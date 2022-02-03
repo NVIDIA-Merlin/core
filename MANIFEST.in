@@ -1,2 +1,5 @@
 include versioneer.py
-include merlin/core/_version.py
+recursive-include merlin *.py *.proto
+include requirements.txt
+include requirements-dev.txt
+
