@@ -428,65 +428,6 @@ def test_to_parquet_output_files(tmpdir, datasets, output_files, out_files_per_p
         assert len(ddf0) == len(ddf1)
 
 
-@pytest.mark.parametrize("part_size", [None, "1KB"])
-@pytest.mark.parametrize("size", [100, 5000])
-@pytest.mark.parametrize("nfiles", [1, 2])
-def test_avro_basic(tmpdir, part_size, size, nfiles):
-
-    # Require uavro and fastavro library.
-    # Note that fastavro is only required to write
-    # avro files for testing, while uavro is actually
-    # used by AvroDatasetEngine.
-    fa = pytest.importorskip("fastavro")
-    pytest.importorskip("uavro")
-
-    # Define avro schema
-    schema = fa.parse_schema(
-        {
-            "name": "avro.example.User",
-            "type": "record",
-            "fields": [
-                {"name": "name", "type": "string"},
-                {"name": "age", "type": "int"},
-            ],
-        }
-    )
-
-    # Write avro dataset with two files.
-    # Collect block and record (row) count while writing.
-    nblocks = 0
-    nrecords = 0
-    paths = [os.path.join(str(tmpdir), f"test.{i}.avro") for i in range(nfiles)]
-    records = []
-    for path in paths:
-        names = np.random.choice(name_list, size)
-        ages = np.random.randint(18, 100, size)
-        data = [{"name": names[i], "age": ages[i]} for i in range(size)]
-        with open(path, "wb") as f:
-            fa.writer(f, schema, data)
-        with open(path, "rb") as fo:
-            avro_reader = fa.block_reader(fo)
-            for block in avro_reader:
-                nrecords += block.num_records
-                nblocks += 1
-                records += list(block)
-    if nfiles == 1:
-        paths = paths[0]
-
-    # Read back with dask.dataframe
-    df = merlin.io.Dataset(paths, part_size=part_size, engine="avro").to_ddf()
-
-    # Check basic length and partition count
-    if part_size == "1KB":
-        assert df.npartitions == nblocks
-    assert len(df) == nrecords
-
-    # Full comparison
-    expect = pd.DataFrame.from_records(records)
-    expect["age"] = expect["age"].astype("int32")
-    assert_eq(df.compute().reset_index(drop=True), expect)
-
-
 @pytest.mark.parametrize("engine", ["csv", "parquet"])
 def test_validate_dataset(datasets, engine):
     with warnings.catch_warnings():
