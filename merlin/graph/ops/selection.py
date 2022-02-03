@@ -30,9 +30,7 @@ class SelectionOp(BaseOperator):
         self.selector = selector
         super().__init__()
 
-    def transform(
-        self, col_selector: ColumnSelector, df: DataFrameType
-    ) -> DataFrameType:
+    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         selector = col_selector or self.selector
         return super()._get_columns(df, selector)
 

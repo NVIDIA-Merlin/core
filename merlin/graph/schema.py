@@ -170,9 +170,7 @@ class Schema:
             names = [names]
 
         selected_schemas = {
-            key: self.column_schemas[key]
-            for key in names
-            if self.column_schemas.get(key, None)
+            key: self.column_schemas[key] for key in names if self.column_schemas.get(key, None)
         }
         return Schema(selected_schemas)
 
@@ -219,9 +217,7 @@ class Schema:
         return str([col_schema.__dict__ for col_schema in self.column_schemas.values()])
 
     def __eq__(self, other):
-        if not isinstance(other, Schema) or len(self.column_schemas) != len(
-            other.column_schemas
-        ):
+        if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):
             return False
         return self.column_schemas == other.column_schemas
 
@@ -229,18 +225,14 @@ class Schema:
         if other is None:
             return self
         if not isinstance(other, Schema):
-            raise TypeError(
-                f"unsupported operand type(s) for +: 'Schema' and {type(other)}"
-            )
+            raise TypeError(f"unsupported operand type(s) for +: 'Schema' and {type(other)}")
 
         col_schemas = []
 
         # must account for same columns in both schemas,
         # use the one with more information for each field
         keys_self_not_other = [
-            col_name
-            for col_name in self.column_names
-            if col_name not in other.column_names
+            col_name for col_name in self.column_names if col_name not in other.column_names
         ]
 
         for key in keys_self_not_other:
@@ -264,9 +256,7 @@ class Schema:
             return self
 
         if not isinstance(other, Schema):
-            raise TypeError(
-                f"unsupported operand type(s) for -: 'Schema' and {type(other)}"
-            )
+            raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
         result = Schema({**self.column_schemas})
 

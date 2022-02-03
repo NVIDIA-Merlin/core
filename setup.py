@@ -14,9 +14,7 @@
 # limitations under the License.
 #
 import os
-import subprocess
 import sys
-from distutils.spawn import find_executable
 
 from setuptools import find_packages, setup
 

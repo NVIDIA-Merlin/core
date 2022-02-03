@@ -111,9 +111,7 @@ class ColumnSelector:
                 tags=self._tags + other._tags,
             )
         elif isinstance(other, Tags):
-            return ColumnSelector(
-                self._names, self.subgroups, tags=self._tags + [other]
-            )
+            return ColumnSelector(self._names, self.subgroups, tags=self._tags + [other])
         else:
             if isinstance(other, str):
                 other = [other]
@@ -123,9 +121,7 @@ class ColumnSelector:
         return self + other
 
     def __rshift__(self, operator):
-        if isinstance(operator, type) and issubclass(
-            operator, merlin.graph.BaseOperator
-        ):
+        if isinstance(operator, type) and issubclass(operator, merlin.graph.BaseOperator):
             # handle case where an operator class is passed
             operator = operator()
 

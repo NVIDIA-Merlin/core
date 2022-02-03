@@ -20,9 +20,7 @@ from merlin.graph.selector import ColumnSelector
 
 
 class Identity(BaseOperator):
-    def transform(
-        self, col_selector: ColumnSelector, df: DataFrameType
-    ) -> DataFrameType:
+    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with building the

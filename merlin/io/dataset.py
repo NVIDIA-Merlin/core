@@ -32,12 +32,11 @@ from fsspec.utils import stringify_path
 
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import _convert_data, _hex_to_int, _is_dataframe_object
+from merlin.core.utils import _set_client_deprecated, device_mem_size, global_dask_client
 from merlin.graph.schema import ColumnSchema, Schema
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.shuffle import _check_shuffle_arg
-from merlin.core.utils import _set_client_deprecated, global_dask_client
 
-from merlin.core.utils import device_mem_size
 from .csv import CSVDatasetEngine
 from .dask import _ddf_to_dataset, _simple_shuffle
 from .dataframe_engine import DataFrameDatasetEngine
@@ -859,7 +858,7 @@ class Dataset:
                 # let user know they will not have expected number of output files.
                 if len(new.keys()) < len(output_files):
                     warnings.warn(
-                        f"Only created {len(new.keys())} files did not have enough\n"
+                        f"Only created {len(new.keys())} files did not have enough "
                         f"partitions to create {len(output_files)} files."
                     )
                 output_files = new

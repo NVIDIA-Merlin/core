@@ -26,8 +26,3 @@ repos:
         hooks:
         - id: bandit
           args: [--verbose, -ll, -x, tests,examples,bench]
-      - repo: https://github.com/s-weigand/flake8-nb
-        rev: v0.3.0
-        hooks:
-        - id: flake8-nb
-          files: \.ipynb$

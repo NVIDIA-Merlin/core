@@ -100,9 +100,7 @@ class TagSet:
         return tags
 
     def _normalize_tags(self, tags):
-        return set(
-            Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags
-        )
+        return set(Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags)
 
     def __repr__(self) -> str:
         return str(self._tags)

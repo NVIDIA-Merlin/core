@@ -50,8 +50,6 @@ class SubtractionOp(BaseOperator):
             result = parents_schema.apply_inverse(subtraction_selector)
         return result
 
-    def transform(
-        self, col_selector: ColumnSelector, df: DataFrameType
-    ) -> DataFrameType:
+    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         selector = self.selector or col_selector
         return super()._get_columns(df, selector)

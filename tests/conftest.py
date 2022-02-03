@@ -47,7 +47,6 @@ except ImportError:
 
 import pytest
 from dask.distributed import Client, LocalCluster
-from numba import cuda
 
 import merlin
 

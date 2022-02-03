@@ -215,9 +215,7 @@ class Node:
             # If the other node is a `+` node, we want to collapse it into this `+` node to
             # avoid creating a cascade of repeated `+`s that we'd need to optimize out by
             # re-combining them later in order to clean up the graph
-            if not isinstance(other_node, list) and isinstance(
-                other_node.op, ConcatColumns
-            ):
+            if not isinstance(other_node, list) and isinstance(other_node.op, ConcatColumns):
                 child.dependencies += other_node.grouped_parents_with_dependencies
             else:
                 child.add_dependency(other_node)
@@ -249,10 +247,7 @@ class Node:
         child.op = SubtractionOp()
 
         for other_node in other_nodes:
-            if (
-                isinstance(other_node.op, SelectionOp)
-                and not other_node.parents_with_dependencies
-            ):
+            if isinstance(other_node.op, SelectionOp) and not other_node.parents_with_dependencies:
                 child.selector += other_node.selector
                 child.op.selector += child.selector
             else:
@@ -559,15 +554,12 @@ def _nodify(nodable):
             nodes = [_nodify(node) for node in nodable]
             non_selection_nodes = [node for node in nodes if not node.selector]
             selection_nodes = [node.selector for node in nodes if node.selector]
-            selection_nodes = (
-                [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
-            )
+            selection_nodes = [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
             return non_selection_nodes + selection_nodes
 
     else:
         raise TypeError(
-            "Unsupported type: Cannot convert object "
-            f"of type {type(nodable)} to Node."
+            "Unsupported type: Cannot convert object " f"of type {type(nodable)} to Node."
         )
 
 

@@ -48,9 +48,7 @@ class BaseOperator:
         parents_selector: ColumnSelector,
         dependencies_selector: ColumnSelector,
     ) -> ColumnSelector:
-        self._validate_matching_cols(
-            input_schema, selector, self.compute_selector.__name__
-        )
+        self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
         return selector
 
@@ -119,15 +117,11 @@ class BaseOperator:
         )
 
         output_schema = Schema()
-        for output_col_name, input_col_names in self.column_mapping(
-            col_selector
-        ).items():
+        for output_col_name, input_col_names in self.column_mapping(col_selector).items():
             col_schema = ColumnSchema(output_col_name)
             col_schema = self._compute_dtype(col_schema, input_schema[input_col_names])
             col_schema = self._compute_tags(col_schema, input_schema[input_col_names])
-            col_schema = self._compute_properties(
-                col_schema, input_schema[input_col_names]
-            )
+            col_schema = self._compute_properties(col_schema, input_schema[input_col_names])
             output_schema += Schema([col_schema])
 
         if self.dynamic_dtypes and prev_output_schema:
@@ -169,9 +163,7 @@ class BaseOperator:
         if self.output_dtype is not None:
             dtype = self.output_dtype
             is_list = any(cs._is_list for _, cs in input_schema.column_schemas.items())
-            is_ragged = any(
-                cs._is_ragged for _, cs in input_schema.column_schemas.items()
-            )
+            is_ragged = any(cs._is_ragged for _, cs in input_schema.column_schemas.items())
 
         return col_schema.with_dtype(dtype, is_list=is_list, is_ragged=is_ragged)
 
@@ -202,9 +194,7 @@ class BaseOperator:
 
     def _validate_matching_cols(self, schema, selector, method_name):
         selector = selector or ColumnSelector()
-        missing_cols = [
-            name for name in selector.names if name not in schema.column_names
-        ]
+        missing_cols = [name for name in selector.names if name not in schema.column_names]
         if missing_cols:
             raise ValueError(
                 f"Missing columns {missing_cols} found in operator"
