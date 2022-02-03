@@ -26,7 +26,7 @@ from merlin.graph.node import (
 )
 from merlin.graph.schema import Schema
 
-LOG = logging.getLogger("nvtabular")
+LOG = logging.getLogger("merlin")
 
 
 class Graph:

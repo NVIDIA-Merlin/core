@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.
+# Copyright (c) 2022, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -207,9 +207,7 @@ def test_filter():
     result_selector = selector1.filter_columns(sub_selector)
     assert result_selector.names == ["a", "b"]
 
-    selector2 = ColumnSelector(
-        ["a", "b", "c"], subgroups=[ColumnSelector(["a", "b", "c"])]
-    )
+    selector2 = ColumnSelector(["a", "b", "c"], subgroups=[ColumnSelector(["a", "b", "c"])])
     result_selector = selector2.filter_columns(sub_selector)
     assert result_selector.names == ["a", "b"]
     assert result_selector.subgroups == []

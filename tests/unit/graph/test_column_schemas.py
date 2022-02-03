@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.
+# Copyright (c) 2022, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,9 +24,7 @@ from merlin.graph.selector import ColumnSelector
 from merlin.graph.tags import Tags, TagSet
 
 
-@pytest.mark.parametrize(
-    "d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64]
-)
+@pytest.mark.parametrize("d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64])
 def test_dtype_column_schema(d_types):
     column = ColumnSchema("name", tags=[], properties=[], dtype=d_types)
     assert column.dtype == d_types
@@ -59,16 +57,10 @@ def test_column_schema_meta():
 @pytest.mark.parametrize("tags2", [[], ["c", "d", "e"]])
 @pytest.mark.parametrize("d_type", [numpy.float, numpy.int])
 @pytest.mark.parametrize("list_type", [True, False])
-def test_column_schema_set_protobuf(
-    tmpdir, props1, props2, tags1, tags2, d_type, list_type
-):
+def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
     # create a schema
-    schema1 = ColumnSchema(
-        "col1", tags=tags1, properties=props1, dtype=d_type, _is_list=list_type
-    )
-    schema2 = ColumnSchema(
-        "col2", tags=tags2, properties=props2, dtype=d_type, _is_list=list_type
-    )
+    schema1 = ColumnSchema("col1", tags=tags1, properties=props1, dtype=d_type, _is_list=list_type)
+    schema2 = ColumnSchema("col2", tags=tags2, properties=props2, dtype=d_type, _is_list=list_type)
     column_schema_set = Schema([schema1, schema2])
     # write schema out
     schema_path = Path(tmpdir)

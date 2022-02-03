@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.
+# Copyright (c) 2022, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ def test_graph_validates_schemas(dataset, engine):
 
 @pytest.mark.parametrize("engine", ["parquet"])
 def test_compute_selector_validates_schemas(dataset, engine):
-    op = BaseOperator()
+    op = Operator()
     schema = Schema(["a", "b"])
     selector = ColumnSelector(["c"])
 

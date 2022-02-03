@@ -4,3 +4,4 @@ pandas>=1.2.0
 numba>=0.55.1
 pyarrow>=1.0
 protobuf>=3.0.0
+tqdm

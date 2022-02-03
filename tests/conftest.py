@@ -49,7 +49,7 @@ import pytest
 from dask.distributed import Client, LocalCluster
 from numba import cuda
 
-import merlin.graph
+import merlin
 
 allcols_csv = ["timestamp", "id", "label", "name-string", "x", "y", "z"]
 mycols_csv = ["name-string", "id", "label", "x", "y"]
@@ -214,7 +214,7 @@ def dataset(request, paths, engine):
     if engine == "csv-no-header":
         kwargs["names"] = allcols_csv
 
-    return merlin.Dataset(paths, part_mem_fraction=gpu_memory_frac, cpu=cpu, **kwargs)
+    return merlin.io.Dataset(paths, part_mem_fraction=gpu_memory_frac, cpu=cpu, **kwargs)
 
 
 def run_in_context(func, *args, context=None, **kwargs):

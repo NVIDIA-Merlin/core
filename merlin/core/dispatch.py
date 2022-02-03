@@ -98,7 +98,7 @@ class ExtData(enum.Enum):
 
 
 def _create_nvt_dataset(df):
-    from nvtabular import Dataset
+    from merlin import Dataset
 
     if not isinstance(df, Dataset):
         # turn arrow format into readable for dispatch
@@ -454,7 +454,7 @@ def _add_to_series(series, to_add, prepend=True):
 
 def _detect_format(data):
     """Utility to detect the format of `data`"""
-    from nvtabular import Dataset
+    from merlin import Dataset
 
     if isinstance(data, Dataset):
         return ExtData.DATASET
