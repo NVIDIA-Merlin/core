@@ -17,7 +17,7 @@
 # flake8: noqa
 from .base_operator import BaseOperator, Supports
 from .graph import Graph
-from .node import Node, iter_nodes, preorder_iter_nodes, postorder_iter_nodes
+from .node import Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 from .schema import ColumnSchema, Schema
 from .selector import ColumnSelector
 from .tags import Tags, TagSet

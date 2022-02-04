@@ -31,4 +31,6 @@ filterwarnings = [
     		'ignore:WARNING..cuDF.to_dlpack',
     		'ignore:::numba.cuda.envvar:',
 		'ignore:Call to deprecated create function:DeprecationWarning',
+                'ignore:Only created .* files did not have enough partitions to create .* file:UserWarning',
+                'ignore:distutils Version classes are deprecated. Use packaging.version instead:DeprecationWarning',
 	]

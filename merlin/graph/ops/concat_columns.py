@@ -49,9 +49,7 @@ class ConcatColumns(BaseOperator):
     ) -> Schema:
         return parents_schema + deps_schema
 
-    def transform(
-        self, col_selector: ColumnSelector, df: DataFrameType
-    ) -> DataFrameType:
+    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with computing the schemas

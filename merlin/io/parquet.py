@@ -59,6 +59,7 @@ else:
     aggregate_row_groups = None
 
 from merlin.core.utils import run_on_worker
+
 from .dataset_engine import DatasetEngine
 from .fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
 from .shuffle import Shuffle, shuffle_df

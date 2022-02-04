@@ -15,7 +15,6 @@
 #
 
 import glob
-import json
 import math
 import os
 import warnings
@@ -26,17 +25,13 @@ import numpy as np
 import pandas as pd
 import pytest
 from dask.dataframe import assert_eq
-from dask.dataframe.io.demo import names as name_list
 from packaging.version import Version
 
 import merlin
-from merlin import io
 from merlin.core import dispatch
-from merlin.graph import ops
 from merlin.graph.schema import Schema
 from merlin.graph.tags import Tags, TagSet
 from merlin.io.parquet import GPUParquetWriter
-from merlin.core.utils import set_dask_client
 from tests.conftest import allcols_csv, mycols_csv, mycols_pq
 
 cudf = pytest.importorskip("cudf")
