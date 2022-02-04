@@ -33,16 +33,12 @@ try:
 
     try:
         # cudf >= 21.08
-        from cudf.api.types import (
-            is_list_dtype as cudf_is_list_dtype,
-            is_string_dtype as cudf_is_string_dtype,
-        )
+        from cudf.api.types import is_list_dtype as cudf_is_list_dtype
+        from cudf.api.types import is_string_dtype as cudf_is_string_dtype
     except ImportError:
         # cudf < 21.08
-        from cudf.utils.dtypes import (
-            is_list_dtype as cudf_is_list_dtype,
-            is_string_dtype as cudf_is_string_dtype,
-        )
+        from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
+        from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
 
     HAS_GPU = True
 except ImportError:

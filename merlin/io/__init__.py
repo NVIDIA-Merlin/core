@@ -16,7 +16,6 @@
 
 # flake8: noqa
 from . import dataframe_iter, dataset, shuffle
-
+from .dataframe_iter import DataFrameIter
 from .dataset import Dataset
 from .shuffle import Shuffle, shuffle_df
-from .dataframe_iter import DataFrameIter
