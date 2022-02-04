@@ -32,7 +32,7 @@ from fsspec.utils import stringify_path
 
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
-from merlin.core.utils import set_client_deprecated, global_dask_client
+from merlin.core.utils import set_client_deprecated, global_dask_client, device_mem_size
 from merlin.graph.schema import ColumnSchema, Schema
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.shuffle import _check_shuffle_arg

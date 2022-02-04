@@ -562,6 +562,7 @@ def _convert_col(col):
     else:
         raise ValueError(f"Invalid column value for Node: {col}")
 
+
 def _derived_output_cols(input_cols, column_mapping):
     outputs = []
     for input_col in set(input_cols):
