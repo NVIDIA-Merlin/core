@@ -27,7 +27,7 @@ from dask.dataframe.optimize import optimize as dd_optimize
 from dask.distributed import get_client
 from tqdm import tqdm
 
-_nvt_dask_client = ContextVar("_nvt_dask_client", default="auto")
+_merlin_dask_client = ContextVar("_merlin_dask_client", default="auto")
 
 try:
     from numba import cuda
@@ -129,7 +129,7 @@ def download_file(url, local_filename, unzip_files=True, redownload=True):
                 shutil.copyfileobj(input_file, output_file)
 
 
-def _ensure_optimize_dataframe_graph(ddf=None, dsk=None, keys=None):
+def ensure_optimize_dataframe_graph(ddf=None, dsk=None, keys=None):
     # Perform HLG DataFrame optimizations
     #
     # If `ddf` is specified, an optimized Dataframe
@@ -162,12 +162,12 @@ def _ensure_optimize_dataframe_graph(ddf=None, dsk=None, keys=None):
     return ddf
 
 
-def _set_client_deprecated(client, caller_str):
+def set_client_deprecated(client, caller_str):
     warnings.warn(
         f"The `client` argument is deprecated from {caller_str} "
         f"and will be removed in a future version of NVTabular. By "
         f"default, a global client in the same python context will be "
-        f"detected automatically, and `nvt.utils.set_dask_client` can "
+        f"detected automatically, and `merlin.utils.set_dask_client` can "
         f"be used for explicit control.",
         FutureWarning,
     )
@@ -181,25 +181,25 @@ def set_dask_client(client="auto"):
     client (if one is detected). To disable distributed
     execution altogether, specify `None`.
     """
-    _nvt_dask_client.set(client)
+    _merlin_dask_client.set(client)
 
 
 def global_dask_client():
-    # First, check _nvt_dask_client
-    nvt_client = _nvt_dask_client.get()
-    if nvt_client and nvt_client != "auto":
-        if nvt_client.cluster and nvt_client.cluster.workers:
+    # First, check _merlin_dask_client
+    merlin_client = _merlin_dask_client.get()
+    if merlin_client and merlin_client != "auto":
+        if merlin_client.cluster and merlin_client.cluster.workers:
             # Active Dask client already known
-            return nvt_client
+            return merlin_client
         else:
             # Our cached client is no-longer
             # active, reset to "auto"
-            nvt_client = "auto"
-    if nvt_client == "auto":
+            merlin_client = "auto"
+    if merlin_client == "auto":
         try:
             # Check for a global Dask client
             set_dask_client(get_client())
-            return _nvt_dask_client.get()
+            return _merlin_dask_client.get()
         except ValueError:
             pass
     # Catch-all

@@ -152,6 +152,10 @@ class Graph:
 
         return self
 
+    @classmethod
+    def get_nodes_by_op_type(cls, nodes, op_type):
+        return set(node for node in iter_nodes(nodes) if isinstance(node.op, op_type))
+
 
 def _get_schemaless_nodes(nodes):
     schemaless_nodes = []
@@ -160,10 +164,6 @@ def _get_schemaless_nodes(nodes):
             schemaless_nodes.append(node)
 
     return set(schemaless_nodes)
-
-
-def _get_ops_by_type(nodes, op_type):
-    return set(node for node in iter_nodes(nodes) if isinstance(node.op, op_type))
 
 
 def _get_unique(cols):
