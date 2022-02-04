@@ -40,7 +40,7 @@ except ImportError:
     psutil = None
 
 
-def _pynvml_mem_size(kind="total", index=0):
+def pynvml_mem_size(kind="total", index=0):
     import pynvml
 
     pynvml.nvmlInit()
@@ -79,7 +79,7 @@ def device_mem_size(kind="total", cpu=False):
         if kind == "free":
             # Not using NVML "free" memory, because it will not include RMM-managed memory
             warnings.warn("get_memory_info is not supported. Using total device memory from NVML.")
-        size = _pynvml_mem_size(kind="total", index=0)
+        size = pynvml_mem_size(kind="total", index=0)
     return size
 
 
