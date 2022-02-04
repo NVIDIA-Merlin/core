@@ -66,11 +66,11 @@ class Node:
 
     # These methods must maintain grouping
     def add_dependency(self, dep):
-        dep_nodes = _nodify(dep)
+        dep_nodes = Node.construct_from(dep)
         self.dependencies.append(dep_nodes)
 
     def add_parent(self, parent):
-        parent_nodes = _nodify(parent)
+        parent_nodes = Node.construct_from(parent)
 
         if not isinstance(parent_nodes, list):
             parent_nodes = [parent_nodes]
@@ -81,7 +81,7 @@ class Node:
         self.parents.extend(parent_nodes)
 
     def add_child(self, child):
-        child_nodes = _nodify(child)
+        child_nodes = Node.construct_from(child)
 
         if not isinstance(child_nodes, list):
             child_nodes = [child_nodes]
@@ -92,7 +92,7 @@ class Node:
         self.children.extend(child_nodes)
 
     def remove_child(self, child):
-        child_nodes = _nodify(child)
+        child_nodes = Node.construct_from(child)
 
         if not isinstance(child_nodes, list):
             child_nodes = [child_nodes]
@@ -208,7 +208,7 @@ class Node:
             child.add_parent(self)
 
         # The right operand becomes a dependency
-        other_nodes = _nodify(other)
+        other_nodes = Node.construct_from(other)
         other_nodes = [other_nodes]
 
         for other_node in other_nodes:
@@ -237,7 +237,7 @@ class Node:
         -------
         Node
         """
-        other_nodes = _nodify(other)
+        other_nodes = Node.construct_from(other)
 
         if not isinstance(other_nodes, list):
             other_nodes = [other_nodes]
@@ -256,7 +256,7 @@ class Node:
         return child
 
     def __rsub__(self, other):
-        left_operand = _nodify(other)
+        left_operand = Node.construct_from(other)
         right_operand = self
 
         if not isinstance(left_operand, list):
@@ -392,6 +392,31 @@ class Node:
     @property
     def graph(self):
         return _to_graphviz(self)
+
+    @classmethod
+    def construct_from(cls, nodable):
+        if isinstance(nodable, str):
+            return Node(ColumnSelector([nodable]))
+        if isinstance(nodable, ColumnSelector):
+            return Node(nodable)
+        elif isinstance(nodable, Node):
+            return nodable
+        elif isinstance(nodable, list):
+            if all(isinstance(elem, str) for elem in nodable):
+                return Node(nodable)
+            else:
+                nodes = [Node.construct_from(node) for node in nodable]
+                non_selection_nodes = [node for node in nodes if not node.selector]
+                selection_nodes = [node.selector for node in nodes if node.selector]
+                selection_nodes = (
+                    [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
+                )
+                return non_selection_nodes + selection_nodes
+
+        else:
+            raise TypeError(
+                "Unsupported type: Cannot convert object " f"of type {type(nodable)} to Node."
+            )
 
 
 def iter_nodes(nodes):
@@ -536,32 +561,6 @@ def _convert_col(col):
         return tuple(col)
     else:
         raise ValueError(f"Invalid column value for Node: {col}")
-
-
-def _nodify(nodable):
-    # TODO: Update to use abstract nodes
-    if isinstance(nodable, str):
-        return Node(ColumnSelector([nodable]))
-
-    if isinstance(nodable, ColumnSelector):
-        return Node(nodable)
-    elif isinstance(nodable, Node):
-        return nodable
-    elif isinstance(nodable, list):
-        if all(isinstance(elem, str) for elem in nodable):
-            return Node(nodable)
-        else:
-            nodes = [_nodify(node) for node in nodable]
-            non_selection_nodes = [node for node in nodes if not node.selector]
-            selection_nodes = [node.selector for node in nodes if node.selector]
-            selection_nodes = [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
-            return non_selection_nodes + selection_nodes
-
-    else:
-        raise TypeError(
-            "Unsupported type: Cannot convert object " f"of type {type(nodable)} to Node."
-        )
-
 
 def _derived_output_cols(input_cols, column_mapping):
     outputs = []

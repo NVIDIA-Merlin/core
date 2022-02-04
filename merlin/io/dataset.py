@@ -31,8 +31,8 @@ from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
 import merlin.core.dispatch as dispatch
-from merlin.core.dispatch import _convert_data, _hex_to_int, _is_dataframe_object
-from merlin.core.utils import _set_client_deprecated, device_mem_size, global_dask_client
+from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
+from merlin.core.utils import set_client_deprecated, global_dask_client
 from merlin.graph.schema import ColumnSchema, Schema
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.shuffle import _check_shuffle_arg
@@ -230,7 +230,7 @@ class Dataset:
 
         # Deprecate `client`
         if client != "auto":
-            _set_client_deprecated(client, "Dataset")
+            set_client_deprecated(client, "Dataset")
 
         self.dtypes = dtypes
         self.schema = schema
@@ -254,12 +254,12 @@ class Dataset:
             )
 
         npartitions = npartitions or 1
-        if isinstance(path_or_source, dask.dataframe.DataFrame) or _is_dataframe_object(
+        if isinstance(path_or_source, dask.dataframe.DataFrame) or is_dataframe_object(
             path_or_source
         ):
             # User is passing in a <dask.dataframe|cudf|pd>.DataFrame
             # Use DataFrameDatasetEngine
-            _path_or_source = _convert_data(
+            _path_or_source = convert_data(
                 path_or_source, cpu=self.cpu, to_collection=True, npartitions=npartitions
             )
             # Check if this is a collection that has now moved between host <-> device
@@ -673,7 +673,7 @@ class Dataset:
         ----------
         output_path : string
             Path to write processed/shuffled output data
-        shuffle : nvt.io.Shuffle enum
+        shuffle : merlin.io.Shuffle enum
             How to shuffle the output dataset. For all options,
             other than `None` (which means no shuffling), the partitions
             of the underlying dataset/ddf will be randomly ordered. If
@@ -940,7 +940,7 @@ class Dataset:
             List of continuous columns
         labels : list of str
             List of label columns
-        shuffle : nvt.io.Shuffle, optional
+        shuffle : merlin.io.Shuffle, optional
             How to shuffle the output dataset. Shuffling is only
             performed if the data is written to disk. For all options,
             other than `None` (which means no shuffling), the partitions
@@ -1119,12 +1119,9 @@ class Dataset:
         """
 
         dtypes = {}
-        try:
-            dtypes = self.sample_dtypes(n=n, annotate_lists=True)
-        except RuntimeError:
-            warnings.warn(
-                "Unable to sample column dtypes to infer merlin.io.Dataset schema, schema is empty."
-            )
+
+        dtypes = self.sample_dtypes(n=n, annotate_lists=True)
+
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
@@ -1152,8 +1149,8 @@ class Dataset:
             _real_meta = self._real_meta[n]
             annotated = {
                 col: {
-                    "dtype": dispatch._list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
-                    "is_list": dispatch._is_list_dtype(_real_meta[col]),
+                    "dtype": dispatch.list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
+                    "is_list": dispatch.is_list_dtype(_real_meta[col]),
                 }
                 for col in _real_meta.columns
             }
@@ -1181,7 +1178,7 @@ for op in ["compute", "persist", "head", "tail"]:
 def _set_dtypes(chunk, dtypes):
     for col, dtype in dtypes.items():
         if isinstance(dtype, str) and ("hex" in dtype):
-            chunk[col] = _hex_to_int(chunk[col])
+            chunk[col] = hex_to_int(chunk[col])
         else:
             chunk[col] = chunk[col].astype(dtype)
     return chunk

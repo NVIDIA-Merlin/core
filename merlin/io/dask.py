@@ -23,7 +23,7 @@ from dask.delayed import Delayed
 from dask.highlevelgraph import HighLevelGraph
 
 from merlin.core.dispatch import annotate
-from merlin.core.utils import _ensure_optimize_dataframe_graph, global_dask_client
+from merlin.core.utils import ensure_optimize_dataframe_graph, global_dask_client
 from merlin.core.worker import clean_worker_cache, get_worker_cache
 
 from .shuffle import Shuffle
@@ -54,7 +54,7 @@ class DaskSubgraph:
         return dask.get(dsk, key)
 
 
-@annotate("write_output_partition", color="green", domain="nvt_python")
+@annotate("write_output_partition", color="green", domain="merlin_python")
 def _write_output_partition(
     df,
     processed_path,
@@ -128,7 +128,7 @@ def _get_partition_groups(df, partition_cols, fs, output_path, filename):
     return fns, subgroups
 
 
-@annotate("write_partitioned", color="green", domain="nvt_python")
+@annotate("write_partitioned", color="green", domain="merlin_python")
 def _write_partitioned(
     df,
     filename,
@@ -168,7 +168,7 @@ def _write_partitioned(
     return writer.close()
 
 
-@annotate("write_subgraph", color="green", domain="nvt_python")
+@annotate("write_subgraph", color="green", domain="merlin_python")
 def _write_subgraph(
     subgraph,
     fns,
@@ -356,7 +356,7 @@ def _ddf_to_dataset(
             task_list.append(key)
         dsk[name] = (lambda x: x, task_list)
 
-    graph = _ensure_optimize_dataframe_graph(
+    graph = ensure_optimize_dataframe_graph(
         dsk=HighLevelGraph.from_collections(name, dsk, dependencies=[ddf]),
         keys=[name],
     )

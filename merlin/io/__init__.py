@@ -16,7 +16,6 @@
 
 from . import dataframe_iter, dataset, shuffle
 
-Dataset = dataset.Dataset
-Shuffle = shuffle.Shuffle
-_shuffle_df = shuffle._shuffle_df
-DataFrameIter = dataframe_iter.DataFrameIter
+from .dataset import Dataset
+from .shuffle import Shuffle, shuffle_df
+from .dataframe_iter import DataFrameIter

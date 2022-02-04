@@ -62,7 +62,7 @@ from merlin.core.utils import run_on_worker
 
 from .dataset_engine import DatasetEngine
 from .fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
-from .shuffle import Shuffle, _shuffle_df
+from .shuffle import Shuffle, shuffle_df
 from .writer import ThreadedWriter
 
 LOG = logging.getLogger("merlin")
@@ -1001,7 +1001,7 @@ class BaseParquetWriter(ThreadedWriter):
             df = self._read_parquet(bio)
             bio.close()
             if self.shuffle == Shuffle.PER_WORKER:
-                df = _shuffle_df(df)
+                df = shuffle_df(df)
             md[path] = self._to_parquet(df, path)
         return md
 

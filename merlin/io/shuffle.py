@@ -50,7 +50,7 @@ def _check_shuffle_arg(shuffle):
     return shuffle
 
 
-def _shuffle_df(df, size=None, keep_index=False):
+def shuffle_df(df, size=None, keep_index=False):
     """Shuffles a DataFrame, returning a new dataframe with randomly
     ordered rows"""
     size = size or len(df)

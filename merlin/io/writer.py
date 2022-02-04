@@ -29,7 +29,7 @@ from fsspec.core import get_fs_token_paths
 
 from merlin.core.dispatch import annotate
 
-from .shuffle import _shuffle_df
+from .shuffle import shuffle_df
 
 
 class Writer:
@@ -127,7 +127,7 @@ class ThreadedWriter(Writer):
     def _write_thread(self):
         return
 
-    @annotate("add_data", color="orange", domain="nvt_python")
+    @annotate("add_data", color="orange", domain="merlin_python")
     def add_data(self, df):
 
         # Early return
@@ -183,7 +183,7 @@ class ThreadedWriter(Writer):
         ):
             self.num_samples[x] += len(group)
             if self.shuffle:
-                group = _shuffle_df(group)
+                group = shuffle_df(group)
             if self.num_threads > 1:
                 self.queue.put((x, group))
             else:
@@ -198,7 +198,7 @@ class ThreadedWriter(Writer):
         # used in `_add_data_scatter`. So, we manually shuffle
         # the df and write out slices.
         if self.shuffle:
-            df = _shuffle_df(df)
+            df = shuffle_df(df)
         int_slice_size = df.shape[0] // self.num_out_files
         slice_size = int_slice_size if df.shape[0] % int_slice_size == 0 else int_slice_size + 1
         for x in range(self.num_out_files):
@@ -218,7 +218,7 @@ class ThreadedWriter(Writer):
         assert len(dfs) == self.num_out_files
         for x, df in enumerate(dfs):
             if self.shuffle:
-                df = _shuffle_df(df)
+                df = shuffle_df(df)
             self.num_samples[x] = self.num_samples[x] + df.shape[0]
             if self.num_threads > 1:
                 self.queue.put((x, df))
@@ -230,7 +230,7 @@ class ThreadedWriter(Writer):
 
         This method works for both pandas and cudf backends.
         """
-        df = _shuffle_df(df) if self.shuffle else df
+        df = shuffle_df(df) if self.shuffle else df
         self.num_samples[0] = self.num_samples[0] + df.shape[0]
         if self.num_threads > 1:
             self.queue.put((0, df))
