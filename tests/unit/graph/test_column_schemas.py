@@ -13,13 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from pathlib import Path
-
 import numpy
 import pytest
 
 from merlin.graph.schema import ColumnSchema, Schema
-from merlin.graph.schema_io.schema_writer_pbtxt import PbTxt_SchemaWriter
+from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
 from merlin.graph.selector import ColumnSelector
 from merlin.graph.tags import Tags, TagSet
 
@@ -59,16 +57,24 @@ def test_column_schema_meta():
 @pytest.mark.parametrize("list_type", [True, False])
 def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
     # create a schema
-    schema1 = ColumnSchema("col1", tags=tags1, properties=props1, dtype=d_type, _is_list=list_type)
-    schema2 = ColumnSchema("col2", tags=tags2, properties=props2, dtype=d_type, _is_list=list_type)
-    column_schema_set = Schema([schema1, schema2])
+    col_schema1 = ColumnSchema(
+        "col1", tags=tags1, properties=props1, dtype=d_type, _is_list=list_type
+    )
+    col_schema2 = ColumnSchema(
+        "col2", tags=tags2, properties=props2, dtype=d_type, _is_list=list_type
+    )
+    schema = Schema([col_schema1, col_schema2])
+
     # write schema out
-    schema_path = Path(tmpdir)
-    column_schema_set = column_schema_set.write(schema_path)
+    tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+    tf_metadata.to_proto_text_file(str(tmpdir))
+
     # read schema back in
-    target = Schema.load(schema_path)
+    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
+    loaded_schema = tf_metadata.to_merlin_schema()
+
     # compare read to origin
-    assert column_schema_set == target
+    assert schema == loaded_schema
 
 
 def test_column_schema_protobuf_domain_check(tmpdir):
@@ -87,20 +93,17 @@ def test_column_schema_protobuf_domain_check(tmpdir):
         dtype=numpy.float,
         _is_list=False,
     )
-    column_schema_set = Schema([schema1, schema2])
+    saved_schema = Schema([schema1, schema2])
+
     # write schema out
-    schema_path = Path(tmpdir)
-    saved_schema = column_schema_set.write(schema_path)
+    tf_metadata = TensorflowMetadata.from_merlin_schema(saved_schema)
+    tf_metadata.to_proto_text_file(str(tmpdir))
+
     # read schema back in
-    loaded_schema = Schema.load(schema_path)
-    # compare read to origin
+    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
+    loaded_schema = tf_metadata.to_merlin_schema()
+
     assert saved_schema == loaded_schema
-
-    # load in protobuf file to tensorflow schema representation
-    proto_schema = PbTxt_SchemaWriter._read(schema_path / "schema.pbtxt")
-
-    assert """name: "col1"\n    min: 0\n    max: 10\n""" in str(proto_schema)
-    assert """name: "col2"\n    min: 0.0\n    max: 10.0\n""" in str(proto_schema)
 
 
 def test_column_schema_tags_normalize():

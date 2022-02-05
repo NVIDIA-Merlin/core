@@ -34,6 +34,7 @@ import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
 from merlin.graph.schema import ColumnSchema, Schema
+from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.shuffle import _check_shuffle_arg
 
@@ -895,7 +896,9 @@ class Dataset:
 
         fs = get_fs_token_paths(output_path)[0]
         fs.mkdirs(output_path, exist_ok=True)
-        self.schema.write(output_path)
+
+        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
+        tf_metadata.to_proto_text_file(output_path)
 
         # Output dask_cudf DataFrame to dataset
         _ddf_to_dataset(
