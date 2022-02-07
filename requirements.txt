@@ -6,5 +6,5 @@ pyarrow>=1.0
 protobuf>=3.0.0
 tqdm>=4.0
 tensorflow-metadata>=1.2.0
+betterproto<2.0.0
 packaging
-
