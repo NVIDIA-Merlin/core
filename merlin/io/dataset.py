@@ -338,9 +338,11 @@ class Dataset:
                     schema_path = schema_path.parent
 
                 if (schema_path / "schema.pbtxt").exists():
-                    self.schema = Schema.load(schema_path)
+                    schema = TensorflowMetadata.from_proto_text_file(schema_path)
+                    self.schema = schema.to_merlin_schema()
                 elif (schema_path.parent / "schema.pbtxt").exists():
-                    self.schema = Schema.load(schema_path.parent)
+                    schema = TensorflowMetadata.from_proto_text_file(schema_path.parent)
+                    self.schema = schema.to_merlin_schema()
                 else:
                     self.infer_schema()
             else:
