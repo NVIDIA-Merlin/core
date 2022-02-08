@@ -184,25 +184,29 @@ def set_feature_domain(feature, column_schema):
         FeatureType.FLOAT: pb_float_domain,
     }
 
-    pb_type = FEATURE_TYPES[_dtype_name(column_schema)]
-    feature.type = pb_type
+    pb_type = FEATURE_TYPES.get(_dtype_name(column_schema))
+    if pb_type:
+        feature.type = pb_type
 
-    domain_attr = DOMAIN_ATTRS[pb_type]
-    domain_fn = DOMAIN_CONSTRUCTORS[pb_type]
+        domain_attr = DOMAIN_ATTRS[pb_type]
+        domain_fn = DOMAIN_CONSTRUCTORS[pb_type]
 
-    setattr(feature, domain_attr, domain_fn(column_schema))
+        setattr(feature, domain_attr, domain_fn(column_schema))
 
     return feature
 
 
 def merlin_domain(feature):
-    domain_value = getattr(feature, DOMAIN_ATTRS[feature.type])
-
     domain = {}
 
-    if hasattr(domain_value, "min") and hasattr(domain_value, "max") and domain_value.max > 0:
-        domain["min"] = domain_value.min
-        domain["max"] = domain_value.max
+    domain_attr = DOMAIN_ATTRS.get(feature.type)
+
+    if domain_attr:
+        domain_value = getattr(feature, domain_attr)
+
+        if hasattr(domain_value, "min") and hasattr(domain_value, "max") and domain_value.max > 0:
+            domain["min"] = domain_value.min
+            domain["max"] = domain_value.max
 
     return domain
 
