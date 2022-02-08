@@ -18,7 +18,6 @@ from typing import Dict, Optional, Text
 
 import numpy as np
 
-from merlin.graph.schema_io.schema_writer_pbtxt import PbTxt_SchemaWriter
 from merlin.graph.tags import TagSet
 
 
@@ -187,13 +186,6 @@ class Schema:
                 if col_name not in col_names
             ]
         )
-
-    @classmethod
-    def load(cls, schema_path) -> "Schema":
-        return PbTxt_SchemaWriter.load(schema_path)
-
-    def write(self, schema_path):
-        return PbTxt_SchemaWriter.write(self, schema_path)
 
     def get(self, col_name, default=None):
         return self.column_schemas.get(col_name, default)

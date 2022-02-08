@@ -29,7 +29,7 @@ from packaging.version import Version
 
 import merlin
 from merlin.core import dispatch
-from merlin.graph.schema import Schema
+from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
 from merlin.graph.tags import Tags, TagSet
 from merlin.io.parquet import GPUParquetWriter
 from tests.conftest import allcols_csv, mycols_csv, mycols_pq
@@ -91,8 +91,12 @@ def test_string_datatypes(tmpdir, engine, cpu):
     column_schema = dataset.schema.column_schemas["column"]
     assert not isinstance(column_schema.dtype, str)
 
-    dataset.schema.write(tmpdir)
-    loaded_schema = Schema.load(str(tmpdir))
+    tf_metadata = TensorflowMetadata.from_merlin_schema(dataset.schema)
+    tf_metadata.to_proto_text_file(tmpdir)
+
+    pb_schema = TensorflowMetadata.from_proto_text_file(str(tmpdir))
+    loaded_schema = pb_schema.to_merlin_schema()
+
     column_schema = loaded_schema.column_schemas["column"]
     assert not isinstance(column_schema.dtype, str)
 
