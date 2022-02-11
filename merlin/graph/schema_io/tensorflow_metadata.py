@@ -146,7 +146,7 @@ def pb_extra_metadata(column_schema):
     json_formatted = json_format.ParseDict(properties, msg_struct)
     any_pack.Pack(json_formatted)
 
-    bp_any = schema_bp.Any(any_pack.type_url, any_pack.value)
+    bp_any = [schema_bp.Any(any_pack.type_url, any_pack.value)]
 
     return bp_any
 
@@ -219,11 +219,12 @@ def merlin_properties(feature):
         )
     elif len(feature.annotation.extra_metadata) == 1:
         properties = feature.annotation.extra_metadata[0].value
-        domain = merlin_domain(feature)
-        if domain:
-            properties["domain"] = domain
     else:
         properties = {}
+
+    domain = merlin_domain(feature)
+    if domain:
+        properties["domain"] = domain
 
     return properties
 
