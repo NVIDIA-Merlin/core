@@ -102,7 +102,10 @@ class TensorflowMetadata:
 
 
 def pb_int_domain(column_schema):
-    domain = column_schema.properties.get("domain", {})
+    domain = column_schema.properties.get("domain")
+    if domain is None:
+        return None
+
     return IntDomain(
         name=column_schema.name,
         min=domain.get("min", None),
@@ -114,7 +117,9 @@ def pb_int_domain(column_schema):
 
 
 def pb_float_domain(column_schema):
-    domain = column_schema.properties.get("domain", {})
+    domain = column_schema.properties.get("domain")
+    if domain is None:
+        return None
     return FloatDomain(
         name=column_schema.name,
         min=domain.get("min", None),
@@ -146,7 +151,7 @@ def pb_extra_metadata(column_schema):
     json_formatted = json_format.ParseDict(properties, msg_struct)
     any_pack.Pack(json_formatted)
 
-    bp_any = [schema_bp.Any(any_pack.type_url, any_pack.value)]
+    bp_any = schema_bp.Any(any_pack.type_url, any_pack.value)
 
     return bp_any
 
@@ -190,8 +195,9 @@ def set_feature_domain(feature, column_schema):
 
         domain_attr = DOMAIN_ATTRS[pb_type]
         domain_fn = DOMAIN_CONSTRUCTORS[pb_type]
-
-        setattr(feature, domain_attr, domain_fn(column_schema))
+        domain = domain_fn(column_schema)
+        if domain:
+            setattr(feature, domain_attr, domain)
 
     return feature
 
@@ -201,10 +207,9 @@ def merlin_domain(feature):
 
     domain_attr = DOMAIN_ATTRS.get(feature.type)
 
-    if domain_attr:
+    if domain_attr and proto_utils.has_field(feature, domain_attr):
         domain_value = getattr(feature, domain_attr)
-
-        if hasattr(domain_value, "min") and hasattr(domain_value, "max") and domain_value.max > 0:
+        if hasattr(domain_value, "min") and hasattr(domain_value, "max"):
             domain["min"] = domain_value.min
             domain["max"] = domain_value.max
 
@@ -212,12 +217,19 @@ def merlin_domain(feature):
 
 
 def merlin_properties(feature):
-    if len(feature.annotation.extra_metadata) > 1:
+    extra_metadata = feature.annotation.extra_metadata
+
+    if isinstance(extra_metadata, schema_bp.Any):
+        msg_struct = Struct()
+        msg_struct.ParseFromString(bytes(extra_metadata.value))
+        properties = dict(msg_struct.items())
+
+    elif len(extra_metadata) > 1:
         raise ValueError(
             f"{feature.name}: extra_metadata should have 1 item, has \
             {len(feature.annotation.extra_metadata)}"
         )
-    elif len(feature.annotation.extra_metadata) == 1:
+    elif len(extra_metadata) == 1:
         properties = feature.annotation.extra_metadata[0].value
     else:
         properties = {}
