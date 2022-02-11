@@ -77,7 +77,7 @@ def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type
     assert schema == loaded_schema
 
 
-@pytest.mark.parametrize("properties", [{}, {"p1": "p1", "p2": "p2"}])
+@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
 @pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
 @pytest.mark.parametrize("list_type", [True, False])
