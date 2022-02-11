@@ -77,6 +77,19 @@ def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type
     assert schema == loaded_schema
 
 
+@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
+@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
+@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("list_type", [True, False])
+def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
+    # make sure we can round trip a schema to TensorflowMetadata without going to disk
+    schema = Schema(
+        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, _is_list=list_type)]
+    )
+    loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
+    assert schema == loaded_schema
+
+
 def test_column_schema_protobuf_domain_check(tmpdir):
     # create a schema
     schema1 = ColumnSchema(
