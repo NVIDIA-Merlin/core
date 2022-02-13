@@ -100,6 +100,9 @@ class TensorflowMetadata:
 
         return merlin_schema
 
+    def to_json(self):
+        return self.proto_schema.to_json()
+
 
 def pb_int_domain(column_schema):
     domain = column_schema.properties.get("domain")
@@ -178,7 +181,7 @@ def pb_feature(column_schema):
             feature.value_count = ValueCount(min=0, max=0)
 
     feature.annotation.tag = pb_tag(column_schema)
-    feature.annotation.extra_metadata = pb_extra_metadata(column_schema)
+    feature.annotation.extra_metadata.append(pb_extra_metadata(column_schema))
 
     return feature
 
@@ -218,19 +221,24 @@ def merlin_domain(feature):
 
 def merlin_properties(feature):
     extra_metadata = feature.annotation.extra_metadata
-
-    if isinstance(extra_metadata, schema_bp.Any):
-        msg_struct = Struct()
-        msg_struct.ParseFromString(bytes(extra_metadata.value))
-        properties = dict(msg_struct.items())
-
-    elif len(extra_metadata) > 1:
+    if len(extra_metadata) > 1:
         raise ValueError(
             f"{feature.name}: extra_metadata should have 1 item, has \
             {len(feature.annotation.extra_metadata)}"
         )
     elif len(extra_metadata) == 1:
         properties = feature.annotation.extra_metadata[0].value
+        if isinstance(properties, str):
+            properties = properties.encode("utf8")
+
+        elif isinstance(properties, schema_bp.Any):
+            properties = bytes(properties.value)
+
+        if isinstance(properties, bytes):
+            msg_struct = Struct()
+            msg_struct.ParseFromString(properties)
+            properties = dict(msg_struct.items())
+
     else:
         properties = {}
 

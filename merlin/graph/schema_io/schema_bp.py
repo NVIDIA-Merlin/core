@@ -36,6 +36,13 @@ class Any(betterproto.Message):
         self.value = value["value"]
         return self
 
+    def to_dict(
+        self,
+        casing: betterproto.Casing = betterproto.Casing.CAMEL,
+        include_default_values: bool = False,
+    ):
+        return {"value": self.value.decode("utf8"), "@type": self.type_url}
+
 
 class LifecycleStage(betterproto.Enum):
     """
