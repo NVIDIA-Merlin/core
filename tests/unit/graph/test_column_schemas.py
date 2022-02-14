@@ -90,6 +90,19 @@ def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_typ
     assert schema == loaded_schema
 
 
+@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
+@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
+@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("list_type", [True, False])
+def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
+    schema = Schema(
+        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, _is_list=list_type)]
+    )
+    tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
+    loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
+    assert schema == loaded_schema
+
+
 def test_column_schema_protobuf_domain_check(tmpdir):
     # create a schema
     schema1 = ColumnSchema(
