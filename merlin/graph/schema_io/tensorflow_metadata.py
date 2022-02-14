@@ -12,26 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
 import pathlib
 from typing import Union
 
 import fsspec
 import numpy
 
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-from google.protobuf import json_format  # noqa: E402
-from google.protobuf.any_pb2 import Any as AnyPb2  # noqa: E402
-from google.protobuf.struct_pb2 import Struct  # noqa: E402
-
-from ..schema import ColumnSchema  # noqa: E402
-from ..schema import Schema as MerlinSchema  # noqa: E402
-from ..tags import Tags  # noqa: E402
-from . import proto_utils  # noqa: E402
-from . import schema_bp  # noqa: E402
-from .schema_bp import ValueCount  # noqa: E402
-from .schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain  # noqa: E402
-from .schema_bp import Schema as ProtoSchema  # noqa: E402
+from ..schema import ColumnSchema
+from ..schema import Schema as MerlinSchema
+from ..tags import Tags
+from . import proto_utils, schema_bp
+from .schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from .schema_bp import Schema as ProtoSchema
+from .schema_bp import ValueCount
 
 DOMAIN_ATTRS = {FeatureType.INT: "int_domain", FeatureType.FLOAT: "float_domain"}
 FEATURE_TYPES = {
@@ -145,18 +138,12 @@ def _dtype_name(column_schema):
 
 
 def pb_extra_metadata(column_schema):
-    properties = {k: v for k, v in column_schema.properties.items() if k != "domain"}
+    properties = {
+        k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
+    }
     properties["is_list"] = column_schema._is_list
     properties["is_ragged"] = column_schema._is_ragged
-
-    msg_struct = Struct()
-    any_pack = AnyPb2()
-    json_formatted = json_format.ParseDict(properties, msg_struct)
-    any_pack.Pack(json_formatted)
-
-    bp_any = schema_bp.Any(any_pack.type_url, any_pack.value)
-
-    return bp_any
+    return schema_bp.Any().from_dict(properties)
 
 
 def pb_tag(column_schema):
@@ -182,7 +169,6 @@ def pb_feature(column_schema):
 
     feature.annotation.tag = pb_tag(column_schema)
     feature.annotation.extra_metadata.append(pb_extra_metadata(column_schema))
-
     return feature
 
 
@@ -216,7 +202,17 @@ def merlin_domain(feature):
             domain["min"] = domain_value.min
             domain["max"] = domain_value.max
 
+        if hasattr(domain_value, "is_categorical"):
+            domain["is_categorical"] = domain_value.is_categorical
+
     return domain
+
+
+def merlin_value_count(feature):
+    if proto_utils.has_field(feature, "value_count"):
+        value_count = feature.value_count
+        if value_count.min != value_count.max != 0:
+            return {"min": value_count.min, "max": value_count.max}
 
 
 def merlin_properties(feature):
@@ -228,16 +224,9 @@ def merlin_properties(feature):
         )
     elif len(extra_metadata) == 1:
         properties = feature.annotation.extra_metadata[0].value
-        if isinstance(properties, str):
-            properties = properties.encode("utf8")
-
-        elif isinstance(properties, schema_bp.Any):
-            properties = bytes(properties.value)
 
         if isinstance(properties, bytes):
-            msg_struct = Struct()
-            msg_struct.ParseFromString(properties)
-            properties = dict(msg_struct.items())
+            properties = schema_bp.Any(value=properties).to_dict()
 
     else:
         properties = {}
@@ -245,6 +234,12 @@ def merlin_properties(feature):
     domain = merlin_domain(feature)
     if domain:
         properties["domain"] = domain
+
+    value_count = merlin_value_count(feature)
+    if value_count:
+        properties["value_count"] = value_count
+        properties["is_list"] = True
+        properties["is_ragged"] = value_count.get("min") != value_count.get("max")
 
     return properties
 
@@ -267,6 +262,11 @@ def merlin_column(feature):
 
     is_list = properties.pop("is_list", False)
     is_ragged = properties.pop("is_ragged", False)
+
+    domain = properties.get("domain")
+    if domain and domain.pop("is_categorical", False):
+        if Tags.CATEGORICAL not in tags:
+            tags.append(Tags.CATEGORICAL)
 
     return ColumnSchema(name, tags, properties, dtype, is_list, _is_ragged=is_ragged)
 
