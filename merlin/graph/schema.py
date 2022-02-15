@@ -122,20 +122,20 @@ class ColumnSchema:
         col_schema = col_schema.with_name(other.name)
         return col_schema
 
-    def _domain(self):
+    def _domain(self) -> Optional[Domain]:
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
 
     @property
-    def int_domain(self):
+    def int_domain(self) -> Optional[Domain]:
         return self._domain() if np.issubdtype(self.dtype, np.integer) else None
 
     @property
-    def float_domain(self):
+    def float_domain(self) -> Optional[Domain]:
         return self._domain() if np.issubdtype(self.dtype, np.floating) else None
 
     @property
-    def value_count(self):
+    def value_count(self) -> Optional[Domain]:
         value_count = self.properties.get("value_count")
         return Domain(**value_count) if value_count else None
 
@@ -188,7 +188,7 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def remove_by_tag(self, tags):
+    def remove_by_tag(self, tags) -> "Schema":
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
@@ -295,7 +295,7 @@ class Schema:
         return result
 
     @property
-    def first(self):
+    def first(self) -> ColumnSchema:
         """Returns the first ColumnSchema in the Schema. Useful for cases where you select down
         to a single column via select_by_name or select_by_tag, and just want the value"""
         if not self.column_schemas:
