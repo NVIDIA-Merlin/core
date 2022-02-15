@@ -14,11 +14,18 @@
 # limitations under the License.
 #
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Text
+from typing import Dict, Optional, Text, Union
 
 import numpy as np
 
 from merlin.graph.tags import TagSet
+
+
+@dataclass(frozen=True)
+class Domain:
+    min: Union[int, float]
+    max: Union[int, float]
+    name: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -115,6 +122,23 @@ class ColumnSchema:
         col_schema = col_schema.with_name(other.name)
         return col_schema
 
+    def _domain(self):
+        domain = self.properties.get("domain")
+        return Domain(**domain) if domain else None
+
+    @property
+    def int_domain(self):
+        return self._domain() if np.issubdtype(self.dtype, np.integer) else None
+
+    @property
+    def float_domain(self):
+        return self._domain() if np.issubdtype(self.dtype, np.floating) else None
+
+    @property
+    def value_count(self):
+        value_count = self.properties.get("value_count")
+        return Domain(**value_count) if value_count else None
+
 
 class Schema:
     """A collection of column schemas for a dataset."""
@@ -124,7 +148,7 @@ class Schema:
 
         if isinstance(column_schemas, dict):
             self.column_schemas = column_schemas
-        elif isinstance(column_schemas, list):
+        elif isinstance(column_schemas, (list, tuple)):
             self.column_schemas = {}
             for column_schema in column_schemas:
                 if isinstance(column_schema, str):
@@ -153,13 +177,25 @@ class Schema:
         return self
 
     def select_by_tag(self, tags):
-        if not isinstance(tags, list):
+        if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
         selected_schemas = {}
 
         for _, column_schema in self.column_schemas.items():
             if any(x in column_schema.tags for x in tags):
+                selected_schemas[column_schema.name] = column_schema
+
+        return Schema(selected_schemas)
+
+    def remove_by_tag(self, tags):
+        if not isinstance(tags, (list, tuple)):
+            tags = [tags]
+
+        selected_schemas = {}
+
+        for _, column_schema in self.column_schemas.items():
+            if not any(x in column_schema.tags for x in tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
@@ -193,7 +229,7 @@ class Schema:
     def __getitem__(self, column_name):
         if isinstance(column_name, str):
             return self.column_schemas[column_name]
-        elif isinstance(column_name, list):
+        elif isinstance(column_name, (list, tuple)):
             return Schema([self.column_schemas[col_name] for col_name in column_name])
 
     def __setitem__(self, column_name, column_schema):
@@ -257,3 +293,12 @@ class Schema:
                 result.column_schemas.pop(key, None)
 
         return result
+
+    @property
+    def first(self):
+        """Returns the first ColumnSchema in the Schema. Useful for cases where you select down
+        to a single column via select_by_name or select_by_tag, and just want the value"""
+        if not self.column_schemas:
+            raise ValueError("There are no columns in this schema to call .first on")
+
+        return next(iter(self.column_schemas.values()))

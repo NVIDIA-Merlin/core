@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 from enum import Enum
+from typing import List, Union
 
 
 class Tags(Enum):
@@ -21,21 +22,25 @@ class Tags(Enum):
     CATEGORICAL = "categorical"
     CONTINUOUS = "continuous"
     LIST = "list"
+    SEQUENCE = "sequence"
     TEXT = "text"
     TEXT_TOKENIZED = "text_tokenized"
     TIME = "time"
 
     # Feature context
     USER = "user"
+    USER_ID = "user_id"
     ITEM = "item"
     ITEM_ID = "item_id"
+    SESSION = "session"
+    SESSION_ID = "session_id"
     CONTEXT = "context"
 
     # Target related
     TARGET = "target"
-    BINARY = "binary"
+    BINARY_CLASSIFICATION = "binary_classification"
+    MULTI_CLASS_CLASSIFICATION = "multi_class"
     REGRESSION = "regression"
-    MULTI_CLASS = "multi_class"
 
 
 TAG_COLLISIONS = {
@@ -104,3 +109,6 @@ class TagSet:
 
     def __repr__(self) -> str:
         return str(self._tags)
+
+
+TagsType = Union[TagSet, List[str], List[Tags], List[Union[Tags, str]]]
