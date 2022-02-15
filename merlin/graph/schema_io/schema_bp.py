@@ -18,11 +18,17 @@
 # sources: tensorflow_metadata/proto/v0/path.proto, tensorflow_metadata/proto/v0/schema.proto
 # plugin: python-betterproto
 import json
+import os
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Dict, List
 
 import betterproto
+
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+from google.protobuf import json_format  # noqa: E402
+from google.protobuf.any_pb2 import Any as AnyPb2  # noqa: E402
+from google.protobuf.struct_pb2 import Struct  # noqa: E402
 
 
 # This is a manual hack to make it possible to parse the Any types in annotations
@@ -32,8 +38,16 @@ class Any(betterproto.Message):
     value: betterproto.Message = betterproto.message_field(2)
 
     def from_dict(self, value: dict):
-        self.type_url = value["@type"]
-        self.value = value["value"]
+        if "@type" in value:
+            self.value = value["value"]
+            self.type_url = value["@type"]
+        else:
+            msg_struct = Struct()
+            any_pack = AnyPb2()
+            json_formatted = json_format.ParseDict(value, msg_struct)
+            any_pack.Pack(json_formatted)
+            self.value = any_pack.value
+            self.type_url = any_pack.type_url
         return self
 
     def to_dict(
@@ -41,7 +55,9 @@ class Any(betterproto.Message):
         casing: betterproto.Casing = betterproto.Casing.CAMEL,
         include_default_values: bool = False,
     ):
-        return {"value": self.value.decode("utf8"), "@type": self.type_url}
+        msg_struct = Struct()
+        msg_struct.ParseFromString(self.value)
+        return dict(msg_struct.items())
 
 
 class LifecycleStage(betterproto.Enum):

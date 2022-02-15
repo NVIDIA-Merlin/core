@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
+
 import numpy
 import pytest
 
@@ -101,6 +103,52 @@ def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, lis
     tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
     loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
     assert schema == loaded_schema
+
+
+def test_tensorflow_metadata_from_json():
+    # make sure we can load up tensorflowmetadata serialized json objects, like done by
+    # merlin-models
+    json_schema = """{"feature": [
+    {
+      "name": "categories",
+      "valueCount": {
+        "min": "1",
+        "max": "4"
+      },
+      "type": "INT",
+      "intDomain": {
+        "name": "categories",
+        "min": "1",
+        "max": "331",
+        "isCategorical": true
+      },
+      "annotation": {
+        "tag": [
+          "item"
+        ]
+      }
+    }]}
+    """
+
+    schema = TensorflowMetadata.from_json(json_schema).to_merlin_schema()
+    column_schema = schema.column_schemas["categories"]
+
+    # make sure the value_count is set appropriately
+    assert column_schema.properties["value_count"] == {"min": 1, "max": 4}
+    assert column_schema._is_list
+    assert column_schema._is_ragged
+
+    # should have CATEGORICAL tag, even though not explicitly listed in annotation
+    # (and instead should be inferred from the intDomain.isCategorical)
+    assert Tags.CATEGORICAL in column_schema.tags
+
+    assert column_schema.properties["domain"] == {"min": 1, "max": 331}
+
+    # make sure the JSON formatted extra_metadata properties are human readable
+    json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
+    assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
+        {"is_list": True, "is_ragged": True}
+    ]
 
 
 def test_column_schema_protobuf_domain_check(tmpdir):
