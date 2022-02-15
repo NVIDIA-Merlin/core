@@ -194,7 +194,7 @@ class Schema:
 
         selected_schemas = {}
 
-        for _, column_schema in self.column_schemas.items():
+        for column_schema in self.column_schemas.values():
             if not any(x in column_schema.tags for x in tags):
                 selected_schemas[column_schema.name] = column_schema
 
