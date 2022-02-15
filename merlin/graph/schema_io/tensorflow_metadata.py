@@ -103,7 +103,7 @@ def pb_int_domain(column_schema):
         return None
 
     return IntDomain(
-        name=column_schema.name,
+        name=domain.get("name", column_schema.name),
         min=domain.get("min", None),
         max=domain.get("max", None),
         is_categorical=(
@@ -204,6 +204,11 @@ def merlin_domain(feature):
 
         if hasattr(domain_value, "is_categorical"):
             domain["is_categorical"] = domain_value.is_categorical
+
+        if hasattr(domain_value, "name"):
+            name = domain_value.name
+            if name != feature.name:
+                domain["name"] = domain_value.name
 
     return domain
 
