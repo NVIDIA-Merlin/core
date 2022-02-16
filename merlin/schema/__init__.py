@@ -16,4 +16,4 @@
 
 # flake8: noqa
 from .schema import ColumnSchema, Schema
-from .tags import Tags, TagSet
+from .tags import Tags, TagSet, TagsType
