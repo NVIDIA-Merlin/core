@@ -24,7 +24,7 @@ from merlin.graph.node import (
     postorder_iter_nodes,
     preorder_iter_nodes,
 )
-from merlin.graph.schema import Schema
+from merlin.schema import Schema
 
 LOG = logging.getLogger("merlin")
 

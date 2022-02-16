@@ -19,8 +19,8 @@ from enum import Flag, auto
 from typing import Any, List, Union
 
 import merlin
-from merlin.graph.schema import ColumnSchema, Schema
 from merlin.graph.selector import ColumnSelector
+from merlin.schema import ColumnSchema, Schema
 
 
 class Supports(Flag):
@@ -151,19 +151,19 @@ class BaseOperator:
 
     def _compute_dtype(self, col_schema, input_schema):
         dtype = col_schema.dtype
-        is_list = col_schema._is_list
-        is_ragged = col_schema._is_ragged
+        is_list = col_schema.is_list
+        is_ragged = col_schema.is_ragged
 
         if input_schema.column_schemas:
             source_col_name = input_schema.column_names[0]
             dtype = input_schema[source_col_name].dtype
-            is_list = input_schema[source_col_name]._is_list
-            is_ragged = input_schema[source_col_name]._is_ragged
+            is_list = input_schema[source_col_name].is_list
+            is_ragged = input_schema[source_col_name].is_ragged
 
         if self.output_dtype is not None:
             dtype = self.output_dtype
-            is_list = any(cs._is_list for _, cs in input_schema.column_schemas.items())
-            is_ragged = any(cs._is_ragged for _, cs in input_schema.column_schemas.items())
+            is_list = any(cs.is_list for _, cs in input_schema.column_schemas.items())
+            is_ragged = any(cs.is_ragged for _, cs in input_schema.column_schemas.items())
 
         return col_schema.with_dtype(dtype, is_list=is_list, is_ragged=is_ragged)
 

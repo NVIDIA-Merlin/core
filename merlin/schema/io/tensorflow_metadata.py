@@ -141,8 +141,8 @@ def pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["is_list"] = column_schema._is_list
-    properties["is_ragged"] = column_schema._is_ragged
+    properties["is_list"] = column_schema.is_list
+    properties["is_ragged"] = column_schema.is_ragged
     return schema_bp.Any().from_dict(properties)
 
 
@@ -155,7 +155,7 @@ def pb_feature(column_schema):
 
     feature = set_feature_domain(feature, column_schema)
 
-    if column_schema._is_list:
+    if column_schema.is_list:
         value_count = column_schema.properties.get("value_count", {})
         min_length = value_count.get("min")
         max_length = value_count.get("max")
@@ -273,7 +273,7 @@ def merlin_column(feature):
         if Tags.CATEGORICAL not in tags:
             tags.append(Tags.CATEGORICAL)
 
-    return ColumnSchema(name, tags, properties, dtype, is_list, _is_ragged=is_ragged)
+    return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
 
 
 def _read_file(path: str):

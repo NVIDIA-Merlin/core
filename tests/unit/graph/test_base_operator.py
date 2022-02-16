@@ -17,8 +17,8 @@ import pytest
 
 from merlin.graph.base_operator import BaseOperator as Operator
 from merlin.graph.graph import Graph
-from merlin.graph.schema import Schema
 from merlin.graph.selector import ColumnSelector
+from merlin.schema import Schema
 
 
 @pytest.mark.parametrize("engine", ["parquet"])

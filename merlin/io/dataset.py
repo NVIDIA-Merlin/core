@@ -33,10 +33,10 @@ from fsspec.utils import stringify_path
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
-from merlin.graph.schema import ColumnSchema, Schema
-from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.shuffle import _check_shuffle_arg
+from merlin.schema import ColumnSchema, Schema
+from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
 from .csv import CSVDatasetEngine
 from .dask import _ddf_to_dataset, _simple_shuffle
@@ -1131,7 +1131,7 @@ class Dataset:
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
             is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, _is_list=is_list, _is_ragged=is_list)
+            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)

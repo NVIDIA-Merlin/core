@@ -29,9 +29,9 @@ from packaging.version import Version
 
 import merlin
 from merlin.core import dispatch
-from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
-from merlin.graph.tags import Tags, TagSet
 from merlin.io.parquet import GPUParquetWriter
+from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+from merlin.schema.tags import Tags, TagSet
 from tests.conftest import allcols_csv, mycols_csv, mycols_pq
 
 cudf = pytest.importorskip("cudf")

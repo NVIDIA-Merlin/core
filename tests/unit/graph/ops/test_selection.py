@@ -15,8 +15,9 @@
 #
 import pytest
 
-from merlin.graph import ColumnSchema, ColumnSelector, Schema
+from merlin.graph import ColumnSelector
 from merlin.graph.ops.selection import SelectionOp
+from merlin.schema import ColumnSchema, Schema
 
 
 @pytest.mark.parametrize("engine", ["parquet"])

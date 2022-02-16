@@ -16,7 +16,7 @@
 from typing import List, Union
 
 import merlin
-from merlin.graph.tags import Tags
+from merlin.schema import Tags
 
 
 class ColumnSelector:
