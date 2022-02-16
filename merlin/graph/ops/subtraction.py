@@ -17,8 +17,8 @@ from __future__ import annotations
 
 from merlin.core.dispatch import DataFrameType
 from merlin.graph.base_operator import BaseOperator
-from merlin.graph.schema import Schema
 from merlin.graph.selector import ColumnSelector
+from merlin.schema import Schema
 
 
 class SubtractionOp(BaseOperator):

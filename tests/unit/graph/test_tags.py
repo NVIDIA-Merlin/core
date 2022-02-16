@@ -15,7 +15,7 @@
 #
 import pytest
 
-from merlin.graph.tags import Tags, TagSet
+from merlin.schema.tags import Tags, TagSet
 
 
 def test_tagset_init_normalizes_tags_to_enum():

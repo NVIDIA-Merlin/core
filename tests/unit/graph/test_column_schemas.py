@@ -18,10 +18,10 @@ import json
 import numpy
 import pytest
 
-from merlin.graph.schema import ColumnSchema, Schema
-from merlin.graph.schema_io.tensorflow_metadata import TensorflowMetadata
 from merlin.graph.selector import ColumnSelector
-from merlin.graph.tags import Tags, TagSet
+from merlin.schema import ColumnSchema, Schema
+from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+from merlin.schema.tags import Tags, TagSet
 
 
 @pytest.mark.parametrize("d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64])
@@ -60,10 +60,10 @@ def test_column_schema_meta():
 def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
     # create a schema
     col_schema1 = ColumnSchema(
-        "col1", tags=tags1, properties=props1, dtype=d_type, _is_list=list_type
+        "col1", tags=tags1, properties=props1, dtype=d_type, is_list=list_type
     )
     col_schema2 = ColumnSchema(
-        "col2", tags=tags2, properties=props2, dtype=d_type, _is_list=list_type
+        "col2", tags=tags2, properties=props2, dtype=d_type, is_list=list_type
     )
     schema = Schema([col_schema1, col_schema2])
 
@@ -86,7 +86,7 @@ def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type
 def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
     # make sure we can round trip a schema to TensorflowMetadata without going to disk
     schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, _is_list=list_type)]
+        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
     )
     loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
     assert schema == loaded_schema
@@ -98,7 +98,7 @@ def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_typ
 @pytest.mark.parametrize("list_type", [True, False])
 def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
     schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, _is_list=list_type)]
+        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
     )
     tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
     loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
@@ -135,8 +135,8 @@ def test_tensorflow_metadata_from_json():
 
     # make sure the value_count is set appropriately
     assert column_schema.properties["value_count"] == {"min": 1, "max": 4}
-    assert column_schema._is_list
-    assert column_schema._is_ragged
+    assert column_schema.is_list
+    assert column_schema.is_ragged
 
     # should have CATEGORICAL tag, even though not explicitly listed in annotation
     # (and instead should be inferred from the intDomain.isCategorical)
@@ -158,14 +158,14 @@ def test_column_schema_protobuf_domain_check(tmpdir):
         tags=[],
         properties={"domain": {"min": 0, "max": 10}},
         dtype=numpy.int,
-        _is_list=False,
+        is_list=False,
     )
     schema2 = ColumnSchema(
         "col2",
         tags=[],
         properties={"domain": {"min": 0.0, "max": 10.0}},
         dtype=numpy.float,
-        _is_list=False,
+        is_list=False,
     )
     saved_schema = Schema([schema1, schema2])
 

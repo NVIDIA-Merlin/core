@@ -19,8 +19,8 @@ import logging
 
 from merlin.core.dispatch import DataFrameType
 from merlin.graph.base_operator import BaseOperator
-from merlin.graph.schema import Schema
 from merlin.graph.selector import ColumnSelector
+from merlin.schema import Schema
 
 LOG = logging.getLogger("SelectionOp")
 

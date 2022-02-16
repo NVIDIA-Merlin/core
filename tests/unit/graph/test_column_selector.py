@@ -19,7 +19,7 @@ from merlin.graph import BaseOperator
 from merlin.graph.node import Node
 from merlin.graph.ops.selection import SelectionOp
 from merlin.graph.selector import ColumnSelector
-from merlin.graph.tags import Tags
+from merlin.schema.tags import Tags
 
 
 def test_constructor_works_with_single_strings_and_lists():

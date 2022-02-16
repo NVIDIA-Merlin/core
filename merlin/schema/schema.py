@@ -18,7 +18,7 @@ from typing import Dict, Optional, Text, Union
 
 import numpy as np
 
-from merlin.graph.tags import TagSet
+from .tags import TagSet
 
 
 @dataclass(frozen=True)
@@ -36,8 +36,8 @@ class ColumnSchema:
     tags: Optional[TagSet] = field(default_factory=TagSet)
     properties: Optional[Dict[str, any]] = field(default_factory=dict)
     dtype: Optional[object] = None
-    _is_list: bool = False
-    _is_ragged: bool = False
+    is_list: bool = False
+    is_ragged: bool = False
 
     def __post_init__(self):
         tags = TagSet(self.tags)
@@ -66,8 +66,8 @@ class ColumnSchema:
             tags=self.tags,
             properties=self.properties,
             dtype=self.dtype,
-            _is_list=self._is_list,
-            _is_ragged=self._is_ragged,
+            is_list=self.is_list,
+            is_ragged=self.is_ragged,
         )
 
     def with_tags(self, tags) -> "ColumnSchema":
@@ -76,8 +76,8 @@ class ColumnSchema:
             tags=self.tags.override(tags),
             properties=self.properties,
             dtype=self.dtype,
-            _is_list=self._is_list,
-            _is_ragged=self._is_ragged,
+            is_list=self.is_list,
+            is_ragged=self.is_ragged,
         )
 
     def with_properties(self, properties):
@@ -92,15 +92,15 @@ class ColumnSchema:
             tags=self.tags,
             properties=properties,
             dtype=self.dtype,
-            _is_list=self._is_list,
-            _is_ragged=self._is_ragged,
+            is_list=self.is_list,
+            is_ragged=self.is_ragged,
         )
 
     def with_dtype(self, dtype, is_list=None, is_ragged=None):
-        is_list = is_list if is_list is not None else self._is_list
+        is_list = is_list if is_list is not None else self.is_list
 
         if is_list:
-            is_ragged = is_ragged if is_ragged is not None else self._is_ragged
+            is_ragged = is_ragged if is_ragged is not None else self.is_ragged
         else:
             is_ragged = False
 
@@ -109,15 +109,15 @@ class ColumnSchema:
             tags=self.tags,
             properties=self.properties,
             dtype=dtype,
-            _is_list=is_list,
-            _is_ragged=is_ragged,
+            is_list=is_list,
+            is_ragged=is_ragged,
         )
 
     def __merge__(self, other):
         col_schema = self.with_tags(other.tags)
         col_schema = col_schema.with_properties(other.properties)
         col_schema = col_schema.with_dtype(
-            other.dtype, is_list=other._is_list, is_ragged=other._is_ragged
+            other.dtype, is_list=other.is_list, is_ragged=other.is_ragged
         )
         col_schema = col_schema.with_name(other.name)
         return col_schema
