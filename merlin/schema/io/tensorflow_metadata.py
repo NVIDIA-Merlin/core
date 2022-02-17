@@ -141,6 +141,7 @@ def pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
+    properties["dtype_item_size"] = numpy.dtype(column_schema.dtype).itemsize * 8
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     return schema_bp.Any().from_dict(properties)
@@ -245,17 +246,37 @@ def merlin_properties(feature):
         properties["value_count"] = value_count
         properties["is_list"] = True
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
-
     return properties
 
 
-def merlin_dtype(feature):
-    dtype = None
-    if feature.type == FeatureType.INT:
-        dtype = numpy.int
-    elif feature.type == FeatureType.FLOAT:
-        dtype = numpy.float
+int_dtypes_map = {
+    8: numpy.int8,
+    16: numpy.int16,
+    32: numpy.int32,
+    64: numpy.int64,
+}
 
+
+float_dtypes_map = {
+    16: numpy.float16,
+    32: numpy.float32,
+    64: numpy.float64,
+}
+
+
+def merlin_dtype(feature, properties):
+    dtype = None
+    item_size = int(properties.get("dtype_item_size", 0)) or None
+    if feature.type == FeatureType.INT:
+        if item_size and item_size in int_dtypes_map:
+            dtype = int_dtypes_map[item_size]
+        else:
+            dtype = numpy.int
+    elif feature.type == FeatureType.FLOAT:
+        if item_size and item_size in float_dtypes_map:
+            dtype = float_dtypes_map[item_size]
+        else:
+            dtype = numpy.float
     return dtype
 
 
@@ -263,10 +284,11 @@ def merlin_column(feature):
     name = feature.name
     tags = list(feature.annotation.tag) or []
     properties = merlin_properties(feature)
-    dtype = merlin_dtype(feature)
+    dtype = merlin_dtype(feature, properties)
 
     is_list = properties.pop("is_list", False)
     is_ragged = properties.pop("is_ragged", False)
+    properties.pop("dtype_item_size", False)
 
     domain = properties.get("domain")
     if domain and domain.pop("is_categorical", False):
