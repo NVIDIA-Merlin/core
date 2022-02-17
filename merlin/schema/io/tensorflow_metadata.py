@@ -14,7 +14,6 @@
 #
 import pathlib
 from typing import Union
-import warnings
 
 import fsspec
 import numpy
