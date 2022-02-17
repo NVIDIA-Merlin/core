@@ -14,6 +14,7 @@
 #
 import pathlib
 from typing import Union
+import warnings
 
 import fsspec
 import numpy
@@ -141,6 +142,7 @@ def pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
+    properties["dtype_item_size"] = numpy.dtype(column_schema.dtype).itemsize * 8
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     return schema_bp.Any().from_dict(properties)
@@ -220,7 +222,7 @@ def merlin_value_count(feature):
             return {"min": value_count.min, "max": value_count.max}
 
 
-def merlin_properties(feature):
+def extract_merlin_properties(feature):
     extra_metadata = feature.annotation.extra_metadata
     if len(extra_metadata) > 1:
         raise ValueError(
@@ -236,6 +238,12 @@ def merlin_properties(feature):
     else:
         properties = {}
 
+    return properties
+
+
+def merlin_properties(feature):
+    properties = extract_merlin_properties(feature)
+
     domain = merlin_domain(feature)
     if domain:
         properties["domain"] = domain
@@ -245,17 +253,37 @@ def merlin_properties(feature):
         properties["value_count"] = value_count
         properties["is_list"] = True
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
+    return {k: v for k, v in properties.items() if not k == "dtype_item_size"}
 
-    return properties
+
+int_dtypes_map = {
+    8: numpy.int8,
+    16: numpy.int16,
+    32: numpy.int32,
+    64: numpy.int64,
+}
+
+
+float_dtypes_map = {
+    16: numpy.float16,
+    32: numpy.float32,
+    64: numpy.float64,
+}
 
 
 def merlin_dtype(feature):
     dtype = None
+    item_size = int(extract_merlin_properties(feature).get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
-        dtype = numpy.int
+        if item_size and item_size in int_dtypes_map:
+            dtype = int_dtypes_map[item_size]
+        else:
+            dtype = numpy.int
     elif feature.type == FeatureType.FLOAT:
-        dtype = numpy.float
-
+        if item_size and item_size in float_dtypes_map:
+            dtype = float_dtypes_map[item_size]
+        else:
+            dtype = numpy.float
     return dtype
 
 
