@@ -147,7 +147,7 @@ def test_tensorflow_metadata_from_json():
     # make sure the JSON formatted extra_metadata properties are human readable
     json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
     assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
-        {"is_list": True, "is_ragged": True, 'dtype_item_size': 64.0}
+        {"is_list": True, "is_ragged": True, "dtype_item_size": 64.0}
     ]
 
 

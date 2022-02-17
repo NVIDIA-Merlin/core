@@ -240,6 +240,7 @@ def extract_merlin_properties(feature):
 
     return properties
 
+
 def merlin_properties(feature):
     properties = extract_merlin_properties(feature)
 
@@ -252,7 +253,8 @@ def merlin_properties(feature):
         properties["value_count"] = value_count
         properties["is_list"] = True
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
-    return {k:v for k, v in properties.items() if not k == "dtype_item_size"}
+    return {k: v for k, v in properties.items() if not k == "dtype_item_size"}
+
 
 int_dtypes_map = {
     8: numpy.int8,
@@ -267,6 +269,7 @@ float_dtypes_map = {
     32: numpy.float32,
     64: numpy.float64,
 }
+
 
 def merlin_dtype(feature):
     dtype = None
