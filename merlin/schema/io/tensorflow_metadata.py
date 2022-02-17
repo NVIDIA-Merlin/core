@@ -222,7 +222,7 @@ def merlin_value_count(feature):
             return {"min": value_count.min, "max": value_count.max}
 
 
-def extract_merlin_properties(feature):
+def merlin_properties(feature):
     extra_metadata = feature.annotation.extra_metadata
     if len(extra_metadata) > 1:
         raise ValueError(
@@ -238,12 +238,6 @@ def extract_merlin_properties(feature):
     else:
         properties = {}
 
-    return properties
-
-
-def merlin_properties(feature):
-    properties = extract_merlin_properties(feature)
-
     domain = merlin_domain(feature)
     if domain:
         properties["domain"] = domain
@@ -253,7 +247,7 @@ def merlin_properties(feature):
         properties["value_count"] = value_count
         properties["is_list"] = True
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
-    return {k: v for k, v in properties.items() if not k == "dtype_item_size"}
+    return properties
 
 
 int_dtypes_map = {
@@ -271,9 +265,9 @@ float_dtypes_map = {
 }
 
 
-def merlin_dtype(feature):
+def merlin_dtype(feature, properties):
     dtype = None
-    item_size = int(extract_merlin_properties(feature).get("dtype_item_size", 0)) or None
+    item_size = int(properties.get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
         if item_size and item_size in int_dtypes_map:
             dtype = int_dtypes_map[item_size]
@@ -291,10 +285,11 @@ def merlin_column(feature):
     name = feature.name
     tags = list(feature.annotation.tag) or []
     properties = merlin_properties(feature)
-    dtype = merlin_dtype(feature)
+    dtype = merlin_dtype(feature, properties)
 
     is_list = properties.pop("is_list", False)
     is_ragged = properties.pop("is_ragged", False)
+    properties.pop("dtype_item_size", False)
 
     domain = properties.get("domain")
     if domain and domain.pop("is_categorical", False):
