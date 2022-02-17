@@ -55,7 +55,7 @@ def test_column_schema_meta():
 @pytest.mark.parametrize("props2", [{}, {"p3": "p3", "p4": "p4"}])
 @pytest.mark.parametrize("tags1", [[], ["a", "b", "c"]])
 @pytest.mark.parametrize("tags2", [[], ["c", "d", "e"]])
-@pytest.mark.parametrize("d_type", [numpy.float, numpy.int])
+@pytest.mark.parametrize("d_type", [numpy.float32, numpy.float64, numpy.int32, numpy.int64])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
     # create a schema
@@ -147,7 +147,7 @@ def test_tensorflow_metadata_from_json():
     # make sure the JSON formatted extra_metadata properties are human readable
     json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
     assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
-        {"is_list": True, "is_ragged": True}
+        {"is_list": True, "is_ragged": True, 'dtype_item_size': 64.0}
     ]
 
 
