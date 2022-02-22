@@ -16,7 +16,7 @@
 import os
 import sys
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 try:
     import versioneer
@@ -40,7 +40,7 @@ install_reqs = parse_requirements("./requirements.txt")
 setup(
     name="merlin-core",
     version=versioneer.get_version(),
-    packages=find_packages(),
+    packages=find_namespace_packages(),
     url="https://github.com/NVIDIA-Merlin/core",
     author="NVIDIA Corporation",
     license="Apache 2.0",
