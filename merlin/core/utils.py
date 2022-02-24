@@ -381,13 +381,15 @@ class Serial:
     def __exit__(self, *args):
         self.deactivate()
 
+
 def set_client_deprecated(client, caller_str):
     warnings.warn(
         f"The `client` argument is deprecated from {caller_str} "
         f"and will be removed in a future version of NVTabular. By "
         f"default, a global client in the same python context will be "
-        f"detected automatically, and `merlin.utils.set_dask_client` can "
-        f"be used for explicit control.",
+        f"detected automatically, and `merlin.utils.set_dask_client` "
+        f"(as well as `Distributed` and `Serial`) can be used for "
+        f"explicit control.",
         FutureWarning,
     )
     set_dask_client(client)
