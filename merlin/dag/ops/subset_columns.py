@@ -15,30 +15,15 @@
 #
 
 from merlin.core.dispatch import DataFrameType
-from merlin.graph.base_operator import BaseOperator
-from merlin.graph.selector import ColumnSelector
+from merlin.dag.base_operator import BaseOperator
+from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
 
-class ConcatColumns(BaseOperator):
+class SubsetColumns(BaseOperator):
     def __init__(self, label=None):
         self._label = label or self.__class__.__name__
         super().__init__()
-
-    def compute_selector(
-        self,
-        input_schema: Schema,
-        selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
-    ) -> ColumnSelector:
-        self._validate_matching_cols(
-            input_schema,
-            parents_selector + dependencies_selector,
-            self.compute_selector.__name__,
-        )
-
-        return parents_selector + dependencies_selector
 
     def compute_input_schema(
         self,
@@ -47,13 +32,13 @@ class ConcatColumns(BaseOperator):
         deps_schema: Schema,
         selector: ColumnSelector,
     ) -> Schema:
-        return parents_schema + deps_schema
+        return parents_schema - deps_schema
 
     def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with computing the schemas
-        for `+` nodes in the Workflow graph, so very little has to happen in the
+        for `-` nodes in the Workflow graph, so very little has to happen in the
         `transform` method.
 
         Parameters

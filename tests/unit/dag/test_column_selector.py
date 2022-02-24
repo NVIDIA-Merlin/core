@@ -15,10 +15,10 @@
 #
 import pytest
 
-from merlin.graph import BaseOperator
-from merlin.graph.node import Node
-from merlin.graph.ops.selection import SelectionOp
-from merlin.graph.selector import ColumnSelector
+from merlin.dag import BaseOperator
+from merlin.dag.node import Node
+from merlin.dag.ops.selection import SelectionOp
+from merlin.dag.selector import ColumnSelector
 from merlin.schema.tags import Tags
 
 

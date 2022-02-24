@@ -46,7 +46,7 @@ class ColumnSelector:
         self._tags = tags if tags is not None else []
         self.subgroups = subgroups if subgroups is not None else []
 
-        if isinstance(self._names, merlin.graph.Node):
+        if isinstance(self._names, merlin.dag.Node):
             raise TypeError("ColumnSelectors can not contain Nodes")
 
         if isinstance(self._names, str):
@@ -59,7 +59,7 @@ class ColumnSelector:
         for name in self._names:
             if isinstance(name, str):
                 plain_names.append(name)
-            elif isinstance(name, merlin.graph.Node):
+            elif isinstance(name, merlin.dag.Node):
                 raise ValueError("ColumnSelectors can not contain Nodes")
             elif isinstance(name, ColumnSelector):
                 self.subgroups.append(name)
@@ -101,7 +101,7 @@ class ColumnSelector:
     def __add__(self, other):
         if other is None:
             return self
-        elif isinstance(other, merlin.graph.Node):
+        elif isinstance(other, merlin.dag.Node):
             return other + self
         elif isinstance(other, ColumnSelector):
 
@@ -121,7 +121,7 @@ class ColumnSelector:
         return self + other
 
     def __rshift__(self, operator):
-        if isinstance(operator, type) and issubclass(operator, merlin.graph.BaseOperator):
+        if isinstance(operator, type) and issubclass(operator, merlin.dag.BaseOperator):
             # handle case where an operator class is passed
             operator = operator()
 
