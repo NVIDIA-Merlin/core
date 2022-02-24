@@ -16,8 +16,8 @@
 from __future__ import annotations
 
 from merlin.core.dispatch import DataFrameType
-from merlin.graph.base_operator import BaseOperator
-from merlin.graph.selector import ColumnSelector
+from merlin.dag.base_operator import BaseOperator
+from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
 

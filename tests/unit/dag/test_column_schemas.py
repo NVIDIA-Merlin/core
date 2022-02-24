@@ -18,7 +18,7 @@ import json
 import numpy
 import pytest
 
-from merlin.graph.selector import ColumnSelector
+from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 from merlin.schema.tags import Tags, TagSet

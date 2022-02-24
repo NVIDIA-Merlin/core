@@ -19,7 +19,7 @@ from enum import Flag, auto
 from typing import Any, List, Union
 
 import merlin
-from merlin.graph.selector import ColumnSelector
+from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 
 
@@ -248,7 +248,7 @@ class BaseOperator:
         return self.__class__.__name__
 
     def create_node(self, selector):
-        return merlin.graph.Node(selector)
+        return merlin.dag.Node(selector)
 
     @property
     def supports(self) -> Supports:

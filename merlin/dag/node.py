@@ -15,9 +15,9 @@
 #
 import collections.abc
 
-from merlin.graph.base_operator import BaseOperator
-from merlin.graph.ops import ConcatColumns, SelectionOp, SubsetColumns, SubtractionOp
-from merlin.graph.selector import ColumnSelector
+from merlin.dag.base_operator import BaseOperator
+from merlin.dag.ops import ConcatColumns, SelectionOp, SubsetColumns, SubtractionOp
+from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
 

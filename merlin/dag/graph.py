@@ -17,7 +17,7 @@
 import logging
 from collections import deque
 
-from merlin.graph.node import (
+from merlin.dag.node import (
     Node,
     _combine_schemas,
     iter_nodes,

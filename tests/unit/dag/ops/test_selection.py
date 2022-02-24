@@ -15,8 +15,8 @@
 #
 import pytest
 
-from merlin.graph import ColumnSelector
-from merlin.graph.ops.selection import SelectionOp
+from merlin.dag import ColumnSelector
+from merlin.dag.ops.selection import SelectionOp
 from merlin.schema import ColumnSchema, Schema
 
 
