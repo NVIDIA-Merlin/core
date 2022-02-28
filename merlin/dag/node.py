@@ -66,8 +66,17 @@ class Node:
 
     # These methods must maintain grouping
     def add_dependency(self, dep):
-        dep_nodes = Node.construct_from(dep)
-        self.dependencies.append(dep_nodes)
+        dep_node = Node.construct_from(dep)
+
+        if not isinstance(dep_node, list):
+            dep_nodes = [dep_node]
+        else:
+            dep_nodes = dep_node
+
+        for node in dep_nodes:
+            node.children.append(self)
+
+        self.dependencies.append(dep_node)
 
     def add_parent(self, parent):
         parent_nodes = Node.construct_from(parent)
