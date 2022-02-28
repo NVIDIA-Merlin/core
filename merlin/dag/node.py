@@ -322,6 +322,10 @@ class Node:
         return removed_outputs
 
     @property
+    def exportable(self):
+        return hasattr(self.op, "export")
+
+    @property
     def parents_with_dependencies(self):
         nodes = []
         for node in self.parents + self.dependencies:
