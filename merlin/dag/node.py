@@ -302,6 +302,7 @@ class Node:
         """
         col_selector = ColumnSelector(columns)
         child = type(self)(col_selector)
+        columns = [columns] if not isinstance(columns, list) else columns
         child.op = SubsetColumns(label=str(list(columns)))
         child.add_parent(self)
         return child
