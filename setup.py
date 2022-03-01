@@ -56,4 +56,5 @@ setup(
     ],
     zip_safe=False,
     install_requires=install_reqs,
+    cmdclass=versioneer.get_cmdclass(),
 )

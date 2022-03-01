@@ -3,3 +3,4 @@ recursive-include merlin *.py *.proto
 include requirements.txt
 include requirements-dev.txt
 
+include merlin/core/_version.py
