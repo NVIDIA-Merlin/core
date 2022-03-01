@@ -122,12 +122,7 @@ class Node:
         # propagate grouping unless this node already has a selector
         if len(self.parents) == 1 and isinstance(self.parents[0].op, (ConcatColumns, SelectionOp)):
             parents_selector = self.parents[0].selector
-            if (
-                not self.selector
-                and self.parents[0].selector
-                and (self.parents[0].selector.names)
-                and (self.parents[0].selector.names != self.parents[0].selector.grouped_names)
-            ):
+            if not self.selector and self.parents[0].selector and (self.parents[0].selector.names):
                 self.selector = parents_selector
 
         self.input_schema = self.op.compute_input_schema(
