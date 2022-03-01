@@ -66,17 +66,8 @@ class Node:
 
     # These methods must maintain grouping
     def add_dependency(self, dep):
-        dep_node = Node.construct_from(dep)
-
-        if not isinstance(dep_node, list):
-            dep_nodes = [dep_node]
-        else:
-            dep_nodes = dep_node
-
-        for node in dep_nodes:
-            node.children.append(self)
-
-        self.dependencies.append(dep_node)
+        dep_nodes = Node.construct_from(dep)
+        self.dependencies.append(dep_nodes)
 
     def add_parent(self, parent):
         parent_nodes = Node.construct_from(parent)
@@ -120,20 +111,19 @@ class Node:
 
         # If parent is an addition or selection node, we may need to
         # propagate grouping unless this node already has a selector
-        if len(self.parents) == 1 and isinstance(self.parents[0].op, (ConcatColumns, SelectionOp)):
+        if (
+            len(self.parents) == 1
+            and isinstance(self.parents[0].op, (ConcatColumns, SelectionOp))
+            and self.parents[0].selector
+            and (self.parents[0].selector.names)
+        ):
             parents_selector = self.parents[0].selector
-            if (
-                not self.selector
-                and self.parents[0].selector
-                and (self.parents[0].selector.names)
-                and (self.parents[0].selector.names != self.parents[0].selector.grouped_names)
-            ):
+            if not self.selector:
                 self.selector = parents_selector
 
         self.input_schema = self.op.compute_input_schema(
             root_schema, parents_schema, deps_schema, self.selector
         )
-
         self.selector = self.op.compute_selector(
             self.input_schema, self.selector, parents_selector, dependencies_selector
         )
@@ -302,7 +292,6 @@ class Node:
         """
         col_selector = ColumnSelector(columns)
         child = type(self)(col_selector)
-        columns = [columns] if not isinstance(columns, list) else columns
         child.op = SubsetColumns(label=str(list(columns)))
         child.add_parent(self)
         return child
@@ -321,10 +310,6 @@ class Node:
             self.selector = self.selector.filter_columns(ColumnSelector(input_cols))
 
         return removed_outputs
-
-    @property
-    def exportable(self):
-        return hasattr(self.op, "export")
 
     @property
     def parents_with_dependencies(self):
@@ -442,9 +427,10 @@ def iter_nodes(nodes):
             queue.extend(current)
         else:
             yield current
+            # TODO: deduplicate nodes?
             for node in current.parents_with_dependencies:
-                if node not in queue:
-                    queue.append(node)
+
+                queue.append(node)
 
 
 # output node (bottom) -> selection leaf nodes (top)
@@ -455,13 +441,7 @@ def preorder_iter_nodes(nodes):
 
     def traverse(current_nodes):
         for node in current_nodes:
-            # Avoid creating duplicate nodes in the queue
-            if node in queue:
-                queue.remove(node)
-
             queue.append(node)
-
-        for node in current_nodes:
             traverse(node.parents_with_dependencies)
 
     traverse(nodes)
@@ -478,8 +458,7 @@ def postorder_iter_nodes(nodes):
     def traverse(current_nodes):
         for node in current_nodes:
             traverse(node.parents_with_dependencies)
-            if node not in queue:
-                queue.append(node)
+            queue.append(node)
 
     traverse(nodes)
     for node in queue:

@@ -17,12 +17,22 @@
 from merlin.core.dispatch import DataFrameType
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
+from merlin.schema import Schema
 
 
 class SubsetColumns(BaseOperator):
     def __init__(self, label=None):
         self._label = label or self.__class__.__name__
         super().__init__()
+
+    def compute_input_schema(
+        self,
+        root_schema: Schema,
+        parents_schema: Schema,
+        deps_schema: Schema,
+        selector: ColumnSelector,
+    ) -> Schema:
+        return parents_schema - deps_schema
 
     def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
         """Simply returns the selected output columns from the input dataframe
