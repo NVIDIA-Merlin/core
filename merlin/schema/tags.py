@@ -18,6 +18,8 @@ from typing import List, Union
 
 
 class Tags(Enum):
+    """Standard tags used in the Merlin ecosystem"""
+
     # Feature types
     CATEGORICAL = "categorical"
     CONTINUOUS = "continuous"
@@ -50,7 +52,9 @@ TAG_COLLISIONS = {
 
 
 class TagSet:
-    def __init__(self, tags=None):
+    """Collection that normalizes tags and prevents collisions between incompatible tags"""
+
+    def __init__(self, tags: List[Union[str, Tags]] = None):
         tags = tags or []
         if isinstance(tags, TagSet):
             tags = tags._tags
@@ -64,7 +68,15 @@ class TagSet:
                 f"The following tags are incompatible: {collisions}"
             )
 
-    def override(self, tags):
+    def override(self, tags: List[Union[str, Tags]]) -> "TagSet":
+        """Add new tags to the collection, removing any existing tags that are incompatible
+
+        Args:
+            tags (List[Union[str, Tags]]): Tags to add (and remove incompatibilities with)
+
+        Returns:
+            TagSet: A new combined set of tags with incompatible tags removed
+        """
         tags = self._convert_to_tagset(tags)
         to_remove = self._detect_collisions(self._tags, tags)
         return TagSet(self - to_remove + tags)
