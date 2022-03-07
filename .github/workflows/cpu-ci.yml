@@ -42,6 +42,9 @@ jobs:
     - name: Lint with isort
       run: |
         isort -c .
+    - name: Lint with interrogate
+      run: |
+        interrogate -viImMpPsSCn -f 39.9 merlin
     - name: Lint with codespell
       run: |
         codespell
