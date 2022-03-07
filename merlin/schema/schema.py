@@ -18,8 +18,6 @@ from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
 
-from merlin.dag.selector import ColumnSelector
-
 from .tags import Tags, TagSet
 
 
@@ -206,7 +204,7 @@ class Schema:
     def column_names(self):
         return list(self.column_schemas.keys())
 
-    def apply(self, selector: ColumnSelector) -> "Schema":
+    def apply(self, selector) -> "Schema":
         """Select matching columns from this Schema object using a ColumnSelector
 
         Args:
@@ -224,7 +222,7 @@ class Schema:
             return schema
         return self
 
-    def apply_inverse(self, selector: ColumnSelector) -> "Schema":
+    def apply_inverse(self, selector) -> "Schema":
         """Select non-matching columns from this Schema object using a ColumnSelector
 
         Args:
