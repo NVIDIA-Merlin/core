@@ -182,7 +182,7 @@ class Node:
         child.op = operator
         child.add_parent(self)
 
-        dependencies = operator.dependencies()
+        dependencies = operator.dependencies
 
         if dependencies:
             if not isinstance(dependencies, collections.abc.Sequence):
