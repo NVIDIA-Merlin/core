@@ -44,11 +44,16 @@ class TensorflowMetadata:
     def from_json(cls, json: Union[str, bytes]) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON string
 
-        Args:
-            json (Union[str, bytes]): The JSON string to parse
+        Parameters
+        ----------
+        json : Union[str, bytes]
+            The JSON string to parse
 
-        Returns:
-            TensorflowMetadata: Schema object parsed from JSON
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from JSON
+
         """
         schema = ProtoSchema().from_json(json)
         return TensorflowMetadata(schema)
@@ -57,11 +62,16 @@ class TensorflowMetadata:
     def from_json_file(cls, path: str) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON file
 
-        Args:
-            path (str): Path to the JSON file to parse
+        Parameters
+        ----------
+        path : str
+            Path to the JSON file to parse
 
-        Returns:
-            TensorflowMetadata: Schema object parsed from JSON file
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from JSON file
+
         """
         return cls.from_json(_read_file(path))
 
@@ -69,11 +79,16 @@ class TensorflowMetadata:
     def from_proto_text(cls, proto_text: str) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text string
 
-        Args:
-            path_or_proto_text (str): Protobuf text string to parse
+        Parameters
+        ----------
+        proto_text : str
+            Protobuf text string to parse
 
-        Returns:
-            TensorflowMetadata: Schema object parsed from Protobuf text
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from Protobuf text
+
         """
         from tensorflow_metadata.proto.v0 import schema_pb2
 
@@ -87,12 +102,18 @@ class TensorflowMetadata:
     def from_proto_text_file(cls, path: str, file_name="schema.pbtxt") -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text file
 
-        Args:
-            path (str): Path to the directory containing the Protobuf text file to parse
-            file_name (str, optional): Name of the schema file. Defaults to "schema.pbtxt".
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the Protobuf text file to parse
+        file_name : str
+            Name of the schema file. Defaults to "schema.pbtxt".
 
-        Returns:
-            TensorflowMetadata: Schema object parsed from Protobuf text file
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from Protobuf text file
+
         """
         path = pathlib.Path(path) / file_name
         return cls.from_proto_text(_read_file(str(path)))
@@ -100,8 +121,14 @@ class TensorflowMetadata:
     def to_proto_text(self) -> str:
         """Convert this TensorflowMetadata schema object to a Proto text string
 
-        Returns:
-            str: Generated Proto text string
+        Parameters
+        ----------
+
+        Returns
+        -------
+        str
+            Generated Proto text string
+
         """
         from tensorflow_metadata.proto.v0 import schema_pb2
 
@@ -110,17 +137,32 @@ class TensorflowMetadata:
     def to_proto_text_file(self, path: str, file_name="schema.pbtxt"):
         """Write this TensorflowMetadata schema object to a file as a Proto text string
 
-        Args:
-            path (str): Path to the directory containing the Protobuf text file
-            file_name (str, optional): Name of the output file. Defaults to "schema.pbtxt".
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the Protobuf text file
+        file_name : str
+            Name of the output file. Defaults to "schema.pbtxt".
+        path: str :
+
+
+        Returns
+        -------
+
         """
         _write_file(self.to_proto_text(), path, file_name)
 
     def copy(self, **kwargs) -> "TensorflowMetadata":
         """Create a copy of this TensorflowMetadata schema object
 
-        Returns:
-            TensorflowMetadata: Copy of this TensorflowMetadata schema object
+        Parameters
+        ----------
+
+        Returns
+        -------
+        TensorflowMetadata
+            Copy of this TensorflowMetadata schema object
+
         """
         schema_copy = proto_utils.copy_better_proto_message(self.proto_schema, **kwargs)
         return TensorflowMetadata(schema_copy)
@@ -129,11 +171,16 @@ class TensorflowMetadata:
     def from_merlin_schema(cls, schema: MerlinSchema) -> "TensorflowMetadata":
         """Convert a MerlinSchema object to a TensorflowMetadata schema object
 
-        Args:
-            schema (MerlinSchema): Schema object to convert
+        Parameters
+        ----------
+        schema : MerlinSchema
+            Schema object to convert
 
-        Returns:
-            TensorflowMetadata: Schema converted to a TensorflowMetadata schema object
+        Returns
+        -------
+        TensorflowMetadata
+            Schema converted to a TensorflowMetadata schema object
+
         """
         features = []
         for col_name, col_schema in schema.column_schemas.items():
@@ -146,8 +193,14 @@ class TensorflowMetadata:
     def to_merlin_schema(self) -> MerlinSchema:
         """Convert this TensorflowMetadata schema object to a MerlinSchema object
 
-        Returns:
-            MerlinSchema: Schema converted to MerlinSchema object
+        Parameters
+        ----------
+
+        Returns
+        -------
+        MerlinSchema
+            Schema converted to MerlinSchema object
+
         """
         merlin_schema = MerlinSchema()
 
@@ -160,8 +213,14 @@ class TensorflowMetadata:
     def to_json(self) -> str:
         """Convert this TensorflowMetadata schema object to a JSON string
 
-        Returns:
-            str: Schema converted to a JSON string
+        Parameters
+        ----------
+
+        Returns
+        -------
+        str
+            Schema converted to a JSON string
+
         """
         return self.proto_schema.to_json()
 

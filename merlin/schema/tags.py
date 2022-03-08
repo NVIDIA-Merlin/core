@@ -71,11 +71,16 @@ class TagSet:
     def override(self, tags: List[Union[str, Tags]]) -> "TagSet":
         """Add new tags to the collection, removing any existing tags that are incompatible
 
-        Args:
-            tags (List[Union[str, Tags]]): Tags to add (and remove incompatibilities with)
+        Parameters
+        ----------
+        tags : List[Union[str, Tags]] :
+            Tags to add (and remove incompatibilities with)
 
-        Returns:
-            TagSet: A new combined set of tags with incompatible tags removed
+        Returns
+        -------
+        TagSet
+            A new combined set of tags with incompatible tags removed
+
         """
         tags = self._convert_to_tagset(tags)
         to_remove = self._detect_collisions(self._tags, tags)

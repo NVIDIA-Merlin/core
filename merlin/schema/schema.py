@@ -65,11 +65,16 @@ class ColumnSchema:
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
 
-        Args:
-            name (str): New column name
+        Parameters
+        ----------
+        name : str
+            New column name
 
-        Returns:
-            ColumnSchema: Copied object with new column name
+        Returns
+        -------
+        ColumnSchema
+            Copied object with new column name
+
         """
         return ColumnSchema(
             name,
@@ -83,11 +88,16 @@ class ColumnSchema:
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
 
-        Args:
-            tags (Union[str, Tags]):  New column tags
+        Parameters
+        ----------
+        tags : Union[str, Tags]
+            New column tags
 
-        Returns:
-            ColumnSchema: Copied object with new column tags
+        Returns
+        -------
+        ColumnSchema
+            Copied object with new column tags
+
         """
         return ColumnSchema(
             self.name,
@@ -101,14 +111,21 @@ class ColumnSchema:
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
 
-        Args:
-            properties (dict): New column properties
+        Parameters
+        ----------
+        properties : dict
+            New column properties
 
-        Raises:
-            TypeError: If properties are not a dict
+        Returns
+        -------
+        ColumnSchema
+            Copied object with new column properties
 
-        Returns:
-            ColumnSchema: Copied object with new column properties
+        Raises
+        ------
+        TypeError
+            If properties are not a dict
+
         """
         if not isinstance(properties, dict):
             raise TypeError("properties must be in dict format, key: value")
@@ -128,14 +145,22 @@ class ColumnSchema:
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
 
-        Args:
-            dtype (np.dtype): New column dtype
-            is_list (bool, optional): Whether rows in this column contain lists. Defaults to None.
-            is_ragged (bool, optional): Whether lists in this column have varying lengths.
-                                        Defaults to None.
+        Parameters
+        ----------
+        dtype : np.dtype
+            New column dtype
+        is_list: bool :
+            Whether rows in this column contain lists.
+             (Default value = None)
+        is_ragged: bool :
+            Whether lists in this column have varying lengths.
+             (Default value = None)
 
-        Returns:
-            ColumnSchema: Copied object with new column dtype
+        Returns
+        -------
+        ColumnSchema
+            Copied object with new column dtype
+
         """
         is_list = is_list if is_list is not None else self.is_list
 
@@ -179,6 +204,7 @@ class ColumnSchema:
         return self.name
 
     def _domain(self) -> Optional[Domain]:
+        """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
 
@@ -207,11 +233,16 @@ class Schema:
     def apply(self, selector) -> "Schema":
         """Select matching columns from this Schema object using a ColumnSelector
 
-        Args:
-            selector (ColumnSelector): Selector that describes which columns match
+        Parameters
+        ----------
+        selector : ColumnSelector
+            Selector that describes which columns match
 
-        Returns:
-            Schema: New object containing only the ColumnSchemas of selected columns
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
         """
         if selector is not None:
             schema = Schema()
@@ -225,11 +256,16 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         """Select non-matching columns from this Schema object using a ColumnSelector
 
-        Args:
-            selector (ColumnSelector): Selector that describes which columns match
+        Parameters
+        ----------
+        selector : ColumnSelector
+            Selector that describes which columns match
 
-        Returns:
-            Schema: New object containing only the ColumnSchemas of selected columns
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
         """
         if selector:
             return self - self.select_by_name(selector.names)
@@ -238,11 +274,16 @@ class Schema:
     def select_by_tag(self, tags: List[Union[str, Tags]]) -> "Schema":
         """Select matching columns from this Schema object using a list of tags
 
-        Args:
-            tags (List[Union[str, Tags]]): List of tags that describes which columns match
+        Parameters
+        ----------
+        tags : List[Union[str, Tags]] :
+            List of tags that describes which columns match
 
-        Returns:
-            Schema: New object containing only the ColumnSchemas of selected columns
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
         """
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
@@ -270,11 +311,16 @@ class Schema:
     def select_by_name(self, names: List[str]) -> "Schema":
         """Select matching columns from this Schema object using a list of column names
 
-        Args:
-            tags (List[Union[str, Tags]]): List of column names that describes which columns match
+        Parameters
+        ----------
+        names: List[str] :
+            List of column names that describes which columns match
 
-        Returns:
-            Schema: New object containing only the ColumnSchemas of selected columns
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
         """
         if isinstance(names, str):
             names = [names]
@@ -287,11 +333,16 @@ class Schema:
     def remove_col(self, col_name: str) -> "Schema":
         """Remove a column from this Schema object by name
 
-        Args:
-            col_name (str): Name of the column to remove
+        Parameters
+        ----------
+        col_name : str
+            Name of the column to remove
 
-        Returns:
-            Schema: This Schema object after the column is removed
+        Returns
+        -------
+        Schema
+            This Schema object after the column is removed
+
         """
         if col_name in self.column_names:
             del self.column_schemas[col_name]
@@ -300,11 +351,16 @@ class Schema:
     def without(self, col_names: List[str]) -> "Schema":
         """Remove columns from this Schema object by name
 
-        Args:
-            col_names (List[str]): Names of the column to remove
+        Parameters
+        ----------
+        col_names : List[str]
+            Names of the column to remove
 
-        Returns:
-            Schema: New Schema object after the columns are removed
+        Returns
+        -------
+        Schema
+            New Schema object after the columns are removed
+
         """
         return Schema(
             [
@@ -317,20 +373,34 @@ class Schema:
     def get(self, col_name: str, default: ColumnSchema = None) -> ColumnSchema:
         """Get a ColumnSchema by name
 
-        Args:
-            col_name (str): Name of the column to get
-            default (ColumnSchema, optional): Default value to return if column is not found.
-                                              Defaults to None.
+        Parameters
+        ----------
+        col_name : str
+            Name of the column to get
+        default: ColumnSchema :
+            Default value to return if column is not found.
+             (Default value = None)
 
-        Returns:
-            ColumnSchema: Retrieved column schema (or default value, if not found)
+        Returns
+        -------
+        ColumnSchema
+            Retrieved column schema (or default value, if not found)
+
         """
         return self.column_schemas.get(col_name, default)
 
     @property
     def first(self) -> ColumnSchema:
         """Returns the first ColumnSchema in the Schema. Useful for cases where you select down
-        to a single column via select_by_name or select_by_tag, and just want the value"""
+        to a single column via select_by_name or select_by_tag, and just want the value
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        """
         if not self.column_schemas:
             raise ValueError("There are no columns in this schema to call .first on")
 

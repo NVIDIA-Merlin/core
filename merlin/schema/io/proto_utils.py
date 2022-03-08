@@ -25,12 +25,22 @@ ProtoMessageType = TypeVar("ProtoMessageType", bound=BetterProtoMessage)
 def has_field(message: ProtoMessageType, field_name: str) -> bool:
     """Check if a Protobuf message has a particular field
 
-    Args:
-        message (ProtoMessageType): Protobuf message object
-        field_name (str): Name of the field to look for
+    Parameters
+    ----------
+    message : ProtoMessageType
+        Protobuf message object
+    field_name : str
+        Name of the field to look for
+    message: ProtoMessageType :
 
-    Returns:
-        bool: Whether or not the named field exists on the message object
+    field_name: str :
+
+
+    Returns
+    -------
+    bool
+        Whether or not the named field exists on the message object
+
     """
     return betterproto.serialized_on_wire(getattr(message, field_name))
 
@@ -38,11 +48,16 @@ def has_field(message: ProtoMessageType, field_name: str) -> bool:
 def copy_better_proto_message(better_proto_message: ProtoMessageType, **kwargs) -> ProtoMessageType:
     """Create a copy of a Protobuf message
 
-    Args:
-        better_proto_message (ProtoMessageType): The message to copy
+    Parameters
+    ----------
+    better_proto_message : ProtoMessageType
+        The message to copy
 
-    Returns:
-        ProtoMessageType: Copy of better_proto_message
+    Returns
+    -------
+    ProtoMessageType
+        Copy of better_proto_message
+
     """
     output = better_proto_message.__class__().parse(bytes(better_proto_message))
     for key, val in kwargs.items():
@@ -56,12 +71,18 @@ def better_proto_to_proto_text(
 ) -> str:
     """Convert a BetterProto message object to Protobuf text format
 
-    Args:
-        better_proto_message (BetterProtoMessage): The message to convert
-        message (ProtoMessage): A blank (raw) Protobuf message object to parse into
+    Parameters
+    ----------
+    better_proto_message : BetterProtoMessage
+        The message to convert
+    message : ProtoMessage
+        A blank (raw) Protobuf message object to parse into
 
-    Returns:
-        str: Protobuf text representation of better_proto_message
+    Returns
+    -------
+    str
+        Protobuf text representation of better_proto_message
+
     """
     message.ParseFromString(bytes(better_proto_message))
 
@@ -73,13 +94,20 @@ def proto_text_to_better_proto(
 ) -> ProtoMessageType:
     """Convert a Protobuf text format message into a BetterProto message object
 
-    Args:
-        better_proto_message (ProtoMessageType): A BetterProto message object of the desired type
-        proto_text (str): The Protobuf text format message to convert
-        message (ProtoMessage): A blank (raw) Protobuf message object to parse proto_text into
+    Parameters
+    ----------
+    better_proto_message : ProtoMessageType
+        A BetterProto message object of the desired type
+    proto_text : str
+        The Protobuf text format message to convert
+    message : ProtoMessage
+        A blank (raw) Protobuf message object to parse proto_text into
 
-    Returns:
-        ProtoMessageType: _description_
+    Returns
+    -------
+    ProtoMessageType
+        _description_
+
     """
     proto = text_format.Parse(proto_text, message)
     json_str = json_format.MessageToJson(proto)
