@@ -218,6 +218,7 @@ class BaseOperator:
         """
         return ColumnSelector(list(self.column_mapping(col_selector).keys()))
 
+    @property
     def dependencies(self) -> List[Union[str, Any]]:
         """Defines an optional list of column dependencies for this operator. This lets you consume columns
         that aren't part of the main transformation workflow.
