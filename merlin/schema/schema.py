@@ -391,9 +391,19 @@ class Schema:
 
     @property
     def first(self) -> ColumnSchema:
-        """Returns the first ColumnSchema in the Schema. Useful for cases where you select down
+        """
+        Returns the first ColumnSchema in the Schema. Useful for cases where you select down
         to a single column via select_by_name or select_by_tag, and just want the value
 
+        Returns
+        -------
+        ColumnSchema
+            The first column schema present in this Schema object
+
+        Raises
+        ------
+        ValueError
+            If this Schema object contains no column schemas
         """
         if not self.column_schemas:
             raise ValueError("There are no columns in this schema to call .first on")
