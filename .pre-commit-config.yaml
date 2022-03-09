@@ -21,7 +21,7 @@ repos:
         rev: 1.5.0
         hooks:
         - id: interrogate
-          args: [-viImMpPsSCn, -f, "39.9", merlin]
+          args: [-viImMpPsSCn, -f, "50.0", merlin]
       - repo: https://github.com/codespell-project/codespell
         rev: v2.1.0
         hooks:

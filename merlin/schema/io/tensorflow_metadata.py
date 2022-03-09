@@ -35,69 +35,185 @@ FEATURE_TYPES = {
 
 
 class TensorflowMetadata:
+    """
+    Reads and writes Merlin schemas as `tensorflow-metadata` Protobuf and JSON files
+
+    See https://github.com/tensorflow/metadata for details on this metadata serialization format
+    """
+
     def __init__(self, schema: ProtoSchema = None):
         self.proto_schema = schema
 
     @classmethod
     def from_json(cls, json: Union[str, bytes]) -> "TensorflowMetadata":
+        """Create a TensorflowMetadata schema object from a JSON string
+
+        Parameters
+        ----------
+        json : Union[str, bytes]
+            The JSON string to parse
+
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from JSON
+
+        """
         schema = ProtoSchema().from_json(json)
         return TensorflowMetadata(schema)
 
     @classmethod
     def from_json_file(cls, path: str) -> "TensorflowMetadata":
+        """Create a TensorflowMetadata schema object from a JSON file
+
+        Parameters
+        ----------
+        path : str
+            Path to the JSON file to parse
+
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from JSON file
+
+        """
         return cls.from_json(_read_file(path))
 
     @classmethod
-    def from_proto_text(cls, path_or_proto_text: str) -> "TensorflowMetadata":
+    def from_proto_text(cls, proto_text: str) -> "TensorflowMetadata":
+        """Create a TensorflowMetadata schema object from a Protobuf text string
+
+        Parameters
+        ----------
+        proto_text : str
+            Protobuf text string to parse
+
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from Protobuf text
+
+        """
         from tensorflow_metadata.proto.v0 import schema_pb2
 
         schema = proto_utils.proto_text_to_better_proto(
-            ProtoSchema(), path_or_proto_text, schema_pb2.Schema()
+            ProtoSchema(), proto_text, schema_pb2.Schema()
         )
 
         return TensorflowMetadata(schema)
 
     @classmethod
     def from_proto_text_file(cls, path: str, file_name="schema.pbtxt") -> "TensorflowMetadata":
+        """Create a TensorflowMetadata schema object from a Protobuf text file
+
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the Protobuf text file to parse
+        file_name : str
+            Name of the schema file. Defaults to "schema.pbtxt".
+
+        Returns
+        -------
+        TensorflowMetadata
+            Schema object parsed from Protobuf text file
+
+        """
         path = pathlib.Path(path) / file_name
         return cls.from_proto_text(_read_file(str(path)))
 
     def to_proto_text(self) -> str:
+        """Convert this TensorflowMetadata schema object to a Proto text string
+
+        Returns
+        -------
+        str
+            Generated Proto text string
+
+        """
         from tensorflow_metadata.proto.v0 import schema_pb2
 
         return proto_utils.better_proto_to_proto_text(self.proto_schema, schema_pb2.Schema())
 
-    def to_proto_text_file(self, path: str, file_name="schema.pbtxt") -> "TensorflowMetadata":
-        return _write_file(self.to_proto_text(), path, file_name)
+    def to_proto_text_file(self, path: str, file_name="schema.pbtxt"):
+        """Write this TensorflowMetadata schema object to a file as a Proto text string
+
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the Protobuf text file
+        file_name : str
+            Name of the output file. Defaults to "schema.pbtxt".
+        path: str :
+
+        """
+        _write_file(self.to_proto_text(), path, file_name)
 
     def copy(self, **kwargs) -> "TensorflowMetadata":
+        """Create a copy of this TensorflowMetadata schema object
+
+        Returns
+        -------
+        TensorflowMetadata
+            Copy of this TensorflowMetadata schema object
+
+        """
         schema_copy = proto_utils.copy_better_proto_message(self.proto_schema, **kwargs)
         return TensorflowMetadata(schema_copy)
 
     @classmethod
-    def from_merlin_schema(cls, schema: MerlinSchema):
+    def from_merlin_schema(cls, schema: MerlinSchema) -> "TensorflowMetadata":
+        """Convert a MerlinSchema object to a TensorflowMetadata schema object
+
+        Parameters
+        ----------
+        schema : MerlinSchema
+            Schema object to convert
+
+        Returns
+        -------
+        TensorflowMetadata
+            Schema converted to a TensorflowMetadata schema object
+
+        """
         features = []
         for col_name, col_schema in schema.column_schemas.items():
-            features.append(pb_feature(col_schema))
+            features.append(_pb_feature(col_schema))
 
         proto_schema = ProtoSchema(feature=features)
 
         return TensorflowMetadata(proto_schema)
 
-    def to_merlin_schema(self):
+    def to_merlin_schema(self) -> MerlinSchema:
+        """Convert this TensorflowMetadata schema object to a MerlinSchema object
+
+        Returns
+        -------
+        MerlinSchema
+            Schema converted to MerlinSchema object
+
+        """
         merlin_schema = MerlinSchema()
 
         for feature in self.proto_schema.feature:
-            col_schema = merlin_column(feature)
+            col_schema = _merlin_column(feature)
             merlin_schema.column_schemas[col_schema.name] = col_schema
 
         return merlin_schema
 
-    def to_json(self):
+    def to_json(self) -> str:
+        """Convert this TensorflowMetadata schema object to a JSON string
+
+        Returns
+        -------
+        str
+            Schema converted to a JSON string
+
+        """
         return self.proto_schema.to_json()
 
 
-def pb_int_domain(column_schema):
+def _pb_int_domain(column_schema):
     domain = column_schema.properties.get("domain")
     if domain is None:
         return None
@@ -112,7 +228,7 @@ def pb_int_domain(column_schema):
     )
 
 
-def pb_float_domain(column_schema):
+def _pb_float_domain(column_schema):
     domain = column_schema.properties.get("domain")
     if domain is None:
         return None
@@ -137,7 +253,7 @@ def _dtype_name(column_schema):
         raise TypeError(f"unsupported dtype for column schema: {column_schema.dtype}")
 
 
-def pb_extra_metadata(column_schema):
+def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
@@ -147,14 +263,14 @@ def pb_extra_metadata(column_schema):
     return schema_bp.Any().from_dict(properties)
 
 
-def pb_tag(column_schema):
+def _pb_tag(column_schema):
     return [tag.value if hasattr(tag, "value") else tag for tag in column_schema.tags]
 
 
-def pb_feature(column_schema):
+def _pb_feature(column_schema):
     feature = Feature(name=column_schema.name)
 
-    feature = set_feature_domain(feature, column_schema)
+    feature = _set_feature_domain(feature, column_schema)
 
     if column_schema.is_list:
         value_count = column_schema.properties.get("value_count", {})
@@ -168,15 +284,15 @@ def pb_feature(column_schema):
         else:
             feature.value_count = ValueCount(min=0, max=0)
 
-    feature.annotation.tag = pb_tag(column_schema)
-    feature.annotation.extra_metadata.append(pb_extra_metadata(column_schema))
+    feature.annotation.tag = _pb_tag(column_schema)
+    feature.annotation.extra_metadata.append(_pb_extra_metadata(column_schema))
     return feature
 
 
-def set_feature_domain(feature, column_schema):
+def _set_feature_domain(feature, column_schema):
     DOMAIN_CONSTRUCTORS = {
-        FeatureType.INT: pb_int_domain,
-        FeatureType.FLOAT: pb_float_domain,
+        FeatureType.INT: _pb_int_domain,
+        FeatureType.FLOAT: _pb_float_domain,
     }
 
     pb_type = FEATURE_TYPES.get(_dtype_name(column_schema))
@@ -192,7 +308,7 @@ def set_feature_domain(feature, column_schema):
     return feature
 
 
-def merlin_domain(feature):
+def _merlin_domain(feature):
     domain = {}
 
     domain_attr = DOMAIN_ATTRS.get(feature.type)
@@ -214,14 +330,14 @@ def merlin_domain(feature):
     return domain
 
 
-def merlin_value_count(feature):
+def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
         if value_count.min != value_count.max != 0:
             return {"min": value_count.min, "max": value_count.max}
 
 
-def merlin_properties(feature):
+def _merlin_properties(feature):
     extra_metadata = feature.annotation.extra_metadata
     if len(extra_metadata) > 1:
         raise ValueError(
@@ -237,11 +353,11 @@ def merlin_properties(feature):
     else:
         properties = {}
 
-    domain = merlin_domain(feature)
+    domain = _merlin_domain(feature)
     if domain:
         properties["domain"] = domain
 
-    value_count = merlin_value_count(feature)
+    value_count = _merlin_value_count(feature)
     if value_count:
         properties["value_count"] = value_count
         properties["is_list"] = True
@@ -264,7 +380,7 @@ float_dtypes_map = {
 }
 
 
-def merlin_dtype(feature, properties):
+def _merlin_dtype(feature, properties):
     dtype = None
     item_size = int(properties.get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
@@ -280,11 +396,11 @@ def merlin_dtype(feature, properties):
     return dtype
 
 
-def merlin_column(feature):
+def _merlin_column(feature):
     name = feature.name
     tags = list(feature.annotation.tag) or []
-    properties = merlin_properties(feature)
-    dtype = merlin_dtype(feature, properties)
+    properties = _merlin_properties(feature)
+    dtype = _merlin_dtype(feature, properties)
 
     is_list = properties.pop("is_list", False)
     is_ragged = properties.pop("is_ragged", False)
