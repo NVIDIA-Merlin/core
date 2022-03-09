@@ -103,7 +103,7 @@ def proto_text_to_better_proto(
     Returns
     -------
     ProtoMessageType
-        _description_
+        A BetterProto message object containing attributes parsed from proto_text
 
     """
     proto = text_format.Parse(proto_text, message)
