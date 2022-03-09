@@ -155,15 +155,17 @@ def _optimized_read_remote(path, row_groups, columns, fs, **kwargs):
 
         return cudf.read_parquet(
             # Transfer the required bytes with fsspec
-            io.BytesIO(_fsspec_data_transfer(
-                path,
-                fs,
-                byte_ranges=byte_ranges,
-                footer=footer,
-                file_size=file_size,
-                add_par1_magic=True,
-                **user_kwargs,
-            )),
+            io.BytesIO(
+                _fsspec_data_transfer(
+                    path,
+                    fs,
+                    byte_ranges=byte_ranges,
+                    footer=footer,
+                    file_size=file_size,
+                    add_par1_magic=True,
+                    **user_kwargs,
+                )
+            ),
             engine="cudf",
             columns=columns,
             row_groups=row_groups,
