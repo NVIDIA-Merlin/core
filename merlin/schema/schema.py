@@ -43,7 +43,7 @@ class ColumnSchema:
         """Standardize tags and dtypes on initialization
 
         Raises:
-            TypeError: If provided dtype can't be cast to a numpy dtype
+            TypeError: If the provided dtype cannot be cast to a numpy dtype
         """
         tags = TagSet(self.tags)
         object.__setattr__(self, "tags", tags)
