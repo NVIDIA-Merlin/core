@@ -1041,7 +1041,7 @@ class Dataset:
         Returns
         -------
         valid : bool
-            Whether or not the input dataset is valid for efficient NVTabular
+            `True` if the input dataset is valid for efficient NVTabular
             processing.
         """
 

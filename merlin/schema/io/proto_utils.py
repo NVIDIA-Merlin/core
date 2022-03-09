@@ -36,7 +36,7 @@ def has_field(message: ProtoMessageType, field_name: str) -> bool:
     Returns
     -------
     bool
-        Whether or not the named field exists on the message object
+        `True` if the named field exists on the message object
 
     """
     return betterproto.serialized_on_wire(getattr(message, field_name))
