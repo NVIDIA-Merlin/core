@@ -35,7 +35,11 @@ FEATURE_TYPES = {
 
 
 class TensorflowMetadata:
-    """Reads and writes Merlin schemas as Protobuf and JSON files"""
+    """
+    Reads and writes Merlin schemas as `tensorflow-metadata` Protobuf and JSON files
+
+    See https://github.com/tensorflow/metadata for details on this metadata serialization format
+    """
 
     def __init__(self, schema: ProtoSchema = None):
         self.proto_schema = schema
