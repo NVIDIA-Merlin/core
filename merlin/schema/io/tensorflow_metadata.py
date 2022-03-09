@@ -121,9 +121,6 @@ class TensorflowMetadata:
     def to_proto_text(self) -> str:
         """Convert this TensorflowMetadata schema object to a Proto text string
 
-        Parameters
-        ----------
-
         Returns
         -------
         str
@@ -145,18 +142,11 @@ class TensorflowMetadata:
             Name of the output file. Defaults to "schema.pbtxt".
         path: str :
 
-
-        Returns
-        -------
-
         """
         _write_file(self.to_proto_text(), path, file_name)
 
     def copy(self, **kwargs) -> "TensorflowMetadata":
         """Create a copy of this TensorflowMetadata schema object
-
-        Parameters
-        ----------
 
         Returns
         -------
@@ -193,9 +183,6 @@ class TensorflowMetadata:
     def to_merlin_schema(self) -> MerlinSchema:
         """Convert this TensorflowMetadata schema object to a MerlinSchema object
 
-        Parameters
-        ----------
-
         Returns
         -------
         MerlinSchema
@@ -212,9 +199,6 @@ class TensorflowMetadata:
 
     def to_json(self) -> str:
         """Convert this TensorflowMetadata schema object to a JSON string
-
-        Parameters
-        ----------
 
         Returns
         -------

@@ -394,12 +394,6 @@ class Schema:
         """Returns the first ColumnSchema in the Schema. Useful for cases where you select down
         to a single column via select_by_name or select_by_tag, and just want the value
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         if not self.column_schemas:
             raise ValueError("There are no columns in this schema to call .first on")

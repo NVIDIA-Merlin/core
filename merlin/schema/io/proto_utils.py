@@ -33,9 +33,6 @@ def has_field(message: ProtoMessageType, field_name: str) -> bool:
         Name of the field to look for
     message: ProtoMessageType :
 
-    field_name: str :
-
-
     Returns
     -------
     bool
