@@ -28,7 +28,7 @@ import betterproto
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 from google.protobuf import json_format  # noqa: E402
 from google.protobuf.any_pb2 import Any as AnyPb2  # noqa: E402
-from google.protobuf.struct_pb2 import Struct  # noqa: E402
+from google.protobuf.struct_pb2 import ListValue, Struct  # noqa: E402
 
 
 # This is a manual hack to make it possible to parse the Any types in annotations
@@ -55,9 +55,29 @@ class Any(betterproto.Message):
         casing: betterproto.Casing = betterproto.Casing.CAMEL,
         include_default_values: bool = False,
     ):
-        msg_struct = Struct()
-        msg_struct.ParseFromString(self.value)
-        return dict(msg_struct.items())
+        if isinstance(self.value, dict):
+            ret = self.value
+        else:
+            msg_struct = Struct()
+            msg_struct.ParseFromString(self.value)
+            ret = dict(msg_struct.items())
+
+        # the ParseFromString method will return Struct types for embedded
+        # dictionaries, and ListValue for embedded lists.
+        # Recursively convert embedded values
+        def _ensure_value(v):
+            if isinstance(v, dict):
+                return _ensure_dict(v)
+            elif isinstance(v, (list, ListValue)):
+                return [_ensure_value(val) for val in v]
+            elif isinstance(v, Struct):
+                return _ensure_dict(dict(v.items()))
+            return v
+
+        def _ensure_dict(x):
+            return {k: _ensure_value(v) for k, v in x.items()}
+
+        return _ensure_dict(ret)
 
 
 class LifecycleStage(betterproto.Enum):
