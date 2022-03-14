@@ -19,7 +19,7 @@ from merlin.dag import BaseOperator
 from merlin.dag.node import Node
 from merlin.dag.ops.selection import SelectionOp
 from merlin.dag.selector import ColumnSelector
-from merlin.schema.tags import Tags
+from merlin.schema import ColumnSchema, Schema, Tags
 
 
 def test_constructor_works_with_single_strings_and_lists():
@@ -220,3 +220,51 @@ def test_filter_group():
 
     assert result_selector.names == ["a", "b"]
     assert result_selector.subgroups == [ColumnSelector(["a", "b"])]
+
+
+def test_applying_selector_to_schema_selects_by_name():
+    schema = Schema(["a", "b", "c", "d", "e"])
+    selector = ColumnSelector(["a", "b"])
+    result = schema.apply(selector)
+
+    assert result == Schema(["a", "b"])
+
+    selector = None
+    result = schema.apply(selector)
+
+    assert result == schema
+
+
+def test_applying_selector_to_schema_selects_by_tags():
+    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
+    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
+
+    schema = Schema([schema1, schema2])
+    selector = ColumnSelector(tags=["a", "b"])
+    result = schema.apply(selector)
+
+    assert result.column_names == schema.column_names
+
+
+def test_applying_selector_to_schema_selects_by_name_or_tags():
+    schema1 = ColumnSchema("col1")
+    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
+
+    schema = Schema([schema1, schema2])
+    selector = ColumnSelector(["col1"], tags=["a", "b"])
+    result = schema.apply(selector)
+
+    assert result.column_names == schema.column_names
+
+
+def test_applying_inverse_selector_to_schema_selects_relevant_columns():
+    schema = Schema(["a", "b", "c", "d", "e"])
+    selector = ColumnSelector(["a", "b"])
+    result = schema.apply_inverse(selector)
+
+    assert result == Schema(["c", "d", "e"])
+
+    selector = None
+    result = schema.apply_inverse(selector)
+
+    assert result == schema
