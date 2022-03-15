@@ -18,7 +18,6 @@ import json
 import numpy
 import pytest
 
-from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 from merlin.schema.tags import Tags, TagSet
@@ -279,51 +278,3 @@ def test_dataset_schema_column_names():
     ds_schema = Schema(["x", "y", "z"])
 
     assert ds_schema.column_names == ["x", "y", "z"]
-
-
-def test_applying_selector_to_schema_selects_by_name():
-    schema = Schema(["a", "b", "c", "d", "e"])
-    selector = ColumnSelector(["a", "b"])
-    result = schema.apply(selector)
-
-    assert result == Schema(["a", "b"])
-
-    selector = None
-    result = schema.apply(selector)
-
-    assert result == schema
-
-
-def test_applying_selector_to_schema_selects_by_tags():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
-
-    schema = Schema([schema1, schema2])
-    selector = ColumnSelector(tags=["a", "b"])
-    result = schema.apply(selector)
-
-    assert result.column_names == schema.column_names
-
-
-def test_applying_selector_to_schema_selects_by_name_or_tags():
-    schema1 = ColumnSchema("col1")
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
-
-    schema = Schema([schema1, schema2])
-    selector = ColumnSelector(["col1"], tags=["a", "b"])
-    result = schema.apply(selector)
-
-    assert result.column_names == schema.column_names
-
-
-def test_applying_inverse_selector_to_schema_selects_relevant_columns():
-    schema = Schema(["a", "b", "c", "d", "e"])
-    selector = ColumnSelector(["a", "b"])
-    result = schema.apply_inverse(selector)
-
-    assert result == Schema(["c", "d", "e"])
-
-    selector = None
-    result = schema.apply_inverse(selector)
-
-    assert result == schema
