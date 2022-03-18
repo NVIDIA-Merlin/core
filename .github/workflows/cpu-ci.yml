@@ -44,7 +44,7 @@ jobs:
         isort -c .
     - name: Lint with interrogate
       run: |
-        interrogate -viImMpPsSCn -f 50.0 merlin
+        interrogate --config=pyproject.toml
     - name: Lint with codespell
       run: |
         codespell
