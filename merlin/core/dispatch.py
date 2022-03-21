@@ -260,10 +260,25 @@ def series_has_nulls(s):
         return s._column.has_nulls
 
 
-def list_val_dtype(ser):
+def list_val_dtype(ser: SeriesType) -> np.dtype:
+    """
+    Return the dtype of the leaves from a list or nested list
+
+    Parameters
+    ----------
+    ser : SeriesType
+        A series where the rows contain lists or nested lists
+
+    Returns
+    -------
+    np.dtype
+        The dtype of the innermost elements
+    """
     if is_list_dtype(ser):
         if HAS_GPU and isinstance(ser, cudf.Series):
-            return ser.dtype._typ.value_type.to_pandas_dtype()
+            if is_list_dtype(ser):
+                ser = ser.list.leaves
+            return ser.dtype
         elif isinstance(ser, pd.Series):
             return pd.core.dtypes.cast.infer_dtype_from(ser[0][0])[0]
     return None
@@ -283,11 +298,23 @@ def is_list_dtype(ser):
     return cudf_is_list_dtype(ser)
 
 
-def is_string_dtype(obj):
+def is_string_dtype(dtype: np.dtype) -> bool:
+    """Check if the dtype of obj is a string type
+
+    Parameters
+    ----------
+    obj : np.dtype
+        Potential string dtype to check
+
+    Returns
+    -------
+    bool
+        `True` if the dtype of `obj` is a string type
+    """
     if not HAS_GPU:
-        return pd.api.types.is_string_dtype(obj)
+        return pd.api.types.is_string_dtype(dtype)
     else:
-        return cudf_is_string_dtype(obj)
+        return cudf_is_string_dtype(dtype)
 
 
 def flatten_list_column_values(s):
