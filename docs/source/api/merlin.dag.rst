@@ -1,5 +1,5 @@
 merlin.dag package
-=================
+==================
 
 .. autoclass:: merlin.dag.BaseOperator
    :members:
