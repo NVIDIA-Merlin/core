@@ -73,9 +73,6 @@ class ConcatColumns(BaseOperator):
         """
         Combine schemas from the nodes being added
 
-
-        workflow_node + "some_column_name"
-
         Parameters
         ----------
         root_schema : Schema
