@@ -11,16 +11,22 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import subprocess
 import sys
+
+from natsort import natsorted
+from recommonmark.parser import CommonMarkParser
 
 rootdir = os.path.join(os.getenv("SPHINX_MULTIVERSION_SOURCEDIR", default="."), "..")
 sys.path.insert(0, rootdir)
 docs_dir = os.path.dirname(__file__)
 
+repodir = os.path.abspath(os.path.join(__file__, r"../../.."))
+gitdir = os.path.join(repodir, r".git")
 
 # -- Project information -----------------------------------------------------
 
-project = "merlin-core"
+project = "Merlin Core"
 copyright = "2022, NVIDIA"  # pylint: disable=redefined-builtin
 author = "NVIDIA"
 
@@ -31,6 +37,7 @@ author = "NVIDIA"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_multiversion",
     "sphinx_rtd_theme",
     "recommonmark",
     "sphinx_markdown_tables",
@@ -64,6 +71,18 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+source_parsers = {".md": CommonMarkParser}
+source_suffix = [".rst", ".md"]
+
+if os.path.exists(gitdir):
+    tag_refs = subprocess.check_output(["git", "tag", "-l", "v*"]).decode("utf-8").split()
+    tag_refs = natsorted(tag_refs)[-6:]
+    smv_tag_whitelist = r"^(" + r"|".join(tag_refs) + r")$"
+else:
+    smv_tag_whitelist = r"^v.*$"
+
+smv_branch_whitelist = r"^main$"
+
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
@@ -72,3 +91,11 @@ intersphinx_mapping = {
 }
 
 autodoc_inherit_docstrings = False
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": False,
+    "member-order": "bysource",
+}
+
+autosummary_generate = True
