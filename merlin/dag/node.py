@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import collections.abc
+from typing import List, Union
 
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.ops import ConcatColumns, SelectionOp, SubsetColumns, SubtractionOp
@@ -65,7 +66,17 @@ class Node:
         self._selector = sel
 
     # These methods must maintain grouping
-    def add_dependency(self, dep):
+    def add_dependency(
+        self, dep: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+    ):
+        """
+        Adding a dependency node to this node
+
+        Parameters
+        ----------
+        dep : Union[str, ColumnSelector, Node, List[Union[str, Node, ColumnSelector]]]
+            Dependency to be added
+        """
         dep_node = Node.construct_from(dep)
 
         if not isinstance(dep_node, list):
@@ -78,7 +89,17 @@ class Node:
 
         self.dependencies.append(dep_node)
 
-    def add_parent(self, parent):
+    def add_parent(
+        self, parent: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+    ):
+        """
+        Adding a parent node to this node
+
+        Parameters
+        ----------
+        parent : Union[str, ColumnSelector, Node, List[Union[str, Node, ColumnSelector]]]
+            Parent to be added
+        """
         parent_nodes = Node.construct_from(parent)
 
         if not isinstance(parent_nodes, list):
@@ -89,7 +110,17 @@ class Node:
 
         self.parents.extend(parent_nodes)
 
-    def add_child(self, child):
+    def add_child(
+        self, child: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+    ):
+        """
+        Adding a child node to this node
+
+        Parameters
+        ----------
+        child : Union[str, ColumnSelector, Node, List[Union[str, Node, ColumnSelector]]]
+            Child to be added
+        """
         child_nodes = Node.construct_from(child)
 
         if not isinstance(child_nodes, list):
@@ -100,7 +131,17 @@ class Node:
 
         self.children.extend(child_nodes)
 
-    def remove_child(self, child):
+    def remove_child(
+        self, child: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+    ):
+        """
+        Removing a child node from this node
+
+        Parameters
+        ----------
+        child : Union[str, ColumnSelector, Node, List[Union[str, Node, ColumnSelector]]]
+            Child to be removed
+        """
         child_nodes = Node.construct_from(child)
 
         if not isinstance(child_nodes, list):
@@ -112,7 +153,17 @@ class Node:
             if child_node in self.children:
                 self.children.remove(child_node)
 
-    def compute_schemas(self, root_schema, preserve_dtypes=False):
+    def compute_schemas(self, root_schema: Schema, preserve_dtypes: bool = False):
+        """
+        Defines the input and output schema
+
+        Parameters
+        ----------
+        root_schema : Schema
+            Schema of the input dataset
+        preserve_dtypes : bool, optional
+            `True` if we don't want to override dtypes in the current schema, by default False
+        """
         parents_schema = _combine_schemas(self.parents)
         deps_schema = _combine_schemas(self.dependencies)
         parents_selector = _combine_selectors(self.parents)
@@ -138,7 +189,26 @@ class Node:
             self.input_schema, self.selector, prev_output_schema
         )
 
-    def validate_schemas(self, root_schema, strict_dtypes=False):
+    def validate_schemas(self, root_schema: Schema, strict_dtypes: bool = False):
+        """
+        Check if this Node's input schema matches the output schemas of parents and dependencies
+
+        Parameters
+        ----------
+        root_schema : Schema
+            Schema of the input dataset
+        strict_dtypes : bool, optional
+            If an error should be raised when column dtypes don't match, by default False
+
+        Raises
+        ------
+        ValueError
+            If parents and dependencies don't provide an expected column based on
+            the input schema
+        ValueError
+            If the dtype of a column from parents and dependencies doesn't match
+            the expected dtype based on the input schema
+        """
         parents_schema = _combine_schemas(self.parents)
         deps_schema = _combine_schemas(self.dependencies)
         ancestors_schema = root_schema + parents_schema + deps_schema

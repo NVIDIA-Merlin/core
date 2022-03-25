@@ -21,6 +21,10 @@ from merlin.schema import Schema
 
 
 class ConcatColumns(BaseOperator):
+    """
+    This operator class provides an implementation for the `+` operator used in constructing graphs.
+    """
+
     def __init__(self, label=None):
         self._label = label or self.__class__.__name__
         super().__init__()
@@ -32,6 +36,25 @@ class ConcatColumns(BaseOperator):
         parents_selector: ColumnSelector,
         dependencies_selector: ColumnSelector,
     ) -> ColumnSelector:
+        """
+        Combine selectors from the nodes being added
+
+        Parameters
+        ----------
+        input_schema : Schema
+            Combined schema of the columns coming from upstream nodes
+        selector : ColumnSelector
+            Existing column selector for this node in the graph (often None)
+        parents_selector : ColumnSelector
+            Combined column selectors of parent nodes
+        dependencies_selector : ColumnSelector
+            Combined column selectors of dependency nodes
+
+        Returns
+        -------
+        ColumnSelector
+            Combined column selectors of parent and dependency nodes
+        """
         self._validate_matching_cols(
             input_schema,
             parents_selector + dependencies_selector,
@@ -47,6 +70,25 @@ class ConcatColumns(BaseOperator):
         deps_schema: Schema,
         selector: ColumnSelector,
     ) -> Schema:
+        """
+        Combine schemas from the nodes being added
+
+        Parameters
+        ----------
+        root_schema : Schema
+            Schema of the columns from the input dataset
+        parents_schema : Schema
+            Schema of the columns from the parent nodes
+        deps_schema : Schema
+            Schema of the columns from the dependency nodes
+        selector : ColumnSelector
+            Existing column selector for this node in the graph (often None)
+
+        Returns
+        -------
+        Schema
+            Combined schema of columns from parents and dependencies
+        """
         return parents_schema + deps_schema
 
     def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
@@ -72,4 +114,7 @@ class ConcatColumns(BaseOperator):
 
     @property
     def label(self) -> str:
+        """
+        Display name of this operator
+        """
         return self._label
