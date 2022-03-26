@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>merlin.dag package &mdash; merlin-core  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>merlin.dag package &mdash; Merlin Core  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -24,7 +24,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> merlin-core
+            <a href="../index.html" class="icon icon-home"> Merlin Core
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -52,7 +52,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">merlin-core</a>
+          <a href="../index.html">Merlin Core</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -79,13 +79,8 @@
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for all operator classes.</p>
 <dl class="py method">
-<dt id="merlin.dag.BaseOperator.column_mapping">
-<code class="sig-name descname"><span class="pre">column_mapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.column_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.column_mapping" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.BaseOperator.compute_column_schema">
-<code class="sig-name descname"><span class="pre">compute_column_schema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_column_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_column_schema" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.BaseOperator.compute_selector">
+<code class="sig-name descname"><span class="pre">compute_selector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.dag.selector.ColumnSelector</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_selector" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -131,32 +126,18 @@ returns a set of schemas for the transformed columns this operator will produce
 </dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.BaseOperator.compute_selector">
-<code class="sig-name descname"><span class="pre">compute_selector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.dag.selector.ColumnSelector</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_selector" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.BaseOperator.column_mapping">
+<code class="sig-name descname"><span class="pre">column_mapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.column_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.column_mapping" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.BaseOperator.create_node">
-<code class="sig-name descname"><span class="pre">create_node</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.create_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.create_node" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.BaseOperator.compute_column_schema">
+<code class="sig-name descname"><span class="pre">compute_column_schema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_column_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_column_schema" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.BaseOperator.dependencies">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dependencies</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.dependencies" title="Permalink to this definition"></a></dt>
-<dd><p>Defines an optional list of column dependencies for this operator. This lets you consume columns
-that aren’t part of the main transformation workflow.
-:returns: Extra dependencies of this operator. Defaults to None
-:rtype: str, list of str or ColumnSelector, optional</p>
-</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.BaseOperator.dynamic_dtypes">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dynamic_dtypes</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.dynamic_dtypes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.BaseOperator.label">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">label</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.label" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -177,8 +158,22 @@ operator will produce
 </dd></dl>
 
 <dl class="py method">
+<dt id="merlin.dag.BaseOperator.dependencies">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dependencies</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.dependencies" title="Permalink to this definition"></a></dt>
+<dd><p>Defines an optional list of column dependencies for this operator. This lets you consume columns
+that aren’t part of the main transformation workflow.
+:returns: Extra dependencies of this operator. Defaults to None
+:rtype: str, list of str or ColumnSelector, optional</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="merlin.dag.BaseOperator.output_dtype">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_dtype</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.output_dtype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.BaseOperator.output_tags">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_tags</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.output_tags" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -187,8 +182,13 @@ operator will produce
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.BaseOperator.output_tags">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_tags</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.output_tags" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.BaseOperator.label">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">label</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.label" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.BaseOperator.create_node">
+<code class="sig-name descname"><span class="pre">create_node</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.create_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.create_node" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -204,6 +204,16 @@ operator will produce
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">merlin.dag.</span></code><code class="sig-name descname"><span class="pre">Graph</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_node</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.node.Node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
+<dt id="merlin.dag.Graph.input_dtypes">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">input_dtypes</span></code><a class="headerlink" href="#merlin.dag.Graph.input_dtypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Graph.output_dtypes">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_dtypes</span></code><a class="headerlink" href="#merlin.dag.Graph.output_dtypes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="merlin.dag.Graph.column_mapping">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">column_mapping</span></code><a class="headerlink" href="#merlin.dag.Graph.column_mapping" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -214,16 +224,6 @@ operator will produce
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.Graph.get_nodes_by_op_type">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_nodes_by_op_type</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph.get_nodes_by_op_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph.get_nodes_by_op_type" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Graph.input_dtypes">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">input_dtypes</span></code><a class="headerlink" href="#merlin.dag.Graph.input_dtypes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt id="merlin.dag.Graph.input_schema">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">input_schema</span></code><a class="headerlink" href="#merlin.dag.Graph.input_schema" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -231,11 +231,6 @@ operator will produce
 <dl class="py method">
 <dt id="merlin.dag.Graph.leaf_nodes">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">leaf_nodes</span></code><a class="headerlink" href="#merlin.dag.Graph.leaf_nodes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Graph.output_dtypes">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_dtypes</span></code><a class="headerlink" href="#merlin.dag.Graph.output_dtypes" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -266,6 +261,11 @@ output columns derived from that column.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="merlin.dag.Graph.get_nodes_by_op_type">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_nodes_by_op_type</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph.get_nodes_by_op_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph.get_nodes_by_op_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -282,15 +282,9 @@ that makes up your workflow</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="merlin.dag.Node.add_child">
-<code class="sig-name descname"><span class="pre">add_child</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.add_child" title="Permalink to this definition"></a></dt>
-<dd><p>Adding a child node to this node</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>child</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><em>List</em><em>[</em><em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>]</em><em>]</em><em>]</em>) – Child to be added</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="merlin.dag.Node.selector">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">selector</span></code><a class="headerlink" href="#merlin.dag.Node.selector" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.add_dependency">
@@ -315,9 +309,26 @@ that makes up your workflow</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.Node.column_mapping">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">column_mapping</span></code><a class="headerlink" href="#merlin.dag.Node.column_mapping" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt id="merlin.dag.Node.add_child">
+<code class="sig-name descname"><span class="pre">add_child</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.add_child" title="Permalink to this definition"></a></dt>
+<dd><p>Adding a child node to this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>child</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><em>List</em><em>[</em><em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>]</em><em>]</em><em>]</em>) – Child to be added</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.remove_child">
+<code class="sig-name descname"><span class="pre">remove_child</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_child" title="Permalink to this definition"></a></dt>
+<dd><p>Removing a child node from this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>child</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><em>List</em><em>[</em><em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>]</em><em>]</em><em>]</em>) – Child to be removed</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.compute_schemas">
@@ -332,72 +343,6 @@ that makes up your workflow</p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.construct_from">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">construct_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.construct_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.construct_from" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.dependency_columns">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dependency_columns</span></code><a class="headerlink" href="#merlin.dag.Node.dependency_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.exportable">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">exportable</span></code><a class="headerlink" href="#merlin.dag.Node.exportable" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.graph">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">graph</span></code><a class="headerlink" href="#merlin.dag.Node.graph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.grouped_parents_with_dependencies">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">grouped_parents_with_dependencies</span></code><a class="headerlink" href="#merlin.dag.Node.grouped_parents_with_dependencies" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.input_columns">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">input_columns</span></code><a class="headerlink" href="#merlin.dag.Node.input_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.label">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">label</span></code><a class="headerlink" href="#merlin.dag.Node.label" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.output_columns">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_columns</span></code><a class="headerlink" href="#merlin.dag.Node.output_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.parents_with_dependencies">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">parents_with_dependencies</span></code><a class="headerlink" href="#merlin.dag.Node.parents_with_dependencies" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.remove_child">
-<code class="sig-name descname"><span class="pre">remove_child</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_child" title="Permalink to this definition"></a></dt>
-<dd><p>Removing a child node from this node</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>child</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><em>List</em><em>[</em><em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.Node"><em>Node</em></a><em>, </em><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a><em>]</em><em>]</em><em>]</em>) – Child to be removed</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.remove_inputs">
-<code class="sig-name descname"><span class="pre">remove_inputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_inputs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.Node.selector">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">selector</span></code><a class="headerlink" href="#merlin.dag.Node.selector" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.validate_schemas">
@@ -420,6 +365,61 @@ that makes up your workflow</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.remove_inputs">
+<code class="sig-name descname"><span class="pre">remove_inputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_inputs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.exportable">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">exportable</span></code><a class="headerlink" href="#merlin.dag.Node.exportable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.parents_with_dependencies">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">parents_with_dependencies</span></code><a class="headerlink" href="#merlin.dag.Node.parents_with_dependencies" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.grouped_parents_with_dependencies">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">grouped_parents_with_dependencies</span></code><a class="headerlink" href="#merlin.dag.Node.grouped_parents_with_dependencies" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.input_columns">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">input_columns</span></code><a class="headerlink" href="#merlin.dag.Node.input_columns" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.output_columns">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">output_columns</span></code><a class="headerlink" href="#merlin.dag.Node.output_columns" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.column_mapping">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">column_mapping</span></code><a class="headerlink" href="#merlin.dag.Node.column_mapping" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.dependency_columns">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dependency_columns</span></code><a class="headerlink" href="#merlin.dag.Node.dependency_columns" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.label">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">label</span></code><a class="headerlink" href="#merlin.dag.Node.label" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.graph">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">graph</span></code><a class="headerlink" href="#merlin.dag.Node.graph" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.Node.construct_from">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">construct_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.construct_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.construct_from" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -445,18 +445,18 @@ of nesting tuples inside the list of names)</p></li>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="merlin.dag.ColumnSelector.filter_columns">
-<code class="sig-name descname"><span class="pre">filter_columns</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/selector.html#ColumnSelector.filter_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.ColumnSelector.filter_columns" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="merlin.dag.ColumnSelector.grouped_names">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">grouped_names</span></code><a class="headerlink" href="#merlin.dag.ColumnSelector.grouped_names" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.ColumnSelector.tags">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tags</span></code><a class="headerlink" href="#merlin.dag.ColumnSelector.tags" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.ColumnSelector.names">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">names</span></code><a class="headerlink" href="#merlin.dag.ColumnSelector.names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.ColumnSelector.grouped_names">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">grouped_names</span></code><a class="headerlink" href="#merlin.dag.ColumnSelector.grouped_names" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -467,8 +467,8 @@ how selection occurs (tags, name) does not matter.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="merlin.dag.ColumnSelector.tags">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tags</span></code><a class="headerlink" href="#merlin.dag.ColumnSelector.tags" title="Permalink to this definition"></a></dt>
+<dt id="merlin.dag.ColumnSelector.filter_columns">
+<code class="sig-name descname"><span class="pre">filter_columns</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/selector.html#ColumnSelector.filter_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.ColumnSelector.filter_columns" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -499,7 +499,20 @@ how selection occurs (tags, name) does not matter.</p>
       </div>
     </section>
   </div>
-  <script>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="merlin.dag.html">main</a></dd>
+    </dl>
+  </div>
+</div><script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
