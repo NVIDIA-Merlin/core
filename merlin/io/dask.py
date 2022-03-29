@@ -24,7 +24,7 @@ from dask.highlevelgraph import HighLevelGraph
 
 from merlin.core.dispatch import annotate
 from merlin.core.utils import ensure_optimize_dataframe_graph, global_dask_client
-from merlin.core.worker import clean_worker_cache, get_worker_cache
+from merlin.io.worker import clean_worker_cache, get_worker_cache
 
 from .shuffle import Shuffle
 from .writer_factory import _writer_cls_factory, writer_factory
