@@ -15,15 +15,15 @@
 #
 
 import io
-from distutils.version import LooseVersion
 from threading import Thread
 
 # Check if fsspec.parquet module is available
 import fsspec
 import numpy as np
+from packaging.version import Version
 from pyarrow import parquet as pq
 
-if LooseVersion(fsspec.__version__).version[:3] > [2021, 11, 0]:
+if Version(fsspec.__version__) > Version("2021.11.0"):
     import fsspec.parquet as fsspec_parquet
 else:
     fsspec_parquet = None
@@ -32,7 +32,7 @@ try:
     import cudf
     from cudf.core.column import as_column, build_categorical_column
 
-    if fsspec_parquet and (LooseVersion(cudf.__version__).version[:2] < [21, 12]):
+    if fsspec_parquet and (Version(cudf.__version__) < Version("21.12.0")):
         # This version of cudf does not support
         # reads from python-file objects. Avoid
         # using the `fsspec.parquet` module
