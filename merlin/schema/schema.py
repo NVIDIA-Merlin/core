@@ -17,7 +17,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
-import pandas as pd
 
 from .tags import Tags, TagSet
 
@@ -54,8 +53,8 @@ class ColumnSchema:
                 dtype = np.dtype(self.dtype.numpy_dtype)
             elif hasattr(self.dtype, "_categories"):
                 dtype = self.dtype._categories.dtype
-            elif isinstance(self.dtype, pd.StringDtype):
-                dtype = np.dtype("O")
+            elif hasattr(self.dtype, "kind"):
+                dtype = np.dtype(self.dtype.kind)
             else:
                 dtype = np.dtype(self.dtype)
         except TypeError as err:
