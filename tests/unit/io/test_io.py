@@ -208,7 +208,7 @@ def test_dask_dataset(datasets, engine, num_files, cpu):
 
     # We do not preserve the index in NVTabular
     if engine == "parquet":
-        assert_eq(ddf0, result, check_index=False)
+        assert_eq(ddf0, cudf.from_pandas(result.compute()) if cpu else result, check_index=False)
     else:
         assert_eq(ddf0, result)
 
