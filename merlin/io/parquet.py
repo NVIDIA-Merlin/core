@@ -77,6 +77,20 @@ class CPUParquetEngine(ArrowDatasetEngine):
     def multi_support(cls):
         return hasattr(ArrowDatasetEngine, "multi_support") and ArrowDatasetEngine.multi_support()
 
+    @classmethod
+    def read_partition(cls, *args, **kwargs):
+        part = ArrowDatasetEngine.read_partition(*args, **kwargs)
+        # NVTabular does NOT currently support nullable pandas dtypes.
+        # Convert everything to non-nullable dtypes instead:
+        # (TODO: Fix issues in Merlin/NVTabular for nullable dtypes)
+        for k, v in part.dtypes.items():
+            type_name = str(v)
+            if type_name.startswith("Int"):
+                part[k] = part[k].astype(type_name.replace("Int", "int"))
+            elif type_name.startswith("Float"):
+                part[k] = part[k].astype(type_name.replace("Float", "float"))
+        return part
+
 
 # Define GPUParquetEngine if cudf is available
 if cudf is not None:
