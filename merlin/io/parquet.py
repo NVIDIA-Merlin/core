@@ -89,6 +89,9 @@ class CPUParquetEngine(ArrowDatasetEngine):
                 part[k] = part[k].astype(type_name.replace("Int", "int"))
             elif type_name.startswith("Float"):
                 part[k] = part[k].astype(type_name.replace("Float", "float"))
+            elif type_name.startswith("string"):
+                # Converts pd.StringDtype to "Object"
+                part[k] = part[k].astype("O")
         return part
 
 
