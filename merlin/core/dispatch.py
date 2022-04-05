@@ -257,7 +257,7 @@ def series_has_nulls(s):
     if isinstance(s, pd.Series):
         return s.isnull().values.any()
     else:
-        return s._column.has_nulls
+        return s.has_nulls
 
 
 def list_val_dtype(ser: SeriesType) -> np.dtype:
