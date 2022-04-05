@@ -1,7 +1,7 @@
 # packages necessary to run tests and push PRs
 # assumes requirements for merlin-core are already installed
 
-black==21.7b0
+black==22.3.0
 click<8.1.0
 flake8==3.9.2
 isort==5.9.3
