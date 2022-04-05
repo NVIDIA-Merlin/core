@@ -257,7 +257,9 @@ def series_has_nulls(s):
     if isinstance(s, pd.Series):
         return s.isnull().values.any()
     else:
-        return s._column.has_nulls
+        # For cudf>=22.02, the has_nulls Series property
+        # should be used in lieu of s._column.has_nulls
+        return s.has_nulls if hasattr(s, "has_nulls") else s._column.has_nulls
 
 
 def list_val_dtype(ser: SeriesType) -> np.dtype:
