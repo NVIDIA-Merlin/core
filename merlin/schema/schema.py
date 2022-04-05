@@ -271,7 +271,7 @@ class Schema:
             return self - self.select_by_name(selector.names)
         return self
 
-    def select_by_tag(self, tags: List[Union[str, Tags]]) -> "Schema":
+    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
         """Select matching columns from this Schema object using a list of tags
 
         Parameters
@@ -296,7 +296,7 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def remove_by_tag(self, tags) -> "Schema":
+    def remove_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
@@ -308,7 +308,7 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def select_by_name(self, names: List[str]) -> "Schema":
+    def select_by_name(self, names: Union[List[str], str]) -> "Schema":
         """Select matching columns from this Schema object using a list of column names
 
         Parameters
