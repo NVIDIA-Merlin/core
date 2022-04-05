@@ -53,8 +53,6 @@ class ColumnSchema:
                 dtype = np.dtype(self.dtype.numpy_dtype)
             elif hasattr(self.dtype, "_categories"):
                 dtype = self.dtype._categories.dtype
-            elif hasattr(self.dtype, "kind"):
-                dtype = np.dtype(self.dtype.kind)
             else:
                 dtype = np.dtype(self.dtype)
         except TypeError as err:
