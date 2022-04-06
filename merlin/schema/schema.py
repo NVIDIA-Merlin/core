@@ -433,9 +433,9 @@ class Schema:
 
     def _repr_html_(self):
         # Repr for Jupyter Notebook
-        return self.as_df()._repr_html_()
+        return self.to_pandas()._repr_html_()
 
-    def as_df(self) -> pd.DataFrame:
+    def to_pandas(self) -> pd.DataFrame:
         """Convert this Schema object to a pandas DataFrame
 
         Returns
@@ -444,20 +444,9 @@ class Schema:
             DataFrame containing the column schemas in this Schema object
 
         """
-        return pd.DataFrame(self)
+        props = [c.__dict__ for c in self.column_schemas.values()]
 
-    def as_property_df(self) -> pd.DataFrame:
-        """Convert this Schema object to a pandas DataFrame containing the properties of each column.
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing the properties of each column.
-
-        """
-        props = [{"column": key, **val.properties} for key, val in self.column_schemas.items()]
-
-        return pd.DataFrame(props)
+        return pd.json_normalize(props)
 
     def __eq__(self, other):
         if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):
