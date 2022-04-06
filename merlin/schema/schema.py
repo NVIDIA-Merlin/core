@@ -431,6 +431,23 @@ class Schema:
     def __repr__(self):
         return str([col_schema.__dict__ for col_schema in self.column_schemas.values()])
 
+    def _repr_html_(self):
+        # Repr for Jupyter Notebook
+        return self.to_pandas()._repr_html_()
+
+    def to_pandas(self) -> pd.DataFrame:
+        """Convert this Schema object to a pandas DataFrame
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the column schemas in this Schema object
+
+        """
+        props = [c.__dict__ for c in self.column_schemas.values()]
+
+        return pd.json_normalize(props)
+
     def __eq__(self, other):
         if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):
             return False

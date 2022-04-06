@@ -267,6 +267,16 @@ def test_schema_can_be_added_to_none():
     assert (None + schema_set) == schema_set
 
 
+def test_schema_to_pandas():
+    import pandas as pd
+
+    schema_set = Schema(["a", "b", "c"])
+    df = schema_set.to_pandas()
+
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
+
+
 def test_construct_schema_with_column_names():
     schema = Schema(["x", "y", "z"])
     expected = Schema([ColumnSchema("x"), ColumnSchema("y"), ColumnSchema("z")])
