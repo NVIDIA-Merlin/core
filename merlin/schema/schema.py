@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
+import pandas as pd
 
 from .tags import Tags, TagSet
 
@@ -429,6 +430,34 @@ class Schema:
 
     def __repr__(self):
         return str([col_schema.__dict__ for col_schema in self.column_schemas.values()])
+
+    def _repr_html_(self):
+        # Repr for Jupyter Notebook
+        return self.as_df()._repr_html_()
+
+    def as_df(self) -> pd.DataFrame:
+        """Convert this Schema object to a pandas DataFrame
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the column schemas in this Schema object
+
+        """
+        return pd.DataFrame(self)
+
+    def as_property_df(self) -> pd.DataFrame:
+        """Convert this Schema object to a pandas DataFrame containing the properties of each column.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the properties of each column.
+
+        """
+        props = [{"column": key, **val.properties} for key, val in self.column_schemas.items()]
+
+        return pd.DataFrame(props)
 
     def __eq__(self, other):
         if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):
