@@ -45,9 +45,7 @@ class CSVDatasetEngine(DatasetEngine):
 
         # CSV reader needs a list of files
         # (Assume flat directory structure if this is a dir)
-        if len(self.paths) == 1 and self.fs.isdir(
-            self.paths[0]
-        ):  # pylint: disable=access-member-before-definition
+        if len(self.paths) == 1 and self.fs.isdir(self.paths[0]):
             self.paths = self.fs.glob(self.fs.sep.join([self.paths[0], "*"]))
 
     def to_ddf(self, columns=None, cpu=None):
