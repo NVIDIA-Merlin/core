@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Text, Union
 import numpy as np
 import pandas as pd
 
-from .tags import Tags, TagSet
+from merlin.schema.tags import Tags, TagSet
 
 
 @dataclass(frozen=True)

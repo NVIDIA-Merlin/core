@@ -28,8 +28,7 @@ import numpy as np
 from fsspec.core import get_fs_token_paths
 
 from merlin.core.dispatch import annotate
-
-from .shuffle import shuffle_df
+from merlin.io.shuffle import shuffle_df
 
 
 class Writer:

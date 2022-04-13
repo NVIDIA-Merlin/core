@@ -18,13 +18,13 @@ from typing import Union
 import fsspec
 import numpy
 
-from ..schema import ColumnSchema
-from ..schema import Schema as MerlinSchema
-from ..tags import Tags
-from . import proto_utils, schema_bp
-from .schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
-from .schema_bp import Schema as ProtoSchema
-from .schema_bp import ValueCount
+from merlin.schema.io import proto_utils, schema_bp
+from merlin.schema.io.schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from merlin.schema.io.schema_bp import Schema as ProtoSchema
+from merlin.schema.io.schema_bp import ValueCount
+from merlin.schema.schema import ColumnSchema
+from merlin.schema.schema import Schema as MerlinSchema
+from merlin.schema.tags import Tags
 
 DOMAIN_ATTRS = {FeatureType.INT: "int_domain", FeatureType.FLOAT: "float_domain"}
 FEATURE_TYPES = {

@@ -20,7 +20,7 @@ import uavro as ua
 from dask.base import tokenize
 from dask.dataframe.core import new_dd_object
 
-from .dataset_engine import DatasetEngine
+from merlin.io.dataset_engine import DatasetEngine
 
 
 class AvroDatasetEngine(DatasetEngine):
@@ -31,6 +31,7 @@ class AvroDatasetEngine(DatasetEngine):
     """
 
     def __init__(self, paths, part_size, storage_options=None, cpu=False, **kwargs):
+        # pylint: disable=access-member-before-definition
         super().__init__(paths, part_size, storage_options=storage_options, cpu=cpu)
         if kwargs != {}:
             raise ValueError("Unexpected AvroDatasetEngine argument(s).")

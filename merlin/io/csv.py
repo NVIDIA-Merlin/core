@@ -27,7 +27,7 @@ from dask.utils import parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import infer_compression
 
-from .dataset_engine import DatasetEngine
+from merlin.io.dataset_engine import DatasetEngine
 
 
 class CSVDatasetEngine(DatasetEngine):
@@ -37,6 +37,7 @@ class CSVDatasetEngine(DatasetEngine):
     """
 
     def __init__(self, paths, part_size, storage_options=None, cpu=False, **kwargs):
+        # pylint: disable=access-member-before-definition
         super().__init__(paths, part_size, cpu=cpu, storage_options=storage_options)
         self._meta = {}
         self.csv_kwargs = kwargs

@@ -18,7 +18,7 @@ from uuid import uuid4
 
 import numpy as np
 
-from .writer import ThreadedWriter
+from merlin.io.writer import ThreadedWriter
 
 
 class HugeCTRWriter(ThreadedWriter):

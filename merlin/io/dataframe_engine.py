@@ -21,7 +21,7 @@ except ImportError:
 from dask.dataframe.core import new_dd_object
 from dask.highlevelgraph import HighLevelGraph
 
-from .dataset_engine import DatasetEngine
+from merlin.io.dataset_engine import DatasetEngine
 
 
 class DataFrameDatasetEngine(DatasetEngine):

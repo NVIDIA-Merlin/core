@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from ._version import get_versions
+from merlin.core._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
