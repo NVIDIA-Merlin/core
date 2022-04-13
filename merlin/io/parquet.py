@@ -59,11 +59,10 @@ else:
     aggregate_row_groups = None
 
 from merlin.core.utils import run_on_worker
-
-from .dataset_engine import DatasetEngine
-from .fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
-from .shuffle import Shuffle, shuffle_df
-from .writer import ThreadedWriter
+from merlin.io.dataset_engine import DatasetEngine
+from merlin.io.fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
+from merlin.io.shuffle import Shuffle, shuffle_df
+from merlin.io.writer import ThreadedWriter
 
 LOG = logging.getLogger("merlin")
 

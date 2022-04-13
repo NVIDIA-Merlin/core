@@ -15,5 +15,5 @@
 #
 
 # flake8: noqa
-from .schema import ColumnSchema, Schema
-from .tags import Tags, TagSet, TagsType
+from merlin.schema.schema import ColumnSchema, Schema
+from merlin.schema.tags import Tags, TagSet, TagsType
