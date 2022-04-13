@@ -71,12 +71,9 @@ except ImportError:
         return inner1
 
 
-if HAS_GPU:
-    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]
-    SeriesType = Union[pd.Series, cudf.Series]
-else:
-    DataFrameType = Union[pd.DataFrame]
-    SeriesType = Union[pd.Series]
+DataFrameType = Union[pd.DataFrame, cudf.DataFrame]
+SeriesType = Union[pd.Series, cudf.Series]
+
 
 # Define mapping between non-nullable,
 # and nullable types in Pandas

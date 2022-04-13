@@ -35,7 +35,7 @@ class ColumnSchema:
 
     name: Text
     tags: Optional[TagSet] = field(default_factory=TagSet)
-    properties: Optional[Dict[str, any]] = field(default_factory=dict)
+    properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
     is_list: bool = False
     is_ragged: bool = False
