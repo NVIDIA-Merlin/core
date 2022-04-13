@@ -71,8 +71,12 @@ except ImportError:
         return inner1
 
 
-DataFrameType = Union[pd.DataFrame, cudf.DataFrame]
-SeriesType = Union[pd.Series, cudf.Series]
+if HAS_GPU:
+    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
+    SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
+else:
+    DataFrameType = pd.DataFrame  # type: ignore
+    SeriesType = pd.Series  # type: ignore
 
 
 # Define mapping between non-nullable,
