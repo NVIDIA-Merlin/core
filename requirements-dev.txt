@@ -17,11 +17,15 @@ codespell
 Sphinx==3.5.4
 sphinx_rtd_theme==1.0.0
 sphinx_markdown_tables==0.0.15
-sphinx-multiversion==0.2.4
+sphinx_external_toc==0.2.4
+sphinx-multiversion@git+https://github.com/mikemckiernan/sphinx-multiversion.git
+sphinxcontrib-copydirs@git+https://github.com/mikemckiernan/sphinxcontrib-copydirs.git
 recommonmark==0.7.1
 jinja2<3.1
 markupsafe==2.0.1
 natsort==8.1.0
+myst-nb==0.13.2
+linkify-it-py==1.0.3
 
 # needed to make test_s3 work
 moto>=2
