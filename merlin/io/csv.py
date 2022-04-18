@@ -60,7 +60,7 @@ class CSVDatasetEngine(DatasetEngine):
             ddf = ddf[columns]
         return ddf
 
-    @property
+    @property  # type: ignore
     @functools.lru_cache(1)
     def _file_partition_map(self):
         ind = 0

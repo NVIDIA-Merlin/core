@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 import pathlib
 from typing import Union
 
@@ -63,7 +64,7 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_json_file(cls, path: str) -> "TensorflowMetadata":
+    def from_json_file(cls, path: os.PathLike) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON file
 
         Parameters
@@ -103,7 +104,9 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_proto_text_file(cls, path: str, file_name="schema.pbtxt") -> "TensorflowMetadata":
+    def from_proto_text_file(
+        cls, path: os.PathLike, file_name="schema.pbtxt"
+    ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text file
 
         Parameters
@@ -120,7 +123,7 @@ class TensorflowMetadata:
 
         """
         path = pathlib.Path(path) / file_name
-        return cls.from_proto_text(_read_file(str(path)))
+        return cls.from_proto_text(_read_file(path))
 
     def to_proto_text(self) -> str:
         """Convert this TensorflowMetadata schema object to a Proto text string
@@ -414,7 +417,7 @@ def _merlin_column(feature):
     return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
 
 
-def _read_file(path: str):
+def _read_file(path: os.PathLike):
     # TODO: Should we be using fsspec here too?
     path = pathlib.Path(path)
     if path.is_file():
