@@ -256,7 +256,7 @@ class Schema:
     def apply(self, selector) -> "Schema":
         return self.select(selector)
 
-    def apply_inverse(self, selector) -> "Schema":
+    def excluding(self, selector) -> "Schema":
         """Select non-matching columns from this Schema object using a ColumnSelector
 
         Parameters
@@ -273,6 +273,9 @@ class Schema:
         if selector:
             return self - self.select_by_name(selector.names)
         return self
+
+    def apply_inverse(self, selector) -> "Schema":
+        return self.excluding(selector)
 
     def select_by_tag(self, tags: List[Union[str, Tags]]) -> "Schema":
         """Select matching columns from this Schema object using a list of tags

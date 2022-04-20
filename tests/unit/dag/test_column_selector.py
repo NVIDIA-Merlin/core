@@ -260,11 +260,11 @@ def test_applying_selector_to_schema_selects_by_name_or_tags():
 def test_applying_inverse_selector_to_schema_selects_relevant_columns():
     schema = Schema(["a", "b", "c", "d", "e"])
     selector = ColumnSelector(["a", "b"])
-    result = schema.apply_inverse(selector)
+    result = schema.excluding(selector)
 
     assert result == Schema(["c", "d", "e"])
 
     selector = None
-    result = schema.apply_inverse(selector)
+    result = schema.excluding(selector)
 
     assert result == schema

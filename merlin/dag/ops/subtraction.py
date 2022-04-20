@@ -89,7 +89,7 @@ class SubtractionOp(BaseOperator):
             result = parents_schema - deps_schema
         else:
             subtraction_selector = self.selector or selector
-            result = parents_schema.apply_inverse(subtraction_selector)
+            result = parents_schema.excluding(subtraction_selector)
         return result
 
     def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:

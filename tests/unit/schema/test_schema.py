@@ -28,59 +28,73 @@ def test_select():
     col1_selection = schema.select(ColumnSelector(["col1"]))
     col2_selection = schema.select(ColumnSelector(["col2"]))
 
-    assert col1_selection.column_schemas == {"col1": col1_schema}
-    assert col2_selection.column_schemas == {"col2": col2_schema}
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
 
     multi_selection = schema.select(ColumnSelector(["col1", "col2"]))
     empty_selection = schema.select(ColumnSelector(["col3"]))
 
-    assert multi_selection.column_schemas == {"col1": col1_schema, "col2": col2_schema}
+    assert multi_selection == Schema([col1_schema, col2_schema])
     assert empty_selection == Schema([])
 
 
 def test_dataset_schema_select_by_name():
     # Shrink this down, so it only tests passing the names and creating a selector
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
 
-    ds_schema = Schema([schema1, schema2])
+    schema = Schema([col1_schema, col2_schema])
 
-    selected_schema1 = ds_schema.select_by_name("col1")
-    selected_schema2 = ds_schema.select_by_name("col2")
+    selected_schema1 = schema.select_by_name("col1")
+    selected_schema2 = schema.select_by_name("col2")
 
-    assert selected_schema1.column_schemas == {"col1": schema1}
-    assert selected_schema2.column_schemas == {"col2": schema2}
+    assert selected_schema1 == Schema([col1_schema])
+    assert selected_schema2 == Schema([col2_schema])
 
-    selected_schema_multi = ds_schema.select_by_name(["col1", "col2"])
+    selected_schema_multi = schema.select_by_name(["col1", "col2"])
 
-    assert selected_schema_multi.column_schemas == {"col1": schema1, "col2": schema2}
+    assert selected_schema_multi == Schema([col1_schema, col2_schema])
 
-    assert ds_schema.select_by_name("col3") == Schema([])
+    assert schema.select_by_name("col3") == Schema([])
 
 
 def test_dataset_schema_select_by_tag():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
 
-    ds_schema = Schema([schema1, schema2])
+    ds_schema = Schema([col1_schema, col2_schema])
 
     selected_schema1 = ds_schema.select_by_tag("a")
     selected_schema2 = ds_schema.select_by_tag("d")
 
-    assert selected_schema1.column_schemas == {"col1": schema1}
-    assert selected_schema2.column_schemas == {"col2": schema2}
+    assert selected_schema1 == Schema([col1_schema])
+    assert selected_schema2 == Schema([col2_schema])
 
     selected_schema_both = ds_schema.select_by_tag("c")
-    selected_schema_neither = ds_schema.select_by_tag("e")
     selected_schema_multi = ds_schema.select_by_tag(["b", "c"])
+    selected_schema_neither = ds_schema.select_by_tag("e")
 
-    assert selected_schema_both.column_schemas == {"col1": schema1, "col2": schema2}
-    assert selected_schema_neither.column_schemas == {}
-    assert selected_schema_multi.column_schemas == {"col1": schema1, "col2": schema2}
+    assert selected_schema_both == Schema([col1_schema, col2_schema])
+    assert selected_schema_multi == Schema([col1_schema, col2_schema])
+    assert selected_schema_neither == Schema([])
 
 
 def test_excluding():
-    pass
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    schema = Schema([col1_schema, col2_schema])
+
+    col1_exclusion = schema.excluding(ColumnSelector(["col1"]))
+    col2_exclusion = schema.excluding(ColumnSelector(["col2"]))
+
+    assert col1_exclusion == Schema([col2_schema])
+    assert col2_exclusion == Schema([col1_schema])
+
+    multi_exclusion = schema.excluding(ColumnSelector(["col1", "col2"]))
+    missing_exclusion = schema.excluding(ColumnSelector(["col3"]))
+
+    assert multi_exclusion == Schema([])
+    assert missing_exclusion == Schema([col1_schema, col2_schema])
 
 
 # def test_excluding_by_name()
