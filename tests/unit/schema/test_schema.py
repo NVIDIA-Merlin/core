@@ -38,7 +38,7 @@ def test_select():
     assert empty_selection == Schema([])
 
 
-def test_dataset_schema_select_by_name():
+def test_schema_select_by_name():
     # Shrink this down, so it only tests passing the names and creating a selector
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
@@ -58,7 +58,7 @@ def test_dataset_schema_select_by_name():
     assert schema.select_by_name("col3") == Schema([])
 
 
-def test_dataset_schema_select_by_tag():
+def test_schema_select_by_tag():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
 
