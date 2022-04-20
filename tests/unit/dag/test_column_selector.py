@@ -225,12 +225,12 @@ def test_filter_group():
 def test_applying_selector_to_schema_selects_by_name():
     schema = Schema(["a", "b", "c", "d", "e"])
     selector = ColumnSelector(["a", "b"])
-    result = schema.apply(selector)
+    result = schema.select(selector)
 
     assert result == Schema(["a", "b"])
 
     selector = None
-    result = schema.apply(selector)
+    result = schema.select(selector)
 
     assert result == schema
 
@@ -241,7 +241,7 @@ def test_applying_selector_to_schema_selects_by_tags():
 
     schema = Schema([schema1, schema2])
     selector = ColumnSelector(tags=["a", "b"])
-    result = schema.apply(selector)
+    result = schema.select(selector)
 
     assert result.column_names == schema.column_names
 
@@ -252,7 +252,7 @@ def test_applying_selector_to_schema_selects_by_name_or_tags():
 
     schema = Schema([schema1, schema2])
     selector = ColumnSelector(["col1"], tags=["a", "b"])
-    result = schema.apply(selector)
+    result = schema.select(selector)
 
     assert result.column_names == schema.column_names
 

@@ -230,7 +230,7 @@ class Schema:
     def column_names(self):
         return list(self.column_schemas.keys())
 
-    def apply(self, selector) -> "Schema":
+    def select(self, selector) -> "Schema":
         """Select matching columns from this Schema object using a ColumnSelector
 
         Parameters
@@ -252,6 +252,9 @@ class Schema:
                 schema += self.select_by_tag(selector.tags)
             return schema
         return self
+
+    def apply(self, selector) -> "Schema":
+        return self.select(selector)
 
     def apply_inverse(self, selector) -> "Schema":
         """Select non-matching columns from this Schema object using a ColumnSelector
