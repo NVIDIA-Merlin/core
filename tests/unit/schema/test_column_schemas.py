@@ -202,8 +202,6 @@ def test_dataset_schema_constructor():
     assert "column_schemas" in str(exception_info.value)
 
 
-
-
 def test_dataset_schemas_can_be_added():
     ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
     ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])

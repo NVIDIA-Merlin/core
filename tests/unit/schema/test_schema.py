@@ -13,15 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
 
-import numpy
-import pytest
-
-from merlin.schema import ColumnSchema, Schema
-from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
-from merlin.schema.tags import Tags, TagSet
 from merlin.dag import ColumnSelector
+from merlin.schema import ColumnSchema, Schema
+
+# from merlin.schema.tags import Tags, TagSet
 
 
 def test_select():
@@ -61,6 +57,7 @@ def test_dataset_schema_select_by_name():
 
     assert ds_schema.select_by_name("col3") == Schema([])
 
+
 def test_dataset_schema_select_by_tag():
     schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
     schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
@@ -84,6 +81,7 @@ def test_dataset_schema_select_by_tag():
 
 def test_excluding():
     pass
+
 
 # def test_excluding_by_name()
 # def test_excluding_by_tag()
