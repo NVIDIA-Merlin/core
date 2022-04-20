@@ -270,9 +270,14 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
-        if selector:
-            return self - self.select_by_name(selector.names)
-        return self
+        schema = self
+        if selector is not None:
+            if selector.names:
+                schema = schema.excluding_by_name(selector.names)
+            if selector.tags:
+                schema = schema.excluding_by_tag(selector.tags)
+
+        return schema
 
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
@@ -302,7 +307,7 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def remove_by_tag(self, tags) -> "Schema":
+    def excluding_by_tag(self, tags) -> "Schema":
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
@@ -313,6 +318,9 @@ class Schema:
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
+
+    def remove_by_tag(self, tags) -> "Schema":
+        return self.excluding_by_tag(tags)
 
     def select_by_name(self, names: List[str]) -> "Schema":
         """Select matching columns from this Schema object using a list of column names
@@ -336,25 +344,7 @@ class Schema:
         }
         return Schema(selected_schemas)
 
-    def remove_col(self, col_name: str) -> "Schema":
-        """Remove a column from this Schema object by name
-
-        Parameters
-        ----------
-        col_name : str
-            Name of the column to remove
-
-        Returns
-        -------
-        Schema
-            This Schema object after the column is removed
-
-        """
-        if col_name in self.column_names:
-            del self.column_schemas[col_name]
-        return self
-
-    def without(self, col_names: List[str]) -> "Schema":
+    def excluding_by_name(self, col_names: List[str]):
         """Remove columns from this Schema object by name
 
         Parameters
@@ -375,6 +365,25 @@ class Schema:
                 if col_name not in col_names
             ]
         )
+
+    def remove_col(self, col_name: str) -> "Schema":
+        """Remove a column from this Schema object by name
+
+        Parameters
+        ----------
+        col_name : str
+            Name of the column to remove
+
+        Returns
+        -------
+        Schema
+            This Schema object after the column is removed
+
+        """
+        return self.excluding_by_name([col_name])
+
+    def without(self, col_names: List[str]) -> "Schema":
+        return self.excluding_by_name(col_names)
 
     def get(self, col_name: str, default: ColumnSchema = None) -> ColumnSchema:
         """Get a ColumnSchema by name
