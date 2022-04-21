@@ -17,8 +17,9 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
+import pandas as pd
 
-from .tags import Tags, TagSet
+from merlin.schema.tags import Tags, TagSet
 
 
 @dataclass(frozen=True)
@@ -34,7 +35,7 @@ class ColumnSchema:
 
     name: Text
     tags: Optional[TagSet] = field(default_factory=TagSet)
-    properties: Optional[Dict[str, any]] = field(default_factory=dict)
+    properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
     is_list: bool = False
     is_ragged: bool = False
@@ -53,6 +54,8 @@ class ColumnSchema:
                 dtype = np.dtype(self.dtype.numpy_dtype)
             elif hasattr(self.dtype, "_categories"):
                 dtype = self.dtype._categories.dtype
+            elif isinstance(self.dtype, pd.StringDtype):
+                dtype = np.dtype("O")
             else:
                 dtype = np.dtype(self.dtype)
         except TypeError as err:
@@ -282,7 +285,7 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: List[Union[str, Tags]]) -> "Schema":
+    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
         """Select matching columns from this Schema object using a list of tags
 
         Parameters
@@ -442,6 +445,23 @@ class Schema:
 
     def __repr__(self):
         return str([col_schema.__dict__ for col_schema in self.column_schemas.values()])
+
+    def _repr_html_(self):
+        # Repr for Jupyter Notebook
+        return self.to_pandas()._repr_html_()
+
+    def to_pandas(self) -> pd.DataFrame:
+        """Convert this Schema object to a pandas DataFrame
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the column schemas in this Schema object
+
+        """
+        props = [c.__dict__ for c in self.column_schemas.values()]
+
+        return pd.json_normalize(props)
 
     def __eq__(self, other):
         if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):

@@ -15,7 +15,7 @@
 #
 # alias submodules here to avoid breaking everything with moving to submodules
 # flake8: noqa
-from .concat_columns import ConcatColumns
-from .selection import SelectionOp
-from .subset_columns import SubsetColumns
-from .subtraction import SubtractionOp
+from merlin.dag.ops.concat_columns import ConcatColumns
+from merlin.dag.ops.selection import SelectionOp
+from merlin.dag.ops.subset_columns import SubsetColumns
+from merlin.dag.ops.subtraction import SubtractionOp

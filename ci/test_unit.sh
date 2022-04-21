@@ -22,5 +22,5 @@ cd /core/
 git pull origin main
 
 # Run tests
-pytest /core/tests/unit
+pytest -rxs /core/tests/unit
 

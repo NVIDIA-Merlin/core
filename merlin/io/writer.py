@@ -28,8 +28,7 @@ import numpy as np
 from fsspec.core import get_fs_token_paths
 
 from merlin.core.dispatch import annotate
-
-from .shuffle import shuffle_df
+from merlin.io.shuffle import shuffle_df
 
 
 class Writer:
@@ -90,7 +89,9 @@ class ThreadedWriter(Writer):
             self.num_out_files = num_out_files
         self.num_samples = [0] * self.num_out_files
 
-        self.data_paths = None
+        self.data_paths = []
+        self.data_writers = []
+
         self.need_cal_col_names = True
         self.use_guid = use_guid
         self.bytes_io = bytes_io

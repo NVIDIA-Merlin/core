@@ -15,8 +15,8 @@
 #
 from fsspec.core import get_fs_token_paths
 
-from .hugectr import HugeCTRWriter
-from .parquet import CPUParquetWriter, GPUParquetWriter
+from merlin.io.hugectr import HugeCTRWriter
+from merlin.io.parquet import CPUParquetWriter, GPUParquetWriter
 
 
 def writer_factory(
