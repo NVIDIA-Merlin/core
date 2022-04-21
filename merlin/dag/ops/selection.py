@@ -83,7 +83,7 @@ class SelectionOp(BaseOperator):
             Schema of selected columns from input, parents, and dependencies
         """
         upstream_schema = root_schema + parents_schema + deps_schema
-        return upstream_schema.apply(self.selector)
+        return upstream_schema.select(self.selector)
 
     def compute_output_schema(
         self,
