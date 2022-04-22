@@ -297,7 +297,7 @@
     <span class="k">def</span> <span class="nf">column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-<div class="viewcode-block" id="Schema.apply"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.select"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Select matching columns from this Schema object using a ColumnSelector</span>
 
 <span class="sd">        Parameters</span>
@@ -320,7 +320,10 @@
             <span class="k">return</span> <span class="n">schema</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Schema.apply_inverse"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.apply_inverse">[docs]</a>    <span class="k">def</span> <span class="nf">apply_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.apply"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.excluding"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.excluding">[docs]</a>    <span class="k">def</span> <span class="nf">excluding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Select non-matching columns from this Schema object using a ColumnSelector</span>
 
 <span class="sd">        Parameters</span>
@@ -334,9 +337,17 @@
 <span class="sd">            New object containing only the ColumnSchemas of selected columns</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">selector</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_by_name</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">selector</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">excluding_by_name</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selector</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">excluding_by_tag</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">schema</span></div>
+
+<div class="viewcode-block" id="Schema.apply_inverse"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.apply_inverse">[docs]</a>    <span class="k">def</span> <span class="nf">apply_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluding</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Schema.select_by_tag"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.select_by_tag">[docs]</a>    <span class="k">def</span> <span class="nf">select_by_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tags</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tags</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Select matching columns from this Schema object using a list of tags</span>
@@ -363,7 +374,7 @@
 
         <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span><span class="n">selected_schemas</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Schema.remove_by_tag"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.remove_by_tag">[docs]</a>    <span class="k">def</span> <span class="nf">remove_by_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tags</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tags</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.excluding_by_tag"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.excluding_by_tag">[docs]</a>    <span class="k">def</span> <span class="nf">excluding_by_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tags</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tags</span><span class="p">]</span>
 
@@ -375,7 +386,10 @@
 
         <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span><span class="n">selected_schemas</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Schema.select_by_name"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.select_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">select_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.remove_by_tag"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.remove_by_tag">[docs]</a>    <span class="k">def</span> <span class="nf">remove_by_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluding_by_tag</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.select_by_name"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.select_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">select_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Select matching columns from this Schema object using a list of column names</span>
 
 <span class="sd">        Parameters</span>
@@ -397,25 +411,7 @@
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span><span class="n">selected_schemas</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Schema.remove_col"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.remove_col">[docs]</a>    <span class="k">def</span> <span class="nf">remove_col</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Remove a column from this Schema object by name</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        col_name : str</span>
-<span class="sd">            Name of the column to remove</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Schema</span>
-<span class="sd">            This Schema object after the column is removed</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_names</span><span class="p">:</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span></div>
-
-<div class="viewcode-block" id="Schema.without"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.without">[docs]</a>    <span class="k">def</span> <span class="nf">without</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.excluding_by_name"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.excluding_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">excluding_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Remove columns from this Schema object by name</span>
 
 <span class="sd">        Parameters</span>
@@ -436,6 +432,25 @@
                 <span class="k">if</span> <span class="n">col_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col_names</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.remove_col"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.remove_col">[docs]</a>    <span class="k">def</span> <span class="nf">remove_col</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Remove a column from this Schema object by name</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col_name : str</span>
+<span class="sd">            Name of the column to remove</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Schema</span>
+<span class="sd">            This Schema object after the column is removed</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluding_by_name</span><span class="p">([</span><span class="n">col_name</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Schema.without"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.without">[docs]</a>    <span class="k">def</span> <span class="nf">without</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluding_by_name</span><span class="p">(</span><span class="n">col_names</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Schema.get"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">ColumnSchema</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnSchema</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get a ColumnSchema by name</span>
