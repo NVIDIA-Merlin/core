@@ -48,6 +48,26 @@ class BaseOperator:
         parents_selector: ColumnSelector,
         dependencies_selector: ColumnSelector,
     ) -> ColumnSelector:
+        """
+        Provides a hook method for sub-classes to override to implement
+        custom column selection logic.
+
+        Parameters
+        ----------
+        input_schema : Schema
+            Schemas of the columns to apply this operator to
+        selector : ColumnSelector
+            Column selector to apply to the input schema
+        parents_selector : ColumnSelector
+            Combined selectors of the upstream parents feeding into this operator
+        dependencies_selector : ColumnSelector
+            Combined selectors of the upstream dependencies feeding into this operator
+
+        Returns
+        -------
+        ColumnSelector
+            Revised column selector to apply to the input schema
+        """
         self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
         return selector
@@ -61,6 +81,7 @@ class BaseOperator:
     ) -> Schema:
         """Given the schemas coming from upstream sources and a column selector for the
         input columns, returns a set of schemas for the input columns this operator will use
+
         Parameters
         -----------
         root_schema: Schema
@@ -71,6 +92,7 @@ class BaseOperator:
             The combined schemas of the upstream dependencies feeding into this operator
         col_selector: ColumnSelector
             The column selector to apply to the input schema
+
         Returns
         -------
         Schema
@@ -88,14 +110,17 @@ class BaseOperator:
         col_selector: ColumnSelector,
         prev_output_schema: Schema = None,
     ) -> Schema:
-        """Given a set of schemas and a column selector for the input columns,
+        """
+        Given a set of schemas and a column selector for the input columns,
         returns a set of schemas for the transformed columns this operator will produce
+
         Parameters
         -----------
         input_schema: Schema
             The schemas of the columns to apply this operator to
         col_selector: ColumnSelector
             The column selector to apply to the input schema
+
         Returns
         -------
         Schema
@@ -130,6 +155,34 @@ class BaseOperator:
                 output_schema.column_schemas[col_name] = col_schema.with_dtype(dtype)
 
         return output_schema
+
+    def validate_schemas(
+        self,
+        parents_schema: Schema,
+        deps_schema: Schema,
+        input_schema: Schema,
+        output_schema: Schema,
+        strict_dtypes: bool = False,
+    ):
+        """
+        Provides a hook method that sub-classes can override to implement schema validation logic.
+
+        Sub-class implementations should raise an exception if the schemas are not valid for the
+        operations they implement.
+
+        Parameters
+        ----------
+        parents_schema : Schema
+            The combined schemas of the upstream parents feeding into this operator
+        deps_schema : Schema
+            The combined schemas of the upstream dependencies feeding into this operator
+        input_schema : Schema
+            The schemas of the columns to apply this operator to
+        output_schema : Schema
+            The schemas of the columns produced by this operator
+        strict_dtypes : Boolean, optional
+            Enables strict checking for column dtype matching if True, by default False
+        """
 
     def column_mapping(self, col_selector):
         column_mapping = {}
@@ -207,10 +260,12 @@ class BaseOperator:
     def output_column_names(self, col_selector: ColumnSelector) -> ColumnSelector:
         """Given a set of columns names returns the names of the transformed columns this
         operator will produce
+
         Parameters
         -----------
         columns: list of str, or list of list of str
             The columns to apply this operator to
+
         Returns
         -------
         list of str, or list of list of str
@@ -222,6 +277,7 @@ class BaseOperator:
     def dependencies(self) -> List[Union[str, Any]]:
         """Defines an optional list of column dependencies for this operator. This lets you consume columns
         that aren't part of the main transformation workflow.
+
         Returns
         -------
         str, list of str or ColumnSelector, optional
