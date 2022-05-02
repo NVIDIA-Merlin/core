@@ -10,14 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import errno
 import os
-import shutil
 import subprocess
 import sys
 
 from natsort import natsorted
-from recommonmark.parser import CommonMarkParser
 
 sys.path.insert(0, os.path.abspath("../../"))
 
@@ -37,9 +34,10 @@ author = "NVIDIA"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "myst_nb",
     "sphinx_multiversion",
+    "sphinx_external_toc",
     "sphinx_rtd_theme",
-    "recommonmark",
     "sphinx_markdown_tables",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
@@ -47,8 +45,21 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinxcontrib.copydirs",
 ]
 
+# MyST configuration settings
+external_toc_path = "toc.yaml"
+myst_enable_extensions = [
+    "deflist",
+    "html_image",
+    "linkify",
+    "replacements",
+    "tasklist",
+]
+myst_linkify_fuzzy_links = False
+myst_heading_anchors = 3
+jupyter_execute_notebooks = "off"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -56,8 +67,12 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = [
+    "generated",
+]
 
+# The API documents are RST and include `.. toctree::` directives.
+suppress_warnings = ["etoc.toctree"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -65,14 +80,15 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    "navigation_depth": 2,
+}
+html_show_sourcelink = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-source_parsers = {".md": CommonMarkParser}
-source_suffix = [".rst", ".md"]
 
 if os.path.exists(gitdir):
     tag_refs = subprocess.check_output(["git", "tag", "-l", "v*"]).decode("utf-8").split()
@@ -83,6 +99,9 @@ else:
 
 smv_branch_whitelist = r"^main$"
 
+smv_refs_override_suffix = "-docs"
+
+html_sidebars = {"**": ["versions.html"]}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
@@ -100,38 +119,9 @@ autodoc_default_options = {
 
 autosummary_generate = True
 
-
-def copy_files(src: str):
-    """
-    src_dir: A path, specified as relative to the
-             docs/source directory in the repository.
-             The source can be a directory or a file.
-             Sphinx considers all directories as relative
-             to the docs/source directory.
-
-             TIP: Add these paths to the .gitignore file.
-    """
-    src_path = os.path.abspath(src)
-    if not os.path.exists(src_path):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), src_path)
-    out_path = os.path.basename(src_path)
-    out_path = os.path.abspath("{}/".format(out_path))
-
-    print(
-        r"Copying source documentation from: {}".format(src_path),
-        file=sys.stderr,
-    )
-    print(r"  ...to destination: {}".format(out_path), file=sys.stderr)
-
-    if os.path.exists(out_path) and os.path.isdir(out_path):
-        shutil.rmtree(out_path, ignore_errors=True)
-    if os.path.exists(out_path) and os.path.isfile(out_path):
-        os.unlink(out_path)
-
-    if os.path.isdir(src_path):
-        shutil.copytree(src_path, out_path)
-    else:
-        shutil.copyfile(src_path, out_path)
-
-
-copy_files(r"../../README.md")
+copydirs_additional_dirs = [
+    "../../README.md",
+]
+copydirs_file_rename = {
+    "README.md": "index.md",
+}
