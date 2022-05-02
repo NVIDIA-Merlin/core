@@ -322,7 +322,7 @@ class Dataset:
                     raise ValueError("Only parquet, csv, and avro supported (for now).")
             else:
                 self.engine = engine(
-                    paths, part_size, cpu=self.cpu, storage_options=storage_options
+                    paths, part_size, cpu=self.cpu, storage_options=storage_options, **kwargs
                 )
 
         # load in schema or infer if not available
@@ -367,10 +367,17 @@ class Dataset:
             `random` std library.
         """
         # Use DatasetEngine to create ddf
-        ddf = self.engine.to_ddf(columns=columns)
+        try:
+            # Check if the engine supports shuffle=
+            ddf = self.engine.to_ddf(columns=columns, shuffle=shuffle)
+            manual_shuffle = False
+        except TypeError:
+            ddf = self.engine.to_ddf(columns=columns)
+            manual_shuffle = shuffle
 
         # Shuffle the partitions of ddf (optional)
-        if shuffle and ddf.npartitions > 1:
+        # if engine does not support internal shuffling
+        if manual_shuffle and ddf.npartitions > 1:
             # Start with ordered partitions
             inds = list(range(ddf.npartitions))
 
@@ -627,10 +634,15 @@ class Dataset:
         if isinstance(columns, str):
             columns = [columns]
 
+        # Start with ddf and check if we can use file metadata
+        # after a shuffle (only allowed for BalancedParquetEngine)
+        _ddf = self.to_ddf(columns=columns, shuffle=shuffle, seed=seed)
+        meta_after_shuffle = hasattr(self.engine, "_generate_tasks")
+
         # Try to extract the row-size metadata
         # if we are not shuffling
         partition_lens_meta = None
-        if not shuffle and use_file_metadata is not False:
+        if (meta_after_shuffle or not shuffle) and use_file_metadata is not False:
             # We are allowed to use file metadata to calculate
             # partition sizes.  If `use_file_metadata` is None,
             # we only use metadata if `self` is backed by a
@@ -646,7 +658,7 @@ class Dataset:
                 pass
 
         return DataFrameIter(
-            self.to_ddf(columns=columns, shuffle=shuffle, seed=seed),
+            _ddf,
             indices=indices,
             partition_lens=partition_lens_meta,
             epochs=epochs,
