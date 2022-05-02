@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Merlin Core &mdash; Merlin Core  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -12,6 +14,11 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -34,14 +41,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#installing-merlin-core-using-pip">Installing Merlin Core Using Pip</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#installing-merlin-core-using-conda">Installing Merlin Core Using Conda</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#running-merlin-core-with-docker">Running Merlin Core with Docker</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#feedback-and-support">Feedback and Support</a></li>
 </ul>
 </li>
@@ -64,7 +67,6 @@
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>Merlin Core</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/README.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -72,7 +74,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="merlin-core">
+  <div class="tex2jax_ignore mathjax_ignore section" id="merlin-core">
 <h1><a class="reference external" href="https://github.com/NVIDIA-Merlin/core">Merlin Core</a><a class="headerlink" href="#merlin-core" title="Permalink to this headline"></a></h1>
 <p><a class="reference external" href="https://pypi.python.org/pypi/merlin-core/"><img alt="PyPI" src="https://img.shields.io/pypi/v/merlin-core?color=orange&amp;label=version" /></a>
 <a class="reference external" href="https://github.com/NVIDIA-Merlin/merlin-core/blob/main/LICENSE"><img alt="LICENSE" src="https://img.shields.io/github/license/NVIDIA-Merlin/core" /></a>
