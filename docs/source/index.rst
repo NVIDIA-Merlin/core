@@ -3,16 +3,24 @@ Merlin Core
 
 The Merlin Core library provides the core utilities and classes for the NVIDIA Merlin project.
 
-.. toctree::
-   :maxdepth: 2
+To learn more, start with the `Introduction <README.html>`_.
 
-   Introduction <README>
-   API Documentation  <api/index>
+Related Resources
+-----------------
 
+Merlin Core GitHub Repository
+  `<https://github.com/NVIDIA-Merlin/core>`_
 
-Indices and tables
-==================
+About Merlin
+  Merlin is the overarching project that brings together the Merlin projects.
+  See the `documentation <https://nvidia-merlin.github.io/Merlin/main/README.html>`_
+  or the `repository <https://github.com/NVIDIA-Merlin/Merlin>`_ on GitHub.
+
+Developer website for Merlin
+  More information about Merlin is available at our developer website:
+  `<https://developer.nvidia.com/nvidia-merlin>`_.
+
+Index
+-----
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
