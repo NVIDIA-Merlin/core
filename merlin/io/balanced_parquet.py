@@ -245,6 +245,7 @@ class BalancedParquetEngine(DatasetEngine):
         storage_options,
         rows_per_partition=None,
         batch_size=None,
+        num_workers=None,
         cpu=False,
         dataset_options=None,
         drop_residual=True,
@@ -259,6 +260,7 @@ class BalancedParquetEngine(DatasetEngine):
         self.drop_residual = drop_residual
         self.read_parquet_kwargs = kwargs.copy()
         self.dataset_options = dataset_options or {}
+        self.npartitions = None
 
         if self.rows_per_partition is None:
             self._real_meta, rg_byte_size_0 = run_on_worker(
@@ -272,12 +274,69 @@ class BalancedParquetEngine(DatasetEngine):
             row_groups_per_part = self.part_size / rg_byte_size_0
             rows_per_part = int(self._size0 * row_groups_per_part)
 
-            # Align partition with batch size if one was specified
-            if batch_size and rows_per_part < batch_size:
-                rows_per_part = batch_size
-            elif batch_size:
-                nbatches = rows_per_part // batch_size
-                rows_per_part = batch_size * nbatches
+            # At this point, we have an upper limit on how large
+            # each partition should be. We now need to consider:
+            # (1) How many workers to balance the partitions across
+            # (2) What batch size to align with
+
+            if num_workers:
+
+                if not self.drop_residual:
+                    raise ValueError(
+                        "Can not honor drop_residual=True when `num_workers` is specified."
+                    )
+
+                # Generate initial tasks so that we can use the
+                # metadata to find the total length of the dataset
+                self.rows_per_partition = int(rows_per_part)
+                self.generate_tasks()
+                global_row_count = sum(self._pp_nrows)
+
+                # Find the maximum row count per partition required
+                # to be divisible by `num_workers`
+                worker_row_count = global_row_count // num_workers
+                max_rows_per_part = min(worker_row_count, rows_per_part)
+
+                if batch_size:
+
+                    # Simple round-robin mapping of batches to workers
+                    batches_per_worker = 0
+                    for row in range(0, global_row_count, batch_size * num_workers):
+                        if row + batch_size * num_workers < global_row_count:
+                            batches_per_worker += 1
+                    if batches_per_worker < 1:
+                        raise ValueError(
+                            f"Could not honor num_workers={num_workers} and "
+                            f"batch_size={batch_size} for this dataset!"
+                        )
+
+                    # Try to divide per-worker load into partitions
+                    batches_per_partition = 1
+                    for i in range(1, batches_per_worker):
+                        if (i + 1) * batch_size <= max_rows_per_part and batches_per_worker % (
+                            i + 1
+                        ) == 0:
+                            batches_per_partition = i + 1
+
+                    # Set final `rows_per_part` and `npartitions`
+                    rows_per_part = batches_per_partition * batch_size
+                    self.npartitions = (batches_per_worker // batches_per_partition) * num_workers
+
+                else:
+
+                    # Simple division of worker worker_row_count by max_rows_per_part
+                    parts_per_worker = worker_row_count // max_rows_per_part
+                    rows_per_part = worker_row_count // parts_per_worker
+                    self.npartitions = global_row_count // rows_per_part
+
+            else:
+
+                # Align partition with batch size if one was specified
+                if batch_size and rows_per_part < batch_size:
+                    rows_per_part = batch_size
+                elif batch_size:
+                    nbatches = rows_per_part // batch_size
+                    rows_per_part = batch_size * nbatches
 
         self.rows_per_partition = int(rows_per_part)
 
@@ -289,6 +348,9 @@ class BalancedParquetEngine(DatasetEngine):
             shuffle=shuffle,
             drop_residual=self.drop_residual,
         )
+        if self.npartitions:
+            tasks = tasks[: self.npartitions]
+
         self._pp_nrows = [task[-1] - task[-2] for task in tasks]
         return tasks
 

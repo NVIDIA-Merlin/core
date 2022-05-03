@@ -866,3 +866,42 @@ def test_balanced_parquet(tmpdir, cpu):
     iter_sizes = set(len(part) for part in ds.to_iter(shuffle=True))
     assert len(iter_sizes) == 1
     assert iter_sizes.pop() % batch_size == 0
+
+    # Check that we can specify a worker-count to balance over
+    # (with a specific `batch_size`)
+    batch_size = 32
+    num_workers = 3
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        num_workers=num_workers,
+        batch_size=batch_size,
+    )
+
+    # The partition sizes should now be aligned with `batch_size`
+    # and should be divisible by `num_workers`
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert iter_sizes.pop() % batch_size == 0
+    assert ds.to_ddf().npartitions % num_workers == 0
+
+    # Check that we can specify a worker-count to balance over
+    # (without a specific `batch_size`)
+    batch_size = 32
+    num_workers = 3
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        num_workers=num_workers,
+    )
+
+    # The partition sizes should be divisible by `num_workers`
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert ds.to_ddf().npartitions % num_workers == 0
