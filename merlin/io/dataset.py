@@ -33,6 +33,7 @@ from fsspec.utils import stringify_path
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.io.balanced_parquet import BalancedParquetEngine
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -201,6 +202,10 @@ class Dataset:
     schema : Schema
         Optional argument, to support custom user defined Schemas.
         This overrides the derived schema behavior.
+    balance_partitions : bool, default False
+        Whether all partitions in the underlying dask.dataframe
+        collection should have an identical row count. This option
+        is only supported by the "parquet" engine.
     **kwargs :
         Key-word arguments to pass through to Dask.dataframe IO function.
         For the Parquet engine(s), notable arguments include `filters`,
@@ -223,6 +228,7 @@ class Dataset:
         cpu=None,
         base_dataset=None,
         schema=None,
+        balance_partitions=False,
         **kwargs,
     ):
         if schema is not None and not isinstance(schema, Schema):
@@ -298,11 +304,39 @@ class Dataset:
             # If engine is not provided, try to infer from end of paths[0]
             if engine is None:
                 engine = paths[0].split(".")[-1]
+
+            # Check if balance_partitions is supported
+            # for the active engine
+            if balance_partitions and engine not in (
+                "parquet",
+                ParquetDatasetEngine,
+                BalancedParquetEngine,
+            ):
+                raise ValueError(f"balance_partitions not supported for engine={engine}")
+            elif balance_partitions:
+                warnings.warn(
+                    "The BalancedParquetEngine is experimental. Stability"
+                    "is not yet guaranteed, but feedback is welcome!"
+                )
+
             if isinstance(engine, str):
                 if engine == "parquet":
-                    self.engine = ParquetDatasetEngine(
-                        paths, part_size, storage_options=storage_options, cpu=self.cpu, **kwargs
-                    )
+                    if balance_partitions:
+                        self.engine = BalancedParquetEngine(
+                            paths,
+                            part_size,
+                            storage_options=storage_options,
+                            cpu=self.cpu,
+                            **kwargs,
+                        )
+                    else:
+                        self.engine = ParquetDatasetEngine(
+                            paths,
+                            part_size,
+                            storage_options=storage_options,
+                            cpu=self.cpu,
+                            **kwargs,
+                        )
                 elif engine == "csv":
                     self.engine = CSVDatasetEngine(
                         paths, part_size, storage_options=storage_options, cpu=self.cpu, **kwargs
@@ -322,7 +356,7 @@ class Dataset:
                     raise ValueError("Only parquet, csv, and avro supported (for now).")
             else:
                 self.engine = engine(
-                    paths, part_size, cpu=self.cpu, storage_options=storage_options
+                    paths, part_size, cpu=self.cpu, storage_options=storage_options, **kwargs
                 )
 
         # load in schema or infer if not available
@@ -367,10 +401,17 @@ class Dataset:
             `random` std library.
         """
         # Use DatasetEngine to create ddf
-        ddf = self.engine.to_ddf(columns=columns)
+        try:
+            # Check if the engine supports shuffle=
+            ddf = self.engine.to_ddf(columns=columns, shuffle=shuffle)
+            manual_shuffle = False
+        except TypeError:
+            ddf = self.engine.to_ddf(columns=columns)
+            manual_shuffle = shuffle
 
         # Shuffle the partitions of ddf (optional)
-        if shuffle and ddf.npartitions > 1:
+        # if engine does not support internal shuffling
+        if manual_shuffle and ddf.npartitions > 1:
             # Start with ordered partitions
             inds = list(range(ddf.npartitions))
 
@@ -627,10 +668,15 @@ class Dataset:
         if isinstance(columns, str):
             columns = [columns]
 
+        # Start with ddf and check if we can use file metadata
+        # after a shuffle (only allowed for BalancedParquetEngine)
+        _ddf = self.to_ddf(columns=columns, shuffle=shuffle, seed=seed)
+        meta_after_shuffle = hasattr(self.engine, "_generate_tasks")
+
         # Try to extract the row-size metadata
         # if we are not shuffling
         partition_lens_meta = None
-        if not shuffle and use_file_metadata is not False:
+        if (meta_after_shuffle or not shuffle) and use_file_metadata is not False:
             # We are allowed to use file metadata to calculate
             # partition sizes.  If `use_file_metadata` is None,
             # we only use metadata if `self` is backed by a
@@ -646,7 +692,7 @@ class Dataset:
                 pass
 
         return DataFrameIter(
-            self.to_ddf(columns=columns, shuffle=shuffle, seed=seed),
+            _ddf,
             indices=indices,
             partition_lens=partition_lens_meta,
             epochs=epochs,

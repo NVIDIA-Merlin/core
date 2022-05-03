@@ -48,7 +48,7 @@ def test_validate_dataset_bad_schema(tmpdir):
         ("part.0.parquet", pd.DataFrame({"a": range(10), "b": range(10)})),
         ("part.1.parquet", pd.DataFrame({"a": [None] * 10, "b": range(10)})),
     ]:
-        df.to_parquet(os.path.join(path, fn))
+        df.to_parquet(os.path.join(path, fn), engine="pyarrow")
 
     # Initial dataset has mismatched schema and is missing a _metadata file.
     dataset = merlin.io.Dataset(path, engine="parquet")
@@ -562,7 +562,7 @@ def test_parquet_iterator_len(tmpdir, shuffle, use_file_metadata):
     ).shuffle("id")
 
     # Write to parquet dataset
-    ddf1.to_parquet(str(tmpdir))
+    ddf1.to_parquet(str(tmpdir), write_metadata_file=True, engine="pyarrow")
 
     # Initialize Dataset
     ds = merlin.io.Dataset(str(tmpdir), engine="parquet")
@@ -663,7 +663,9 @@ def test_dataset_shuffle_on_keys(tmpdir, cpu, partition_on, keys, npartitions):
 
     # Write the dataset to disk
     path = str(tmpdir)
-    ddf1.to_parquet(str(tmpdir), partition_on=partition_on)
+    ddf1.to_parquet(
+        str(tmpdir), partition_on=partition_on, write_metadata_file=True, engine="pyarrow"
+    )
 
     # Construct NVT Dataset
     ds = merlin.io.Dataset(path, engine="parquet")
@@ -728,7 +730,7 @@ def test_parquet_filtered_hive(tmpdir, cpu):
         seed=42,
     ).reset_index()
     ddf["timestamp"] = ddf["timestamp"].dt.round("D").dt.day
-    ddf.to_parquet(path, partition_on=["timestamp"], engine="pyarrow")
+    ddf.to_parquet(path, partition_on=["timestamp"], engine="pyarrow", write_metadata_file=True)
 
     # Convert to merlin.io.Dataset
     ds = merlin.io.Dataset(path, cpu=cpu, engine="parquet", filters=[("timestamp", "==", 1)])
@@ -755,7 +757,7 @@ def test_parquet_aggregate_files(tmpdir, cpu):
         seed=42,
     ).reset_index()
     ddf["timestamp"] = ddf["timestamp"].dt.round("D").dt.day
-    ddf.to_parquet(path, partition_on=["timestamp"], engine="pyarrow")
+    ddf.to_parquet(path, partition_on=["timestamp"], engine="pyarrow", write_metadata_file=True)
 
     # Setting `aggregate_files=True` should result
     # in one large partition
@@ -780,3 +782,126 @@ def test_parquet_aggregate_files(tmpdir, cpu):
     )
     assert ds.to_ddf().npartitions == 1
     assert len(ds.to_ddf().timestamp.unique()) == 1
+
+
+@pytest.mark.parametrize("cpu", [True, False])
+def test_balanced_parquet(tmpdir, cpu):
+
+    path = str(tmpdir)
+    ddf1 = dask.datasets.timeseries(
+        start="2000-01-01",
+        end="2000-01-6",
+        freq="600s",
+        partition_freq="1d",
+        id_lam=10,
+        seed=42,
+    )
+    ddf1.to_parquet(path, engine="pyarrow")
+
+    # Default Dataset with desired `part_size`
+    ds_default = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=False,
+        part_size="10KB",
+    )
+
+    # Simple "balanced parquet" engine
+    # with desired `part_size` specified
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+    )
+
+    # All partition sizes should be the same size
+    ddf_sizes = set(len(part) for part in ds.to_ddf().partitions)
+    assert len(ddf_sizes) == 1
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert iter_sizes == ddf_sizes
+
+    # Simple "balanced parquet" engine
+    # with desired `part_size` specified,
+    # and without dropping "residual" rows
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        drop_residual=False,
+    )
+
+    # Computed ddf should be the same as the
+    # `balance_partitions=False` case
+    assert_eq(
+        ds.to_ddf().compute(),
+        ds_default.to_ddf().compute(),
+        check_index=False,
+    )
+
+    # Using "balanced parquet" engine with
+    # `batch_size` should align the partition
+    # sizes with this "minimum size"
+    batch_size = 128
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        batch_size=batch_size,
+    )
+
+    # The partition sizes should now be aligned with `batch_size`
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert iter_sizes.pop() % batch_size == 0
+
+    # This is still true after shuffling
+    iter_sizes = set(len(part) for part in ds.to_iter(shuffle=True))
+    assert len(iter_sizes) == 1
+    assert iter_sizes.pop() % batch_size == 0
+
+    # Check that we can specify a worker-count to balance over
+    # (with a specific `batch_size`)
+    batch_size = 32
+    num_workers = 3
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        num_workers=num_workers,
+        batch_size=batch_size,
+    )
+
+    # The partition sizes should now be aligned with `batch_size`
+    # and should be divisible by `num_workers`
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert iter_sizes.pop() % batch_size == 0
+    assert ds.to_ddf().npartitions % num_workers == 0
+
+    # Check that we can specify a worker-count to balance over
+    # (without a specific `batch_size`)
+    batch_size = 32
+    num_workers = 3
+    ds = merlin.io.Dataset(
+        path,
+        cpu=cpu,
+        engine="parquet",
+        balance_partitions=True,
+        part_size="10KB",
+        num_workers=num_workers,
+    )
+
+    # The partition sizes should be divisible by `num_workers`
+    iter_sizes = set(len(part) for part in ds.to_iter())
+    assert len(iter_sizes) == 1
+    assert ds.to_ddf().npartitions % num_workers == 0

@@ -63,4 +63,8 @@ def shuffle_df(df, size=None, keep_index=False):
                 return df.sample(n=size)
             return df.sample(n=size).reset_index(drop=True)
     else:
-        return df.sample(n=size, keep_index=keep_index)
+        try:
+            return df.sample(n=size, keep_index=keep_index)
+        except TypeError:
+            # keep_index was changed to ignore_index in cudf-22.04
+            return df.sample(n=size, ignore_index=not keep_index)
