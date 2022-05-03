@@ -313,6 +313,11 @@ class Dataset:
                 BalancedParquetEngine,
             ):
                 raise ValueError(f"balance_partitions not supported for engine={engine}")
+            elif balance_partitions:
+                warnings.warn(
+                    "The BalancedParquetEngine is experimental. Stability"
+                    "is not yet guaranteed, but feedback is welcome!"
+                )
 
             if isinstance(engine, str):
                 if engine == "parquet":
