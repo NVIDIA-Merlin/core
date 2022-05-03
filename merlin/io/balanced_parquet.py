@@ -178,7 +178,7 @@ class _PartitionReader:
                 for path, row_groups in zip(paths, groups):
                     rgs = row_groups if isinstance(row_groups, list) else [row_groups]
                     with fsspec_parquet.open_parquet_file(
-                        path, columns=self.columns, row_groups=rgs
+                        path, fs=self.fs, columns=self.columns, row_groups=rgs, engine="pyarrow"
                     ) as fil:
                         dfs.append(
                             cudf.read_parquet(
@@ -195,7 +195,7 @@ class _PartitionReader:
             for path, row_groups in zip(paths, groups):
                 rgs = row_groups if isinstance(row_groups, list) else [row_groups]
                 with fsspec_parquet.open_parquet_file(
-                    path, columns=self.columns, row_groups=rgs
+                    path, fs=self.fs, columns=self.columns, row_groups=rgs, engine="pyarrow"
                 ) as fil:
                     tables.append(
                         pq.ParquetFile(fil).read_row_groups(
