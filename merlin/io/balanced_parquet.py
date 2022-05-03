@@ -140,7 +140,7 @@ class DatasetInfo:
                 read_tasks.append(_ReadTask(task_size))
                 residual_read = read_tasks[-1].add_read(*residual_read)
 
-        if drop_residual and read_tasks[-1].size < task_size:
+        if drop_residual and len(read_tasks) > 1 and read_tasks[-1].size < task_size:
             read_tasks.pop(-1)
 
         return [read_task.to_tuple() for read_task in read_tasks]
@@ -211,6 +211,25 @@ class _PartitionReader:
                     )
             df = pa.concat_tables(tables).to_pandas().iloc[global_start:global_stop]
 
+            # NVTabular does NOT currently support nullable pandas dtypes.
+            # Convert everything to non-nullable dtypes instead:
+            # (TODO: Fix issues in Merlin/NVTabular for nullable dtypes)
+            for k, v in df.dtypes.items():
+                type_name = str(v)
+                if type_name.startswith("Int"):
+                    df[k] = df[k].astype(type_name.replace("Int", "int"))
+                elif type_name.startswith("Float"):
+                    df[k] = df[k].astype(type_name.replace("Float", "float"))
+                elif type_name.startswith("string"):
+                    # Converts pd.StringDtype to "Object"
+                    df[k] = df[k].astype("O")
+
+        if df.index.name:
+            df.reset_index(inplace=True)
+
+        if self.columns is not None:
+            df = df[self.columns]
+
         if shuffle:
             return shuffle_df(df)
         return df
@@ -251,10 +270,12 @@ class BalancedParquetEngine(DatasetEngine):
                 **self.read_parquet_kwargs,
             )
             row_groups_per_part = self.part_size / rg_byte_size_0
-            rows_per_part = self._size0 * int(row_groups_per_part)
+            rows_per_part = int(self._size0 * row_groups_per_part)
 
             # Align partition with batch size if one was specified
-            if batch_size:
+            if batch_size and rows_per_part < batch_size:
+                rows_per_part = batch_size
+            elif batch_size:
                 nbatches = rows_per_part // batch_size
                 rows_per_part = batch_size * nbatches
 
