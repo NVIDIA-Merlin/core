@@ -1,8 +1,10 @@
 import functools
 
 import dask.dataframe as dd
+import fsspec.parquet as fsspec_parquet
 import pyarrow as pa
 import pyarrow.dataset as pa_ds
+import pyarrow.parquet as pq
 from dask.utils import natural_sort_key
 
 from merlin.core.utils import run_on_worker
@@ -146,7 +148,8 @@ class DatasetInfo:
 
 
 class _PartitionReader:
-    def __init__(self, cpu=True, **dataset_options):
+    def __init__(self, fs, cpu=True, **dataset_options):
+        self.fs = fs
         self.cpu = cpu
         self.dataset_options = dataset_options
         self._columns = None
@@ -165,28 +168,45 @@ class _PartitionReader:
         if not self.cpu:
             import cudf
 
-            df = cudf.read_parquet(paths, index=False, row_groups=groups, **read_kwargs).iloc[
-                global_start:global_stop
-            ]
+            if cudf.utils.ioutils._is_local_filesystem(self.fs):
+                df = cudf.read_parquet(paths, index=False, row_groups=groups, **read_kwargs).iloc[
+                    global_start:global_stop
+                ]
+            else:
+                # TODO: Can we do this faster?
+                dfs = []
+                for path, row_groups in zip(paths, groups):
+                    rgs = row_groups if isinstance(row_groups, list) else [row_groups]
+                    with fsspec_parquet.open_parquet_file(
+                        path, columns=self.columns, row_groups=rgs
+                    ) as fil:
+                        dfs.append(
+                            cudf.read_parquet(
+                                fil, columns=self.columns, row_groups=rgs, **read_kwargs
+                            )
+                        )
+                df = cudf.concat(dfs).iloc[global_start:global_stop]
         else:
-            import pyarrow.parquet as pq
-
             tables = []
             if not isinstance(paths, list):
                 paths = [paths]
             if not isinstance(groups, list):
                 groups = [groups]
             for path, row_groups in zip(paths, groups):
-                tables.append(
-                    pq.ParquetFile(path).read_row_groups(
-                        row_groups if isinstance(row_groups, list) else [row_groups],
-                        columns=self.columns,
-                        use_threads=False,
-                        use_pandas_metadata=False,
-                        **read_kwargs,
+                rgs = row_groups if isinstance(row_groups, list) else [row_groups]
+                with fsspec_parquet.open_parquet_file(
+                    path, columns=self.columns, row_groups=rgs
+                ) as fil:
+                    tables.append(
+                        pq.ParquetFile(fil).read_row_groups(
+                            rgs,
+                            columns=self.columns,
+                            use_threads=False,
+                            use_pandas_metadata=False,
+                            **read_kwargs,
+                        )
                     )
-                )
-            df = pa.concat_tables(tables).to_pandas()
+            df = pa.concat_tables(tables).to_pandas().iloc[global_start:global_stop]
 
         if shuffle:
             return shuffle_df(df)
@@ -291,7 +311,7 @@ class BalancedParquetEngine(DatasetEngine):
         tasks = self.generate_tasks(shuffle)
 
         # Return a DataFrame collection
-        func = _PartitionReader(cpu=cpu)
+        func = _PartitionReader(self.fs, cpu=cpu)
         return dd.from_map(
             func,
             tasks,
