@@ -1,10 +1,13 @@
 import functools
 
-import dask.dataframe as dd
 import fsspec.parquet as fsspec_parquet
 import pyarrow as pa
 import pyarrow.dataset as pa_ds
 import pyarrow.parquet as pq
+from dask.base import tokenize
+from dask.dataframe.core import new_dd_object
+from dask.highlevelgraph import HighLevelGraph
+from dask.layers import DataFrameIOLayer
 from dask.utils import natural_sort_key
 
 from merlin.core.utils import run_on_worker
@@ -318,12 +321,24 @@ class BalancedParquetEngine(DatasetEngine):
 
         # Return a DataFrame collection
         func = _PartitionReader(self.fs, cpu=cpu)
-        return dd.from_map(
-            func,
+
+        # TODO: Use `from_map` to replace all the code
+        # below (once it is available/established upstream)
+
+        # Construct DataFrameIOLayer
+        name = "balanced-parquet-" + tokenize(func, tasks)
+        layer = DataFrameIOLayer(
+            name,
+            func.columns,
             tasks,
-            meta=self.sample_data(),
-            enforce_metadata=False,
+            func,
         )
+
+        # Return new DataFrame-collection object
+        divisions = [None] * (len(tasks) + 1)
+        meta = self.sample_data()
+        graph = HighLevelGraph.from_collections(name, layer, dependencies=[])
+        return new_dd_object(graph, name, meta, divisions)
 
     def to_cpu(self):
         self.cpu = True
