@@ -33,6 +33,7 @@ from fsspec.utils import stringify_path
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.io.balanced_parquet import BalancedParquetEngine
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -201,6 +202,10 @@ class Dataset:
     schema : Schema
         Optional argument, to support custom user defined Schemas.
         This overrides the derived schema behavior.
+    balance_partitions : bool, default False
+        Whether all partitions in the underlying dask.dataframe
+        collection should have an identical row count. This option
+        is only supported by the "parquet" engine.
     **kwargs :
         Key-word arguments to pass through to Dask.dataframe IO function.
         For the Parquet engine(s), notable arguments include `filters`,
@@ -223,6 +228,7 @@ class Dataset:
         cpu=None,
         base_dataset=None,
         schema=None,
+        balance_partitions=False,
         **kwargs,
     ):
         if schema is not None and not isinstance(schema, Schema):
@@ -298,11 +304,34 @@ class Dataset:
             # If engine is not provided, try to infer from end of paths[0]
             if engine is None:
                 engine = paths[0].split(".")[-1]
+
+            # Check if balance_partitions is supported
+            # for the active engine
+            if balance_partitions and engine not in (
+                "parquet",
+                ParquetDatasetEngine,
+                BalancedParquetEngine,
+            ):
+                raise ValueError(f"balance_partitions not supported for engine={engine}")
+
             if isinstance(engine, str):
                 if engine == "parquet":
-                    self.engine = ParquetDatasetEngine(
-                        paths, part_size, storage_options=storage_options, cpu=self.cpu, **kwargs
-                    )
+                    if balance_partitions:
+                        self.engine = BalancedParquetEngine(
+                            paths,
+                            part_size,
+                            storage_options=storage_options,
+                            cpu=self.cpu,
+                            **kwargs,
+                        )
+                    else:
+                        self.engine = ParquetDatasetEngine(
+                            paths,
+                            part_size,
+                            storage_options=storage_options,
+                            cpu=self.cpu,
+                            **kwargs,
+                        )
                 elif engine == "csv":
                     self.engine = CSVDatasetEngine(
                         paths, part_size, storage_options=storage_options, cpu=self.cpu, **kwargs

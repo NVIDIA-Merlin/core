@@ -249,6 +249,12 @@ class BalancedParquetEngine(DatasetEngine):
             )
             row_groups_per_part = self.part_size / rg_byte_size_0
             rows_per_part = self._size0 * int(row_groups_per_part)
+
+            # Align partition with batch size if one was specified
+            if batch_size:
+                nbatches = rows_per_part // batch_size
+                rows_per_part = batch_size * nbatches
+
         self.rows_per_partition = int(rows_per_part)
 
         assert self.rows_per_partition > 0
