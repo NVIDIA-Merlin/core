@@ -33,15 +33,14 @@ from fsspec.utils import stringify_path
 import merlin.core.dispatch as dispatch
 from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.io.csv import CSVDatasetEngine
+from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
+from merlin.io.dataframe_engine import DataFrameDatasetEngine
 from merlin.io.dataframe_iter import DataFrameIter
+from merlin.io.parquet import ParquetDatasetEngine
 from merlin.io.shuffle import _check_shuffle_arg
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
-
-from .csv import CSVDatasetEngine
-from .dask import _ddf_to_dataset, _simple_shuffle
-from .dataframe_engine import DataFrameDatasetEngine
-from .parquet import ParquetDatasetEngine
 
 try:
     import cudf
@@ -310,7 +309,7 @@ class Dataset:
                     )
                 elif engine == "avro":
                     try:
-                        from .avro import AvroDatasetEngine
+                        from merlin.io.avro import AvroDatasetEngine
                     except ImportError as e:
                         raise RuntimeError(
                             "Failed to import AvroDatasetEngine. Make sure uavro is installed."

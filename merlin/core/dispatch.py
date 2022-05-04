@@ -72,11 +72,12 @@ except ImportError:
 
 
 if HAS_GPU:
-    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]
-    SeriesType = Union[pd.Series, cudf.Series]
+    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
+    SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
-    DataFrameType = Union[pd.DataFrame]
-    SeriesType = Union[pd.Series]
+    DataFrameType = pd.DataFrame  # type: ignore
+    SeriesType = pd.Series  # type: ignore
+
 
 # Define mapping between non-nullable,
 # and nullable types in Pandas
@@ -100,6 +101,7 @@ class ExtData(enum.Enum):
 
 
 def create_merlin_dataset(df):
+    """Create a merlin.ioDataset"""
     from merlin.io import Dataset
 
     if not isinstance(df, Dataset):
@@ -115,6 +117,7 @@ def create_merlin_dataset(df):
 
 
 def read_parquet_metadata(path):
+    """Read parquet metadata from path"""
     if HAS_GPU:
         return cudf.io.read_parquet_metadata(path)
     full_meta = pq.read_metadata(path)
@@ -123,6 +126,7 @@ def read_parquet_metadata(path):
 
 
 def get_lib():
+    """Dispatch to the appropriate library (cudf or pandas) for the current environment"""
     return cudf if HAS_GPU else pd
 
 
@@ -141,6 +145,7 @@ def random_uniform(size):
 
 
 def coo_matrix(data, row, col):
+    """Dispatch for scipy.sparse.coo_matrix"""
     if HAS_GPU:
         return cp.sparse.coo_matrix((data, row, col))
     else:
@@ -348,6 +353,7 @@ def concat_columns(args: list):
 
 
 def read_parquet_dispatch(df: DataFrameType) -> Callable:
+    """Dispatch function for reading parquet files"""
     return read_dispatch(df=df, fmt="parquet")
 
 
@@ -441,6 +447,7 @@ def to_arrow(x):
 
 
 def concat(objs, **kwargs):
+    """dispatch function for concat"""
     if isinstance(objs[0], dd.DataFrame):
         return dd.multi.concat(objs)
     elif isinstance(objs[0], (pd.DataFrame, pd.Series)) or not HAS_GPU:
@@ -450,6 +457,7 @@ def concat(objs, **kwargs):
 
 
 def make_df(_like_df=None, device=None):
+    """Return a DataFrame with the same dtype as `_like_df`"""
     if not cudf or isinstance(_like_df, (pd.DataFrame, pd.Series)):
         return pd.DataFrame(_like_df)
     elif isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
@@ -463,6 +471,7 @@ def make_df(_like_df=None, device=None):
 
 
 def make_series(_like_ser=None, device=None):
+    """Return a Series with the same dtype as `_like_ser`"""
     if not cudf or device == "cpu":
         return pd.Series(_like_ser)
     return cudf.Series(_like_ser)
@@ -626,11 +635,12 @@ def generate_local_seed(global_rank, global_size):
         seeds = random_state.tomaxint(size=global_size)
         cp.random.seed(seeds[global_rank].get())
     else:
-        seeds = random_state.randint(0, 2 ** 32, size=global_size)
+        seeds = random_state.randint(0, 2**32, size=global_size)
     return seeds[global_rank]
 
 
 def get_random_state():
+    """get_random_state from either cupy or numpy."""
     if cp:
         return cp.random.get_random_state()
     return np.random.mtrand.RandomState()

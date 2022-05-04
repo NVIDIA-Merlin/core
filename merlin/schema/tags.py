@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from enum import Enum
-from typing import List, Union
+from typing import List, Set, Union
 
 
 class Tags(Enum):
@@ -55,11 +55,12 @@ class TagSet:
     """Collection that normalizes tags and prevents collisions between incompatible tags"""
 
     def __init__(self, tags: List[Union[str, Tags]] = None):
-        tags = tags or []
         if isinstance(tags, TagSet):
-            tags = tags._tags
+            tags = list(tags._tags)
+        elif tags is None:
+            tags = []
 
-        self._tags = self._normalize_tags(tags)
+        self._tags: Set[Tags] = self._normalize_tags(tags)
 
         collisions = self._detect_collisions(self._tags, self._tags)
         if collisions:
@@ -121,7 +122,7 @@ class TagSet:
 
         return tags
 
-    def _normalize_tags(self, tags):
+    def _normalize_tags(self, tags) -> Set[Tags]:
         return set(Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags)
 
     def __repr__(self) -> str:

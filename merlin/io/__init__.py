@@ -15,7 +15,7 @@
 #
 
 # flake8: noqa
-from . import dataframe_iter, dataset, shuffle
-from .dataframe_iter import DataFrameIter
-from .dataset import Dataset
-from .shuffle import Shuffle, shuffle_df
+from merlin.io import dataframe_iter, dataset, shuffle
+from merlin.io.dataframe_iter import DataFrameIter
+from merlin.io.dataset import Dataset
+from merlin.io.shuffle import Shuffle, shuffle_df

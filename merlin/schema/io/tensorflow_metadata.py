@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 import pathlib
 from typing import Union
 
 import fsspec
 import numpy
 
-from ..schema import ColumnSchema
-from ..schema import Schema as MerlinSchema
-from ..tags import Tags
-from . import proto_utils, schema_bp
-from .schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
-from .schema_bp import Schema as ProtoSchema
-from .schema_bp import ValueCount
+from merlin.schema.io import proto_utils, schema_bp
+from merlin.schema.io.schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from merlin.schema.io.schema_bp import Schema as ProtoSchema
+from merlin.schema.io.schema_bp import ValueCount
+from merlin.schema.schema import ColumnSchema
+from merlin.schema.schema import Schema as MerlinSchema
+from merlin.schema.tags import Tags
 
 DOMAIN_ATTRS = {FeatureType.INT: "int_domain", FeatureType.FLOAT: "float_domain"}
 FEATURE_TYPES = {
@@ -63,7 +64,7 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_json_file(cls, path: str) -> "TensorflowMetadata":
+    def from_json_file(cls, path: os.PathLike) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON file
 
         Parameters
@@ -103,7 +104,9 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_proto_text_file(cls, path: str, file_name="schema.pbtxt") -> "TensorflowMetadata":
+    def from_proto_text_file(
+        cls, path: os.PathLike, file_name="schema.pbtxt"
+    ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text file
 
         Parameters
@@ -120,7 +123,7 @@ class TensorflowMetadata:
 
         """
         path = pathlib.Path(path) / file_name
-        return cls.from_proto_text(_read_file(str(path)))
+        return cls.from_proto_text(_read_file(path))
 
     def to_proto_text(self) -> str:
         """Convert this TensorflowMetadata schema object to a Proto text string
@@ -414,7 +417,7 @@ def _merlin_column(feature):
     return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
 
 
-def _read_file(path: str):
+def _read_file(path: os.PathLike):
     # TODO: Should we be using fsspec here too?
     path = pathlib.Path(path)
     if path.is_file():

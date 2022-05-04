@@ -202,46 +202,6 @@ def test_dataset_schema_constructor():
     assert "column_schemas" in str(exception_info.value)
 
 
-def test_dataset_schema_select_by_tag():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
-
-    ds_schema = Schema([schema1, schema2])
-
-    selected_schema1 = ds_schema.select_by_tag("a")
-    selected_schema2 = ds_schema.select_by_tag("d")
-
-    assert selected_schema1.column_schemas == {"col1": schema1}
-    assert selected_schema2.column_schemas == {"col2": schema2}
-
-    selected_schema_both = ds_schema.select_by_tag("c")
-    selected_schema_neither = ds_schema.select_by_tag("e")
-    selected_schema_multi = ds_schema.select_by_tag(["b", "c"])
-
-    assert selected_schema_both.column_schemas == {"col1": schema1, "col2": schema2}
-    assert selected_schema_neither.column_schemas == {}
-    assert selected_schema_multi.column_schemas == {"col1": schema1, "col2": schema2}
-
-
-def test_dataset_schema_select_by_name():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["b", "c", "d"])
-
-    ds_schema = Schema([schema1, schema2])
-
-    selected_schema1 = ds_schema.select_by_name("col1")
-    selected_schema2 = ds_schema.select_by_name("col2")
-
-    assert selected_schema1.column_schemas == {"col1": schema1}
-    assert selected_schema2.column_schemas == {"col2": schema2}
-
-    selected_schema_multi = ds_schema.select_by_name(["col1", "col2"])
-
-    assert selected_schema_multi.column_schemas == {"col1": schema1, "col2": schema2}
-
-    assert ds_schema.select_by_name("col3") == Schema([])
-
-
 def test_dataset_schemas_can_be_added():
     ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
     ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])
@@ -265,6 +225,16 @@ def test_schema_can_be_added_to_none():
 
     assert (schema_set + None) == schema_set
     assert (None + schema_set) == schema_set
+
+
+def test_schema_to_pandas():
+    import pandas as pd
+
+    schema_set = Schema(["a", "b", "c"])
+    df = schema_set.to_pandas()
+
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
 
 
 def test_construct_schema_with_column_names():

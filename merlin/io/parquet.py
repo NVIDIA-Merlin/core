@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import functools
+import io as py_io
 import itertools
 import logging
 import math
@@ -22,7 +23,6 @@ import os
 import threading
 import warnings
 from collections import defaultdict
-from io import BytesIO
 from uuid import uuid4
 
 from packaging.version import Version
@@ -59,11 +59,10 @@ else:
     aggregate_row_groups = None
 
 from merlin.core.utils import run_on_worker
-
-from .dataset_engine import DatasetEngine
-from .fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
-from .shuffle import Shuffle, shuffle_df
-from .writer import ThreadedWriter
+from merlin.io.dataset_engine import DatasetEngine
+from merlin.io.fsspec_utils import _optimized_read_partition_remote, _optimized_read_remote
+from merlin.io.shuffle import Shuffle, shuffle_df
+from merlin.io.writer import ThreadedWriter
 
 LOG = logging.getLogger("merlin")
 
@@ -333,12 +332,12 @@ class ParquetDatasetEngine(DatasetEngine):
 
         assert self.row_groups_per_part > 0
 
-    @property
+    @property  # type: ignore
     @functools.lru_cache(1)
     def _path0(self):
         return next(self._dataset.get_fragments()).path
 
-    @property
+    @property  # type: ignore
     @functools.lru_cache(1)
     def _legacy_dataset(self):
         # TODO: Remove this after finding a way to avoid
@@ -356,7 +355,7 @@ class ParquetDatasetEngine(DatasetEngine):
             dataset = pq.ParquetDataset(paths[0], filesystem=fs)
         return dataset
 
-    @property
+    @property  # type: ignore
     @functools.lru_cache(1)
     def _dataset(self):
         paths = self.stripped_paths
@@ -596,7 +595,7 @@ class ParquetDatasetEngine(DatasetEngine):
                     paths,
                     out_dir=False,
                 )
-                with BytesIO() as myio:
+                with py_io.BytesIO() as myio:
                     myio.write(memoryview(metadata_bytes))
                     myio.seek(0)
                     metadata = pq.ParquetFile(myio).metadata
@@ -931,9 +930,7 @@ def _write_data(data_list, output_path, fs, fn):
 class BaseParquetWriter(ThreadedWriter):
     def __init__(self, out_dir, suffix=".parquet", **kwargs):
         super().__init__(out_dir, **kwargs)
-        self.data_paths = []
         self.data_files = []
-        self.data_writers = []
         self.data_bios = []
         self._lock = threading.RLock()
         self.pwriter = self._pwriter
@@ -969,7 +966,7 @@ class BaseParquetWriter(ThreadedWriter):
         _kwargs = tlz.merge(self.pwriter_kwargs, add_kwargs or {})
 
         if self.bytes_io:
-            bio = BytesIO()
+            bio = py_io.BytesIO()
             self.data_bios.append(bio)
             self.data_writers.append(self.pwriter(bio, *_args, **_kwargs))
         else:
