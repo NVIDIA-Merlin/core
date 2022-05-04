@@ -21,6 +21,13 @@ from packaging.version import Version
 
 _IGNORE_INDEX_SUPPORTED = Version(pd.__version__) >= Version("1.3.0")
 
+try:
+    import cudf
+
+    _CUDF_IGNORE_INDEX_SUPPORTED = Version(cudf.__version__) >= Version("22.04.0")
+except ImportError:
+    _CUDF_IGNORE_INDEX_SUPPORTED = None
+
 
 class Shuffle(enum.Enum):
     PER_PARTITION = 0
@@ -63,4 +70,7 @@ def shuffle_df(df, size=None, keep_index=False):
                 return df.sample(n=size)
             return df.sample(n=size).reset_index(drop=True)
     else:
-        return df.sample(n=size, keep_index=keep_index)
+        if _CUDF_IGNORE_INDEX_SUPPORTED:
+            return df.sample(n=size, ignore_index=not keep_index)
+        else:
+            return df.sample(n=size, keep_index=keep_index)
