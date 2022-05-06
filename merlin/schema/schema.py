@@ -285,7 +285,9 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
+    def select_by_tag(
+        self, tags: Union[Union[str, Tags], List[Union[str, Tags]], TagSet]
+    ) -> "Schema":
         """Select matching columns from this Schema object using a list of tags
 
         Parameters
@@ -299,8 +301,11 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
-        if not isinstance(tags, (list, tuple)):
+        if isinstance(tags, tuple):
+            tags = list(tags)
+        if not isinstance(tags, list):
             tags = [tags]
+        tags = TagSet(tags)
 
         selected_schemas = {}
 
