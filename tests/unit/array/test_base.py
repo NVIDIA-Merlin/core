@@ -13,13 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cudf
 import cupy as cp
 import numpy as np
-
-# tensorflow/cupy
 import tensorflow as tf
 
-from merlin.array.base import MerlinCupyArray, MerlinNumpyArray, MerlinTensorflowArray
+from merlin.array.base import (
+    MerlinCudfArray,
+    MerlinCupyArray,
+    MerlinNumpyArray,
+    MerlinTensorflowArray,
+)
+
+# =============================================================================
+# CuPy
+# =============================================================================
 
 
 def test_cp_merlinarray_to_cp_merlinarray():
@@ -28,6 +36,27 @@ def test_cp_merlinarray_to_cp_merlinarray():
     cp_array = MerlinCupyArray(cp_tensor)
     cp_array2 = cp_array.to(MerlinCupyArray)
     assert isinstance(cp_array2.data, cp.ndarray)
+
+
+def test_cupy_merlinarray_to_tf_merlinarray():
+    cp_tensor = cp.array([1, 2, 3, 4])
+
+    cp_array = MerlinCupyArray(cp_tensor)
+    tf_array = cp_array.to(MerlinTensorflowArray)
+    assert isinstance(tf_array.data, tf.Tensor)
+
+
+def test_cp_merlinarray_to_np_merlinarray():
+    cp_tensor = cp.array([1, 2, 3, 4])
+
+    cp_array = MerlinCupyArray(cp_tensor)
+    np_array = cp_array.to(MerlinNumpyArray)
+    assert isinstance(np_array.data, np.ndarray)
+
+
+# =============================================================================
+# Tensorflow
+# =============================================================================
 
 
 def test_tf_merlinarray_to_tf_merlinarray():
@@ -46,12 +75,9 @@ def test_tf_merlinarray_to_cupy_merlinarray():
     assert isinstance(cp_array.data, cp.ndarray)
 
 
-def test_cupy_merlinarray_to_tf_merlinarray():
-    cp_tensor = cp.array([1, 2, 3, 4])
-
-    cp_array = MerlinCupyArray(cp_tensor)
-    tf_array = cp_array.to(MerlinTensorflowArray)
-    assert isinstance(tf_array.data, tf.Tensor)
+# =============================================================================
+# Numpy
+# =============================================================================
 
 
 def test_np_merlinarray_to_cp_merlinarray():
@@ -62,9 +88,15 @@ def test_np_merlinarray_to_cp_merlinarray():
     assert isinstance(cp_array.data, cp.ndarray)
 
 
-def test_cp_merlinarray_to_np_merlinarray():
-    cp_tensor = cp.array([1, 2, 3, 4])
+# =============================================================================
+# CuDF
+# =============================================================================
 
-    cp_array = MerlinCupyArray(cp_tensor)
-    np_array = cp_array.to(MerlinNumpyArray)
-    assert isinstance(np_array.data, np.ndarray)
+
+def test_cudf_merlinarray_to_cupy_merlinarray():
+
+    cudf_series = cudf.Series([1, 2, 3, 4])
+
+    cudf_array = MerlinCudfArray(cudf_series)
+    cp_array = cudf_array.to(MerlinCupyArray)
+    assert isinstance(cp_array.data, cp.ndarray)

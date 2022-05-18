@@ -14,10 +14,26 @@
 # limitations under the License.
 from typing import Protocol, runtime_checkable
 
+import cudf
 import cupy as cp
 import numba
 import tensorflow.experimental.dlpack as tf_dlpack
 from numba.cuda.cudadrv.devicearray import DeviceNDArray as NumbaArray
+
+
+@runtime_checkable
+class CudaArrayConvertible(Protocol):
+    """
+    Dlpack is the preferred intermediate format for converting array data
+    between frameworks, since it provides zero-copy data transfer.
+    """
+
+    @classmethod
+    def _from_cuda_array(cls, cuda_array) -> "MerlinArray":
+        ...
+
+    def _to_cuda_array(self):
+        ...
 
 
 @runtime_checkable
@@ -51,6 +67,13 @@ class NumbaConvertible(Protocol):
         ...
 
 
+CONVERSION_PROTOCOLS = {
+    CudaArrayConvertible: ("_to_cuda_array", "_from_cuda_array"),
+    DlpackConvertible: ("_to_dlpack", "_from_dlpack"),
+    NumbaConvertible: ("_to_numba", "_from_numba"),
+}
+
+
 class MerlinArray:
     """
     Base class for an array of data in the Merlin framework.
@@ -82,15 +105,17 @@ class MerlinArray:
             If there's no supported intermediate format between the two MerlinArray types,
             as determined by the Protocols implemented by each type.
         """
-        if isinstance(self, DlpackConvertible) and issubclass(target_type, DlpackConvertible):
-            return target_type._from_dlpack(self._to_dlpack())
-        elif isinstance(self, NumbaConvertible) and issubclass(target_type, NumbaConvertible):
-            return target_type._from_numba(self._to_numba())
-        else:
-            raise TypeError(
-                f"Types {type(self)} and {target_type} have no interchange format "
-                "directly compatible with both classes."
-            )
+        for protocol, method_names in CONVERSION_PROTOCOLS.items():
+            to_name, from_name = method_names
+            if isinstance(self, protocol) and issubclass(target_type, protocol):
+                to_method = getattr(self, to_name)
+                from_method = getattr(target_type, from_name)
+                return from_method(to_method())
+
+        raise TypeError(
+            f"Types {type(self)} and {target_type} have no interchange format "
+            "directly compatible with both classes."
+        )
 
 
 class MerlinTensorflowArray(MerlinArray, DlpackConvertible):
@@ -106,10 +131,38 @@ class MerlinTensorflowArray(MerlinArray, DlpackConvertible):
         return tf_dlpack.to_dlpack(self.data)
 
 
-class MerlinCupyArray(MerlinArray, DlpackConvertible, NumbaConvertible):
+class MerlinCudfArray(MerlinArray, DlpackConvertible, CudaArrayConvertible):
     """
-    Thin wrapper around a Cupy array that implements conversion via DLPack and Numba.
+    Thin wrapper around a CuDF Series that implements conversion via DLPack.
     """
+
+    @classmethod
+    def _from_dlpack(cls, dlpack_capsule) -> "MerlinCudfArray":
+        return cls(cudf.io.from_dlpack(dlpack_capsule))
+
+    def _to_dlpack(self):
+        return self.data.to_dlpack()
+
+    @classmethod
+    def _from_cuda_array(cls, cuda_array) -> "MerlinArray":
+        return cls(cudf.Series(cuda_array))
+
+    def _to_cuda_array(self):
+        return self.data.values
+
+
+class MerlinCupyArray(MerlinArray, CudaArrayConvertible, DlpackConvertible, NumbaConvertible):
+    """
+    Thin wrapper around a Cupy array that implements conversion
+    via CUDA array interface, DLPack, and Numba.
+    """
+
+    @classmethod
+    def _from_cuda_array(cls, cuda_array) -> "MerlinArray":
+        return cls(cp.asarray(cuda_array))
+
+    def _to_cuda_array(self):
+        return self.data
 
     @classmethod
     def _from_dlpack(cls, dlpack_capsule) -> "MerlinCupyArray":
