@@ -12,3 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import cupy as cp
+import numpy as np
+
+from merlin.array.cupy import MerlinCupyArray
+from merlin.array.numpy import MerlinNumpyArray
+
+
+def test_np_merlinarray_to_cp_merlinarray():
+    np_tensor = np.array([1, 2, 3, 4])
+
+    np_array = MerlinNumpyArray(np_tensor)
+    cp_array = np_array.to(MerlinCupyArray)
+    assert isinstance(cp_array.data, cp.ndarray)
+    assert (cp.asnumpy(cp_array.data) == np_array.data).all()
