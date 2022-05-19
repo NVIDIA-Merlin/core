@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.array.protocols import CudaArrayConvertible, DlpackConvertible, NumbaConvertible
+from merlin.array.convertible import CudaArrayConvertible, DlpackConvertible, NumbaConvertible
 
 CONVERSION_PROTOCOLS = {
     CudaArrayConvertible: ("_to_cuda_array", "_from_cuda_array"),

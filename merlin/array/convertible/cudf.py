@@ -19,7 +19,7 @@ except ImportError:
     cudf = None
 
 from merlin.array.base import MerlinArray
-from merlin.array.protocols import CudaArrayConvertible, DlpackConvertible
+from merlin.array.convertible import CudaArrayConvertible, DlpackConvertible
 
 
 class MerlinCudfArray(MerlinArray, DlpackConvertible, CudaArrayConvertible):

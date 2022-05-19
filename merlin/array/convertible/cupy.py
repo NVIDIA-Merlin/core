@@ -15,6 +15,11 @@
 #
 
 try:
+    import cupy as cp
+except ImportError:
+    cupy = None
+
+try:
     import numba
     from numba.cuda.cudadrv.devicearray import DeviceNDArray as NumbaArray
 except ImportError:
@@ -22,17 +27,32 @@ except ImportError:
     NumbaArray = None
 
 from merlin.array.base import MerlinArray
-from merlin.array.protocols import NumbaConvertible
+from merlin.array.convertible import CudaArrayConvertible, DlpackConvertible, NumbaConvertible
 
 
-class MerlinNumpyArray(MerlinArray, NumbaConvertible):
+class MerlinCupyArray(MerlinArray, CudaArrayConvertible, DlpackConvertible, NumbaConvertible):
     """
-    Thin wrapper around a Numpy array that implements conversion via Numba.
+    Thin wrapper around a Cupy array that implements conversion
+    via CUDA array interface, DLPack, and Numba.
     """
 
     @classmethod
-    def _from_numba(cls, numba_array) -> "MerlinNumpyArray":
-        return cls(numba_array.copy_to_host())
+    def _from_cuda_array(cls, cuda_array) -> "MerlinArray":
+        return cls(cp.asarray(cuda_array))
+
+    def _to_cuda_array(self):
+        return self.data
+
+    @classmethod
+    def _from_dlpack(cls, dlpack_capsule) -> "MerlinCupyArray":
+        return cls(cp.fromDlpack(dlpack_capsule))
+
+    def _to_dlpack(self):
+        return self.data.toDlpack()
+
+    @classmethod
+    def _from_numba(cls, numba_array) -> "MerlinCupyArray":
+        return cls(cp.asarray(numba_array))
 
     def _to_numba(self) -> NumbaArray:
         return numba.cuda.to_device(self.data)
