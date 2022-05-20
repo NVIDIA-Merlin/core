@@ -34,17 +34,14 @@ class MerlinTensorflowArray(MerlinArray):
         _description_
     """
 
-    @classmethod
-    def build_from_cuda_array(cls, other):
+    def build_from_cuda_array(self, other):
         """build_from_cuda_array"""
         raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
 
-    @classmethod
-    def build_from_array(cls, other):
+    def build_from_array(self, other):
         """build_from_array"""
         return tf.convert_to_tensor(other)
 
-    @classmethod
-    def build_from_dlpack_capsule(cls, capsule):
+    def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
         return tf_dlpack.from_dlpack(capsule)

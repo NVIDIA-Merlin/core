@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 
 from merlin.array.interfaces import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
 
@@ -39,10 +39,9 @@ class MerlinArray(ABC):
     """
 
     def __init__(self, array):
-        self.data = self.__class__.build_from(array)
+        self.data = self.build_from(array)
 
-    @classmethod
-    def build_from(cls, other):
+    def build_from(self, other):
         """
         Build a MerlinArray sub-class object from an array-like object.
 
@@ -65,19 +64,19 @@ class MerlinArray(ABC):
         interface_methods = {}
 
         if cp is not None:
-            interface_methods[cp.ndarray] = cls.build_from_cp_array
+            interface_methods[cp.ndarray] = self.build_from_cp_array
 
         if tf is not None:
-            interface_methods[tf.Tensor] = cls.build_from_tf_tensor
+            interface_methods[tf.Tensor] = self.build_from_tf_tensor
 
         if cudf is not None:
-            interface_methods[cudf.Series] = cls.build_from_cudf_series
+            interface_methods[cudf.Series] = self.build_from_cudf_series
 
         interface_methods.update(
             {
-                CudaArrayInterface: cls.build_from_cuda_array,
-                DLPackInterface: cls.build_from_dlpack,
-                NumpyArrayInterface: cls.build_from_array,
+                CudaArrayInterface: self.build_from_cuda_array,
+                DLPackInterface: self.build_from_dlpack,
+                NumpyArrayInterface: self.build_from_array,
             }
         )
 
@@ -89,12 +88,12 @@ class MerlinArray(ABC):
                     continue
 
         raise TypeError(
-            f"Can't create {cls} array from type {type(other)}, "
+            f"Can't create {self.__class__} array from type {type(other)}, "
             "which doesn't support any of the available conversion interfaces."
         )
 
-    @abstractclassmethod
-    def build_from_cuda_array(cls, other: CudaArrayInterface):
+    @abstractmethod
+    def build_from_cuda_array(self, other: CudaArrayInterface):
         """
         Build a MerlinArray from an array-like object that implements the CUDA Array Interface
 
@@ -105,8 +104,8 @@ class MerlinArray(ABC):
         """
         ...
 
-    @abstractclassmethod
-    def build_from_array(cls, other: NumpyArrayInterface):
+    @abstractmethod
+    def build_from_array(self, other: NumpyArrayInterface):
         """
         Build a MerlinArray from an array-like object that implements the Numpy Array Interface
 
@@ -117,8 +116,8 @@ class MerlinArray(ABC):
         """
         ...
 
-    @abstractclassmethod
-    def build_from_dlpack_capsule(cls, capsule):
+    @abstractmethod
+    def build_from_dlpack_capsule(self, capsule):
         """
         Build a MerlinArray from a PyCapsule object created with the DLPack interface
 
@@ -129,8 +128,7 @@ class MerlinArray(ABC):
         """
         ...
 
-    @classmethod
-    def build_from_dlpack(cls, other):
+    def build_from_dlpack(self, other):
         """
         Build a MerlinArray from an array-like object that implements the DLPack Standard
 
@@ -139,35 +137,32 @@ class MerlinArray(ABC):
         other : PyCapsule
             An array-like object that implements the DLPack Standard
         """
-        return cls.build_from_dlpack_capsule(other.__dlpack__())
+        return self.build_from_dlpack_capsule(other.__dlpack__())
 
-    @classmethod
-    def build_from_tf_tensor(cls, other):
+    def build_from_tf_tensor(self, other):
         """build_from_tf_tensor"""
         try:
             capsule = tf.experimental.dlpack.to_dlpack(other)
-            return cls.build_from_dlpack_capsule(capsule)
+            return self.build_from_dlpack_capsule(capsule)
         except NotImplementedError:
             ...
 
-        return cls.build_from_array(other.numpy())
+        return self.build_from_array(other.numpy())
 
-    @classmethod
-    def build_from_cp_array(cls, other):
+    def build_from_cp_array(self, other):
         """build_from_cp_array"""
         try:
-            return cls.build_from_dlpack_capsule(other.toDlpack())
+            return self.build_from_dlpack_capsule(other.toDlpack())
         except NotImplementedError:
             ...
 
-        return cls.build_from_array(cp.asnumpy(other))
+        return self.build_from_array(cp.asnumpy(other))
 
-    @classmethod
-    def build_from_cudf_series(cls, other):
+    def build_from_cudf_series(self, other):
         """build_from_cudf_series"""
         try:
-            return cls.build_from_dlpack_capsule(other.to_dlpack())
+            return self.build_from_dlpack_capsule(other.to_dlpack())
         except NotImplementedError:
             ...
 
-        return cls.build_from_array(other.to_numpy())
+        return self.build_from_array(other.to_numpy())

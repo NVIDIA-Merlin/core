@@ -21,17 +21,14 @@ from merlin.array.interfaces.base import MerlinArray
 class MerlinCupyArray(MerlinArray):
     """MerlinCupyArray"""
 
-    @classmethod
-    def build_from_cuda_array(cls, other):
+    def build_from_cuda_array(self, other):
         """build_from_cuda_array"""
         return cp.asarray(other)
 
-    @classmethod
-    def build_from_array(cls, other):
+    def build_from_array(self, other):
         """build_from_array"""
         return cp.asarray(other)
 
-    @classmethod
-    def build_from_dlpack_capsule(cls, capsule):
+    def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
         return cp.fromDlpack(capsule)
