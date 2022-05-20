@@ -13,26 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.array.interfaces import (
-    ArrayInterface,
-    CudaArrayInterface,
-    DLPackInterface,
-    NumpyArrayInterface,
-)
+from abc import ABC, abstractclassmethod
+
+from merlin.array.interfaces import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
 
 try:
     import tensorflow as tf
 except ImportError:
     tf = None
 
+try:
+    import cupy as cp
+except ImportError:
+    cp = None
 
-class MerlinArray:
+try:
+    import cudf
+except ImportError:
+    cudf = None
+
+
+class MerlinArray(ABC):
     """
     Base class for Merlin array wrapper classes that implement cross-framework array conversions.
     """
 
     def __init__(self, array):
-        self.data = array
+        self.data = self.__class__.build_from(array)
 
     @classmethod
     def build_from(cls, other):
@@ -55,22 +62,38 @@ class MerlinArray:
         TypeError
             If no appropriate conversion interface can be identified.
         """
-        if isinstance(other, CudaArrayInterface):
-            return cls.build_from_cuda_array(other)
-        elif isinstance(other, ArrayInterface):
-            return cls.build_from_array(other)
-        elif isinstance(other, DLPackInterface):
-            return cls.build_from_dlpack(other)
-        elif tf is not None and isinstance(other, tf.Tensor):
-            capsule = tf.experimental.dlpack.to_dlpack(other)
-            return cls.build_from_dlpack_capsule(capsule)
-        else:
-            raise TypeError(
-                f"Can't create {cls} array from type {type(other)}, "
-                "which doesn't support any of the available conversion interfaces."
-            )
+        interface_methods = {}
 
-    @classmethod
+        if cp is not None:
+            interface_methods[cp.ndarray] = cls.build_from_cp_array
+
+        if tf is not None:
+            interface_methods[tf.Tensor] = cls.build_from_tf_tensor
+
+        if cudf is not None:
+            interface_methods[cudf.Series] = cls.build_from_cudf_series
+
+        interface_methods.update(
+            {
+                CudaArrayInterface: cls.build_from_cuda_array,
+                DLPackInterface: cls.build_from_dlpack,
+                NumpyArrayInterface: cls.build_from_array,
+            }
+        )
+
+        for interface, method in interface_methods.items():
+            if isinstance(other, interface):
+                try:
+                    return method(other)
+                except NotImplementedError:
+                    continue
+
+        raise TypeError(
+            f"Can't create {cls} array from type {type(other)}, "
+            "which doesn't support any of the available conversion interfaces."
+        )
+
+    @abstractclassmethod
     def build_from_cuda_array(cls, other: CudaArrayInterface):
         """
         Build a MerlinArray from an array-like object that implements the CUDA Array Interface
@@ -82,7 +105,7 @@ class MerlinArray:
         """
         ...
 
-    @classmethod
+    @abstractclassmethod
     def build_from_array(cls, other: NumpyArrayInterface):
         """
         Build a MerlinArray from an array-like object that implements the Numpy Array Interface
@@ -94,19 +117,7 @@ class MerlinArray:
         """
         ...
 
-    @classmethod
-    def build_from_dlpack(cls, capsule):
-        """
-        Build a MerlinArray from an array-like object that implements the DLPack Standard
-
-        Parameters
-        ----------
-        other : PyCapsule
-            An array-like object that implements the DLPack Standard
-        """
-        ...
-
-    @classmethod
+    @abstractclassmethod
     def build_from_dlpack_capsule(cls, capsule):
         """
         Build a MerlinArray from a PyCapsule object created with the DLPack interface
@@ -117,3 +128,46 @@ class MerlinArray:
             A PyCapsule object created with the DLPack interface
         """
         ...
+
+    @classmethod
+    def build_from_dlpack(cls, other):
+        """
+        Build a MerlinArray from an array-like object that implements the DLPack Standard
+
+        Parameters
+        ----------
+        other : PyCapsule
+            An array-like object that implements the DLPack Standard
+        """
+        return cls.build_from_dlpack_capsule(other.__dlpack__())
+
+    @classmethod
+    def build_from_tf_tensor(cls, other):
+        """build_from_tf_tensor"""
+        try:
+            capsule = tf.experimental.dlpack.to_dlpack(other)
+            return cls.build_from_dlpack_capsule(capsule)
+        except NotImplementedError:
+            ...
+
+        return cls.build_from_array(other.numpy())
+
+    @classmethod
+    def build_from_cp_array(cls, other):
+        """build_from_cp_array"""
+        try:
+            return cls.build_from_dlpack_capsule(other.toDlpack())
+        except NotImplementedError:
+            ...
+
+        return cls.build_from_array(cp.asnumpy(other))
+
+    @classmethod
+    def build_from_cudf_series(cls, other):
+        """build_from_cudf_series"""
+        try:
+            return cls.build_from_dlpack_capsule(other.to_dlpack())
+        except NotImplementedError:
+            ...
+
+        return cls.build_from_array(other.to_numpy())

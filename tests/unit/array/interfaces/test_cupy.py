@@ -24,7 +24,7 @@ from merlin.array.interfaces.cupy import MerlinCupyArray
 
 def test_np_array_to_merlin_cupy_array():
     np_array = np.array([1, 2, 3, 4])
-    merlin_cp_array = MerlinCupyArray.build_from(np_array)
+    merlin_cp_array = MerlinCupyArray(np_array)
 
     assert isinstance(merlin_cp_array.data, cp.ndarray)
     assert (cp.asnumpy(merlin_cp_array.data) == np_array).all()
@@ -32,7 +32,7 @@ def test_np_array_to_merlin_cupy_array():
 
 def test_cupy_array_to_merlin_cupy_array():
     cp_array = cp.array([1, 2, 3, 4])
-    merlin_cp_array = MerlinCupyArray.build_from(cp_array)
+    merlin_cp_array = MerlinCupyArray(cp_array)
 
     assert isinstance(merlin_cp_array.data, cp.ndarray)
     assert (cp.asnumpy(merlin_cp_array.data) == cp.asnumpy(cp_array)).all()
@@ -40,7 +40,7 @@ def test_cupy_array_to_merlin_cupy_array():
 
 def test_cudf_series_to_merlin_cupy_array():
     cudf_series = cudf.Series([1, 2, 3, 4])
-    merlin_cp_array = MerlinCupyArray.build_from(cudf_series)
+    merlin_cp_array = MerlinCupyArray(cudf_series)
 
     assert isinstance(merlin_cp_array.data, cp.ndarray)
     assert (cp.asnumpy(merlin_cp_array.data) == cudf_series.to_numpy()).all()
@@ -48,7 +48,7 @@ def test_cudf_series_to_merlin_cupy_array():
 
 def test_tf_tensor_to_merlin_cupy_array():
     tf_tensor = tf.random.uniform((10,))
-    merlin_cp_array = MerlinCupyArray.build_from(tf_tensor)
+    merlin_cp_array = MerlinCupyArray(tf_tensor)
 
     assert isinstance(merlin_cp_array.data, cp.ndarray)
     assert (cp.asnumpy(merlin_cp_array.data) == tf_tensor.numpy()).all()
