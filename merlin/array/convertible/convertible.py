@@ -62,10 +62,3 @@ class NumbaConvertible(Protocol):
 
     def _to_numba(self) -> NumbaArray:
         ...
-
-
-CONVERSION_PROTOCOLS = {
-    CudaArrayConvertible: ("_to_cuda_array", "_from_cuda_array"),
-    DlpackConvertible: ("_to_dlpack", "_from_dlpack"),
-    NumbaConvertible: ("_to_numba", "_from_numba"),
-}
