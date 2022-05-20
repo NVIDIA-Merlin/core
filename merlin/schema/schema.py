@@ -252,7 +252,7 @@ class Schema:
             if selector.names:
                 schema += self.select_by_name(selector.names)
             if selector.tags:
-                schema += self.select_by_tag(selector.tags)
+                schema += self.select_by_any_tag(selector.tags)
             return schema
         return self
 
