@@ -230,6 +230,10 @@ class Node:
                         f"expected dtype '{col_schema.dtype}'."
                     )
 
+            self.op.validate_schemas(
+                parents_schema, deps_schema, self.input_schema, self.output_schema, strict_dtypes
+            )
+
     def __rshift__(self, operator):
         """Transforms this Node by applying an BaseOperator
 
@@ -376,7 +380,20 @@ class Node:
         output = " output" if not self.children else ""
         return f"<Node {self.label}{output}>"
 
-    def remove_inputs(self, input_cols):
+    def remove_inputs(self, input_cols: List[str]) -> List[str]:
+        """
+        Remove input columns and all output columns that depend on them.
+
+        Parameters
+        ----------
+        input_cols : List[str]
+            The input columns to remove
+
+        Returns
+        -------
+        List[str]
+            The output columns that were removed
+        """
         removed_outputs = _derived_output_cols(input_cols, self.column_mapping)
 
         self.input_schema = self.input_schema.without(input_cols)
@@ -473,8 +490,33 @@ class Node:
     def graph(self):
         return _to_graphviz(self)
 
+    Nodable = Union[
+        "Node", str, List[str], ColumnSelector, List[Union["Node", str, List[str], ColumnSelector]]
+    ]
+
     @classmethod
-    def construct_from(cls, nodable):
+    def construct_from(
+        cls,
+        nodable: Nodable,
+    ):
+        """
+        Convert Node-like objects to a Node or list of Nodes.
+
+        Parameters
+        ----------
+        nodable : Nodable
+            Node-like objects to convert to a Node or list of Nodes.
+
+        Returns
+        -------
+        Union["Node", List["Node"]]
+            New Node(s) corresponding to the Node-like input objects
+
+        Raises
+        ------
+        TypeError
+            If supplied input cannot be converted to a Node or list of Nodes
+        """
         if isinstance(nodable, str):
             return Node(ColumnSelector([nodable]))
         if isinstance(nodable, ColumnSelector):
@@ -486,8 +528,12 @@ class Node:
                 return Node(nodable)
             else:
                 nodes = [Node.construct_from(node) for node in nodable]
-                non_selection_nodes = [node for node in nodes if not node.selector]
-                selection_nodes = [node.selector for node in nodes if node.selector]
+                non_selection_nodes = [
+                    node for node in nodes if not (hasattr(node, "selector") and node.selector)
+                ]
+                selection_nodes = [
+                    node.selector for node in nodes if (hasattr(node, "selector") and node.selector)
+                ]
                 selection_nodes = (
                     [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
                 )
