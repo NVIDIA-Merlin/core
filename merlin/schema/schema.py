@@ -310,6 +310,31 @@ class Schema:
 
         return Schema(selected_schemas)
 
+    def select_by_any_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
+        """Select any matching columns from this Schema object using a list of tags
+
+        Parameters
+        ----------
+        tags : List[Union[str, Tags]] :
+            List of tags that describes which columns match
+
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
+        """
+        if not isinstance(tags, (list, tuple)):
+            tags = [tags]
+
+        selected_schemas = {}
+
+        for _, column_schema in self.column_schemas.items():
+            if any(x in column_schema.tags for x in tags):
+                selected_schemas[column_schema.name] = column_schema
+
+        return Schema(selected_schemas)
+
     def excluding_by_tag(self, tags) -> "Schema":
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
