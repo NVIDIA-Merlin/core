@@ -14,8 +14,33 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import Any, Protocol, Sequence, Union, runtime_checkable
+from typing import Protocol, Sequence, Union, runtime_checkable
 
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
+
+try:
+    import cupy as cp
+except ImportError:
+    cp = None
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
+try:
+    import cudf as cf
+except ImportError:
+    cf = None
+
+from merlin.array.base import MerlinArray
+from merlin.array.cudf import MerlinCudfArray
+from merlin.array.cupy import MerlinCupyArray
+from merlin.array.numpy import MerlinNumpyArray
+from merlin.array.tensorflow import MerlinTensorflowArray
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -26,11 +51,16 @@ class Feature:
     """
 
     schema: ColumnSchema
-    value: Any
+    value: MerlinArray
 
 
 @runtime_checkable
 class Features(Protocol):
+    # TODO: See if we can narrow down this type to the things we actually want to support
+    # Dictionaries of MerlinArrays (or their data types)
+    # Dataframes (pandas and cudf)
+    # InferenceDataframe
+    # CPU_DICT_ARRAY/GPU_DICT_ARRAY
     def __getitem__(self, key):
         ...
 
@@ -100,4 +130,22 @@ class FeatureCollection:
         return FeatureCollection(sub_schema, sub_values)
 
     def __getitem__(self, feature_name: str) -> Feature:
-        return Feature(self.schema.column_schemas[feature_name], self.values[feature_name])
+        array = self.values[feature_name]
+
+        if not isinstance(array, MerlinArray):
+            array = build_merlin_array(array)
+
+        return Feature(self.schema.column_schemas[feature_name], array)
+
+
+def build_merlin_array(values):
+    if tf is not None and isinstance(values, tf.Tensor):
+        return MerlinTensorflowArray(values)
+    elif cp is not None and isinstance(values, cp.ndarray):
+        return MerlinCupyArray(values)
+    elif np is not None and isinstance(values, np.ndarray):
+        return MerlinNumpyArray(values)
+    elif cf is not None and isinstance(values, cf.Series):
+        return MerlinCudfArray(values)
+    else:
+        raise TypeError(f"Unknown type of array: {type(values)}")

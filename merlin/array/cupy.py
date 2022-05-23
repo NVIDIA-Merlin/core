@@ -13,25 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
+import cupy as cp
 
-from merlin.array.interfaces.base import MerlinArray
+from merlin.array.base import MerlinArray
 
 
-class MerlinNumpyArray(MerlinArray):
-    """MerlinNumpyArray"""
+class MerlinCupyArray(MerlinArray):
+    """MerlinCupyArray"""
 
     def build_from_cuda_array(self, other):
         """build_from_cuda_array"""
-        return np.array(other)
+        return cp.asarray(other)
 
     def build_from_array(self, other):
         """build_from_array"""
-        return np.array(other)
+        return cp.asarray(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
-        raise NotImplementedError(
-            "NumPy does not implement the DLPack Standard until version 1.22.3, "
-            f"currently running {np.__version__}"
-        )
+        return cp.fromDlpack(capsule)

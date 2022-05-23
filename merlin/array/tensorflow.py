@@ -13,22 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import cudf
+import tensorflow as tf
+import tensorflow.experimental.dlpack as tf_dlpack
 
-from merlin.array.interfaces.base import MerlinArray
+from merlin.array.base import MerlinArray
 
 
-class MerlinCudfArray(MerlinArray):
-    """MerlinCudfArray"""
+class MerlinTensorflowArray(MerlinArray):
+    """
+    _summary_
+
+    Parameters
+    ----------
+    MerlinArray : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
 
     def build_from_cuda_array(self, other):
         """build_from_cuda_array"""
-        return cudf.Series(other)
+        raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
 
     def build_from_array(self, other):
         """build_from_array"""
-        return cudf.Series(other)
+        return tf.convert_to_tensor(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
-        return cudf.io.from_dlpack(capsule)
+        return tf_dlpack.from_dlpack(capsule)

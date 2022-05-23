@@ -19,7 +19,7 @@ import cupy as cp
 import numpy as np
 import tensorflow as tf
 
-from merlin.array.interfaces.numpy import MerlinNumpyArray
+from merlin.array.numpy import MerlinNumpyArray
 
 
 def test_np_array_to_merlin_numpy_array():
