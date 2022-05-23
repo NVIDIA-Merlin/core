@@ -15,7 +15,7 @@
 #
 from abc import ABC, abstractmethod
 
-from merlin.array import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
+from merlin.features.array import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
 
 try:
     import tensorflow as tf
@@ -39,7 +39,7 @@ class MerlinArray(ABC):
     """
 
     def __init__(self, array):
-        self.data = self._build_from(array)
+        self.array = self._build_from(array)
 
     def _build_from(self, other):
         """

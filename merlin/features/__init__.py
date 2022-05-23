@@ -13,22 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import cudf
-
-from merlin.array.base import MerlinArray
-
-
-class MerlinCudfArray(MerlinArray):
-    """MerlinCudfArray"""
-
-    def build_from_cuda_array(self, other):
-        """build_from_cuda_array"""
-        return cudf.Series(other)
-
-    def build_from_array(self, other):
-        """build_from_array"""
-        return cudf.Series(other)
-
-    def build_from_dlpack_capsule(self, capsule):
-        """build_from_dlpack_capsule"""
-        return cudf.io.from_dlpack(capsule)

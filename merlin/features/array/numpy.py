@@ -13,35 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import tensorflow as tf
-import tensorflow.experimental.dlpack as tf_dlpack
+import numpy as np
 
-from merlin.array.base import MerlinArray
+from merlin.features.array.base import MerlinArray
 
 
-class MerlinTensorflowArray(MerlinArray):
-    """
-    _summary_
-
-    Parameters
-    ----------
-    MerlinArray : _type_
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
-    """
+class MerlinNumpyArray(MerlinArray):
+    """MerlinNumpyArray"""
 
     def build_from_cuda_array(self, other):
         """build_from_cuda_array"""
-        raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
+        return np.array(other)
 
     def build_from_array(self, other):
         """build_from_array"""
-        return tf.convert_to_tensor(other)
+        return np.array(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
-        return tf_dlpack.from_dlpack(capsule)
+        raise NotImplementedError(
+            "NumPy does not implement the DLPack Standard until version 1.22.3, "
+            f"currently running {np.__version__}"
+        )

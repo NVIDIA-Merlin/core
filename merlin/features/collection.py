@@ -36,11 +36,11 @@ try:
 except ImportError:
     cf = None
 
-from merlin.array.base import MerlinArray
-from merlin.array.cudf import MerlinCudfArray
-from merlin.array.cupy import MerlinCupyArray
-from merlin.array.numpy import MerlinNumpyArray
-from merlin.array.tensorflow import MerlinTensorflowArray
+from merlin.features.array.base import MerlinArray
+from merlin.features.array.cudf import MerlinCudfArray
+from merlin.features.array.cupy import MerlinCupyArray
+from merlin.features.array.numpy import MerlinNumpyArray
+from merlin.features.array.tensorflow import MerlinTensorflowArray
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -51,7 +51,7 @@ class Feature:
     """
 
     schema: ColumnSchema
-    value: MerlinArray
+    values: MerlinArray
 
 
 @runtime_checkable
@@ -145,6 +145,8 @@ def build_merlin_array(values):
         return MerlinCupyArray(values)
     elif np is not None and isinstance(values, np.ndarray):
         return MerlinNumpyArray(values)
+    elif np is not None and isinstance(values, list):
+        return MerlinNumpyArray(np.array(values))
     elif cf is not None and isinstance(values, cf.Series):
         return MerlinCudfArray(values)
     else:

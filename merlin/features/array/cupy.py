@@ -15,7 +15,7 @@
 #
 import cupy as cp
 
-from merlin.array.base import MerlinArray
+from merlin.features.array.base import MerlinArray
 
 
 class MerlinCupyArray(MerlinArray):
@@ -31,4 +31,4 @@ class MerlinCupyArray(MerlinArray):
 
     def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
-        return cp.fromDlpack(capsule)
+        return cp.from_dlpack(capsule)

@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
+import tensorflow as tf
 
-from merlin.array.features import Feature, FeatureCollection
+from merlin.core.dispatch import make_df
+from merlin.features.collection import Feature, FeatureCollection
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -27,19 +28,19 @@ def test_select_features_by_name():
             ColumnSchema("c", tags=["c"]),
         ]
     )
-    value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
+    value = {"a": [1, 2, 3], "b": [3, 4, 5], "c": [6, 7, 8]}
     fc = FeatureCollection(schema, value)
     fc_b = fc.select_by_name("b")
     fc_bc = fc.select_by_name(["b", "c"])
 
     assert fc_b["b"].schema.name in "b"
-    assert (fc_b["b"].value.data == value["b"]).all()
+    assert (fc_b["b"].values.array == value["b"]).all()
 
     assert fc_bc["b"].schema.name in "b"
-    assert (fc_bc["b"].value.data == value["b"]).all()
+    assert (fc_bc["b"].values.array == value["b"]).all()
 
     assert fc_bc["c"].schema.name in "c"
-    assert (fc_bc["c"].value.data == value["c"]).all()
+    assert (fc_bc["c"].values.array == value["c"]).all()
 
 
 def test_select_features_by_tag():
@@ -51,7 +52,7 @@ def test_select_features_by_tag():
         ]
     )
 
-    value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
+    value = {"a": [1, 2, 3], "b": [3, 4, 5], "c": [6, 7, 8]}
 
     features = FeatureCollection(schema, value)
 
@@ -60,16 +61,16 @@ def test_select_features_by_tag():
 
     for feature_name in ["a", "b"]:
         assert categorical[feature_name].schema.name == feature_name
-        assert (categorical[feature_name].value.data == value[feature_name]).all()
+        assert (categorical[feature_name].values.array == value[feature_name]).all()
 
     assert continuous["c"].schema.name == "c"
-    assert (continuous["c"].value.data == value["c"]).all()
+    assert (continuous["c"].values.array == value["c"]).all()
 
 
 def test_update_feature_schemas():
     schema = Schema(["a"])
-    value = {"a": np.array([1.0, 2.0])}
-    features = FeatureCollection(schema, value)
+    values = {"a": [1.0, 2.0]}
+    features = FeatureCollection(schema, values)
 
     new_schema = Schema([schema.column_schemas["a"].with_tags("updated")])
     updated_features = features.with_schema(new_schema)
@@ -79,11 +80,41 @@ def test_update_feature_schemas():
 
 def test_get_feature():
     schema = Schema(["a"])
-    values = {"a": np.array([1.0, 2.0])}
+    values = {"a": [1.0, 2.0]}
     features = FeatureCollection(schema, values)
 
     feature = features["a"]
 
     assert isinstance(feature, Feature)
     assert feature.schema.name == "a"
-    assert (feature.value.data == values["a"]).all()
+    assert (feature.values.array == values["a"]).all()
+
+
+def test_dataframe_features():
+    values = make_df(
+        {
+            "a": [1.0, 2.0],
+        }
+    )
+
+    schema = Schema(["a"])
+    features = FeatureCollection(schema, values)
+
+    feature = features["a"]
+    assert isinstance(feature, Feature)
+    assert feature.schema.name == "a"
+    assert (feature.values.array == values["a"]).all()
+
+
+def test_tensorflow_features():
+    values = {
+        "a": tf.random.uniform((10,)),
+    }
+
+    schema = Schema(["a"])
+    features = FeatureCollection(schema, values)
+
+    feature = features["a"]
+    assert isinstance(feature, Feature)
+    assert feature.schema.name == "a"
+    assert (feature.values.array.numpy() == values["a"].numpy()).all()
