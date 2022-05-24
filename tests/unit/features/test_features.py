@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
 import tensorflow as tf
 
 from merlin.core.dispatch import make_df
@@ -118,3 +119,29 @@ def test_tensorflow_features():
     assert isinstance(feature, Feature)
     assert feature.schema.name == "a"
     assert (feature.values.array.numpy() == values["a"].numpy()).all()
+
+
+def test_schema_values_mismatch():
+    schema = Schema(["a"])
+    values = make_df(
+        {
+            "b": [1.0, 2.0],
+        }
+    )
+
+    with pytest.raises(ValueError) as exception_info:
+        FeatureCollection(schema, values)
+
+    assert "Schema and Values have different column names." in str(exception_info.value)
+
+    values = make_df(
+        {
+            "a": [1.0, 2.0],
+            "b": [1.0, 2.0],
+        }
+    )
+
+    with pytest.raises(ValueError) as exception_info:
+        FeatureCollection(schema, values)
+
+    assert "Schema and values must have the same number of columns" in str(exception_info.value)

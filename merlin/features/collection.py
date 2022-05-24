@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import Protocol, Sequence, Union, runtime_checkable
+from typing import Dict, List, Protocol, Sequence, Union, runtime_checkable
 
 try:
     import tensorflow as tf
@@ -54,13 +54,41 @@ class Feature:
     values: MerlinArray
 
 
+class VirtualDataframe:
+    def __init__(self, data=None):
+        self._col_data = data or {}
+
+    @property
+    def columns(self) -> List[str]:
+        return list(self._col_data.keys())
+
+    def __getitem__(self, col_items):
+        if isinstance(col_items, list):
+            results = {name: self._col_data[name] for name in col_items}
+            return VirtualDataframe(results)
+        else:
+            return self._col_data[col_items]
+
+    def __len__(self):
+        return len(self.columns)
+
+    def __iter__(self):
+        for name, tensor in self._col_data.items():
+            yield name, tensor
+
+    def __repr__(self):
+        dict_rep = {}
+        for k, v in self._col_data.items():
+            dict_rep[k] = v
+        return str(dict_rep)
+
+
 @runtime_checkable
 class Features(Protocol):
-    # TODO: See if we can narrow down this type to the things we actually want to support
-    # Dictionaries of MerlinArrays (or their data types)
-    # Dataframes (pandas and cudf)
-    # InferenceDataframe
-    # CPU_DICT_ARRAY/GPU_DICT_ARRAY
+    @property
+    def columns(self):
+        ...
+
     def __getitem__(self, key):
         ...
 
@@ -70,9 +98,20 @@ class FeatureCollection:
     A collection of features containing their schemas and data.
     """
 
-    def __init__(self, schema: Schema, values: Features):
-        self.values = values
-        self.schema = schema
+    def __init__(self, schema: Schema, values: Union[Dict, Features]):
+        self.schema: Schema = schema
+        self.values: Features = None
+
+        if isinstance(values, dict):
+            self.values = VirtualDataframe(values)
+        else:
+            self.values = values
+
+        if len(self.schema) != len(self.values.columns):
+            raise ValueError("Schema and values must have the same number of columns")
+
+        if set(self.schema.column_names) != set(self.values.columns):
+            raise ValueError("Schema and Values have different column names.")
 
     def with_schema(self, schema: Schema) -> "FeatureCollection":
         """
@@ -129,6 +168,9 @@ class FeatureCollection:
 
         return FeatureCollection(sub_schema, sub_values)
 
+    def __len__(self):
+        return len(self.values)
+
     def __getitem__(self, feature_name: str) -> Feature:
         array = self.values[feature_name]
 
@@ -137,8 +179,30 @@ class FeatureCollection:
 
         return Feature(self.schema.column_schemas[feature_name], array)
 
+    def __iter__(self):
+        for col_name in self.schema.column_names:
+            yield self[col_name]
+
 
 def build_merlin_array(values):
+    """
+    Construct a MerlinArray from a numpy array, cupy array, cudf array, or tensorflow tensor.
+
+    Parameters
+    ----------
+    values : Union[np.ndarray, cp.ndarray, cf.DataFrame, tf.Tensor]
+        The array to be converted to a MerlinArray
+
+    Returns
+    -------
+    MerlinArray
+        A MerlinArray object that wraps the provided array
+
+    Raises
+    ------
+    TypeError
+        If the provided array is not one of the supported types
+    """
     if tf is not None and isinstance(values, tf.Tensor):
         return MerlinTensorflowArray(values)
     elif cp is not None and isinstance(values, cp.ndarray):
