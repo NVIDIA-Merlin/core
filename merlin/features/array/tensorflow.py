@@ -21,27 +21,53 @@ from merlin.features.array.base import MerlinArray
 
 class MerlinTensorflowArray(MerlinArray):
     """
-    _summary_
-
-    Parameters
-    ----------
-    MerlinArray : _type_
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
+    Thin wrapper around a tensorflow.Tensor that can be constructed from other framework types.
     """
 
     def build_from_cuda_array(self, other):
-        """build_from_cuda_array"""
+        """
+        Build a tf.Tensor from an object that implements the Cuda Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Tensor from
+
+        Returns
+        -------
+        tf.Tensor
+            The Tensor built from the array-like object
+        """
         raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
 
     def build_from_array(self, other):
-        """build_from_array"""
+        """
+        Build a tf.Tensor from an object that implements the Numpy Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Tensor from
+
+        Returns
+        -------
+        tf.Tensor
+            The Tensor built from the array-like object
+        """
         return tf.convert_to_tensor(other)
 
     def build_from_dlpack_capsule(self, capsule):
-        """build_from_dlpack_capsule"""
+        """
+        Build a tf.Tensor from an object that implements the DLPack Standard.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Tensor from
+
+        Returns
+        -------
+        tf.Tensor
+            The Tensor built from the array-like object
+        """
         return tf_dlpack.from_dlpack(capsule)

@@ -19,18 +19,56 @@ from merlin.features.array.base import MerlinArray
 
 
 class MerlinCupyArray(MerlinArray):
-    """MerlinCupyArray"""
+    """
+    Thin wrapper around a cupy.ndarray that can be constructed from other framework types.
+    """
 
     def build_from_cuda_array(self, other):
-        """build_from_cuda_array"""
+        """
+        Build a cupy.ndarray from an object that implements the Cuda Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        cupy.ndarray
+            The ndarray built from the array-like object
+        """
         return cp.asarray(other)
 
     def build_from_array(self, other):
-        """build_from_array"""
+        """
+        Build a cupy.ndarray from an object that implements the Numpy Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        cupy.ndarray
+            The ndarray built from the array-like object
+        """
         return cp.asarray(other)
 
     def build_from_dlpack_capsule(self, capsule):
-        """build_from_dlpack_capsule"""
+        """
+        Build a cupy.ndarray from a PyCapsule object created according to the DLPack Standard.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        cupy.ndarray
+            The ndarray built from the array-like object
+        """
         try:
             return cp.from_dlpack(capsule)
         except AttributeError:

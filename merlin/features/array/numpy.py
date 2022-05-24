@@ -19,19 +19,60 @@ from merlin.features.array.base import MerlinArray
 
 
 class MerlinNumpyArray(MerlinArray):
-    """MerlinNumpyArray"""
+    """
+    Thin wrapper around a numpy.ndarray that can be constructed from other framework types.
+    """
 
     def build_from_cuda_array(self, other):
-        """build_from_cuda_array"""
+        """
+        Build a numpy.ndarray from an object that implements the Cuda Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        numpy.ndarray
+            The ndarray built from the array-like object
+        """
         return np.array(other)
 
     def build_from_array(self, other):
-        """build_from_array"""
+        """
+        Build a numpy.ndarray from an object that implements the Numpy Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        numpy.ndarray
+            The ndarray built from the array-like object
+        """
         return np.array(other)
 
     def build_from_dlpack_capsule(self, capsule):
-        """build_from_dlpack_capsule"""
-        raise NotImplementedError(
-            "NumPy does not implement the DLPack Standard until version 1.22.3, "
-            f"currently running {np.__version__}"
-        )
+        """
+        Build a numpy.ndarray from an object that implements the DLPack Standard.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the ndarray from
+
+        Returns
+        -------
+        numpy.ndarray
+            The ndarray built from the array-like object
+        """
+        try:
+            return np._from_dlpack(capsule)
+        except AttributeError as exc:
+            raise NotImplementedError(
+                "NumPy does not implement the DLPack Standard until version 1.22.0, "
+                f"currently running {np.__version__}"
+            ) from exc

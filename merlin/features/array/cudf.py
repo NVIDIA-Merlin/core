@@ -19,16 +19,54 @@ from merlin.features.array.base import MerlinArray
 
 
 class MerlinCudfArray(MerlinArray):
-    """MerlinCudfArray"""
+    """
+    Thin wrapper around a cudf.Series that can be constructed from other framework types.
+    """
 
     def build_from_cuda_array(self, other):
-        """build_from_cuda_array"""
+        """
+        Build a cudf.Series from an object that implements the Cuda Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Series from
+
+        Returns
+        -------
+        cudf.Series
+            The Series built from the array-like object
+        """
         return cudf.Series(other)
 
     def build_from_array(self, other):
-        """build_from_array"""
+        """
+        Build a cudf.Series from an object that implements the Numpy Array Interface.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Series from
+
+        Returns
+        -------
+        cudf.Series
+            The Series built from the array-like object
+        """
         return cudf.Series(other)
 
     def build_from_dlpack_capsule(self, capsule):
-        """build_from_dlpack_capsule"""
+        """
+        Build a cudf.Series from an object that implements the DLPack Standard.
+
+        Parameters
+        ----------
+        other : array-like
+            The array-like object to build the Series from
+
+        Returns
+        -------
+        cudf.Series
+            The Series built from the array-like object
+        """
         return cudf.io.from_dlpack(capsule)

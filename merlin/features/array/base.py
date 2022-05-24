@@ -140,7 +140,14 @@ class MerlinArray(ABC):
         return self.build_from_dlpack_capsule(other.__dlpack__())
 
     def build_from_tf_tensor(self, other):
-        """build_from_tf_tensor"""
+        """
+        Build a MerlinArray from a Tensorflow tensor
+
+        Parameters
+        ----------
+        other : tf.Tensor
+            A Tensorflow tensor
+        """
         try:
             capsule = tf.experimental.dlpack.to_dlpack(other)
             return self.build_from_dlpack_capsule(capsule)
@@ -150,7 +157,14 @@ class MerlinArray(ABC):
         return self.build_from_array(other.numpy())
 
     def build_from_cp_array(self, other):
-        """build_from_cp_array"""
+        """
+        Build a MerlinArray from a CuPy array
+
+        Parameters
+        ----------
+        other : cp.ndarray
+            A CuPy array
+        """
         try:
             return self.build_from_dlpack_capsule(other.toDlpack())
         except NotImplementedError:
@@ -159,7 +173,14 @@ class MerlinArray(ABC):
         return self.build_from_array(cp.asnumpy(other))
 
     def build_from_cudf_series(self, other):
-        """build_from_cudf_series"""
+        """
+        Build a MerlinArray from a cuDF series
+
+        Parameters
+        ----------
+        other : cudf.Series
+            A cuDF series
+        """
         try:
             return self.build_from_dlpack_capsule(other.to_dlpack())
         except NotImplementedError:
