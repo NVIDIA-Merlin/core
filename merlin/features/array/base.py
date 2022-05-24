@@ -16,7 +16,7 @@
 from abc import ABC, abstractmethod
 
 from merlin.features.array import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
-from merlin.features.array.compat import cudf, cupy, tensorflow
+from merlin.features.array.compat import cudf, cupy, pandas, tensorflow
 
 
 class MerlinArray(ABC):
@@ -57,6 +57,9 @@ class MerlinArray(ABC):
 
         if cudf is not None:
             interface_methods[cudf.Series] = self.build_from_cudf_series
+
+        if pandas is not None:
+            interface_methods[pandas.Series] = self.build_from_pandas_series
 
         interface_methods.update(
             {
@@ -172,4 +175,15 @@ class MerlinArray(ABC):
         except NotImplementedError:
             ...
 
+        return self.build_from_array(other.to_numpy())
+
+    def build_from_pandas_series(self, other):
+        """
+        Build a MerlinArray from a Pandas series
+
+        Parameters
+        ----------
+        other : pandas.Series
+            A Pandas series
+        """
         return self.build_from_array(other.to_numpy())

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.features.array.compat import cudf, cupy, numpy, tensorflow
+from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.cupy import MerlinCupyArray
 
 
@@ -47,3 +47,11 @@ def test_tf_tensor_to_merlin_cupy_array():
 
     assert isinstance(merlin_cp_array.array, cupy.ndarray)
     assert (cupy.asnumpy(merlin_cp_array.array) == tf_tensor.numpy()).all()
+
+
+def test_pandas_series_to_merlin_cupy_array():
+    pandas_series = pandas.Series([1, 2, 3, 4])
+    merlin_pandas_array = MerlinCupyArray(pandas_series)
+
+    assert isinstance(merlin_pandas_array.array, cupy.ndarray)
+    assert (cupy.asnumpy(merlin_pandas_array.array) == pandas_series.to_numpy()).all()

@@ -17,9 +17,9 @@
 # pylint: disable=unused-import
 
 try:
-    import numpy  # noqa
+    import cudf  # noqa
 except ImportError:
-    numpy = None
+    cudf = None
 
 try:
     import cupy  # noqa
@@ -27,9 +27,14 @@ except ImportError:
     cupy = None
 
 try:
-    import cudf  # noqa
+    import numpy  # noqa
 except ImportError:
-    cudf = None
+    numpy = None
+
+try:
+    import pandas  # noqa
+except ImportError:
+    pandas = None
 
 try:
     import tensorflow  # noqa
