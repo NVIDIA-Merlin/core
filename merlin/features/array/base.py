@@ -25,6 +25,7 @@ class MerlinArray(ABC):
     """
 
     def __init__(self, array):
+        self._ref = array
         self.array = self._build_from(array)
 
     def _build_from(self, other):
