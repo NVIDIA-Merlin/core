@@ -31,4 +31,7 @@ class MerlinCupyArray(MerlinArray):
 
     def build_from_dlpack_capsule(self, capsule):
         """build_from_dlpack_capsule"""
-        return cp.from_dlpack(capsule)
+        try:
+            return cp.from_dlpack(capsule)
+        except AttributeError:
+            return cp.fromDlpack(capsule)
