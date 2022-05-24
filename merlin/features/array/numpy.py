@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
-
 from merlin.features.array.base import MerlinArray
+from merlin.features.array.compat import numpy
 
 
 class MerlinNumpyArray(MerlinArray):
@@ -37,7 +36,7 @@ class MerlinNumpyArray(MerlinArray):
         numpy.ndarray
             The ndarray built from the array-like object
         """
-        return np.array(other)
+        return numpy.array(other)
 
     def build_from_array(self, other):
         """
@@ -53,7 +52,7 @@ class MerlinNumpyArray(MerlinArray):
         numpy.ndarray
             The ndarray built from the array-like object
         """
-        return np.array(other)
+        return numpy.array(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """
@@ -70,9 +69,9 @@ class MerlinNumpyArray(MerlinArray):
             The ndarray built from the array-like object
         """
         try:
-            return np._from_dlpack(capsule)
+            return numpy._from_dlpack(capsule)
         except AttributeError as exc:
             raise NotImplementedError(
                 "NumPy does not implement the DLPack Standard until version 1.22.0, "
-                f"currently running {np.__version__}"
+                f"currently running {numpy.__version__}"
             ) from exc

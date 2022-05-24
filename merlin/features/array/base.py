@@ -16,21 +16,7 @@
 from abc import ABC, abstractmethod
 
 from merlin.features.array import CudaArrayInterface, DLPackInterface, NumpyArrayInterface
-
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
-
-try:
-    import cupy as cp
-except ImportError:
-    cp = None
-
-try:
-    import cudf
-except ImportError:
-    cudf = None
+from merlin.features.array.compat import cudf, cupy, tensorflow
 
 
 class MerlinArray(ABC):
@@ -63,11 +49,11 @@ class MerlinArray(ABC):
         """
         interface_methods = {}
 
-        if cp is not None:
-            interface_methods[cp.ndarray] = self.build_from_cp_array
+        if cupy is not None:
+            interface_methods[cupy.ndarray] = self.build_from_cp_array
 
-        if tf is not None:
-            interface_methods[tf.Tensor] = self.build_from_tf_tensor
+        if tensorflow is not None:
+            interface_methods[tensorflow.Tensor] = self.build_from_tf_tensor
 
         if cudf is not None:
             interface_methods[cudf.Series] = self.build_from_cudf_series
@@ -149,7 +135,7 @@ class MerlinArray(ABC):
             A Tensorflow tensor
         """
         try:
-            capsule = tf.experimental.dlpack.to_dlpack(other)
+            capsule = tensorflow.experimental.dlpack.to_dlpack(other)
             return self.build_from_dlpack_capsule(capsule)
         except NotImplementedError:
             ...
@@ -170,7 +156,7 @@ class MerlinArray(ABC):
         except NotImplementedError:
             ...
 
-        return self.build_from_array(cp.asnumpy(other))
+        return self.build_from_array(cupy.asnumpy(other))
 
     def build_from_cudf_series(self, other):
         """

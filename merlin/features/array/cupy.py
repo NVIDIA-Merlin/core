@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import cupy as cp
-
 from merlin.features.array.base import MerlinArray
+from merlin.features.array.compat import cupy
 
 
 class MerlinCupyArray(MerlinArray):
@@ -37,7 +36,7 @@ class MerlinCupyArray(MerlinArray):
         cupy.ndarray
             The ndarray built from the array-like object
         """
-        return cp.asarray(other)
+        return cupy.asarray(other)
 
     def build_from_array(self, other):
         """
@@ -53,7 +52,7 @@ class MerlinCupyArray(MerlinArray):
         cupy.ndarray
             The ndarray built from the array-like object
         """
-        return cp.asarray(other)
+        return cupy.asarray(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """
@@ -70,6 +69,6 @@ class MerlinCupyArray(MerlinArray):
             The ndarray built from the array-like object
         """
         try:
-            return cp.from_dlpack(capsule)
+            return cupy.from_dlpack(capsule)
         except AttributeError:
-            return cp.fromDlpack(capsule)
+            return cupy.fromDlpack(capsule)

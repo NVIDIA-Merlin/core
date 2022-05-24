@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 import pytest
-import tensorflow as tf
 
 from merlin.core.dispatch import make_df
+from merlin.features.array.compat import tensorflow
 from merlin.features.collection import Feature, FeatureCollection
 from merlin.schema import ColumnSchema, Schema, Tags
 
@@ -109,7 +109,7 @@ def test_dataframe_features():
 
 def test_tensorflow_features():
     values = {
-        "a": tf.random.uniform((10,)),
+        "a": tensorflow.random.uniform((10,)),
     }
 
     schema = Schema(["a"])

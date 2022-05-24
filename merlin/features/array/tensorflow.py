@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import tensorflow as tf
-import tensorflow.experimental.dlpack as tf_dlpack
-
 from merlin.features.array.base import MerlinArray
+from merlin.features.array.compat import tensorflow
 
 
 class MerlinTensorflowArray(MerlinArray):
@@ -54,7 +52,7 @@ class MerlinTensorflowArray(MerlinArray):
         tf.Tensor
             The Tensor built from the array-like object
         """
-        return tf.convert_to_tensor(other)
+        return tensorflow.convert_to_tensor(other)
 
     def build_from_dlpack_capsule(self, capsule):
         """
@@ -70,4 +68,4 @@ class MerlinTensorflowArray(MerlinArray):
         tf.Tensor
             The Tensor built from the array-like object
         """
-        return tf_dlpack.from_dlpack(capsule)
+        return tensorflow.experimental.dlpack.from_dlpack(capsule)

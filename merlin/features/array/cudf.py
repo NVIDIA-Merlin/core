@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import cudf
 
 from merlin.features.array.base import MerlinArray
+from merlin.features.array.compat import cudf
 
 
 class MerlinCudfArray(MerlinArray):
