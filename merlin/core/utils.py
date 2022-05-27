@@ -183,7 +183,7 @@ class Distributed:
     -----------
     client : `dask.distributed.Client`; Optional
         The client to use for distributed-Dask execution.
-    new_cluster : {"cuda", "cpu", None}
+    cluster_type : {"cuda", "cpu", None}
         Type of local cluster to generate in the case that a
         global client is not detected (or `force_new=True`).
         "cuda" corresponds to `dask_cuda.LocalCUDACluster`,
@@ -195,7 +195,7 @@ class Distributed:
         detected. Default is False.
     **cluster_options :
         Key-word arguments to pass to the local-cluster
-        constructor specified by `new_cluster` (e.g.
+        constructor specified by `cluster_type` (e.g.
         `n_workers=2`).
 
     Examples
