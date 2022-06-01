@@ -24,6 +24,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+from merlin.core.compat import HAS_GPU
+
 try:
     import cudf
     import cupy as cp
@@ -40,9 +42,7 @@ try:
         from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
         from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
 
-    HAS_GPU = True
 except ImportError:
-    HAS_GPU = False
     cp = None
     cudf = None
     rmm = None

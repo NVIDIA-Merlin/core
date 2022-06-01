@@ -28,18 +28,10 @@ from dask.dataframe.optimize import optimize as dd_optimize
 from dask.distributed import Client, get_client
 from tqdm import tqdm
 
+from merlin.core.compat import HAS_GPU, cuda
+
 _merlin_dask_client = ContextVar("_merlin_dask_client", default="auto")
 
-HAS_GPU = False
-try:
-    from numba import cuda
-
-    try:
-        HAS_GPU = len(cuda.gpus.lst) > 0
-    except cuda.cudadrv.error.CudaSupportError:
-        pass
-except ImportError:
-    cuda = None
 
 try:
     import psutil
