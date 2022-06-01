@@ -69,8 +69,8 @@ jobs:
       run: |
         conda update conda
         conda install conda-build
-        conda build --python ${{ matrix.python-version }} . -c defaults -c conda-forge -c numba -c rapidsai --output-folder ./conda_packages
-        export CONDA_PACKAGE=$(conda build --python ${{ matrix.python-version }} . -c defaults -c conda-forge -c numba -c rapidsai --output-folder ./conda_packages --output)
+        conda build . -c defaults -c conda-forge -c numba -c rapidsai --output-folder ./conda_packages
+        export CONDA_PACKAGE=$(conda build . -c defaults -c conda-forge -c numba -c rapidsai --output-folder ./conda_packages --output)
         echo "conda_package : $CONDA_PACKAGE"
         echo "::set-output name=conda_package::$CONDA_PACKAGE"
 
