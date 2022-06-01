@@ -30,8 +30,14 @@ from tqdm import tqdm
 
 _merlin_dask_client = ContextVar("_merlin_dask_client", default="auto")
 
+HAS_GPU = False
 try:
     from numba import cuda
+
+    try:
+        HAS_GPU = len(cuda.gpus.lst) > 0
+    except cuda.cudadrv.error.CudaSupportError:
+        pass
 except ImportError:
     cuda = None
 
@@ -254,7 +260,7 @@ class Distributed:
     def __init__(self, client=None, cluster_type=None, force_new=False, **cluster_options):
         self._initial_client = global_dask_client()  # Initial state
         self._client = client or "auto"  # Cannot be `None`
-        self.cluster_type = cluster_type or ("cpu" if cuda is None else "cuda")
+        self.cluster_type = cluster_type or ("cuda" if HAS_GPU else "cpu")
         self.cluster_options = cluster_options
         # We can only shut down the cluster in `shutdown`/`__exit__`
         # if we are generating it internally
