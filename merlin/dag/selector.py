@@ -34,6 +34,9 @@ class ColumnSelector:
     subgroups, optional: list of ColumnSelector objects
         This provides an alternate syntax for grouping column names together (instead
         of nesting tuples inside the list of names)
+    tags : list of Tags
+        The columns to select from the input dataset based on Tags. Any column with
+        at-least-one of the tags provided will be considered.
     """
 
     def __init__(
