@@ -27,7 +27,7 @@ def test_np_array_to_merlin_pandas_array():
     merlin_pandas_array = MerlinPandasArray(np_array)
 
     assert isinstance(merlin_pandas_array.array, pandas.Series)
-    assert (cupy.asnumpy(merlin_pandas_array.array) == np_array).all()
+    assert (merlin_pandas_array.array.to_numpy() == np_array).all()
 
 
 @pytest.mark.skipif(cupy is None, reason="Cupy is not defined")
@@ -36,7 +36,7 @@ def test_cupy_array_to_merlin_pandas_array():
     merlin_pandas_array = MerlinPandasArray(cp_array)
 
     assert isinstance(merlin_pandas_array.array, pandas.Series)
-    assert (cupy.asnumpy(merlin_pandas_array.array) == cupy.asnumpy(cp_array)).all()
+    assert (merlin_pandas_array.array.to_numpy() == cupy.asnumpy(cp_array)).all()
 
 
 @pytest.mark.skipif(cudf is None, reason="Cudf is not defined")
@@ -45,7 +45,7 @@ def test_cudf_series_to_merlin_pandas_array():
     merlin_pandas_array = MerlinPandasArray(cudf_series)
 
     assert isinstance(merlin_pandas_array.array, pandas.Series)
-    assert (cupy.asnumpy(merlin_pandas_array.array) == cudf_series.to_numpy()).all()
+    assert (merlin_pandas_array.array.to_numpy() == cudf_series.to_numpy()).all()
 
 
 @pytest.mark.skipif(pandas is None, reason="Pandas is not defined")
@@ -54,7 +54,7 @@ def test_pandas_series_to_merlin_pandas_array():
     merlin_pandas_array = MerlinPandasArray(pandas_series)
 
     assert isinstance(merlin_pandas_array.array, pandas.Series)
-    assert (cupy.asnumpy(merlin_pandas_array.array) == pandas_series.to_numpy()).all()
+    assert (merlin_pandas_array.array.to_numpy() == pandas_series.to_numpy()).all()
 
 
 @pytest.mark.skipif(tensorflow is None, reason="Tensorflow is not defined")
@@ -63,4 +63,4 @@ def test_tf_tensor_to_merlin_pandas_array():
     merlin_pandas_array = MerlinPandasArray(tf_tensor)
 
     assert isinstance(merlin_pandas_array.array, pandas.Series)
-    assert (cupy.asnumpy(merlin_pandas_array.array) == tf_tensor.numpy()).all()
+    assert (merlin_pandas_array.array.to_numpy() == tf_tensor.numpy()).all()
