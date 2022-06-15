@@ -16,75 +16,76 @@
 from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import tensorflow
 
+if tensorflow:
 
-class _MerlinTensorflowArray(MerlinArray):
-    """
-    Thin wrapper around a tensorflow.Tensor that can be constructed from other framework types.
-    """
-
-    @classmethod
-    def array_type(cls):
-        return tensorflow.Tensor
-
-    @classmethod
-    def convert_to_array(cls, other):
-        return other.numpy()
-
-    @classmethod
-    def convert_to_cuda_array(cls, other):
-        raise NotImplementedError
-
-    @classmethod
-    def convert_to_dlpack_capsule(cls, other):
-        return tensorflow.experimental.dlpack.to_dlpack(other)
-
-    def build_from_cuda_array(self, other):
+    class _MerlinTensorflowArray(MerlinArray):
         """
-        Build a tf.Tensor from an object that implements the Cuda Array Interface.
-
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Tensor from
-
-        Returns
-        -------
-        tf.Tensor
-            The Tensor built from the array-like object
+        Thin wrapper around a tensorflow.Tensor that can be constructed from other framework types.
         """
-        raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
 
-    def build_from_array(self, other):
-        """
-        Build a tf.Tensor from an object that implements the Numpy Array Interface.
+        @classmethod
+        def array_type(cls):
+            return tensorflow.Tensor
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Tensor from
+        @classmethod
+        def convert_to_array(cls, other):
+            return other.numpy()
 
-        Returns
-        -------
-        tf.Tensor
-            The Tensor built from the array-like object
-        """
-        return tensorflow.convert_to_tensor(other)
+        @classmethod
+        def convert_to_cuda_array(cls, other):
+            raise NotImplementedError
 
-    def build_from_dlpack_capsule(self, capsule):
-        """
-        Build a tf.Tensor from an object that implements the DLPack Standard.
+        @classmethod
+        def convert_to_dlpack_capsule(cls, other):
+            return tensorflow.experimental.dlpack.to_dlpack(other)
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Tensor from
+        def build_from_cuda_array(self, other):
+            """
+            Build a tf.Tensor from an object that implements the Cuda Array Interface.
 
-        Returns
-        -------
-        tf.Tensor
-            The Tensor built from the array-like object
-        """
-        return tensorflow.experimental.dlpack.from_dlpack(capsule)
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Tensor from
+
+            Returns
+            -------
+            tf.Tensor
+                The Tensor built from the array-like object
+            """
+            raise NotImplementedError("Tensorflow does not implement the CUDA Array Interface")
+
+        def build_from_array(self, other):
+            """
+            Build a tf.Tensor from an object that implements the Numpy Array Interface.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Tensor from
+
+            Returns
+            -------
+            tf.Tensor
+                The Tensor built from the array-like object
+            """
+            return tensorflow.convert_to_tensor(other)
+
+        def build_from_dlpack_capsule(self, capsule):
+            """
+            Build a tf.Tensor from an object that implements the DLPack Standard.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Tensor from
+
+            Returns
+            -------
+            tf.Tensor
+                The Tensor built from the array-like object
+            """
+            return tensorflow.experimental.dlpack.from_dlpack(capsule)
 
 
 MerlinTensorflowArray = None if not tensorflow else _MerlinTensorflowArray

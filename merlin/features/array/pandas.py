@@ -17,78 +17,79 @@
 from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import pandas
 
+if pandas:
 
-class _MerlinPandasArray(MerlinArray):
-    """
-    Thin wrapper around a cudf.Series that can be constructed from other framework types.
-    """
-
-    @classmethod
-    def array_type(cls):
-        return pandas.Series
-
-    @classmethod
-    def convert_to_array(cls, other):
-        return other.to_numpy()
-
-    @classmethod
-    def convert_to_cuda_array(cls, other):
-        raise NotImplementedError
-
-    @classmethod
-    def convert_to_dlpack_capsule(cls, other):
-        raise NotImplementedError
-
-    def build_from_cuda_array(self, other):
+    class _MerlinPandasArray(MerlinArray):
         """
-        Build a cudf.Series from an object that implements the Cuda Array Interface.
-
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
-
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
+        Thin wrapper around a cudf.Series that can be constructed from other framework types.
         """
-        return pandas.Series(other)
 
-    def build_from_array(self, other):
-        """
-        Build a cudf.Series from an object that implements the Numpy Array Interface.
+        @classmethod
+        def array_type(cls):
+            return pandas.Series
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
+        @classmethod
+        def convert_to_array(cls, other):
+            return other.to_numpy()
 
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
-        """
-        return pandas.Series(other)
+        @classmethod
+        def convert_to_cuda_array(cls, other):
+            raise NotImplementedError
 
-    def build_from_dlpack_capsule(self, capsule):
-        """
-        Build a cudf.Series from an object that implements the DLPack Standard.
+        @classmethod
+        def convert_to_dlpack_capsule(cls, other):
+            raise NotImplementedError
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
+        def build_from_cuda_array(self, other):
+            """
+            Build a cudf.Series from an object that implements the Cuda Array Interface.
 
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
-        """
-        raise NotImplementedError(
-            "Pandas does not yet implement the full DLPack Standard, "
-            f"currently running {pandas.__version__}"
-        )
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            return pandas.Series(other)
+
+        def build_from_array(self, other):
+            """
+            Build a cudf.Series from an object that implements the Numpy Array Interface.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            return pandas.Series(other)
+
+        def build_from_dlpack_capsule(self, capsule):
+            """
+            Build a cudf.Series from an object that implements the DLPack Standard.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            raise NotImplementedError(
+                "Pandas does not yet implement the full DLPack Standard, "
+                f"currently running {pandas.__version__}"
+            )
 
 
 MerlinPandasArray = None if not pandas else _MerlinPandasArray

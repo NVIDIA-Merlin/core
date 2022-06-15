@@ -17,75 +17,76 @@
 from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import cudf
 
+if cudf:
 
-class _MerlinCudfArray(MerlinArray):
-    """
-    Thin wrapper around a cudf.Series that can be constructed from other framework types.
-    """
-
-    @classmethod
-    def array_type(cls):
-        return cudf.Series
-
-    @classmethod
-    def convert_to_array(cls, other):
-        return other.to_numpy()
-
-    @classmethod
-    def convert_to_cuda_array(cls, other):
-        raise NotImplementedError
-
-    @classmethod
-    def convert_to_dlpack_capsule(cls, other):
-        return other.to_dlpack()
-
-    def build_from_cuda_array(self, other):
+    class _MerlinCudfArray(MerlinArray):
         """
-        Build a cudf.Series from an object that implements the Cuda Array Interface.
-
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
-
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
+        Thin wrapper around a cudf.Series that can be constructed from other framework types.
         """
-        return cudf.Series(other)
 
-    def build_from_array(self, other):
-        """
-        Build a cudf.Series from an object that implements the Numpy Array Interface.
+        @classmethod
+        def array_type(cls):
+            return cudf.Series
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
+        @classmethod
+        def convert_to_array(cls, other):
+            return other.to_numpy()
 
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
-        """
-        return cudf.Series(other)
+        @classmethod
+        def convert_to_cuda_array(cls, other):
+            raise NotImplementedError
 
-    def build_from_dlpack_capsule(self, capsule):
-        """
-        Build a cudf.Series from an object that implements the DLPack Standard.
+        @classmethod
+        def convert_to_dlpack_capsule(cls, other):
+            return other.to_dlpack()
 
-        Parameters
-        ----------
-        other : array-like
-            The array-like object to build the Series from
+        def build_from_cuda_array(self, other):
+            """
+            Build a cudf.Series from an object that implements the Cuda Array Interface.
 
-        Returns
-        -------
-        cudf.Series
-            The Series built from the array-like object
-        """
-        return cudf.io.from_dlpack(capsule)
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            return cudf.Series(other)
+
+        def build_from_array(self, other):
+            """
+            Build a cudf.Series from an object that implements the Numpy Array Interface.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            return cudf.Series(other)
+
+        def build_from_dlpack_capsule(self, capsule):
+            """
+            Build a cudf.Series from an object that implements the DLPack Standard.
+
+            Parameters
+            ----------
+            other : array-like
+                The array-like object to build the Series from
+
+            Returns
+            -------
+            cudf.Series
+                The Series built from the array-like object
+            """
+            return cudf.io.from_dlpack(capsule)
 
 
 MerlinCudfArray = None if not cudf else _MerlinCudfArray
