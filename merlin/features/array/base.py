@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from abc import ABC, abstractmethod
-from typing import Callable, Dict
+from typing import Callable, Dict, Type
 
 from merlin.features.array.interfaces import (
     CudaArrayInterface,
@@ -28,7 +28,7 @@ class MerlinArray(ABC):
     Base class for Merlin array wrapper classes that implement cross-framework array conversions.
     """
 
-    array_types: Dict[type, type] = {}
+    array_types: Dict[type, Type["MerlinArray"]] = {}
     array_interfaces: Dict[type, Callable] = {}
 
     def __init__(self, array):
@@ -53,17 +53,7 @@ class MerlinArray(ABC):
 
         return super().__init_subclass__()
 
-    # MerlinArray.build(array_object) -> MerlinCupyArray
-    @classmethod
-    def build(cls, other):
-        for array_type, array_class in cls.array_types.items():
-            if isinstance(other, array_type):
-                return array_class(other)
-
-        raise TypeError(f"Unknown type of array: {type(other)}")
-
-    # MerlinCupyArray(array_object)
-    def _build_from(self, other):
+    def _build_from(self, other) -> "MerlinArray":
         """
         Build a MerlinArray sub-class object from an array-like object.
 
@@ -116,12 +106,82 @@ class MerlinArray(ABC):
         )
 
     @classmethod
+    def build(cls, other) -> "MerlinArray":
+        """Build the correct sub-class of MerlinArray from the type of other.
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object.
+
+        Returns
+        -------
+        MerlinArray
+            A MerlinArray object of the appropriate sub-class
+
+        Raises
+        ------
+        TypeError
+            If the type of other is not registered with MerlinArray
+        """
+        for array_type, array_class in cls.array_types.items():
+            if isinstance(other, array_type):
+                return array_class(other)
+
+        raise TypeError(f"Unknown type of array: {type(other)}")
+
+    @classmethod
     @abstractmethod
     def array_type(cls) -> type:
+        """Specifies the framework array-like type that sub-classes wrap
+
+        Returns
+        -------
+        type
+            Framework array-like type (e.g. cupy.ndarray)
+        """
+        ...
+
+    @classmethod
+    @abstractmethod
+    def convert_to_cuda_array(cls, other):
+        """
+        Convert an array-like object to an object that implements the CUDA Array Interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
+        ...
+
+    @classmethod
+    @abstractmethod
+    def convert_to_dlpack_capsule(cls, other):
+        """Convert an array-like object into a PyCapsule object created with the DLPack interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
+        ...
+
+    @classmethod
+    @abstractmethod
+    def convert_to_array(cls, other):
+        """
+        Convert an array-like object to an object that implements the Numpy Array Interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
         ...
 
     @abstractmethod
-    def build_from_cuda_array(self, other: CudaArrayInterface):
+    def build_from_cuda_array(self, other: CudaArrayInterface) -> "MerlinArray":
         """
         Build a MerlinArray from an array-like object that implements the CUDA Array Interface
 
@@ -132,9 +192,8 @@ class MerlinArray(ABC):
         """
         ...
 
-    @classmethod
     @abstractmethod
-    def build_from_array(cls, other: NumpyArrayInterface):
+    def build_from_array(self, other: NumpyArrayInterface) -> "MerlinArray":
         """
         Build a MerlinArray from an array-like object that implements the Numpy Array Interface
 
@@ -145,9 +204,8 @@ class MerlinArray(ABC):
         """
         ...
 
-    @classmethod
     @abstractmethod
-    def build_from_dlpack_capsule(cls, capsule):
+    def build_from_dlpack_capsule(self, capsule) -> "MerlinArray":
         """
         Build a MerlinArray from a PyCapsule object created with the DLPack interface
 
@@ -158,7 +216,7 @@ class MerlinArray(ABC):
         """
         ...
 
-    def build_from_dlpack(self, other):
+    def build_from_dlpack(self, other) -> "MerlinArray":
         """
         Build a MerlinArray from an array-like object that implements the DLPack Standard
 
