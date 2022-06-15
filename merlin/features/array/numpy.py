@@ -17,10 +17,26 @@ from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import numpy
 
 
-class MerlinNumpyArray(MerlinArray):
+class _MerlinNumpyArray(MerlinArray):
     """
     Thin wrapper around a numpy.ndarray that can be constructed from other framework types.
     """
+
+    @classmethod
+    def array_type(cls):
+        return numpy.ndarray
+
+    @classmethod
+    def convert_to_array(cls, other):
+        return other
+
+    @classmethod
+    def convert_to_cuda_array(cls, other):
+        raise NotImplementedError
+
+    @classmethod
+    def convert_to_dlpack_capsule(cls, other):
+        raise NotImplementedError
 
     def build_from_cuda_array(self, other):
         """
@@ -75,3 +91,6 @@ class MerlinNumpyArray(MerlinArray):
                 "NumPy does not implement the DLPack Standard until version 1.22.0, "
                 f"currently running {numpy.__version__}"
             ) from exc
+
+
+MerlinNumpyArray = None if not numpy else _MerlinNumpyArray

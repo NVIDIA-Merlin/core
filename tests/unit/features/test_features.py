@@ -16,6 +16,7 @@
 import pytest
 
 from merlin.core.dispatch import make_df
+from merlin.features.array.compat import numpy as np
 from merlin.features.array.compat import tensorflow
 from merlin.features.collection import Feature, FeatureCollection
 from merlin.schema import ColumnSchema, Schema, Tags
@@ -29,7 +30,7 @@ def test_select_features_by_name():
             ColumnSchema("c", tags=["c"]),
         ]
     )
-    value = {"a": [1, 2, 3], "b": [3, 4, 5], "c": [6, 7, 8]}
+    value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
     fc = FeatureCollection(schema, value)
     fc_b = fc.select_by_name("b")
     fc_bc = fc.select_by_name(["b", "c"])
@@ -53,7 +54,7 @@ def test_select_features_by_tag():
         ]
     )
 
-    value = {"a": [1, 2, 3], "b": [3, 4, 5], "c": [6, 7, 8]}
+    value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
 
     features = FeatureCollection(schema, value)
 
@@ -70,7 +71,7 @@ def test_select_features_by_tag():
 
 def test_update_feature_schemas():
     schema = Schema(["a"])
-    values = {"a": [1.0, 2.0]}
+    values = {"a": np.array([1.0, 2.0])}
     features = FeatureCollection(schema, values)
 
     new_schema = Schema([schema.column_schemas["a"].with_tags("updated")])
@@ -81,7 +82,7 @@ def test_update_feature_schemas():
 
 def test_get_feature():
     schema = Schema(["a"])
-    values = {"a": [1.0, 2.0]}
+    values = {"a": np.array([1.0, 2.0])}
     features = FeatureCollection(schema, values)
 
     feature = features["a"]
@@ -108,6 +109,8 @@ def test_dataframe_features():
 
 
 def test_tensorflow_features():
+    pytest.importorskip("tensorflow")
+
     values = {
         "a": tensorflow.random.uniform((10,)),
     }

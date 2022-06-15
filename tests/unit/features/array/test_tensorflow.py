@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
 
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.tensorflow import MerlinTensorflowArray
 
+pytest.importorskip("tensorflow")
 
+
+@pytest.mark.skipif(numpy is None, reason="Numpy is not defined")
 def test_np_array_to_merlin_tf_array():
     np_array = numpy.array([1, 2, 3, 4])
     merlin_tf_array = MerlinTensorflowArray(np_array)
@@ -26,6 +30,7 @@ def test_np_array_to_merlin_tf_array():
     assert (merlin_tf_array.array.numpy() == np_array).all()
 
 
+@pytest.mark.skipif(cupy is None, reason="Cupy is not defined")
 def test_cupy_array_to_merlin_tf_array():
     cp_array = cupy.array([1, 2, 3, 4])
     merlin_tf_array = MerlinTensorflowArray(cp_array)
@@ -34,6 +39,7 @@ def test_cupy_array_to_merlin_tf_array():
     assert (merlin_tf_array.array.numpy() == cupy.asnumpy(cp_array)).all()
 
 
+@pytest.mark.skipif(cudf is None, reason="Cudf is not defined")
 def test_cudf_series_to_merlin_tf_array():
     cudf_series = cudf.Series([1, 2, 3, 4])
     merlin_tf_array = MerlinTensorflowArray(cudf_series)
@@ -42,6 +48,7 @@ def test_cudf_series_to_merlin_tf_array():
     assert (merlin_tf_array.array.numpy() == cudf_series.to_numpy()).all()
 
 
+@pytest.mark.skipif(tensorflow is None, reason="Tensorflow is not defined")
 def test_tf_tensor_to_merlin_tf_array():
     tf_tensor = tensorflow.random.uniform((10,))
     merlin_tf_array = MerlinTensorflowArray(tf_tensor)
@@ -50,6 +57,7 @@ def test_tf_tensor_to_merlin_tf_array():
     assert (merlin_tf_array.array.numpy() == tf_tensor.numpy()).all()
 
 
+@pytest.mark.skipif(pandas is None, reason="Pandas is not defined")
 def test_pandas_series_to_merlin_tf_array():
     pandas_series = pandas.Series([1, 2, 3, 4])
     merlin_tf_array = MerlinTensorflowArray(pandas_series)

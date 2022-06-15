@@ -17,10 +17,29 @@ from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import cupy
 
 
-class MerlinCupyArray(MerlinArray):
+class _MerlinCupyArray(MerlinArray):
     """
     Thin wrapper around a cupy.ndarray that can be constructed from other framework types.
     """
+
+    @classmethod
+    def array_type(cls):
+        return cupy.ndarray
+
+    @classmethod
+    def convert_to_array(cls, other):
+        return cupy.asnumpy(other)
+
+    @classmethod
+    def convert_to_cuda_array(cls, other):
+        return other
+
+    @classmethod
+    def convert_to_dlpack_capsule(cls, other):
+        try:
+            return other.to_dlpack()
+        except AttributeError:
+            return other.toDlpack()
 
     def build_from_cuda_array(self, other):
         """
@@ -72,3 +91,6 @@ class MerlinCupyArray(MerlinArray):
             return cupy.from_dlpack(capsule)
         except AttributeError:
             return cupy.fromDlpack(capsule)
+
+
+MerlinCupyArray = None if not cupy else _MerlinCupyArray

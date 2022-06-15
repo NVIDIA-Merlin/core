@@ -17,10 +17,26 @@ from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import tensorflow
 
 
-class MerlinTensorflowArray(MerlinArray):
+class _MerlinTensorflowArray(MerlinArray):
     """
     Thin wrapper around a tensorflow.Tensor that can be constructed from other framework types.
     """
+
+    @classmethod
+    def array_type(cls):
+        return tensorflow.Tensor
+
+    @classmethod
+    def convert_to_array(cls, other):
+        return other.numpy()
+
+    @classmethod
+    def convert_to_cuda_array(cls, other):
+        raise NotImplementedError
+
+    @classmethod
+    def convert_to_dlpack_capsule(cls, other):
+        return tensorflow.experimental.dlpack.to_dlpack(other)
 
     def build_from_cuda_array(self, other):
         """
@@ -69,3 +85,6 @@ class MerlinTensorflowArray(MerlinArray):
             The Tensor built from the array-like object
         """
         return tensorflow.experimental.dlpack.from_dlpack(capsule)
+
+
+MerlinTensorflowArray = None if not tensorflow else _MerlinTensorflowArray

@@ -18,10 +18,26 @@ from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import pandas
 
 
-class MerlinPandasArray(MerlinArray):
+class _MerlinPandasArray(MerlinArray):
     """
     Thin wrapper around a cudf.Series that can be constructed from other framework types.
     """
+
+    @classmethod
+    def array_type(cls):
+        return pandas.Series
+
+    @classmethod
+    def convert_to_array(cls, other):
+        return other.to_numpy()
+
+    @classmethod
+    def convert_to_cuda_array(cls, other):
+        raise NotImplementedError
+
+    @classmethod
+    def convert_to_dlpack_capsule(cls, other):
+        raise NotImplementedError
 
     def build_from_cuda_array(self, other):
         """
@@ -73,3 +89,6 @@ class MerlinPandasArray(MerlinArray):
             "Pandas does not yet implement the full DLPack Standard, "
             f"currently running {pandas.__version__}"
         )
+
+
+MerlinPandasArray = None if not pandas else _MerlinPandasArray
