@@ -51,10 +51,10 @@ def test_cudf_series_to_merlin_numpy_array():
 @pytest.mark.skipif(pandas is None, reason="Pandas is not defined")
 def test_pandas_series_to_merlin_numpy_array():
     pandas_series = pandas.Series([1, 2, 3, 4])
-    merlin_pandas_array = MerlinNumpyArray(pandas_series)
+    merlin_numpy_array = MerlinNumpyArray(pandas_series)
 
-    assert isinstance(merlin_pandas_array.array, numpy.ndarray)
-    assert (merlin_pandas_array.array.to_numpy() == pandas_series.to_numpy()).all()
+    assert isinstance(merlin_numpy_array.array, numpy.ndarray)
+    assert (merlin_numpy_array.array == pandas_series.to_numpy()).all()
 
 
 @pytest.mark.skipif(tensorflow is None, reason="Tensorflow is not defined")
