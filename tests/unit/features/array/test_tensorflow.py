@@ -76,7 +76,7 @@ def test_virtual_df_convert_to_tensorflow():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(tensorflow.Tensor)
+    m_vdf = vdf.columns_to(tensorflow.Tensor)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], tensorflow.Tensor)
@@ -91,7 +91,7 @@ def test_virtual_df_convert_from_tensorflow():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(numpy.ndarray)
+    m_vdf = vdf.columns_to(numpy.ndarray)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], numpy.ndarray)

@@ -15,10 +15,17 @@
 #
 from typing import Any, Dict, List
 
+from merlin.core.dispatch import DataFrameType
 from merlin.features.array.base import MerlinArray
 
 
 class VirtualDataframe:
+    """
+    A dataframe-like representation that simulates a real dataframe, given a dictionary
+    of array-like objects (e.g. numpy.ndarray, tensorflow.Tensor) from external frameworks
+    supported by Merlin that represent the "column" data of the VirtualDataframe.
+    """
+
     def __init__(self, data: Dict[str, Any] = None):
         data = data or {}
         converted_cols = {}
@@ -31,11 +38,39 @@ class VirtualDataframe:
         self._col_data = converted_cols
 
     @classmethod
-    def from_df(cls, other_df):
+    def from_df(cls, other_df: DataFrameType) -> "VirtualDataframe":
+        """
+        Create virtual dataframe from another dataframe
+
+        Parameters
+        ----------
+        other_df : DataFrameType
+            A pandas or cudf dataframe.
+
+        Returns
+        -------
+        VirtualDataframe
+            A VirtualDataframe that has the same data as the DataFrame supplied.
+        """
+
         col_series = {col_name: other_df[col_name] for col_name in other_df.columns}
         return VirtualDataframe(col_series)
 
-    def to(self, array_type):
+    def columns_to(self, array_type) -> "VirtualDataframe":
+        """
+        Convert the columns of this dataframe to a
+        framework array-like type (e.g. cupy.ndarray)
+
+        Parameters
+        ----------
+        array_type : array-like type
+            An array type from an external framework
+
+        Returns
+        -------
+        VirtualDataframe
+            A new VirtualDataframe with the columns converted to the new type
+        """
         merlin_array_type = MerlinArray.array_types[array_type]
         converted_cols = {}
         for col_name, col_array in self._col_data.items():

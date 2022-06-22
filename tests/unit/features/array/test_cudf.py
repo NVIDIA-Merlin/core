@@ -77,7 +77,7 @@ def test_virtual_df_convert_to_cudf():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(cudf.Series)
+    m_vdf = vdf.columns_to(cudf.Series)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], cudf.Series)
@@ -94,7 +94,7 @@ def test_virtual_df_convert_from_cudf():
     vdf = VirtualDataframe.from_df(df)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(numpy.ndarray)
+    m_vdf = vdf.columns_to(numpy.ndarray)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], numpy.ndarray)

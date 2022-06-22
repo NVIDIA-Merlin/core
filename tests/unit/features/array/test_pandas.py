@@ -68,7 +68,7 @@ def test_tf_tensor_to_merlin_pandas_array():
     assert (merlin_pandas_array.array.to_numpy() == tf_tensor.numpy()).all()
 
 
-def test_virtual_df_convert_to_cudf():
+def test_virtual_df_convert_to_pandas():
     dict_array = {
         "a": numpy.array([1, 2, 3, 4, 5]),
         "b": numpy.array([1, 2, 3, 4, 5]),
@@ -77,24 +77,25 @@ def test_virtual_df_convert_to_cudf():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(cudf.Series)
+    m_vdf = vdf.columns_to(pandas.Series)
 
     for col_name in m_vdf.columns:
-        assert isinstance(m_vdf[col_name], cudf.Series)
+        assert isinstance(m_vdf[col_name], pandas.Series)
 
 
-def test_virtual_df_convert_from_cudf():
+def test_virtual_df_convert_from_pandas():
     df = make_df(
         {
             "a": numpy.array([1, 2, 3, 4, 5]),
             "b": numpy.array([1, 2, 3, 4, 5]),
             "c": numpy.array([1, 2, 3, 4, 5]),
-        }
+        },
+        device="cpu",
     )
     vdf = VirtualDataframe.from_df(df)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(numpy.ndarray)
+    m_vdf = vdf.columns_to(numpy.ndarray)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], numpy.ndarray)

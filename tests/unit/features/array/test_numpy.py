@@ -76,7 +76,7 @@ def test_virtual_df_convert_to_numpy():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(numpy.ndarray)
+    m_vdf = vdf.columns_to(numpy.ndarray)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], numpy.ndarray)
@@ -91,7 +91,7 @@ def test_virtual_df_convert_from_numpy():
     vdf = VirtualDataframe(dict_array)
     assert isinstance(vdf, VirtualDataframe)
 
-    m_vdf = vdf.to(numpy.ndarray)
+    m_vdf = vdf.columns_to(numpy.ndarray)
 
     for col_name in m_vdf.columns:
         assert isinstance(m_vdf[col_name], numpy.ndarray)
