@@ -14,9 +14,10 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import Dict, List, Protocol, Sequence, Union, runtime_checkable
+from typing import Dict, Protocol, Sequence, Union, runtime_checkable
 
-from merlin.features.array.base import MerlinArray
+from merlin.features.array import MerlinArray
+from merlin.features.df import VirtualDataframe
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -28,35 +29,6 @@ class Feature:
 
     schema: ColumnSchema
     values: MerlinArray
-
-
-class VirtualDataframe:
-    def __init__(self, data=None):
-        self._col_data = data or {}
-
-    @property
-    def columns(self) -> List[str]:
-        return list(self._col_data.keys())
-
-    def __getitem__(self, col_items):
-        if isinstance(col_items, list):
-            results = {name: self._col_data[name] for name in col_items}
-            return VirtualDataframe(results)
-        else:
-            return self._col_data[col_items]
-
-    def __len__(self):
-        return len(self.columns)
-
-    def __iter__(self):
-        for name, tensor in self._col_data.items():
-            yield name, tensor
-
-    def __repr__(self):
-        dict_rep = {}
-        for k, v in self._col_data.items():
-            dict_rep[k] = v
-        return str(dict_rep)
 
 
 @runtime_checkable

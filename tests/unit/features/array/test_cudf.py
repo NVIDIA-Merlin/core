@@ -15,8 +15,10 @@
 #
 import pytest
 
+from merlin.core.dispatch import make_df
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.cudf import MerlinCudfArray
+from merlin.features.df import VirtualDataframe
 
 pytest.importorskip("cudf")
 
@@ -64,3 +66,35 @@ def test_pandas_series_to_merlin_cudf_array():
 
     assert isinstance(merlin_pandas_array.array, cudf.Series)
     assert (cupy.asnumpy(merlin_pandas_array.array) == pandas_series.to_numpy()).all()
+
+
+def test_virtual_df_convert_to_cudf():
+    dict_array = {
+        "a": numpy.array([1, 2, 3, 4, 5]),
+        "b": numpy.array([1, 2, 3, 4, 5]),
+        "c": numpy.array([1, 2, 3, 4, 5]),
+    }
+    vdf = VirtualDataframe(dict_array)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(cudf.Series)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], cudf.Series)
+
+
+def test_virtual_df_convert_from_cudf():
+    df = make_df(
+        {
+            "a": numpy.array([1, 2, 3, 4, 5]),
+            "b": numpy.array([1, 2, 3, 4, 5]),
+            "c": numpy.array([1, 2, 3, 4, 5]),
+        }
+    )
+    vdf = VirtualDataframe.from_df(df)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(numpy.ndarray)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], numpy.ndarray)

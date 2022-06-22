@@ -17,6 +17,7 @@ import pytest
 
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.numpy import MerlinNumpyArray
+from merlin.features.df import VirtualDataframe
 
 pytest.importorskip("numpy")
 
@@ -64,3 +65,33 @@ def test_tf_tensor_to_merlin_numpy_array():
 
     assert isinstance(merlin_np_array.array, numpy.ndarray)
     assert (merlin_np_array.array == tf_tensor.numpy()).all()
+
+
+def test_virtual_df_convert_to_numpy():
+    dict_array = {
+        "a": numpy.array([1, 2, 3, 4, 5]),
+        "b": numpy.array([1, 2, 3, 4, 5]),
+        "c": numpy.array([1, 2, 3, 4, 5]),
+    }
+    vdf = VirtualDataframe(dict_array)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(numpy.ndarray)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], numpy.ndarray)
+
+
+def test_virtual_df_convert_from_numpy():
+    dict_array = {
+        "a": numpy.array([1, 2, 3, 4, 5]),
+        "b": numpy.array([1, 2, 3, 4, 5]),
+        "c": numpy.array([1, 2, 3, 4, 5]),
+    }
+    vdf = VirtualDataframe(dict_array)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(numpy.ndarray)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], numpy.ndarray)

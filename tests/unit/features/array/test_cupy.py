@@ -17,6 +17,7 @@ import pytest
 
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.cupy import MerlinCupyArray
+from merlin.features.df import VirtualDataframe
 
 pytest.importorskip("cupy")
 
@@ -64,3 +65,33 @@ def test_pandas_series_to_merlin_cupy_array():
 
     assert isinstance(merlin_pandas_array.array, cupy.ndarray)
     assert (cupy.asnumpy(merlin_pandas_array.array) == pandas_series.to_numpy()).all()
+
+
+def test_virtual_df_convert_to_cupy():
+    dict_array = {
+        "a": numpy.array([1, 2, 3, 4, 5]),
+        "b": numpy.array([1, 2, 3, 4, 5]),
+        "c": numpy.array([1, 2, 3, 4, 5]),
+    }
+    vdf = VirtualDataframe(dict_array)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(cupy.ndarray)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], cupy.ndarray)
+
+
+def test_virtual_df_convert_from_cupy():
+    dict_array = {
+        "a": cupy.ndarray([1, 2, 3, 4, 5]),
+        "b": cupy.ndarray([1, 2, 3, 4, 5]),
+        "c": cupy.ndarray([1, 2, 3, 4, 5]),
+    }
+    vdf = VirtualDataframe(dict_array)
+    assert isinstance(vdf, VirtualDataframe)
+
+    m_vdf = vdf.to(numpy.ndarray)
+
+    for col_name in m_vdf.columns:
+        assert isinstance(m_vdf[col_name], numpy.ndarray)

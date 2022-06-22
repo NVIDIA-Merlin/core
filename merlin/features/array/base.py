@@ -32,8 +32,8 @@ class MerlinArray(ABC):
     array_interfaces: Dict[type, Callable] = {}
 
     def __init__(self, array):
-        self._ref = array
-        self.array = self._build_from(array)
+        self._ref = array._ref if isinstance(array, MerlinArray) else array
+        self.array = self._build_from(self._ref)
 
     @classmethod
     def __init_subclass__(cls) -> None:
