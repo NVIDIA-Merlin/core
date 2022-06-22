@@ -126,7 +126,7 @@ class FeatureCollection:
             A collection of the features that match the provided names
         """
         sub_schema = self.schema.select_by_name(names)
-        sub_values = VirtualDataframe({name: self.values[name] for name in sub_schema.column_names})
+        sub_values = self.values[sub_schema.column_names]
 
         return FeatureCollection(sub_schema, sub_values)
 
@@ -146,7 +146,7 @@ class FeatureCollection:
             A collection of the features that match the provided tags
         """
         sub_schema = self.schema.select_by_tag(tags)
-        sub_values = VirtualDataframe({name: self.values[name] for name in sub_schema.column_names})
+        sub_values = self.values[sub_schema.column_names]
 
         return FeatureCollection(sub_schema, sub_values)
 
