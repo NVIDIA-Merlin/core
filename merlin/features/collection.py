@@ -61,6 +61,13 @@ class VirtualDataframe:
 
 @runtime_checkable
 class Features(Protocol):
+    """
+    This Protocol matches either real Pandas/cuDF dataframes
+    or the VirtualDataframe class defined above when an object
+    is checked with `is_instance(obj, Features)` which returns
+    `True` for any object that defines all of the methods below
+    """
+
     @property
     def columns(self):
         ...
@@ -74,20 +81,19 @@ class FeatureCollection:
     A collection of features containing their schemas and data.
     """
 
-    def __init__(self, schema: Schema, values: Union[Dict, Features]):
+    def __init__(self, schema: Schema, values: Features):
         self.schema: Schema = schema
-        self.values: Features = None
-
-        if isinstance(values, dict):
-            self.values = VirtualDataframe(values)
-        else:
-            self.values = values
+        self.values: Features = values
 
         if len(self.schema) != len(self.values.columns):
             raise ValueError("Schema and values must have the same number of columns")
 
         if set(self.schema.column_names) != set(self.values.columns):
             raise ValueError("Schema and Values have different column names.")
+
+    @classmethod
+    def from_values_dict(cls, schema: Schema, values: Dict):
+        return FeatureCollection(schema, VirtualDataframe(values))
 
     def with_schema(self, schema: Schema) -> "FeatureCollection":
         """
@@ -120,7 +126,7 @@ class FeatureCollection:
             A collection of the features that match the provided names
         """
         sub_schema = self.schema.select_by_name(names)
-        sub_values = {name: self.values[name] for name in sub_schema.column_names}
+        sub_values = VirtualDataframe({name: self.values[name] for name in sub_schema.column_names})
 
         return FeatureCollection(sub_schema, sub_values)
 
@@ -140,7 +146,7 @@ class FeatureCollection:
             A collection of the features that match the provided tags
         """
         sub_schema = self.schema.select_by_tag(tags)
-        sub_values = {name: self.values[name] for name in sub_schema.column_names}
+        sub_values = VirtualDataframe({name: self.values[name] for name in sub_schema.column_names})
 
         return FeatureCollection(sub_schema, sub_values)
 
