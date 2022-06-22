@@ -39,7 +39,7 @@ class MerlinArray(ABC):
     def __init_subclass__(cls) -> None:
         # Create a lookup table that matches array types (e.g. cupy.ndarray)
         # with MerlinArray sub-classes (e.g. CupyMerlinArray)
-        if hasattr(cls, "array_type"):
+        if hasattr(cls, "array_type") and cls.array_type():
             cls.array_types[cls.array_type()] = cls
 
         # Since each sub-class defines its own implementation of these methods
@@ -226,3 +226,69 @@ class MerlinArray(ABC):
             An array-like object that implements the DLPack Standard
         """
         return self.build_from_dlpack_capsule(other.__dlpack__())
+
+
+class ArrayPackageNotInstalled(MerlinArray):
+    def __init__(self, array):
+        self.__class__.raise_not_installed(self.__class__.package_name())
+        super().__init__(array)
+
+    @classmethod
+    def array_type(cls):
+        return None
+
+    @classmethod
+    @abstractmethod
+    def package_name(cls):
+        ...
+
+    @classmethod
+    def raise_not_installed(cls, package_name):
+        raise ImportError(f"{cls.package_name()} is not installed")
+
+    @classmethod
+    def convert_to_array(cls, other):
+        """
+        Convert an array-like object to an object that implements the Numpy Array Interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
+        cls.raise_not_installed(cls.package_name)
+
+    @classmethod
+    def convert_to_cuda_array(cls, other):
+        """
+        Convert an array-like object to an object that implements the CUDA Array Interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
+        cls.raise_not_installed(cls.package_name)
+
+    @classmethod
+    def convert_to_dlpack_capsule(cls, other):
+        """Convert an array-like object into a PyCapsule object created with the DLPack interface
+
+        Parameters
+        ----------
+        other : array-like
+            An array-like object
+        """
+        cls.raise_not_installed(cls.package_name)
+
+    def build_from_dlpack_capsule(self, capsule) -> "MerlinArray":
+        """
+        Build a MerlinArray from a PyCapsule object created with the DLPack interface
+
+        Parameters
+        ----------
+        other : PyCapsule
+            A PyCapsule object created with the DLPack interface
+        """
+        self.__class__.raise_not_installed(self.__class__.package_name)
+        return None

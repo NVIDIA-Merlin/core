@@ -13,10 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.features.array.base import MerlinArray
+from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
 from merlin.features.array.compat import cupy
 
-if cupy:
+if not cupy:
+
+    class _CupyNotInstalled(ArrayPackageNotInstalled):
+        @classmethod
+        def package_name(cls):
+            return "cupy"
+
+else:
 
     class _MerlinCupyArray(MerlinArray):
         """
@@ -94,4 +101,6 @@ if cupy:
                 return cupy.fromDlpack(capsule)
 
 
-MerlinCupyArray = None if not cupy else _MerlinCupyArray
+# This makes mypy type checking work by avoiding
+# duplicate definitions of MerlinCudfArray
+MerlinCupyArray = _MerlinCupyArray if cupy else _CupyNotInstalled

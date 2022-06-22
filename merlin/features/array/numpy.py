@@ -13,10 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.features.array.base import MerlinArray
+from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
 from merlin.features.array.compat import numpy
 
-if numpy:
+if not numpy:
+
+    class _NumpyNotInstalled(ArrayPackageNotInstalled):
+        @classmethod
+        def package_name(cls):
+            return "numpy"
+
+else:
 
     class _MerlinNumpyArray(MerlinArray):
         """
@@ -94,4 +101,6 @@ if numpy:
                 ) from exc
 
 
-MerlinNumpyArray = None if not numpy else _MerlinNumpyArray
+# This makes mypy type checking work by avoiding
+# duplicate definitions of MerlinCudfArray
+MerlinNumpyArray = _MerlinNumpyArray if numpy else _NumpyNotInstalled

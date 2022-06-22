@@ -13,10 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.features.array.base import MerlinArray
+from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
 from merlin.features.array.compat import tensorflow
 
-if tensorflow:
+if not tensorflow:
+
+    class _TensorflowNotInstalled(ArrayPackageNotInstalled):
+        @classmethod
+        def package_name(cls):
+            return "tensorflow"
+
+else:
 
     class _MerlinTensorflowArray(MerlinArray):
         """
@@ -88,4 +95,6 @@ if tensorflow:
             return tensorflow.experimental.dlpack.from_dlpack(capsule)
 
 
-MerlinTensorflowArray = None if not tensorflow else _MerlinTensorflowArray
+# This makes mypy type checking work by avoiding
+# duplicate definitions of MerlinCudfArray
+MerlinTensorflowArray = _MerlinTensorflowArray if tensorflow else _TensorflowNotInstalled

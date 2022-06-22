@@ -14,10 +14,17 @@
 # limitations under the License.
 #
 
-from merlin.features.array.base import MerlinArray
+from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
 from merlin.features.array.compat import pandas
 
-if pandas:
+if not pandas:
+
+    class _PandasNotInstalled(ArrayPackageNotInstalled):
+        @classmethod
+        def package_name(cls):
+            return "pandas"
+
+else:
 
     class _MerlinPandasArray(MerlinArray):
         """
@@ -92,4 +99,6 @@ if pandas:
             )
 
 
-MerlinPandasArray = None if not pandas else _MerlinPandasArray
+# This makes mypy type checking work by avoiding
+# duplicate definitions of MerlinCudfArray
+MerlinPandasArray = _MerlinPandasArray if pandas else _PandasNotInstalled

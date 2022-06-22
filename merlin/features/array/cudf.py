@@ -14,10 +14,17 @@
 # limitations under the License.
 #
 
-from merlin.features.array.base import MerlinArray
+from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
 from merlin.features.array.compat import cudf
 
-if cudf:
+if not cudf:
+
+    class _CudfNotInstalled(ArrayPackageNotInstalled):
+        @classmethod
+        def package_name(cls):
+            return "cudf"
+
+else:
 
     class _MerlinCudfArray(MerlinArray):
         """
@@ -29,20 +36,33 @@ if cudf:
             return cudf.Series
 
         @classmethod
-        def convert_to_array(cls, other):
-            return other.to_numpy()
+        def convert_to_array(cls, series: cudf.Series):
+            return series.to_numpy()
 
         @classmethod
-        def convert_to_cuda_array(cls, other):
+        def convert_to_cuda_array(cls, series: cudf.Series):
             raise NotImplementedError
 
         @classmethod
-        def convert_to_dlpack_capsule(cls, other):
-            return other.to_dlpack()
+        def convert_to_dlpack_capsule(cls, series: cudf.Series):
+            """
+            Convert a `cudf.Series` to a dlpack capsule
+
+            Parameters
+            ----------
+            series : cudf.Series
+                Series to be converted
+
+            Returns
+            -------
+            PyCapsule
+                dlpack capsule created from series
+            """
+            return series.to_dlpack()
 
         def build_from_cuda_array(self, other):
             """
-            Build a cudf.Series from an object that implements the Cuda Array Interface.
+            Build a `cudf.Series` from an object that implements the Cuda Array Interface.
 
             Parameters
             ----------
@@ -89,4 +109,6 @@ if cudf:
             return cudf.io.from_dlpack(capsule)
 
 
-MerlinCudfArray = None if not cudf else _MerlinCudfArray
+# This makes mypy type checking work by avoiding
+# duplicate definitions of MerlinCudfArray
+MerlinCudfArray = _MerlinCudfArray if cudf else _CudfNotInstalled
