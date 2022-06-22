@@ -13,3 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+from merlin.features.array.base import MerlinArray
+from merlin.features.array.cudf import MerlinCudfArray
+from merlin.features.array.cupy import MerlinCupyArray
+from merlin.features.array.numpy import MerlinNumpyArray
+from merlin.features.array.pandas import MerlinPandasArray
+from merlin.features.array.tensorflow import MerlinTensorflowArray
+
+__all__ = [
+    "MerlinArray",
+    "MerlinCudfArray",
+    "MerlinCupyArray",
+    "MerlinNumpyArray",
+    "MerlinPandasArray",
+    "MerlinTensorflowArray",
+]
