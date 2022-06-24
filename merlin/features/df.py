@@ -23,7 +23,7 @@ class VirtualDataFrame:
     """
     A dataframe-like representation that simulates a real dataframe, given a dictionary
     of array-like objects (e.g. numpy.ndarray, tensorflow.Tensor) from external frameworks
-    supported by Merlin that represent the "column" data of the VirtualDataframe.
+    supported by Merlin that represent the "column" data of the VirtualDataFrame.
     """
 
     def __init__(self, data: Dict[str, Any] = None):
@@ -49,8 +49,8 @@ class VirtualDataFrame:
 
         Returns
         -------
-        VirtualDataframe
-            A VirtualDataframe that has the same data as the DataFrame supplied.
+        VirtualDataFrame
+            A VirtualDataFrame that has the same data as the DataFrame supplied.
         """
 
         col_series = {col_name: other_df[col_name] for col_name in other_df.columns}
@@ -68,8 +68,8 @@ class VirtualDataFrame:
 
         Returns
         -------
-        VirtualDataframe
-            A new VirtualDataframe with the columns converted to the new type
+        VirtualDataFrame
+            A new VirtualDataFrame with the columns converted to the new type
         """
         merlin_array_type = MerlinArray.array_types[array_type]
         converted_cols = {}

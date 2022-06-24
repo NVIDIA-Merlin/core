@@ -18,7 +18,7 @@ import pytest
 from merlin.core.dispatch import make_df
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.pandas import MerlinPandasArray
-from merlin.features.df import VirtualDataframe
+from merlin.features.df import VirtualDataFrame
 
 pytest.importorskip("pandas")
 
@@ -74,8 +74,8 @@ def test_virtual_df_convert_to_pandas():
         "b": numpy.array([1, 2, 3, 4, 5]),
         "c": numpy.array([1, 2, 3, 4, 5]),
     }
-    vdf = VirtualDataframe(dict_array)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame(dict_array)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(pandas.Series)
 
@@ -92,8 +92,8 @@ def test_virtual_df_convert_from_pandas():
         },
         device="cpu",
     )
-    vdf = VirtualDataframe.from_df(df)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame.from_df(df)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(numpy.ndarray)
 

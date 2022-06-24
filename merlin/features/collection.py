@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from typing import Dict, Protocol, Sequence, Union, runtime_checkable
 
 from merlin.features.array import MerlinArray
-from merlin.features.df import VirtualDataframe
+from merlin.features.df import VirtualDataFrame
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -71,7 +71,7 @@ class Features:
 
     @classmethod
     def from_values_dict(cls, schema: Schema, values: Dict):
-        return Features(schema, VirtualDataframe(values))
+        return Features(schema, VirtualDataFrame(values))
 
     def with_schema(self, schema: Schema) -> "Features":
         """

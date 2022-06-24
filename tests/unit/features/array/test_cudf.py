@@ -18,7 +18,7 @@ import pytest
 from merlin.core.dispatch import make_df
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.cudf import MerlinCudfArray
-from merlin.features.df import VirtualDataframe
+from merlin.features.df import VirtualDataFrame
 
 pytest.importorskip("cudf")
 
@@ -74,8 +74,8 @@ def test_virtual_df_convert_to_cudf():
         "b": numpy.array([1, 2, 3, 4, 5]),
         "c": numpy.array([1, 2, 3, 4, 5]),
     }
-    vdf = VirtualDataframe(dict_array)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame(dict_array)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(cudf.Series)
 
@@ -91,8 +91,8 @@ def test_virtual_df_convert_from_cudf():
             "c": numpy.array([1, 2, 3, 4, 5]),
         }
     )
-    vdf = VirtualDataframe.from_df(df)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame.from_df(df)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(numpy.ndarray)
 

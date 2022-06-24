@@ -15,11 +15,11 @@
 #
 from merlin.features.array.base import MerlinArray
 from merlin.features.array.compat import numpy
-from merlin.features.df import VirtualDataframe
+from merlin.features.df import VirtualDataFrame
 
 
 def test_virtual_dataframe_set_item():
-    df = VirtualDataframe()
+    df = VirtualDataFrame()
 
     values = numpy.random.randint(0, 9, 5)
     df["col_name"] = values

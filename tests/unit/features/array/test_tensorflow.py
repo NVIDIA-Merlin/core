@@ -17,7 +17,7 @@ import pytest
 
 from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.tensorflow import MerlinTensorflowArray
-from merlin.features.df import VirtualDataframe
+from merlin.features.df import VirtualDataFrame
 
 pytest.importorskip("tensorflow")
 
@@ -73,8 +73,8 @@ def test_virtual_df_convert_to_tensorflow():
         "b": numpy.array([1, 2, 3, 4, 5]),
         "c": numpy.array([1, 2, 3, 4, 5]),
     }
-    vdf = VirtualDataframe(dict_array)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame(dict_array)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(tensorflow.Tensor)
 
@@ -88,8 +88,8 @@ def test_virtual_df_convert_from_tensorflow():
         "b": tensorflow.constant([1, 2, 3, 4, 5]),
         "c": tensorflow.constant([1, 2, 3, 4, 5]),
     }
-    vdf = VirtualDataframe(dict_array)
-    assert isinstance(vdf, VirtualDataframe)
+    vdf = VirtualDataFrame(dict_array)
+    assert isinstance(vdf, VirtualDataFrame)
 
     m_vdf = vdf.columns_to(numpy.ndarray)
 
