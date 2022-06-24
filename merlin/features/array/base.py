@@ -53,6 +53,12 @@ class MerlinArray(ABC):
 
         return super().__init_subclass__()
 
+    def __str__(self):
+        return f"{self.__class__.__name__}({self.array.__str__()})"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.array.__repr__()})"
+
     def _build_from(self, other) -> "MerlinArray":
         """
         Build a MerlinArray sub-class object from an array-like object.

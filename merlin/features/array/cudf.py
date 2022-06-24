@@ -108,6 +108,12 @@ else:
             """
             return cudf.io.from_dlpack(capsule)
 
+        def __str__(self):
+            return f"{self.__class__.__name__}({self.array.values.__str__()})"
+
+        def __repr__(self):
+            return f"{self.__class__.__name__}({self.array.values.__repr__()})"
+
 
 # This makes mypy type checking work by avoiding
 # duplicate definitions of MerlinCudfArray
