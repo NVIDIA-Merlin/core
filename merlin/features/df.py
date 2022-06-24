@@ -13,10 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Protocol, runtime_checkable
 
 from merlin.features.array.base import MerlinArray
-from merlin.features.collection import DataFrame
+
+
+@runtime_checkable
+class DataFrame(Protocol):
+    """
+    This Protocol matches either real Pandas/cuDF dataframes
+    or the VirtualDataFrame class defined above when an object
+    is checked with `is_instance(obj, Features)` which returns
+    `True` for any object that defines all of the methods below
+    """
+
+    @property
+    def columns(self):
+        ...
+
+    def __getitem__(self, key):
+        ...
+
+    def __setitem__(self, key, value):
+        ...
+
+    def __iter__(self):  # pylint: disable=non-iterator-returned
+        ...
 
 
 class VirtualDataFrame:

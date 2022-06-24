@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import Dict, Protocol, Sequence, Union, runtime_checkable
+from typing import Dict, Sequence, Union
 
 from merlin.features.array import MerlinArray
-from merlin.features.df import VirtualDataFrame
+from merlin.features.df import DataFrame, VirtualDataFrame
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -29,29 +29,6 @@ class Feature:
 
     schema: ColumnSchema
     values: MerlinArray
-
-
-@runtime_checkable
-class DataFrame(Protocol):
-    """
-    This Protocol matches either real Pandas/cuDF dataframes
-    or the VirtualDataframe class defined above when an object
-    is checked with `is_instance(obj, Features)` which returns
-    `True` for any object that defines all of the methods below
-    """
-
-    @property
-    def columns(self):
-        ...
-
-    def __getitem__(self, key):
-        ...
-
-    def __setitem__(self, key, value):
-        ...
-
-    def __iter__(self):  # pylint: disable=non-iterator-returned
-        ...
 
 
 class Features:
