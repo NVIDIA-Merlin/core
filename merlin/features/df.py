@@ -105,7 +105,7 @@ class VirtualDataFrame:
 
     def __getitem__(self, col_items):
         if isinstance(col_items, list):
-            results = {name: self[name].array for name in col_items}
+            results = {name: self._col_data[name].array for name in col_items}
             return VirtualDataFrame(results)
         else:
             return self._col_data[col_items].array
