@@ -32,7 +32,7 @@ class Feature:
 
 
 @runtime_checkable
-class Features(Protocol):
+class DataFrame(Protocol):
     """
     This Protocol matches either real Pandas/cuDF dataframes
     or the VirtualDataframe class defined above when an object
@@ -59,9 +59,9 @@ class FeatureCollection:
     A collection of features containing their schemas and data.
     """
 
-    def __init__(self, schema: Schema, values: Features):
+    def __init__(self, schema: Schema, values: DataFrame):
         self.schema: Schema = schema
-        self.values: Features = values
+        self.values: DataFrame = values
 
         if len(self.schema) != len(self.values.columns):
             raise ValueError("Schema and values must have the same number of columns")
