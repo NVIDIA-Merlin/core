@@ -19,7 +19,7 @@ from merlin.core.dispatch import DataFrameType
 from merlin.features.array.base import MerlinArray
 
 
-class VirtualDataframe:
+class VirtualDataFrame:
     """
     A dataframe-like representation that simulates a real dataframe, given a dictionary
     of array-like objects (e.g. numpy.ndarray, tensorflow.Tensor) from external frameworks
@@ -38,7 +38,7 @@ class VirtualDataframe:
         self._col_data = converted_cols
 
     @classmethod
-    def from_df(cls, other_df: DataFrameType) -> "VirtualDataframe":
+    def from_df(cls, other_df: DataFrameType) -> "VirtualDataFrame":
         """
         Create virtual dataframe from another dataframe
 
@@ -54,9 +54,9 @@ class VirtualDataframe:
         """
 
         col_series = {col_name: other_df[col_name] for col_name in other_df.columns}
-        return VirtualDataframe(col_series)
+        return VirtualDataFrame(col_series)
 
-    def columns_to(self, array_type) -> "VirtualDataframe":
+    def columns_to(self, array_type) -> "VirtualDataFrame":
         """
         Convert the columns of this dataframe to a
         framework array-like type (e.g. cupy.ndarray)
@@ -75,7 +75,7 @@ class VirtualDataframe:
         converted_cols = {}
         for col_name, col_array in self._col_data.items():
             converted_cols[col_name] = merlin_array_type(col_array)
-        return VirtualDataframe(converted_cols)
+        return VirtualDataFrame(converted_cols)
 
     @property
     def columns(self) -> List[str]:
@@ -84,7 +84,7 @@ class VirtualDataframe:
     def __getitem__(self, col_items):
         if isinstance(col_items, list):
             results = {name: self._col_data[name].array for name in col_items}
-            return VirtualDataframe(results)
+            return VirtualDataFrame(results)
         else:
             return self._col_data[col_items].array
 
