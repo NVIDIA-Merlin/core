@@ -88,6 +88,12 @@ class VirtualDataframe:
         else:
             return self._col_data[col_items].array
 
+    def __setitem__(self, col_name, col_values):
+        converted_col = (
+            col_values if isinstance(col_values, MerlinArray) else MerlinArray.build(col_values)
+        )
+        self._col_data[col_name] = converted_col
+
     def __len__(self):
         return len(self.columns)
 
