@@ -15,8 +15,8 @@
 #
 from typing import Any, Dict, List
 
-from merlin.core.dispatch import DataFrameType
 from merlin.features.array.base import MerlinArray
+from merlin.features.collection import DataFrame
 
 
 class VirtualDataFrame:
@@ -38,7 +38,7 @@ class VirtualDataFrame:
         self._col_data = converted_cols
 
     @classmethod
-    def from_df(cls, other_df: DataFrameType) -> "VirtualDataFrame":
+    def from_df(cls, other_df: DataFrame) -> "VirtualDataFrame":
         """
         Create virtual dataframe from another dataframe
 
