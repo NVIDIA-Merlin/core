@@ -54,7 +54,7 @@ class DataFrame(Protocol):
         ...
 
 
-class FeatureCollection:
+class Features:
     """
     A collection of features containing their schemas and data.
     """
@@ -71,27 +71,27 @@ class FeatureCollection:
 
     @classmethod
     def from_values_dict(cls, schema: Schema, values: Dict):
-        return FeatureCollection(schema, VirtualDataframe(values))
+        return Features(schema, VirtualDataframe(values))
 
-    def with_schema(self, schema: Schema) -> "FeatureCollection":
+    def with_schema(self, schema: Schema) -> "Features":
         """
-        Create a new FeatureCollection with the same data and an updated Schema.
+        Create a new Features with the same data and an updated Schema.
 
         Parameters
         ----------
         schema : Schema
-            Schema to be applied to FeatureCollection
+            Schema to be applied to Features
 
         Returns
         -------
-        FeatureCollection
+        Features
             New collection of features with updated Schema
         """
-        return FeatureCollection(schema, self.values)
+        return Features(schema, self.values)
 
-    def select_by_name(self, names: Union[str, Sequence[str]]) -> "FeatureCollection":
+    def select_by_name(self, names: Union[str, Sequence[str]]) -> "Features":
         """
-        Create a new FeatureCollection with only the features that match the provided names.
+        Create a new Features with only the features that match the provided names.
 
         Parameters
         ----------
@@ -100,19 +100,17 @@ class FeatureCollection:
 
         Returns
         -------
-        FeatureCollection
+        Features
             A collection of the features that match the provided names
         """
         sub_schema = self.schema.select_by_name(names)
         sub_values = self.values[sub_schema.column_names]
 
-        return FeatureCollection(sub_schema, sub_values)
+        return Features(sub_schema, sub_values)
 
-    def select_by_tag(
-        self, tags: Union[str, Tags, Sequence[str], Sequence[Tags]]
-    ) -> "FeatureCollection":
+    def select_by_tag(self, tags: Union[str, Tags, Sequence[str], Sequence[Tags]]) -> "Features":
         """
-        Create a new FeatureCollection with only the features that match the provided tags.
+        Create a new Features with only the features that match the provided tags.
 
         Parameters
         ----------
@@ -120,13 +118,13 @@ class FeatureCollection:
             Tags or tag strings of the features to select
         Returns
         -------
-        FeatureCollection
+        Features
             A collection of the features that match the provided tags
         """
         sub_schema = self.schema.select_by_tag(tags)
         sub_values = self.values[sub_schema.column_names]
 
-        return FeatureCollection(sub_schema, sub_values)
+        return Features(sub_schema, sub_values)
 
     def __len__(self):
         return len(self.values)
