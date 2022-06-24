@@ -47,6 +47,12 @@ class Features(Protocol):
     def __getitem__(self, key):
         ...
 
+    def __setitem__(self, key, value):
+        ...
+
+    def __iter__(self):  # pylint: disable=non-iterator-returned
+        ...
+
 
 class FeatureCollection:
     """
