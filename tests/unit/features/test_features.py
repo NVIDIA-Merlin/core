@@ -18,7 +18,7 @@ import pytest
 from merlin.core.dispatch import make_df
 from merlin.features.array.compat import numpy as np
 from merlin.features.array.compat import tensorflow
-from merlin.features.collection import Feature, FeatureCollection
+from merlin.features.collection import Feature, Features
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -31,7 +31,7 @@ def test_select_features_by_name():
         ]
     )
     value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
-    fc = FeatureCollection.from_values_dict(schema, value)
+    fc = Features.from_values_dict(schema, value)
     fc_b = fc.select_by_name("b")
     fc_bc = fc.select_by_name(["b", "c"])
 
@@ -56,7 +56,7 @@ def test_select_features_by_tag():
 
     value = {"a": np.array([1, 2, 3]), "b": np.array([3, 4, 5]), "c": np.array([6, 7, 8])}
 
-    features = FeatureCollection.from_values_dict(schema, value)
+    features = Features.from_values_dict(schema, value)
 
     categorical = features.select_by_tag(Tags.CATEGORICAL)
     continuous = features.select_by_tag(Tags.CONTINUOUS)
@@ -72,7 +72,7 @@ def test_select_features_by_tag():
 def test_update_feature_schemas():
     schema = Schema(["a"])
     values = {"a": np.array([1.0, 2.0])}
-    features = FeatureCollection.from_values_dict(schema, values)
+    features = Features.from_values_dict(schema, values)
 
     new_schema = Schema([schema.column_schemas["a"].with_tags("updated")])
     updated_features = features.with_schema(new_schema)
@@ -83,7 +83,7 @@ def test_update_feature_schemas():
 def test_get_feature():
     schema = Schema(["a"])
     values = {"a": np.array([1.0, 2.0])}
-    features = FeatureCollection.from_values_dict(schema, values)
+    features = Features.from_values_dict(schema, values)
 
     feature = features["a"]
 
@@ -100,7 +100,7 @@ def test_dataframe_features():
     )
 
     schema = Schema(["a"])
-    features = FeatureCollection(schema, values)
+    features = Features(schema, values)
 
     feature = features["a"]
     assert isinstance(feature, Feature)
@@ -116,7 +116,7 @@ def test_tensorflow_features():
     }
 
     schema = Schema(["a"])
-    features = FeatureCollection.from_values_dict(schema, values)
+    features = Features.from_values_dict(schema, values)
 
     feature = features["a"]
     assert isinstance(feature, Feature)
@@ -133,7 +133,7 @@ def test_schema_values_mismatch():
     )
 
     with pytest.raises(ValueError) as exception_info:
-        FeatureCollection(schema, values)
+        Features(schema, values)
 
     assert "Schema and Values have different column names." in str(exception_info.value)
 
@@ -145,6 +145,6 @@ def test_schema_values_mismatch():
     )
 
     with pytest.raises(ValueError) as exception_info:
-        FeatureCollection(schema, values)
+        Features(schema, values)
 
     assert "Schema and values must have the same number of columns" in str(exception_info.value)
