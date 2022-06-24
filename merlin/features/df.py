@@ -51,9 +51,9 @@ class VirtualDataFrame:
     def __init__(self, data: Dict[str, Any] = None):
         data = data or {}
         converted_cols = {}
-        for col_name, col_values in data.items():
+        for col_name, col_data in data.items():
             converted_col = (
-                col_values if isinstance(col_values, MerlinArray) else MerlinArray.build(col_values)
+                col_data if isinstance(col_data, MerlinArray) else MerlinArray.build(col_data)
             )
             converted_cols[col_name] = converted_col
 
@@ -95,8 +95,8 @@ class VirtualDataFrame:
         """
         merlin_array_type = MerlinArray.array_types[array_type]
         converted_cols = {}
-        for col_name, col_array in self._col_data.items():
-            converted_cols[col_name] = merlin_array_type(col_array)
+        for col_name in self:
+            converted_cols[col_name] = merlin_array_type(self[col_name])
         return VirtualDataFrame(converted_cols)
 
     @property
@@ -105,7 +105,7 @@ class VirtualDataFrame:
 
     def __getitem__(self, col_items):
         if isinstance(col_items, list):
-            results = {name: self._col_data[name].array for name in col_items}
+            results = {name: self[name].array for name in col_items}
             return VirtualDataFrame(results)
         else:
             return self._col_data[col_items].array
@@ -120,11 +120,8 @@ class VirtualDataFrame:
         return len(self.columns)
 
     def __iter__(self):
-        for name, tensor in self._col_data.items():
-            yield name, tensor
+        for col_name in self.columns:
+            yield col_name
 
     def __repr__(self):
-        dict_rep = {}
-        for k, v in self._col_data.items():
-            dict_rep[k] = v
-        return str(dict_rep)
+        return str(self._col_data)
