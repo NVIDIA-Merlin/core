@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from merlin.features.array.base import MerlinArray
-from merlin.features.array.compat import numpy
+from merlin.features.compat import numpy
 from merlin.features.df import VirtualDataFrame
 
 

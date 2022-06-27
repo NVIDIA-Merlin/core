@@ -15,7 +15,7 @@
 #
 
 from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
-from merlin.features.array.compat import pandas
+from merlin.features.compat import pandas
 
 if not pandas:
 

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
-from merlin.features.array.compat import tensorflow
+from merlin.features.compat import tensorflow
 
 if not tensorflow:
 

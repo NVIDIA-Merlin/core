@@ -16,11 +16,12 @@
 import pytest
 
 from merlin.core.dispatch import make_df
-from merlin.features.array.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.array.pandas import MerlinPandasArray
+from merlin.features.compat import cudf, cupy, numpy, pandas, tensorflow
 from merlin.features.df import VirtualDataFrame
 
-pytest.importorskip("pandas")
+if pandas is None:
+    pytest.skip("pandas is not installed.", allow_module_level=True)
 
 
 @pytest.mark.skipif(numpy is None, reason="Numpy is not defined")
@@ -59,7 +60,7 @@ def test_pandas_series_to_merlin_pandas_array():
     assert (merlin_pandas_array.array.to_numpy() == pandas_series.to_numpy()).all()
 
 
-@pytest.mark.skipif(tensorflow is None, reason="Tensorflow is not defined")
+@pytest.mark.skipif(tensorflow is None, reason="tensorflow is not installed")
 def test_tf_tensor_to_merlin_pandas_array():
     tf_tensor = tensorflow.random.uniform((10,))
     merlin_pandas_array = MerlinPandasArray(tf_tensor)

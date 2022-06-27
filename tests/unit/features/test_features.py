@@ -16,9 +16,9 @@
 import pytest
 
 from merlin.core.dispatch import make_df
-from merlin.features.array.compat import numpy as np
-from merlin.features.array.compat import tensorflow
-from merlin.features.collection import Feature, Features
+from merlin.features import Feature, Features
+from merlin.features.compat import numpy as np
+from merlin.features.compat import tensorflow
 from merlin.schema import ColumnSchema, Schema, Tags
 
 
@@ -109,7 +109,8 @@ def test_dataframe_features():
 
 
 def test_tensorflow_features():
-    pytest.importorskip("tensorflow")
+    if tensorflow is None:
+        pytest.skip("tensorflow is not installed.")
 
     values = {
         "a": tensorflow.random.uniform((10,)),

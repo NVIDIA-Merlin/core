@@ -15,7 +15,7 @@
 #
 
 from merlin.features.array.base import ArrayPackageNotInstalled, MerlinArray
-from merlin.features.array.compat import cudf
+from merlin.features.compat import cudf
 
 if not cudf:
 

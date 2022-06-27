@@ -16,8 +16,8 @@
 
 import pytest
 
-from merlin.features.array.compat import numpy
 from merlin.features.array.numpy import MerlinNumpyArray
+from merlin.features.compat import numpy
 
 pytest.importorskip("numpy")
 
