@@ -298,3 +298,40 @@ class ArrayPackageNotInstalled(MerlinArray):
         """
         self.__class__.raise_not_installed(self.__class__.package_name)
         return None
+
+    def build_from_array(self, other: NumpyArrayInterface) -> "MerlinArray":
+        """
+        Build a MerlinArray from Numpy based array with a Numpy Array Interface.
+
+        Parameters
+        ----------
+        other : NumpyArrayInterface
+            A CPU array with a Numpy array interface.
+        """
+        self.__class__.raise_not_installed(self.__class__.package_name)
+        return None
+
+    def build_from(self, other) -> "MerlinArray":
+        """
+        Build a MerlinArray from another object, merlin array or other framework specific
+
+        Parameters
+        ----------
+        other : Any
+            A framework (numpy, cupy, cudf, pandas, tensorflow) specific object or
+            another MerlinArray.
+        """
+        self.__class__.raise_not_installed(self.__class__.package_name)
+        return None
+
+    def build_from_cuda_array(self, other: CudaArrayInterface) -> "MerlinArray":
+        """
+        Build a MerlinArray from a CudaArrayInterface.
+
+        Parameters
+        ----------
+        other : CudaArrayInterface
+            A interface for array object manipulation in CUDA.
+        """
+        self.__class__.raise_not_installed(self.__class__.package_name)
+        return None

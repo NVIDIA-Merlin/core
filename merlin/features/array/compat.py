@@ -38,5 +38,8 @@ except ImportError:
 
 try:
     import tensorflow  # noqa
+
+    if not hasattr(tensorflow, "Tensor"):
+        tensorflow = None
 except ImportError:
     tensorflow = None
