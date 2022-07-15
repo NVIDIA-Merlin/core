@@ -17,9 +17,7 @@
 #!/bin/bash
 set -e
 
-# Get latest NVTabular version
 cd /core/
-git pull origin main
 
 # Run tests
 pytest -rxs /core/tests/unit
