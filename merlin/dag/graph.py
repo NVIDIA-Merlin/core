@@ -133,15 +133,21 @@ class Graph:
 
         while nodes_to_process:
             node, columns_to_remove = nodes_to_process.popleft()
-
             if node.input_schema and len(node.input_schema):
                 output_columns_to_remove = node.remove_inputs(columns_to_remove)
 
                 for child in node.children:
-                    nodes_to_process.append((child, to_remove + output_columns_to_remove))
+                    nodes_to_process.append(
+                        (child, list(set(to_remove + output_columns_to_remove)))
+                    )
 
                     if not len(node.input_schema):
                         node.remove_child(child)
+
+            # remove any dependencies that do not have an output schema
+            node.dependencies = [
+                dep for dep in node.dependencies if dep.output_schema and len(dep.output_schema)
+            ]
 
             if not node.input_schema or not len(node.input_schema):
                 for parent in node.parents:
