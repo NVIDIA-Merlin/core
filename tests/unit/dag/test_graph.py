@@ -21,7 +21,7 @@ from merlin.schema import Schema
 
 
 def test_remove_inputs():
-    # construct a basic graph , mimicing the structure shown here
+    # construct a basic graph , mimicking the structure shown here
     # https://github.com/NVIDIA-Merlin/NVTabular/issues/1632
     selector = ColumnSelector(["a", "b", "c"])
     operator = BaseOperator()
@@ -33,7 +33,7 @@ def test_remove_inputs():
     # remove the 'target' column from the inputs
     graph.remove_inputs(["target"])
 
-    # make sure the 'target' is removed everywhere. We have to
+    # make sure the 'target' is removed everywhere.
     to_examine = [graph.output_node]
     while to_examine:
         current = to_examine.pop()
