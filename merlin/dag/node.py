@@ -150,6 +150,8 @@ class Node:
         for child_node in child_nodes:
             if self in child_node.parents:
                 child_node.parents.remove(self)
+            if self in child_node.dependencies:
+                child_node.dependencies.remove(self)
             if child_node in self.children:
                 self.children.remove(child_node)
 
