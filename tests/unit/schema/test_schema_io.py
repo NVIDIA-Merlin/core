@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+import pytest
+
 from merlin.schema import ColumnSchema, Schema, Tags
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
@@ -68,4 +70,22 @@ def test_merlin_to_proto_to_json_to_merlin():
     tfm_schema2 = TensorflowMetadata.from_json(json_schema)
     output_schema = tfm_schema2.to_merlin_schema()
 
+    assert output_schema == schema
+
+
+@pytest.mark.parametrize("value_count", [{"min": 0, "max": 0}, {"min": 1, "max": 1}, {"min": 1, "max": 2}])
+def test_value_count(value_count):
+    schema = Schema(
+        [
+            ColumnSchema(
+                "example",
+                properties={
+                    "value_count": value_count,
+                },
+                is_list=True,
+            )
+        ]
+    )
+    json_schema = TensorflowMetadata.from_merlin_schema(schema).to_json()
+    output_schema = TensorflowMetadata.from_json(json_schema).to_merlin_schema()
     assert output_schema == schema
