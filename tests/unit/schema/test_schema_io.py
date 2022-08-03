@@ -73,7 +73,9 @@ def test_merlin_to_proto_to_json_to_merlin():
     assert output_schema == schema
 
 
-@pytest.mark.parametrize("value_count", [{"min": 0, "max": 0}, {"min": 1, "max": 1}, {"min": 1, "max": 2}])
+@pytest.mark.parametrize(
+    "value_count", [{"min": 0, "max": 0}, {"min": 1, "max": 1}, {"min": 1, "max": 2}]
+)
 def test_value_count(value_count):
     schema = Schema(
         [
