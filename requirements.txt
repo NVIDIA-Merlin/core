@@ -8,3 +8,4 @@ tqdm>=4.0
 tensorflow-metadata>=1.2.0
 betterproto<2.0.0
 packaging
+fsspec==2022.5.0
