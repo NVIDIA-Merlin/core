@@ -48,7 +48,7 @@ if HAS_GPU:
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
 
     except ImportError:
-        pass
+        HAS_GPU = False
 
 
 try:
