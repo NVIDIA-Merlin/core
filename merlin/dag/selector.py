@@ -15,7 +15,7 @@
 #
 from typing import List, Union
 
-import merlin
+import merlin.dag
 from merlin.schema import Tags
 
 

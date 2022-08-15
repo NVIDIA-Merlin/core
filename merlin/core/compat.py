@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+HAS_GPU = False
+try:
+    from numba import cuda
 
-#!/bin/bash
-set -e
-
-cd /core/
-
-# Run tests
-pytest -rxs /core/tests/unit
-
+    try:
+        HAS_GPU = len(cuda.gpus.lst) > 0
+    except cuda.cudadrv.error.CudaSupportError:
+        pass
+except ImportError:
+    cuda = None
