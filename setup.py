@@ -40,7 +40,7 @@ install_reqs = parse_requirements("./requirements.txt")
 setup(
     name="merlin-core",
     version=versioneer.get_version(),
-    packages=find_namespace_packages(),
+    packages=find_namespace_packages(include=["merlin*"]),
     url="https://github.com/NVIDIA-Merlin/core",
     author="NVIDIA Corporation",
     license="Apache 2.0",
