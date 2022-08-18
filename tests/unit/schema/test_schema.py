@@ -16,6 +16,7 @@
 
 from merlin.dag import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
+from merlin.schema.schema import ColumnQuantity
 
 
 def test_select_by_name():
@@ -133,28 +134,33 @@ def test_excluding():
     assert col2_exclusion == Schema([col2_schema])
 
 
-def test_list_columns():
+def test_list_column_attributes():
     col0_schema = ColumnSchema("col0")
 
     assert not col0_schema.is_list
     assert not col0_schema.is_ragged
+    assert col0_schema.quantity == ColumnQuantity.SCALAR
 
     col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
 
     assert not col1_schema.is_list
     assert not col1_schema.is_ragged
+    assert col1_schema.quantity == ColumnQuantity.SCALAR
 
     col2_schema = ColumnSchema("col2", is_list=True)
 
     assert col2_schema.is_list
     assert col2_schema.is_ragged
+    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
 
     col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
     assert col3_schema.is_list
     assert col3_schema.is_ragged
+    assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
     col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
 
     assert col4_schema.is_list
     assert not col4_schema.is_ragged
+    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST

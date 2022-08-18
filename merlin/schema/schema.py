@@ -13,13 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
 import pandas as pd
 
 from merlin.schema.tags import Tags, TagSet
+
+
+class ColumnQuantity(Enum):
+    """Describes the number of elements in each row of a column"""
+
+    SCALAR = "scalar"
+    FIXED_LIST = "fixed_list"
+    RAGGED_LIST = "ragged_list"
 
 
 @dataclass(frozen=True)
@@ -67,6 +77,25 @@ class ColumnSchema:
 
         if self.is_ragged is None:
             object.__setattr__(self, "is_ragged", self.is_list)
+
+    @property
+    def quantity(self):
+        """
+        Describes the number of elements in each row of this column
+
+        Returns
+        -------
+        ColumnQuantity
+            SCALAR when one element per row
+            FIXED_LIST when the same number of elements per row
+            RAGGED_LIST when different numbers of elements per row
+        """
+        if self.is_list and self.is_ragged:
+            return ColumnQuantity.RAGGED_LIST
+        elif self.is_list:
+            return ColumnQuantity.FIXED_LIST
+        else:
+            return ColumnQuantity.SCALAR
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
