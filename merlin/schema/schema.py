@@ -38,7 +38,7 @@ class ColumnSchema:
     properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
     is_list: bool = False
-    is_ragged: bool = False
+    is_ragged: Optional[bool] = None
 
     def __post_init__(self):
         """Standardize tags and dtypes on initialization
@@ -64,6 +64,9 @@ class ColumnSchema:
             ) from err
 
         object.__setattr__(self, "dtype", dtype)
+
+        if self.is_ragged is None:
+            object.__setattr__(self, "is_ragged", self.is_list)
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name

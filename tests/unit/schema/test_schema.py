@@ -131,3 +131,30 @@ def test_excluding():
 
     assert col1_exclusion == Schema([col1_schema])
     assert col2_exclusion == Schema([col2_schema])
+
+
+def test_list_columns():
+    col0_schema = ColumnSchema("col0")
+
+    assert not col0_schema.is_list
+    assert not col0_schema.is_ragged
+
+    col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
+
+    assert not col1_schema.is_list
+    assert not col1_schema.is_ragged
+
+    col2_schema = ColumnSchema("col2", is_list=True)
+
+    assert col2_schema.is_list
+    assert col2_schema.is_ragged
+
+    col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
+
+    assert col3_schema.is_list
+    assert col3_schema.is_ragged
+
+    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
+
+    assert col4_schema.is_list
+    assert not col4_schema.is_ragged
