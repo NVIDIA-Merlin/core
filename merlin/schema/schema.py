@@ -78,6 +78,12 @@ class ColumnSchema:
         if self.is_ragged is None:
             object.__setattr__(self, "is_ragged", self.is_list)
 
+        if self.is_ragged and not self.is_list:
+            raise ValueError(
+                "`is_ragged` is set to `True` but `is_list` is not. "
+                "Only list columns can set the `is_ragged` flag."
+            )
+
     @property
     def quantity(self):
         """

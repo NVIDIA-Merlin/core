@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
 
 from merlin.dag import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
@@ -164,3 +165,6 @@ def test_list_column_attributes():
     assert col4_schema.is_list
     assert not col4_schema.is_ragged
     assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
+
+    with pytest.raises(ValueError):
+        ColumnSchema("col5", is_list=False, is_ragged=True)
