@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import warnings
 from enum import Enum
 from typing import List, Set, Union
 
@@ -26,28 +27,43 @@ class Tags(Enum):
     LIST = "list"
     SEQUENCE = "sequence"
     TEXT = "text"
-    TEXT_TOKENIZED = "text_tokenized"
+    TOKENIZED = "tokenized"
     TIME = "time"
 
     # Feature context
+    ID = "id"
     USER = "user"
-    USER_ID = "user_id"
     ITEM = "item"
-    ITEM_ID = "item_id"
     SESSION = "session"
-    SESSION_ID = "session_id"
     CONTEXT = "context"
 
     # Target related
     TARGET = "target"
-    BINARY_CLASSIFICATION = "binary_classification"
-    MULTI_CLASS_CLASSIFICATION = "multi_class"
     REGRESSION = "regression"
+    CLASSIFICATION = "classification"
+
+    BINARY = "binary"
+    MULTI_CLASS = "multi_class"
+
+    # Deprecated compound tags
+    USER_ID = "user_id"
+    ITEM_ID = "item_id"
+    SESSION_ID = "session_id"
+    TEXT_TOKENIZED = "text_tokenized"
+    BINARY_CLASSIFICATION = "binary_classification"
+    MULTI_CLASS_CLASSIFICATION = "multi_class_classification"
 
 
 TAG_COLLISIONS = {
     Tags.CATEGORICAL: [Tags.CONTINUOUS],
     Tags.CONTINUOUS: [Tags.CATEGORICAL],
+}
+
+COMPOUND_TAGS = {
+    Tags.USER_ID: [Tags.USER, Tags.ID],
+    Tags.ITEM_ID: [Tags.ITEM, Tags.ID],
+    Tags.SESSION_ID: [Tags.SESSION, Tags.ID],
+    Tags.TEXT_TOKENIZED: [Tags.TEXT, Tags.TOKENIZED],
 }
 
 
@@ -123,7 +139,20 @@ class TagSet:
         return tags
 
     def _normalize_tags(self, tags) -> Set[Tags]:
-        return set(Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags)
+        tag_set = set(Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags)
+        atomized_tags = set()
+
+        for tag in tag_set:
+            atomized_tags.add(tag)
+            if tag in COMPOUND_TAGS.keys():
+                warnings.warn(
+                    f"Compound tags like {tag} have been deprecated "
+                    "and will be removed in a future version. "
+                    f"Please use the atomic versions of these tags, like {COMPOUND_TAGS[tag]}."
+                )
+                atomized_tags.update(COMPOUND_TAGS[tag])
+
+        return atomized_tags
 
     def __repr__(self) -> str:
         return str(self._tags)
