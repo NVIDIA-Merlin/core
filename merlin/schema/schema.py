@@ -250,20 +250,23 @@ class ColumnSchema:
         return Domain(**domain) if domain else None
 
 
+@dataclass(frozen=True)
 class Schema:
     """A collection of column schemas for a dataset."""
 
-    def __init__(self, column_schemas=None):
-        column_schemas = column_schemas or {}
+    column_schemas: Optional[Dict] = field(default_factory=dict)
 
-        if isinstance(column_schemas, dict):
-            self.column_schemas = column_schemas
-        elif isinstance(column_schemas, (list, tuple)):
-            self.column_schemas = {}
-            for column_schema in column_schemas:
-                if isinstance(column_schema, str):
-                    column_schema = ColumnSchema(column_schema)
-                self.column_schemas[column_schema.name] = column_schema
+    def __post_init__(self):
+        """Convert lists of strings or schemas to the standard dictionary format"""
+        if isinstance(self.column_schemas, dict):
+            ...
+        elif isinstance(self.column_schemas, list):
+            column_schemas = {}
+            for col_schema in self.column_schemas:
+                if isinstance(col_schema, str):
+                    col_schema = ColumnSchema(col_schema)
+                column_schemas[col_schema.name] = col_schema
+            object.__setattr__(self, "column_schemas", column_schemas)
         else:
             raise TypeError("The `column_schemas` parameter must be a list or dict.")
 
@@ -400,11 +403,11 @@ class Schema:
 
         """
         return Schema(
-            [
-                col_schema
+            {
+                col_name: col_schema
                 for col_name, col_schema in self.column_schemas.items()
                 if col_name not in col_names
-            ]
+            }
         )
 
     def remove_col(self, col_name: str) -> "Schema":
