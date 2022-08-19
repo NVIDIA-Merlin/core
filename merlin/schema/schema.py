@@ -16,6 +16,7 @@
 
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
@@ -254,21 +255,27 @@ class ColumnSchema:
 class Schema:
     """A collection of column schemas for a dataset."""
 
-    column_schemas: Optional[Dict] = field(default_factory=dict)
+    # MappingProxyType is basically an immutable dictionary
+    column_schemas: Optional[Union[Dict, MappingProxyType]] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
 
     def __post_init__(self):
         """Convert lists of strings or schemas to the standard dictionary format"""
-        if isinstance(self.column_schemas, dict):
-            ...
+        if isinstance(self.column_schemas, MappingProxyType):
+            column_schemas = self.column_schemas
+        elif isinstance(self.column_schemas, dict):
+            column_schemas = MappingProxyType(self.column_schemas)
         elif isinstance(self.column_schemas, list):
             column_schemas = {}
             for col_schema in self.column_schemas:
                 if isinstance(col_schema, str):
                     col_schema = ColumnSchema(col_schema)
                 column_schemas[col_schema.name] = col_schema
-            object.__setattr__(self, "column_schemas", column_schemas)
         else:
             raise TypeError("The `column_schemas` parameter must be a list or dict.")
+
+        object.__setattr__(self, "column_schemas", column_schemas)
 
     @property
     def column_names(self):
@@ -474,9 +481,6 @@ class Schema:
             return self.column_schemas[column_name]
         elif isinstance(column_name, (list, tuple)):
             return Schema([self.column_schemas[col_name] for col_name in column_name])
-
-    def __setitem__(self, column_name, column_schema):
-        self.column_schemas[column_name] = column_schema
 
     def __iter__(self):
         return iter(self.column_schemas.values())

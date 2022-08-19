@@ -196,13 +196,13 @@ class TensorflowMetadata:
             Schema converted to MerlinSchema object
 
         """
-        merlin_schema = MerlinSchema()
+        column_schemas = {}
 
         for feature in self.proto_schema.feature:
             col_schema = _merlin_column(feature)
-            merlin_schema.column_schemas[col_schema.name] = col_schema
+            column_schemas[col_schema.name] = col_schema
 
-        return merlin_schema
+        return MerlinSchema(column_schemas)
 
     def to_json(self) -> str:
         """Convert this TensorflowMetadata schema object to a JSON string
