@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
@@ -22,48 +22,53 @@ import pandas as pd
 from merlin.schema.tags import Tags, TagSet
 
 
-@dataclass(frozen=True)
+@dataclass
 class Domain:
     min: Union[int, float]
     max: Union[int, float]
     name: Optional[str] = None
 
 
-@dataclass(frozen=True)
 class ColumnSchema:
     """A schema containing metadata of a dataframe column."""
 
-    name: Text
-    tags: Optional[TagSet] = field(default_factory=TagSet)
-    properties: Optional[Dict] = field(default_factory=dict)
-    dtype: Optional[object] = None
-    is_list: bool = False
-    is_ragged: bool = False
-
-    def __post_init__(self):
-        """Standardize tags and dtypes on initialization
-
-        Raises:
-            TypeError: If the provided dtype cannot be cast to a numpy dtype
-        """
-        tags = TagSet(self.tags)
-        object.__setattr__(self, "tags", tags)
+    def __init__(
+        self,
+        name: Text,
+        tags: Optional[TagSet] = None,
+        properties: Optional[Dict] = None,
+        dtype: Optional[object] = None,
+        is_list: Optional[bool] = False,
+        is_ragged: Optional[bool] = None,
+    ):
+        self.name = name
+        self.tags = TagSet(tags or [])
+        self.properties = properties or {}
 
         try:
-            if hasattr(self.dtype, "numpy_dtype"):
-                dtype = np.dtype(self.dtype.numpy_dtype)
-            elif hasattr(self.dtype, "_categories"):
-                dtype = self.dtype._categories.dtype
-            elif isinstance(self.dtype, pd.StringDtype):
+            if hasattr(dtype, "numpy_dtype"):
+                dtype = np.dtype(getattr(dtype, "numpy_dtype"))
+            elif hasattr(dtype, "_categories"):
+                dtype = getattr(dtype, "_categories").dtype
+            elif isinstance(dtype, pd.StringDtype):
                 dtype = np.dtype("O")
             else:
-                dtype = np.dtype(self.dtype)
+                dtype = np.dtype(dtype)
         except TypeError as err:
             raise TypeError(
-                f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
+                f"Unsupported dtype {dtype}, unable to cast {dtype} to a numpy dtype."
             ) from err
 
-        object.__setattr__(self, "dtype", dtype)
+        self.dtype = dtype
+
+        self.is_list = is_list
+        self.is_ragged = is_ragged if is_ragged is not None else is_list
+
+        if self.is_ragged and not self.is_list:
+            raise ValueError(
+                "`is_ragged` is set to `True` but `is_list` is not. "
+                "Only list columns can set the `is_ragged` flag."
+            )
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
@@ -210,6 +215,9 @@ class ColumnSchema:
         """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
+
+    def __eq__(self, other) -> bool:
+        return self.__dict__ == other.__dict__
 
 
 class Schema:
