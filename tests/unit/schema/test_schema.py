@@ -58,22 +58,22 @@ def test_select_by_tag():
     assert select_neither == Schema([])
 
 
-def test_select_by_any_tag():
+def test_select_by_any_tags():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
     col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
 
     schema = Schema([col1_schema, col2_schema, col3_schema])
 
-    col1_selection = schema.select_by_any_tag("a")
-    col2_selection = schema.select_by_any_tag("d")
+    col1_selection = schema.select_by_any_tags("a")
+    col2_selection = schema.select_by_any_tags("d")
 
     assert col1_selection == Schema([col1_schema])
     assert col2_selection == Schema([col2_schema])
 
-    select_both = schema.select_by_any_tag("c")
-    select_multi = schema.select_by_any_tag(["b", "c"])
-    select_neither = schema.select_by_any_tag("unknown")
+    select_both = schema.select_by_any_tags("c")
+    select_multi = schema.select_by_any_tags(["b", "c"])
+    select_neither = schema.select_by_any_tags("unknown")
 
     assert select_both == Schema([col1_schema, col2_schema])
     assert select_multi == Schema([col1_schema, col2_schema, col3_schema])

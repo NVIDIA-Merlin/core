@@ -252,7 +252,7 @@ class Schema:
             if selector.names:
                 schema += self.select_by_name(selector.names)
             if selector.tags:
-                schema += self.select_by_any_tag(selector.tags)
+                schema += self.select_by_any_tags(selector.tags)
             return schema
         return self
 
@@ -286,7 +286,23 @@ class Schema:
         return self.excluding(selector)
 
     def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
-        """Select all matching columns from this Schema object using a list of tags
+        """Select columns from this Schema that match ANY of the supplied tags.
+
+        Parameters
+        ----------
+        tags : List[Union[str, Tags]] :
+            List of tags that describes which columns match
+
+        Returns
+        -------
+        Schema
+            New object containing only the ColumnSchemas of selected columns
+
+        """
+        return self.select_by_any_tags(tags)
+
+    def select_by_all_tags(self, tags: Union[str, Tags, List[Union[str, Tags]]]) -> "Schema":
+        """Select columns from this Schema that match ALL of the supplied tags.
 
         Parameters
         ----------
@@ -310,8 +326,8 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def select_by_any_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
-        """Select any matching columns from this Schema object using a list of tags
+    def select_by_any_tags(self, tags: Union[str, Tags, List[Union[str, Tags]]]) -> "Schema":
+        """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
