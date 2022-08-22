@@ -66,8 +66,8 @@ def test_select_by_any_tag():
 
     schema = Schema([col1_schema, col2_schema, col3_schema])
 
-    col1_selection = schema.select_by_tag("a")
-    col2_selection = schema.select_by_tag("d")
+    col1_selection = schema.select_by_any_tag("a")
+    col2_selection = schema.select_by_any_tag("d")
 
     assert col1_selection == Schema([col1_schema])
     assert col2_selection == Schema([col2_schema])
