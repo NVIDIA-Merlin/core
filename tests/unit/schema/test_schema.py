@@ -40,9 +40,8 @@ def test_select_by_name():
 def test_select_by_tag():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
-    col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
 
-    schema = Schema([col1_schema, col2_schema, col3_schema])
+    schema = Schema([col1_schema, col2_schema])
 
     col1_selection = schema.select_by_tag("a")
     col2_selection = schema.select_by_tag("d")
@@ -52,7 +51,7 @@ def test_select_by_tag():
 
     select_both = schema.select_by_tag("c")
     select_multi = schema.select_by_tag(["b", "c"])
-    select_neither = schema.select_by_tag("unknown")
+    select_neither = schema.select_by_tag("e")
 
     assert select_both == Schema([col1_schema, col2_schema])
     assert select_multi == Schema([col1_schema, col2_schema])
