@@ -272,7 +272,7 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 
 <dl class="py class">
 <dt id="merlin.schema.ColumnSchema">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">merlin.schema.</span></code><code class="sig-name descname"><span class="pre">ColumnSchema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str</span></em>, <em class="sig-param"><span class="pre">tags:</span> <span class="pre">Optional[merlin.schema.tags.TagSet]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em>, <em class="sig-param"><span class="pre">properties:</span> <span class="pre">Optional[Dict]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em>, <em class="sig-param"><span class="pre">dtype:</span> <span class="pre">Optional[object]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">is_list:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">is_ragged:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#ColumnSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.ColumnSchema" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">merlin.schema.</span></code><code class="sig-name descname"><span class="pre">ColumnSchema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str</span></em>, <em class="sig-param"><span class="pre">tags:</span> <span class="pre">Optional[merlin.schema.tags.TagSet]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em>, <em class="sig-param"><span class="pre">properties:</span> <span class="pre">Optional[Dict]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em>, <em class="sig-param"><span class="pre">dtype:</span> <span class="pre">Optional[object]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">is_list:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></em>, <em class="sig-param"><span class="pre">is_ragged:</span> <span class="pre">Optional[bool]</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#ColumnSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.ColumnSchema" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A schema containing metadata of a dataframe column.</p>
 <dl class="py attribute">
@@ -302,8 +302,24 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 
 <dl class="py attribute">
 <dt id="merlin.schema.ColumnSchema.is_ragged">
-<code class="sig-name descname"><span class="pre">is_ragged</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#merlin.schema.ColumnSchema.is_ragged" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">is_ragged</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#merlin.schema.ColumnSchema.is_ragged" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt id="merlin.schema.ColumnSchema.quantity">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantity</span></code><a class="headerlink" href="#merlin.schema.ColumnSchema.quantity" title="Permalink to this definition"></a></dt>
+<dd><p>Describes the number of elements in each row of this column</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>SCALAR when one element per row
+FIXED_LIST when the same number of elements per row
+RAGGED_LIST when different numbers of elements per row</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>ColumnQuantity</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.schema.ColumnSchema.with_name">
@@ -436,8 +452,8 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="merlin.schema.Tags.TEXT_TOKENIZED">
-<code class="sig-name descname"><span class="pre">TEXT_TOKENIZED</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'text_tokenized'</span></em><a class="headerlink" href="#merlin.schema.Tags.TEXT_TOKENIZED" title="Permalink to this definition"></a></dt>
+<dt id="merlin.schema.Tags.TOKENIZED">
+<code class="sig-name descname"><span class="pre">TOKENIZED</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'tokenized'</span></em><a class="headerlink" href="#merlin.schema.Tags.TOKENIZED" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -446,13 +462,13 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="merlin.schema.Tags.USER">
-<code class="sig-name descname"><span class="pre">USER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'user'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER" title="Permalink to this definition"></a></dt>
+<dt id="merlin.schema.Tags.ID">
+<code class="sig-name descname"><span class="pre">ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'id'</span></em><a class="headerlink" href="#merlin.schema.Tags.ID" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="merlin.schema.Tags.USER_ID">
-<code class="sig-name descname"><span class="pre">USER_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'user_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER_ID" title="Permalink to this definition"></a></dt>
+<dt id="merlin.schema.Tags.USER">
+<code class="sig-name descname"><span class="pre">USER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'user'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -461,18 +477,8 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="merlin.schema.Tags.ITEM_ID">
-<code class="sig-name descname"><span class="pre">ITEM_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'item_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.ITEM_ID" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt id="merlin.schema.Tags.SESSION">
 <code class="sig-name descname"><span class="pre">SESSION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'session'</span></em><a class="headerlink" href="#merlin.schema.Tags.SESSION" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="merlin.schema.Tags.SESSION_ID">
-<code class="sig-name descname"><span class="pre">SESSION_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'session_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.SESSION_ID" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -486,18 +492,53 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt id="merlin.schema.Tags.REGRESSION">
+<code class="sig-name descname"><span class="pre">REGRESSION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'regression'</span></em><a class="headerlink" href="#merlin.schema.Tags.REGRESSION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.CLASSIFICATION">
+<code class="sig-name descname"><span class="pre">CLASSIFICATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.CLASSIFICATION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.BINARY">
+<code class="sig-name descname"><span class="pre">BINARY</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'binary'</span></em><a class="headerlink" href="#merlin.schema.Tags.BINARY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.MULTI_CLASS">
+<code class="sig-name descname"><span class="pre">MULTI_CLASS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'multi_class'</span></em><a class="headerlink" href="#merlin.schema.Tags.MULTI_CLASS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.USER_ID">
+<code class="sig-name descname"><span class="pre">USER_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'user_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER_ID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.ITEM_ID">
+<code class="sig-name descname"><span class="pre">ITEM_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'item_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.ITEM_ID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.SESSION_ID">
+<code class="sig-name descname"><span class="pre">SESSION_ID</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'session_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.SESSION_ID" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="merlin.schema.Tags.TEXT_TOKENIZED">
+<code class="sig-name descname"><span class="pre">TEXT_TOKENIZED</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'text_tokenized'</span></em><a class="headerlink" href="#merlin.schema.Tags.TEXT_TOKENIZED" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt id="merlin.schema.Tags.BINARY_CLASSIFICATION">
 <code class="sig-name descname"><span class="pre">BINARY_CLASSIFICATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'binary_classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.BINARY_CLASSIFICATION" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION">
-<code class="sig-name descname"><span class="pre">MULTI_CLASS_CLASSIFICATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'multi_class'</span></em><a class="headerlink" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="merlin.schema.Tags.REGRESSION">
-<code class="sig-name descname"><span class="pre">REGRESSION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'regression'</span></em><a class="headerlink" href="#merlin.schema.Tags.REGRESSION" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">MULTI_CLASS_CLASSIFICATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'multi_class_classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
