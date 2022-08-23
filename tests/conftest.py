@@ -48,7 +48,7 @@ except ImportError:
 import pytest
 from dask.distributed import Client, LocalCluster
 
-import merlin
+import merlin.io
 
 allcols_csv = ["timestamp", "id", "label", "name-string", "x", "y", "z"]
 mycols_csv = ["name-string", "id", "label", "x", "y"]

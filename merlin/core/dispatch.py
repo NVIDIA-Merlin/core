@@ -24,28 +24,32 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-try:
-    import cudf
-    import cupy as cp
-    import dask_cudf
-    import rmm
-    from cudf.core.column import as_column, build_column
+from merlin.core.compat import HAS_GPU
 
+cp = None
+cudf = None
+rmm = None
+
+if HAS_GPU:
     try:
-        # cudf >= 21.08
-        from cudf.api.types import is_list_dtype as cudf_is_list_dtype
-        from cudf.api.types import is_string_dtype as cudf_is_string_dtype
-    except ImportError:
-        # cudf < 21.08
-        from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
-        from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
+        import cudf
+        import cupy as cp
+        import dask_cudf
+        import rmm
+        from cudf.core.column import as_column, build_column
 
-    HAS_GPU = True
-except ImportError:
-    HAS_GPU = False
-    cp = None
-    cudf = None
-    rmm = None
+        try:
+            # cudf >= 21.08
+            from cudf.api.types import is_list_dtype as cudf_is_list_dtype
+            from cudf.api.types import is_string_dtype as cudf_is_string_dtype
+        except ImportError:
+            # cudf < 21.08
+            from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
+            from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
+
+    except ImportError:
+        HAS_GPU = False
+
 
 try:
     # Dask >= 2021.5.1

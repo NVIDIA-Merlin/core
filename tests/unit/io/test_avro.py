@@ -21,7 +21,7 @@ import pytest
 from dask.dataframe import assert_eq
 from dask.dataframe.io.demo import names as name_list
 
-import merlin
+import merlin.io
 
 cudf = pytest.importorskip("cudf")
 dask_cudf = pytest.importorskip("dask_cudf")
