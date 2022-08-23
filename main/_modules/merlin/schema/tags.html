@@ -85,6 +85,7 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -98,28 +99,43 @@
     <span class="n">LIST</span> <span class="o">=</span> <span class="s2">&quot;list&quot;</span>
     <span class="n">SEQUENCE</span> <span class="o">=</span> <span class="s2">&quot;sequence&quot;</span>
     <span class="n">TEXT</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
-    <span class="n">TEXT_TOKENIZED</span> <span class="o">=</span> <span class="s2">&quot;text_tokenized&quot;</span>
+    <span class="n">TOKENIZED</span> <span class="o">=</span> <span class="s2">&quot;tokenized&quot;</span>
     <span class="n">TIME</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span>
 
     <span class="c1"># Feature context</span>
+    <span class="n">ID</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
     <span class="n">USER</span> <span class="o">=</span> <span class="s2">&quot;user&quot;</span>
-    <span class="n">USER_ID</span> <span class="o">=</span> <span class="s2">&quot;user_id&quot;</span>
     <span class="n">ITEM</span> <span class="o">=</span> <span class="s2">&quot;item&quot;</span>
-    <span class="n">ITEM_ID</span> <span class="o">=</span> <span class="s2">&quot;item_id&quot;</span>
     <span class="n">SESSION</span> <span class="o">=</span> <span class="s2">&quot;session&quot;</span>
-    <span class="n">SESSION_ID</span> <span class="o">=</span> <span class="s2">&quot;session_id&quot;</span>
     <span class="n">CONTEXT</span> <span class="o">=</span> <span class="s2">&quot;context&quot;</span>
 
     <span class="c1"># Target related</span>
     <span class="n">TARGET</span> <span class="o">=</span> <span class="s2">&quot;target&quot;</span>
+    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;regression&quot;</span>
+    <span class="n">CLASSIFICATION</span> <span class="o">=</span> <span class="s2">&quot;classification&quot;</span>
+
+    <span class="n">BINARY</span> <span class="o">=</span> <span class="s2">&quot;binary&quot;</span>
+    <span class="n">MULTI_CLASS</span> <span class="o">=</span> <span class="s2">&quot;multi_class&quot;</span>
+
+    <span class="c1"># Deprecated compound tags</span>
+    <span class="n">USER_ID</span> <span class="o">=</span> <span class="s2">&quot;user_id&quot;</span>
+    <span class="n">ITEM_ID</span> <span class="o">=</span> <span class="s2">&quot;item_id&quot;</span>
+    <span class="n">SESSION_ID</span> <span class="o">=</span> <span class="s2">&quot;session_id&quot;</span>
+    <span class="n">TEXT_TOKENIZED</span> <span class="o">=</span> <span class="s2">&quot;text_tokenized&quot;</span>
     <span class="n">BINARY_CLASSIFICATION</span> <span class="o">=</span> <span class="s2">&quot;binary_classification&quot;</span>
-    <span class="n">MULTI_CLASS_CLASSIFICATION</span> <span class="o">=</span> <span class="s2">&quot;multi_class&quot;</span>
-    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;regression&quot;</span></div>
+    <span class="n">MULTI_CLASS_CLASSIFICATION</span> <span class="o">=</span> <span class="s2">&quot;multi_class_classification&quot;</span></div>
 
 
 <span class="n">TAG_COLLISIONS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">Tags</span><span class="o">.</span><span class="n">CATEGORICAL</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">CONTINUOUS</span><span class="p">],</span>
     <span class="n">Tags</span><span class="o">.</span><span class="n">CONTINUOUS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">CATEGORICAL</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="n">COMPOUND_TAGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">Tags</span><span class="o">.</span><span class="n">USER_ID</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">USER</span><span class="p">,</span> <span class="n">Tags</span><span class="o">.</span><span class="n">ID</span><span class="p">],</span>
+    <span class="n">Tags</span><span class="o">.</span><span class="n">ITEM_ID</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">ITEM</span><span class="p">,</span> <span class="n">Tags</span><span class="o">.</span><span class="n">ID</span><span class="p">],</span>
+    <span class="n">Tags</span><span class="o">.</span><span class="n">SESSION_ID</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">SESSION</span><span class="p">,</span> <span class="n">Tags</span><span class="o">.</span><span class="n">ID</span><span class="p">],</span>
+    <span class="n">Tags</span><span class="o">.</span><span class="n">TEXT_TOKENIZED</span><span class="p">:</span> <span class="p">[</span><span class="n">Tags</span><span class="o">.</span><span class="n">TEXT</span><span class="p">,</span> <span class="n">Tags</span><span class="o">.</span><span class="n">TOKENIZED</span><span class="p">],</span>
 <span class="p">}</span>
 
 
@@ -195,7 +211,20 @@
         <span class="k">return</span> <span class="n">tags</span>
 
     <span class="k">def</span> <span class="nf">_normalize_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Tags</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">Tags</span><span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">Tags</span><span class="o">.</span><span class="n">_value2member_map_</span> <span class="k">else</span> <span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="n">tag_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">Tags</span><span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">Tags</span><span class="o">.</span><span class="n">_value2member_map_</span> <span class="k">else</span> <span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="n">atomized_tags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_set</span><span class="p">:</span>
+            <span class="n">atomized_tags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">COMPOUND_TAGS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Compound tags like </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2"> have been deprecated &quot;</span>
+                    <span class="s2">&quot;and will be removed in a future version. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Please use the atomic versions of these tags, like </span><span class="si">{</span><span class="n">COMPOUND_TAGS</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">atomized_tags</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">COMPOUND_TAGS</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">atomized_tags</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tags</span><span class="p">)</span>
