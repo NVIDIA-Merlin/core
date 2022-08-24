@@ -139,6 +139,8 @@
                 <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_categories</span><span class="o">.</span><span class="n">dtype</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">StringDtype</span><span class="p">):</span>
                 <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -507,6 +509,120 @@
 
 <div class="viewcode-block" id="Schema.without"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.without">[docs]</a>    <span class="k">def</span> <span class="nf">without</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Schema&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluding_by_name</span><span class="p">(</span><span class="n">col_names</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.with_tags"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.with_tags">[docs]</a>    <span class="k">def</span> <span class="nf">with_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">tags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tags</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Create a copy of this Schema object with different column tags</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col_names : List[str]</span>
+<span class="sd">            Names of the columns to add tags to</span>
+<span class="sd">        tags : Union[str, Tags]</span>
+<span class="sd">            New column tags to add</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Schema</span>
+<span class="sd">            Copied object with new column tags</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">with_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">col_names</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.with_properties"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.with_properties">[docs]</a>    <span class="k">def</span> <span class="nf">with_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a copy of this Schema object with different column properties</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col_names : List[str]</span>
+<span class="sd">            Names of the columns to add properties to</span>
+<span class="sd">        properties : dict</span>
+<span class="sd">            New column properties to add</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Schema</span>
+<span class="sd">            Copied object with new column properties</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If properties are not a dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">with_properties</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">col_names</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.with_dtype"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.with_dtype">[docs]</a>    <span class="k">def</span> <span class="nf">with_dtype</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">is_ragged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a copy of this Schema object with different column dtypes</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col_names : List[str]</span>
+<span class="sd">            Names of the columns to adjust the dtype of</span>
+<span class="sd">        dtype : np.dtype</span>
+<span class="sd">            New column dtype</span>
+<span class="sd">        is_list: bool :</span>
+<span class="sd">            Whether rows in this column contain lists.</span>
+<span class="sd">             (Default value = None)</span>
+<span class="sd">        is_ragged: bool :</span>
+<span class="sd">            Whether lists in this column have varying lengths.</span>
+<span class="sd">             (Default value = None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Schema</span>
+<span class="sd">            Copied object with new column dtypes</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schema</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span>
+                    <span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">is_ragged</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">col_names</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Schema.with_names"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.with_names">[docs]</a>    <span class="k">def</span> <span class="nf">with_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_names</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Create a copy of this Schema object with some columns renamed</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        col_names : Dict[str,str]</span>
+<span class="sd">            Mapping of old column names to new column names</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Schema</span>
+<span class="sd">            Copied object with new column names</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unrenamed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">col_names</span>
+        <span class="p">}</span>
+        <span class="n">renamed</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">col_names</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">col_names</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_schemas</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">col_names</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">Schema</span><span class="p">({</span><span class="o">**</span><span class="n">unrenamed</span><span class="p">,</span> <span class="o">**</span><span class="n">renamed</span><span class="p">})</span></div>
 
 <div class="viewcode-block" id="Schema.get"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">ColumnSchema</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnSchema</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get a ColumnSchema by name</span>
