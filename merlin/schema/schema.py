@@ -67,6 +67,8 @@ class ColumnSchema:
                 dtype = self.dtype._categories.dtype
             elif isinstance(self.dtype, pd.StringDtype):
                 dtype = np.dtype("O")
+            elif self.dtype is None:
+                dtype = None
             else:
                 dtype = np.dtype(self.dtype)
         except TypeError as err:
@@ -435,6 +437,120 @@ class Schema:
 
     def without(self, col_names: List[str]) -> "Schema":
         return self.excluding_by_name(col_names)
+
+    def with_tags(self, col_names: List[str], tags: Union[str, Tags]):
+        """Create a copy of this Schema object with different column tags
+
+        Parameters
+        ----------
+        col_names : List[str]
+            Names of the columns to add tags to
+        tags : Union[str, Tags]
+            New column tags to add
+
+        Returns
+        -------
+        Schema
+            Copied object with new column tags
+
+        """
+        return Schema(
+            {
+                key: self.column_schemas[key].with_tags(tags)
+                if key in col_names
+                else self.column_schemas[key]
+                for key in self.column_schemas
+            }
+        )
+
+    def with_properties(self, col_names: List[str], properties: dict):
+        """Create a copy of this Schema object with different column properties
+
+        Parameters
+        ----------
+        col_names : List[str]
+            Names of the columns to add properties to
+        properties : dict
+            New column properties to add
+
+        Returns
+        -------
+        Schema
+            Copied object with new column properties
+
+        Raises
+        ------
+        TypeError
+            If properties are not a dict
+
+        """
+        return Schema(
+            {
+                key: self.column_schemas[key].with_properties(properties)
+                if key in col_names
+                else self.column_schemas[key]
+                for key in self.column_schemas
+            }
+        )
+
+    def with_dtype(
+        self, col_names: List[str], dtype, is_list: bool = False, is_ragged: bool = False
+    ):
+        """Create a copy of this Schema object with different column dtypes
+
+        Parameters
+        ----------
+        col_names : List[str]
+            Names of the columns to adjust the dtype of
+        dtype : np.dtype
+            New column dtype
+        is_list: bool :
+            Whether rows in this column contain lists.
+             (Default value = None)
+        is_ragged: bool :
+            Whether lists in this column have varying lengths.
+             (Default value = None)
+
+        Returns
+        -------
+        Schema
+            Copied object with new column dtypes
+
+        """
+        return Schema(
+            {
+                key: self.column_schemas[key].with_dtype(
+                    dtype, is_list=is_list, is_ragged=is_ragged
+                )
+                if key in col_names
+                else self.column_schemas[key]
+                for key in self.column_schemas
+            }
+        )
+
+    def with_names(self, col_names: Dict[str, str]):
+        """Create a copy of this Schema object with some columns renamed
+
+        Parameters
+        ----------
+        col_names : Dict[str,str]
+            Mapping of old column names to new column names
+
+        Returns
+        -------
+        Schema
+            Copied object with new column names
+
+        """
+        unrenamed = {
+            key: self.column_schemas[key] for key in self.column_schemas if key not in col_names
+        }
+        renamed = {
+            col_names[key]: self.column_schemas[key].with_name(col_names[key])
+            for key in self.column_schemas
+            if key in col_names
+        }
+        return Schema({**unrenamed, **renamed})
 
     def get(self, col_name: str, default: ColumnSchema = None) -> ColumnSchema:
         """Get a ColumnSchema by name

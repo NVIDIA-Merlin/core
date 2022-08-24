@@ -15,7 +15,7 @@
 #
 import json
 
-import numpy
+import numpy as np
 import pytest
 
 from merlin.schema import ColumnSchema, Schema, Tags
@@ -55,6 +55,7 @@ def test_merlin_to_proto_to_json_to_merlin():
             ColumnSchema(
                 "userid",
                 tags=[Tags.USER_ID, Tags.CATEGORICAL],
+                dtype=np.int32,
                 properties={
                     "num_buckets": None,
                     "freq_threshold": 0.0,
@@ -81,14 +82,14 @@ def test_column_schema_protobuf_domain_check(tmpdir):
         "col1",
         tags=[],
         properties={"domain": {"min": 0, "max": 10}},
-        dtype=numpy.int,
+        dtype=np.int,
         is_list=False,
     )
     schema2 = ColumnSchema(
         "col2",
         tags=[],
         properties={"domain": {"min": 0.0, "max": 10.0}},
-        dtype=numpy.float,
+        dtype=np.float,
         is_list=False,
     )
     saved_schema = Schema([schema1, schema2])
@@ -108,7 +109,7 @@ def test_column_schema_protobuf_domain_check(tmpdir):
 @pytest.mark.parametrize("props2", [{}, {"p3": "p3", "p4": "p4"}])
 @pytest.mark.parametrize("tags1", [[], ["a", "b", "c"]])
 @pytest.mark.parametrize("tags2", [[], ["c", "d", "e"]])
-@pytest.mark.parametrize("d_type", [numpy.float32, numpy.float64, numpy.int32, numpy.int64])
+@pytest.mark.parametrize("d_type", [np.float32, np.float64, np.int32, np.int64])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
     # create a schema
@@ -134,7 +135,7 @@ def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type
 
 @pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("dtype", [np.float, np.int])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
     # make sure we can round trip a schema to TensorflowMetadata without going to disk
@@ -147,7 +148,7 @@ def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_typ
 
 @pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("dtype", [np.float, np.int])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
     schema = Schema(

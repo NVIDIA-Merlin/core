@@ -252,6 +252,8 @@ def _dtype_name(column_schema):
         return column_schema.dtype
     elif hasattr(column_schema.dtype, "__name__"):
         return column_schema.dtype.__name__
+    elif column_schema.dtype is None:
+        return None
     else:
         raise TypeError(f"unsupported dtype for column schema: {column_schema.dtype}")
 

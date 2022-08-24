@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import numpy as np
 import pytest
 
 from merlin.dag import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
+from merlin.schema.tags import TagSet
 
 
 def test_select_by_name():
@@ -200,17 +202,59 @@ def test_dataset_schemas_can_be_added():
     assert result == expected
 
 
-def test_with_tags():
-    ...
+@pytest.mark.parametrize("tags", ["tagged", ["tagged"], ["tagged", "twice"]])
+def test_with_tags(tags):
+    schema = Schema(["col1", "col2", "col3"])
+    schema_with_tags = schema.with_tags(["col1", "col2"], tags)
+
+    if not isinstance(tags, list):
+        tags = [tags]
+
+    assert isinstance(schema_with_tags, Schema)
+    assert schema_with_tags["col1"].tags == TagSet(tags)
+    assert schema_with_tags["col2"].tags == TagSet(tags)
+    assert schema_with_tags["col3"].tags == TagSet()
 
 
-def test_with_properties():
-    ...
+@pytest.mark.parametrize("props", [{"key": "value"}])
+def test_with_properties(props):
+    schema = Schema(["col1", "col2", "col3"])
+    schema_with_props = schema.with_properties(["col1", "col2"], props)
+
+    assert isinstance(schema_with_props, Schema)
+    assert schema_with_props["col1"].properties == props
+    assert schema_with_props["col2"].properties == props
+    assert schema_with_props["col3"].properties == {}
 
 
-def test_with_dtype():
-    ...
+@pytest.mark.parametrize("dtype", [np.int32])
+@pytest.mark.parametrize("is_list", [True, False])
+@pytest.mark.parametrize("is_ragged", [True, False])
+def test_with_dtype(dtype, is_list, is_ragged):
+    schema = Schema(["col1", "col2", "col3"])
+    schema_with_dtype = schema.with_dtype(
+        ["col1", "col2"], dtype, is_list=is_list, is_ragged=is_ragged
+    )
+
+    assert isinstance(schema_with_dtype, Schema)
+    assert schema_with_dtype["col1"].dtype == dtype
+    assert schema_with_dtype["col2"].dtype == dtype
+    assert schema_with_dtype["col3"].dtype is None
+
+    assert schema_with_dtype["col1"].is_list == is_list
+    assert schema_with_dtype["col2"].is_list == is_list
+    assert schema_with_dtype["col3"].is_list is False
+
+    assert schema_with_dtype["col1"].is_ragged == (is_ragged if is_list else False)
+    assert schema_with_dtype["col2"].is_ragged == (is_ragged if is_list else False)
+    assert schema_with_dtype["col3"].is_ragged is False
 
 
-def test_with_name():
-    ...
+def test_with_names():
+    schema = Schema(["col1", "col2", "col3"])
+    schema_with_names = schema.with_names({"col1": "col1_renamed", "col2": "col2_renamed"})
+
+    assert isinstance(schema_with_names, Schema)
+    assert schema_with_names["col1_renamed"]
+    assert schema_with_names["col2_renamed"]
+    assert schema_with_names["col3"]
