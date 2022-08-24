@@ -17,7 +17,6 @@ import pytest
 
 from merlin.dag import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
-from merlin.schema.schema import ColumnQuantity
 
 
 def test_select_by_name():
@@ -135,36 +134,83 @@ def test_excluding():
     assert col2_exclusion == Schema([col2_schema])
 
 
-def test_list_column_attributes():
-    col0_schema = ColumnSchema("col0")
+def test_schema_can_be_added_to_none():
+    schema_set = Schema(["a", "b", "c"])
 
-    assert not col0_schema.is_list
-    assert not col0_schema.is_ragged
-    assert col0_schema.quantity == ColumnQuantity.SCALAR
+    assert (schema_set + None) == schema_set
+    assert (None + schema_set) == schema_set
 
-    col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
 
-    assert not col1_schema.is_list
-    assert not col1_schema.is_ragged
-    assert col1_schema.quantity == ColumnQuantity.SCALAR
+def test_schema_to_pandas():
+    import pandas as pd
 
-    col2_schema = ColumnSchema("col2", is_list=True)
+    schema_set = Schema(["a", "b", "c"])
+    df = schema_set.to_pandas()
 
-    assert col2_schema.is_list
-    assert col2_schema.is_ragged
-    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
 
-    col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
-    assert col3_schema.is_list
-    assert col3_schema.is_ragged
-    assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
+def test_construct_schema_with_column_names():
+    schema = Schema(["x", "y", "z"])
+    expected = Schema([ColumnSchema("x"), ColumnSchema("y"), ColumnSchema("z")])
 
-    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
+    assert schema == expected
 
-    assert col4_schema.is_list
-    assert not col4_schema.is_ragged
-    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
 
-    with pytest.raises(ValueError):
-        ColumnSchema("col5", is_list=False, is_ragged=True)
+def test_dataset_schema_column_names():
+    ds_schema = Schema(["x", "y", "z"])
+
+    assert ds_schema.column_names == ["x", "y", "z"]
+
+
+def test_dataset_schema_constructor():
+    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
+    schema2 = ColumnSchema("col2", tags=["c", "d", "e"])
+
+    expected = {schema1.name: schema1, schema2.name: schema2}
+
+    ds_schema_dict = Schema(expected)
+    ds_schema_list = Schema([schema1, schema2])
+
+    assert ds_schema_dict.column_schemas == expected
+    assert ds_schema_list.column_schemas == expected
+
+    with pytest.raises(TypeError) as exception_info:
+        Schema(12345)
+
+    assert "column_schemas" in str(exception_info.value)
+
+
+def test_dataset_schemas_can_be_added():
+    ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
+    ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])
+
+    result = ds1_schema + ds2_schema
+
+    expected = Schema(
+        [
+            ColumnSchema("col1"),
+            ColumnSchema("col2"),
+            ColumnSchema("col3"),
+            ColumnSchema("col4"),
+        ]
+    )
+
+    assert result == expected
+
+
+def test_with_tags():
+    ...
+
+
+def test_with_properties():
+    ...
+
+
+def test_with_dtype():
+    ...
+
+
+def test_with_name():
+    ...

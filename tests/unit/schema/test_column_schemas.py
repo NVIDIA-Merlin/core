@@ -13,13 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
-
 import numpy
 import pytest
 
-from merlin.schema import ColumnSchema, Schema
-from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+from merlin.schema import ColumnSchema
+from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -50,201 +48,41 @@ def test_column_schema_meta():
     assert column != ColumnSchema("name", properties={"p1": "prop-1"})
 
 
-@pytest.mark.parametrize("props1", [{}, {"p1": "p1", "p2": "p2"}])
-@pytest.mark.parametrize("props2", [{}, {"p3": "p3", "p4": "p4"}])
-@pytest.mark.parametrize("tags1", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("tags2", [[], ["c", "d", "e"]])
-@pytest.mark.parametrize("d_type", [numpy.float32, numpy.float64, numpy.int32, numpy.int64])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
-    # create a schema
-    col_schema1 = ColumnSchema(
-        "col1", tags=tags1, properties=props1, dtype=d_type, is_list=list_type
-    )
-    col_schema2 = ColumnSchema(
-        "col2", tags=tags2, properties=props2, dtype=d_type, is_list=list_type
-    )
-    schema = Schema([col_schema1, col_schema2])
-
-    # write schema out
-    tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
-    tf_metadata.to_proto_text_file(str(tmpdir))
-
-    # read schema back in
-    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = tf_metadata.to_merlin_schema()
-
-    # compare read to origin
-    assert schema == loaded_schema
-
-
-@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
-@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
-    # make sure we can round trip a schema to TensorflowMetadata without going to disk
-    schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
-    )
-    loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
-    assert schema == loaded_schema
-
-
-@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
-@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
-    schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
-    )
-    tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
-    loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
-    assert schema == loaded_schema
-
-
-def test_tensorflow_metadata_from_json():
-    # make sure we can load up tensorflowmetadata serialized json objects, like done by
-    # merlin-models
-    json_schema = """{"feature": [
-    {
-      "name": "categories",
-      "valueCount": {
-        "min": "1",
-        "max": "4"
-      },
-      "type": "INT",
-      "intDomain": {
-        "name": "categories",
-        "min": "1",
-        "max": "331",
-        "isCategorical": true
-      },
-      "annotation": {
-        "tag": [
-          "item"
-        ]
-      }
-    }]}
-    """
-
-    schema = TensorflowMetadata.from_json(json_schema).to_merlin_schema()
-    column_schema = schema.column_schemas["categories"]
-
-    # make sure the value_count is set appropriately
-    assert column_schema.properties["value_count"] == {"min": 1, "max": 4}
-    assert column_schema.is_list
-    assert column_schema.is_ragged
-
-    # should have CATEGORICAL tag, even though not explicitly listed in annotation
-    # (and instead should be inferred from the intDomain.isCategorical)
-    assert Tags.CATEGORICAL in column_schema.tags
-
-    assert column_schema.properties["domain"] == {"min": 1, "max": 331}
-
-    # make sure the JSON formatted extra_metadata properties are human readable
-    json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
-    assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
-        {"is_list": True, "is_ragged": True, "dtype_item_size": 64.0}
-    ]
-
-
-def test_column_schema_protobuf_domain_check(tmpdir):
-    # create a schema
-    schema1 = ColumnSchema(
-        "col1",
-        tags=[],
-        properties={"domain": {"min": 0, "max": 10}},
-        dtype=numpy.int,
-        is_list=False,
-    )
-    schema2 = ColumnSchema(
-        "col2",
-        tags=[],
-        properties={"domain": {"min": 0.0, "max": 10.0}},
-        dtype=numpy.float,
-        is_list=False,
-    )
-    saved_schema = Schema([schema1, schema2])
-
-    # write schema out
-    tf_metadata = TensorflowMetadata.from_merlin_schema(saved_schema)
-    tf_metadata.to_proto_text_file(str(tmpdir))
-
-    # read schema back in
-    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = tf_metadata.to_merlin_schema()
-
-    assert saved_schema == loaded_schema
-
-
 def test_column_schema_tags_normalize():
     schema1 = ColumnSchema("col1", tags=["categorical", "list", "item_id"])
     assert schema1.tags == TagSet([Tags.CATEGORICAL, Tags.LIST, Tags.ITEM_ID])
 
 
-def test_dataset_schema_constructor():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["c", "d", "e"])
+def test_list_column_attributes():
+    col0_schema = ColumnSchema("col0")
 
-    expected = {schema1.name: schema1, schema2.name: schema2}
+    assert not col0_schema.is_list
+    assert not col0_schema.is_ragged
+    assert col0_schema.quantity == ColumnQuantity.SCALAR
 
-    ds_schema_dict = Schema(expected)
-    ds_schema_list = Schema([schema1, schema2])
+    col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
 
-    assert ds_schema_dict.column_schemas == expected
-    assert ds_schema_list.column_schemas == expected
+    assert not col1_schema.is_list
+    assert not col1_schema.is_ragged
+    assert col1_schema.quantity == ColumnQuantity.SCALAR
 
-    with pytest.raises(TypeError) as exception_info:
-        Schema(12345)
+    col2_schema = ColumnSchema("col2", is_list=True)
 
-    assert "column_schemas" in str(exception_info.value)
+    assert col2_schema.is_list
+    assert col2_schema.is_ragged
+    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
 
+    col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
-def test_dataset_schemas_can_be_added():
-    ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
-    ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])
+    assert col3_schema.is_list
+    assert col3_schema.is_ragged
+    assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
-    result = ds1_schema + ds2_schema
+    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
 
-    expected = Schema(
-        [
-            ColumnSchema("col1"),
-            ColumnSchema("col2"),
-            ColumnSchema("col3"),
-            ColumnSchema("col4"),
-        ]
-    )
+    assert col4_schema.is_list
+    assert not col4_schema.is_ragged
+    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
 
-    assert result == expected
-
-
-def test_schema_can_be_added_to_none():
-    schema_set = Schema(["a", "b", "c"])
-
-    assert (schema_set + None) == schema_set
-    assert (None + schema_set) == schema_set
-
-
-def test_schema_to_pandas():
-    import pandas as pd
-
-    schema_set = Schema(["a", "b", "c"])
-    df = schema_set.to_pandas()
-
-    assert isinstance(df, pd.DataFrame)
-    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
-
-
-def test_construct_schema_with_column_names():
-    schema = Schema(["x", "y", "z"])
-    expected = Schema([ColumnSchema("x"), ColumnSchema("y"), ColumnSchema("z")])
-
-    assert schema == expected
-
-
-def test_dataset_schema_column_names():
-    ds_schema = Schema(["x", "y", "z"])
-
-    assert ds_schema.column_names == ["x", "y", "z"]
+    with pytest.raises(ValueError):
+        ColumnSchema("col5", is_list=False, is_ragged=True)
