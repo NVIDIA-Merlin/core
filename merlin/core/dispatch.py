@@ -438,7 +438,7 @@ def pull_apart_list(original, device=None):
         offsets = original._column.offsets
         elements = original._column.elements
         if isinstance(elements, cudf.core.column.lists.ListColumn):
-            offsets = elements.offsets[offsets]
+            offsets = make_series(elements.offsets)[offsets]
     return make_series(values, device), make_series(offsets, device)
 
 
