@@ -198,19 +198,3 @@ def test_dataset_schemas_can_be_added():
     )
 
     assert result == expected
-
-
-def test_with_tags():
-    ...
-
-
-def test_with_properties():
-    ...
-
-
-def test_with_dtype():
-    ...
-
-
-def test_with_name():
-    ...
