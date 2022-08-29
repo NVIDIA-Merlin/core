@@ -34,4 +34,4 @@ jobs:
         python -m pip install --upgrade pip setuptools==59.4.0 wheel tox
     - name: Run tests
       run: |
-        tox -e test-systems-cpu
+        GIT_COMMIT=`git rev-parse HEAD` tox -e test-systems-cpu
