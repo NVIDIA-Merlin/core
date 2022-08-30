@@ -36,7 +36,7 @@ class Graph:
         self.subgraphs = subgraphs or {}
 
     def subgraph(self, name: str):
-        if not name in self.subgraphs.keys():
+        if name not in self.subgraphs.keys():
             raise ValueError(f"No subgraph named {name}. Options are: {self.subgraphs.keys()}")
         return Graph(self.subgraphs[name])
 
