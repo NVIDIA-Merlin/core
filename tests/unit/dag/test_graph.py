@@ -61,5 +61,5 @@ def test_subgraph():
     assert graph.subgraph("sub1").output_node == sg1
     assert graph.subgraph("sub2").output_node == sg2
 
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(ValueError):
         graph.subgraph("sg3")
