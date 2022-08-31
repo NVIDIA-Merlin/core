@@ -38,7 +38,10 @@ class Graph:
         parents_with_deps = self.output_node.parents_with_dependencies
         for name, sg in self.subgraphs.items():
             if sg not in parents_with_deps:
-                raise ValueError(f"Subgraph {name} does not exist in output_node.")
+                raise ValueError(
+                    f"The output node of subgraph {name} ({self.subgraphs[name]}) "
+                    + "does not exist among the parents or dependencies of {output_node}"
+                )
 
     def subgraph(self, name: str) -> "Graph":
         if name not in self.subgraphs.keys():
