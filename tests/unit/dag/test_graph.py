@@ -63,3 +63,17 @@ def test_subgraph():
 
     with pytest.raises(ValueError):
         graph.subgraph("sg3")
+
+
+def test_subgraph_with_unrelated_subgraph():
+    sg1 = ["a", "b"] >> BaseOperator()
+    sg2 = ["a", "c"] >> BaseOperator()
+    sg3 = ["c", "d"] >> BaseOperator()
+
+    # same input as sg3, but not included in the combined Graph.
+    unrelated = ["c", "d"] >> BaseOperator()
+
+    combined = sg1 + sg2 + sg3
+
+    with pytest.raises(ValueError):
+        Graph(combined, subgraphs={"sub1": sg1, "unrelated": unrelated})
