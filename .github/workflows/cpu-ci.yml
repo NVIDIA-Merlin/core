@@ -1,4 +1,4 @@
-name: CPU CI
+name: Core Tests (CPU)
 
 on:
   workflow_dispatch:
