@@ -88,6 +88,7 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">merlin.dag.node</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Node</span><span class="p">,</span>
@@ -102,8 +103,22 @@
 
 
 <div class="viewcode-block" id="Graph"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph">[docs]</a><span class="k">class</span> <span class="nc">Graph</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_node</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">subgraphs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Node</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span> <span class="o">=</span> <span class="n">output_node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span> <span class="o">=</span> <span class="n">subgraphs</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">parents_with_deps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span><span class="o">.</span><span class="n">parents_with_dependencies</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parents_with_deps</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The output node of subgraph </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">) &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;does not exist among the parents or dependencies of </span><span class="si">{output_node}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+<div class="viewcode-block" id="Graph.subgraph"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Graph&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No subgraph named </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Options are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
