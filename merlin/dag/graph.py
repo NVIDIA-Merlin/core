@@ -16,6 +16,7 @@
 
 import logging
 from collections import deque
+from typing import Dict, Optional
 
 from merlin.dag.node import (
     Node,
@@ -30,8 +31,22 @@ LOG = logging.getLogger("merlin")
 
 
 class Graph:
-    def __init__(self, output_node: Node):
+    def __init__(self, output_node: Node, subgraphs: Optional[Dict[str, Node]] = None):
         self.output_node = output_node
+        self.subgraphs = subgraphs or {}
+
+        parents_with_deps = self.output_node.parents_with_dependencies
+        for name, sg in self.subgraphs.items():
+            if sg not in parents_with_deps:
+                raise ValueError(
+                    f"The output node of subgraph {name} ({self.subgraphs[name]}) "
+                    + "does not exist among the parents or dependencies of {output_node}"
+                )
+
+    def subgraph(self, name: str) -> "Graph":
+        if name not in self.subgraphs.keys():
+            raise ValueError(f"No subgraph named {name}. Options are: {self.subgraphs.keys()}")
+        return Graph(self.subgraphs[name])
 
     @property
     def input_dtypes(self):
@@ -133,15 +148,21 @@ class Graph:
 
         while nodes_to_process:
             node, columns_to_remove = nodes_to_process.popleft()
-
             if node.input_schema and len(node.input_schema):
                 output_columns_to_remove = node.remove_inputs(columns_to_remove)
 
                 for child in node.children:
-                    nodes_to_process.append((child, to_remove + output_columns_to_remove))
+                    nodes_to_process.append(
+                        (child, list(set(to_remove + output_columns_to_remove)))
+                    )
 
                     if not len(node.input_schema):
                         node.remove_child(child)
+
+            # remove any dependencies that do not have an output schema
+            node.dependencies = [
+                dep for dep in node.dependencies if dep.output_schema and len(dep.output_schema)
+            ]
 
             if not node.input_schema or not len(node.input_schema):
                 for parent in node.parents:

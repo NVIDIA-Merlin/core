@@ -27,7 +27,7 @@ import pytest
 from dask.dataframe import assert_eq
 from packaging.version import Version
 
-import merlin
+import merlin.io
 from merlin.core import dispatch
 from merlin.io.parquet import GPUParquetWriter
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata

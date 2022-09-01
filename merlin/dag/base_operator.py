@@ -18,7 +18,7 @@ from __future__ import annotations
 from enum import Flag, auto
 from typing import Any, List, Union
 
-import merlin
+import merlin.dag
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 
