@@ -9,6 +9,8 @@
 pytest>=5
 pytest-cov>=2
 testbook==0.4.2
+git+https://github.com/rapidsai/asvdb
+scikit-learn
 
 # needed to make test_s3 work
 # moto>=2
