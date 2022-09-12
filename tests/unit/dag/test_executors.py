@@ -46,7 +46,7 @@ def test_local_executor_with_multiple_dataframe():
     graph.construct_schema(schema)
 
     executor = LocalExecutor()
-    result = executor.transform_multi((df0, df1), [graph.output_node])
+    result = executor.transform_multi((df0, df1), (schema, schema), [graph.output_node])
 
     assert all(result[0]["a"].to_pandas() == df0["a"].to_pandas())
     assert "b" not in result[0].columns
@@ -82,7 +82,7 @@ def test_local_executor_with_multiple_dataframe_like():
     graph.construct_schema(schema)
 
     executor = LocalExecutor()
-    result = executor.transform_multi((df0, df1), [graph.output_node])
+    result = executor.transform_multi((df0, df1), (schema, schema), [graph.output_node])
 
     assert result[0]["a"] == df0["a"]
     assert "b" not in result[0].columns
