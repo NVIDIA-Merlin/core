@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import logging
+from copy import deepcopy
 from typing import Dict
 
 import dask
@@ -26,7 +27,7 @@ from merlin.core.utils import (
     global_dask_client,
     set_client_deprecated,
 )
-from merlin.dag import ColumnSelector, Node
+from merlin.dag import ColumnSelector, Graph, Node
 from merlin.io.worker import clean_worker_cache
 from merlin.dag.dictarray import Transformable
 
@@ -79,14 +80,22 @@ class LocalExecutor:
     An executor for running Merlin operator DAGs locally
     """
 
+    # TODO: Replace `nodes` with `graph` here?
     def transform_multi(
-        self, df, nodes, output_dtypes=None, additional_columns=None, capture_dtypes=False
+        self, dfs, schemas, nodes, output_dtypes=None, additional_columns=None, capture_dtypes=False
     ):
         """
         Transforms multiple dataframes by applying the operators from a collection of Nodes
         """
-        return [self.transform(df, nodes) for df in df]
+        graphs = [Graph(deepcopy(nodes)[0]).construct_schema(schema) for schema in schemas]
 
+        results = []
+        for graph, df in zip(graphs, dfs):
+            results.append(self.transform(df, [graph.output_node]))
+
+        return results
+
+    # TODO: Replace `nodes` with `graph` here?
     def transform(
         self,
         data: Transformable,
