@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Dict
 
 import numpy as np
 
 from merlin.core.dispatch import make_df
 from merlin.dag import Graph
 from merlin.dag.base_operator import BaseOperator
-from merlin.dag.executors import LocalExecutor
+from merlin.dag.executors import DataFrameLike, LocalExecutor
 from merlin.schema.schema import ColumnSchema, Schema
 
 
@@ -57,47 +56,6 @@ def test_local_executor_with_multiple_dataframe():
 
 
 # ==========================================================================
-
-
-class Column:
-    def __init__(self, data, dtype):
-        self.data = data
-        self._dtype = dtype
-
-    @property
-    def dtype(self):
-        return self._dtype
-
-    def __eq__(self, other):
-        return self.data == other.data and self._dtype == other._dtype
-
-
-class DataFrameLike:
-    def __init__(self, data: Dict, dtypes: Dict):
-        self.data = data
-        self.dtypes = dtypes
-
-    @property
-    def columns(self):
-        return list(self.data.keys())
-
-    def __len__(self):
-        return len(self.data)
-
-    def __eq__(self, other):
-        return self.data == other.data and self.dtypes == other.dtypes
-
-    def __getitem__(self, key):
-        if isinstance(key, list):
-            return DataFrameLike(
-                data={k: self.data[k] for k in key},
-                dtypes={k: self.dtypes[k] for k in key},
-            )
-        else:
-            return Column(self.data[key], self.dtypes[key])
-
-    def _grab_keys(self, source, keys):
-        return {k: source[k] for k in keys}
 
 
 def test_local_executor_with_dataframe_like():

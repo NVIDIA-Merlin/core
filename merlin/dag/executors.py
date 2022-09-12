@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import logging
+from typing import Dict
 
 import dask
 import pandas as pd
@@ -29,6 +30,47 @@ from merlin.dag import ColumnSelector, Node
 from merlin.io.worker import clean_worker_cache
 
 LOG = logging.getLogger("merlin")
+
+
+class Column:
+    def __init__(self, data, dtype):
+        self.data = data
+        self._dtype = dtype
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    def __eq__(self, other):
+        return self.data == other.data and self._dtype == other._dtype
+
+
+class DataFrameLike:
+    def __init__(self, data: Dict, dtypes: Dict):
+        self.data = data
+        self.dtypes = dtypes
+
+    @property
+    def columns(self):
+        return list(self.data.keys())
+
+    def __len__(self):
+        return len(self.data)
+
+    def __eq__(self, other):
+        return self.data == other.data and self.dtypes == other.dtypes
+
+    def __getitem__(self, key):
+        if isinstance(key, list):
+            return DataFrameLike(
+                data={k: self.data[k] for k in key},
+                dtypes={k: self.dtypes[k] for k in key},
+            )
+        else:
+            return Column(self.data[key], self.dtypes[key])
+
+    def _grab_keys(self, source, keys):
+        return {k: source[k] for k in keys}
 
 
 class LocalExecutor:
