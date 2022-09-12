@@ -101,7 +101,8 @@ class BaseOperator(ComputeSchemaMixin):
         Schema
             The schemas of the columns produced by this operator
         """
-        output_schema = super().compute_output_schema(input_schema, col_selector)
+        if not col_selector or col_selector.all:
+            col_selector = ColumnSelector(input_schema.column_names)
 
         if self.dynamic_dtypes and prev_output_schema:
             for col_name, col_schema in output_schema.column_schemas.items():
