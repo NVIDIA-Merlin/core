@@ -268,3 +268,12 @@ def test_applying_inverse_selector_to_schema_selects_relevant_columns():
     result = schema.excluding(selector)
 
     assert result == schema
+
+
+def test_wildcard_selector():
+    selector = ColumnSelector("*")
+
+    schema = Schema(["a", "b", "c", "d", "e"])
+    result = schema.select(selector)
+
+    assert result == schema
