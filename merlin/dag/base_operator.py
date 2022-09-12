@@ -131,6 +131,9 @@ class BaseOperator:
 
         return output_schema
 
+    def transform(self, col_selector, df):
+        return df
+
     def column_mapping(self, col_selector):
         column_mapping = {}
         for col_name in col_selector.names:

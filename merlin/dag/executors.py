@@ -36,6 +36,14 @@ class LocalExecutor:
     An executor for running Merlin operator DAGs locally
     """
 
+    def transform_multi(
+        self, df, nodes, output_dtypes=None, additional_columns=None, capture_dtypes=False
+    ):
+        """
+        Transforms multiple dataframes by applying the operators from a collection of Nodes
+        """
+        return [self.transform(df, nodes) for df in df]
+
     def transform(
         self, df, nodes, output_dtypes=None, additional_columns=None, capture_dtypes=False
     ):
