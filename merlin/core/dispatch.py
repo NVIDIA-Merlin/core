@@ -25,7 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from merlin.core.compat import HAS_GPU
-from merlin.core.protocols import DataFrameLike
+from merlin.core.protocols import DataFrameLike, SeriesLike
 
 cp = None
 cudf = None
@@ -74,12 +74,6 @@ except ImportError:
             return inner2
 
         return inner1
-
-
-if HAS_GPU:
-    SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
-else:
-    SeriesType = pd.Series  # type: ignore
 
 
 # Define mapping between non-nullable,
@@ -268,13 +262,13 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesType) -> np.dtype:
+def list_val_dtype(ser: SeriesLike) -> np.dtype:
     """
     Return the dtype of the leaves from a list or nested list
 
     Parameters
     ----------
-    ser : SeriesType
+    ser : SeriesLike
         A series where the rows contain lists or nested lists
 
     Returns
