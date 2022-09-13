@@ -16,7 +16,8 @@
 import pytest
 
 from merlin.core.dispatch import make_df
-from merlin.dag.dictarray import DataFrameLike, DictArray, DictLike, Transformable
+from merlin.core.protocols import DataFrameLike, DictLike, Transformable
+from merlin.dag.dictarray import DictArray
 
 
 @pytest.mark.parametrize("protocol", [DictLike])

@@ -13,56 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Dict, Protocol, runtime_checkable
+from typing import Dict
 
-
-@runtime_checkable
-class DictLike(Protocol):
-    def __iter__(self):
-        ...
-
-    def __len__(self):
-        ...
-
-    def __getitem__(self, key):
-        ...
-
-    def __setitem__(self, key, value):
-        ...
-
-    def __delitem__(self, key):
-        ...
-
-    def keys(self):
-        ...
-
-    def items(self):
-        ...
-
-    def values(self):
-        ...
-
-    def update(self, other):
-        ...
-
-    def copy(self):
-        ...
-
-
-@runtime_checkable
-class DataFrameLike(Protocol):
-    @property
-    def columns(self):
-        ...
-
-    @property
-    def dtypes(self):
-        ...
-
-
-@runtime_checkable
-class Transformable(DictLike, DataFrameLike, Protocol):
-    ...
+from merlin.core.protocols import Transformable
 
 
 class Column:
@@ -78,7 +31,7 @@ class Column:
         return self.data == other.data and self._dtype == other._dtype
 
 
-class DictArray:
+class DictArray(Transformable):
     def __init__(self, data: Dict, dtypes: Dict):
         self.data = data
         self.dtypes = dtypes
