@@ -50,6 +50,21 @@ class DictLike(Protocol):
 
 
 @runtime_checkable
+class SeriesLike(Protocol):
+    def values(self):
+        ...
+
+    def dtype(self):
+        ...
+
+    def __getitem__(self, index):
+        ...
+
+    def __eq__(self, other):
+        ...
+
+
+@runtime_checkable
 class DataFrameLike(Protocol):
     @property
     def columns(self):
@@ -61,6 +76,9 @@ class DataFrameLike(Protocol):
 
     @dtypes.setter
     def dtypes(self, dtypes):
+        ...
+
+    def __getitem__(self, index):
         ...
 
 
