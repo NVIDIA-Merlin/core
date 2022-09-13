@@ -15,20 +15,19 @@
 #
 from typing import Dict
 
-from merlin.core.protocols import Transformable
+from merlin.core.protocols import SeriesLike, Transformable
 
 
-class Column:
-    def __init__(self, data, dtype):
-        self.data = data
-        self._dtype = dtype
+class Column(SeriesLike):
+    def __init__(self, values, dtype):
+        self.values = values
+        self.dtype = dtype
 
-    @property
-    def dtype(self):
-        return self._dtype
+    def __getitem__(self, index):
+        return self.values[index]
 
     def __eq__(self, other):
-        return self.data == other.data and self._dtype == other._dtype
+        return self.data == other.data and self.dtype == other.dtype
 
 
 class DictArray(Transformable):

@@ -13,33 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import numpy as np
 import pytest
 
-from merlin.core.dispatch import make_df
-from merlin.core.protocols import DataFrameLike, DictLike, Transformable
-from merlin.dag.dictarray import DictArray
+from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike, Transformable
+from merlin.dag.dictarray import Column, DictArray
 
 
-@pytest.mark.parametrize("protocol", [DictLike])
-def test_dictionary_is_dictlike(protocol):
-    obj = {}
+@pytest.mark.parametrize("protocol", [SeriesLike])
+def test_column_matches_protocols(protocol):
+    obj = Column([], np.int32)
 
     assert isinstance(obj, protocol)
-
-
-@pytest.mark.parametrize("device", [None, "cpu"])
-@pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
-def test_dataframes_match_protocols(protocol, device):
-    obj = make_df({}, device=device)
-
-    assert isinstance(obj, DictLike)
-
-
-@pytest.mark.parametrize("device", [None, "cpu"])
-def test_dataframes_are_dataframelike(device):
-    obj = make_df({}, device=device)
-
-    assert isinstance(obj, DataFrameLike)
 
 
 @pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
