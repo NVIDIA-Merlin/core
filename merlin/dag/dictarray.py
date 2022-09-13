@@ -60,6 +60,11 @@ class DataFrameLike(Protocol):
         ...
 
 
+@runtime_checkable
+class Transformable(DictLike, DataFrameLike, Protocol):
+    ...
+
+
 class Column:
     def __init__(self, data, dtype):
         self.data = data

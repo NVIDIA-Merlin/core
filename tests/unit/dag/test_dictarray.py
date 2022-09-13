@@ -16,17 +16,19 @@
 import pytest
 
 from merlin.core.dispatch import make_df
-from merlin.dag.dictarray import DataFrameLike, DictArray, DictLike
+from merlin.dag.dictarray import DataFrameLike, DictArray, DictLike, Transformable
 
 
-def test_dictionary_is_dictlike():
+@pytest.mark.parametrize("protocol", [DictLike])
+def test_dictionary_is_dictlike(protocol):
     obj = {}
 
-    assert isinstance(obj, DictLike)
+    assert isinstance(obj, protocol)
 
 
 @pytest.mark.parametrize("device", [None, "cpu"])
-def test_dataframes_are_dictlike(device):
+@pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
+def test_dataframes_match_protocols(protocol, device):
     obj = make_df({}, device=device)
 
     assert isinstance(obj, DictLike)
@@ -39,13 +41,8 @@ def test_dataframes_are_dataframelike(device):
     assert isinstance(obj, DataFrameLike)
 
 
-def test_dictarray_is_dictlike():
+@pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
+def test_dictarray_matches_protocols(protocol):
     obj = DictArray({}, {})
 
-    assert isinstance(obj, DictLike)
-
-
-def test_dictarray_is_dataframelike():
-    obj = DictArray({}, {})
-
-    assert isinstance(obj, DataFrameLike)
+    assert isinstance(obj, protocol)
