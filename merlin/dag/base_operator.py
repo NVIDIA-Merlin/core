@@ -72,7 +72,7 @@ class BaseOperator(ComputeSchemaMixin):
         Schema
             The schemas of the columns used by this operator
         """
-        selector = selector or ColumnSelector()
+        selector = selector or ColumnSelector("*")
 
         upstream_schema = parents_schema + deps_schema
         self._validate_matching_cols(upstream_schema, selector, self.compute_input_schema.__name__)
@@ -101,8 +101,7 @@ class BaseOperator(ComputeSchemaMixin):
         Schema
             The schemas of the columns produced by this operator
         """
-        if not col_selector or col_selector.all:
-            col_selector = ColumnSelector(input_schema.column_names)
+        output_schema = super().compute_output_schema(input_schema, col_selector)
 
         if self.dynamic_dtypes and prev_output_schema:
             for col_name, col_schema in output_schema.column_schemas.items():
