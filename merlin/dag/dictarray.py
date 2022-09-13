@@ -31,53 +31,53 @@ class Column(SeriesLike):
 
 
 class DictArray(Transformable):
-    def __init__(self, data: Dict, dtypes: Dict):
-        self.data = data
+    def __init__(self, values: Dict, dtypes: Dict):
+        self.values = values
         self.dtypes = dtypes
 
     @property
     def columns(self):
-        return list(self.data.keys())
+        return list(self.values.keys())
 
     def __len__(self):
-        return len(self.data)
+        return len(self.values)
 
     def __iter__(self):
-        return iter(self.data)
+        return iter(self.values)
 
     def __eq__(self, other):
-        return self.data == other.data and self.dtypes == other.dtypes
+        return self.values == other.data and self.dtypes == other.dtypes
 
     def __setitem__(self, key, value):
         # TODO: Update dtypes here too?
-        self.data[key] = value
+        self.values[key] = value
 
     def __getitem__(self, key):
         if isinstance(key, list):
             return DictArray(
-                data={k: self.data[k] for k in key},
+                values={k: self.values[k] for k in key},
                 dtypes={k: self.dtypes[k] for k in key},
             )
         else:
-            return Column(self.data[key], self.dtypes[key])
+            return Column(self.values[key], self.dtypes[key])
 
     def __delitem__(self, key):
-        del self.data[key]
+        del self.values[key]
 
     def _grab_keys(self, source, keys):
         return {k: source[k] for k in keys}
 
     def keys(self):
-        return self.data.keys()
+        return self.values.keys()
 
     def items(self):
-        return self.data.items()
+        return self.values.items()
 
     def values(self):
-        return self.data.values()
+        return self.values.values()
 
     def update(self, other):
-        self.data.update(other)
+        self.values.update(other)
 
     def copy(self):
-        return DictArray(self.data.copy(), self.dtypes.copy())
+        return DictArray(self.values.copy(), self.dtypes.copy())
