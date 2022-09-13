@@ -46,7 +46,7 @@ class BaseOperator(ComputeSchemaMixin):
         Transformable
             Returns a transformed dataframe or dictarray for this operator
         """
-        raise NotImplementedError
+        return transformable
 
     def compute_input_schema(
         self,
