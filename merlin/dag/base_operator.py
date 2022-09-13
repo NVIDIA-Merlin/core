@@ -18,10 +18,10 @@ from __future__ import annotations
 from typing import Any, List, Union
 
 import merlin.dag
-from merlin.dag.selector import ColumnSelector
-from merlin.dag.schema_mixin import ComputeSchemaMixin
-from merlin.schema import Schema
 from merlin.dag.dictarray import Transformable
+from merlin.dag.schema_mixin import ComputeSchemaMixin
+from merlin.dag.selector import ColumnSelector
+from merlin.schema import Schema
 
 
 class BaseOperator(ComputeSchemaMixin):
@@ -72,7 +72,7 @@ class BaseOperator(ComputeSchemaMixin):
         Schema
             The schemas of the columns used by this operator
         """
-        selector = selector or ColumnSelector("*")
+        selector = selector or ColumnSelector()
 
         upstream_schema = parents_schema + deps_schema
         self._validate_matching_cols(upstream_schema, selector, self.compute_input_schema.__name__)
