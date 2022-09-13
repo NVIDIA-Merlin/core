@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from enum import Flag, auto
 
-from merlin.dag.dictlike import DictLike
+from merlin.dag.dictarray import DictLike
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 

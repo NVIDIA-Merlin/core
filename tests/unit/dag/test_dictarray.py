@@ -16,7 +16,7 @@
 import pytest
 
 from merlin.core.dispatch import make_df
-from merlin.dag.dictlike import DictLike
+from merlin.dag.dictarray import DataFrameLike, DictArray, DictLike
 
 
 def test_dictionary_is_dictlike():
@@ -26,7 +26,26 @@ def test_dictionary_is_dictlike():
 
 
 @pytest.mark.parametrize("device", [None, "cpu"])
-def test_dataframe_is_dictlike(device):
+def test_dataframes_are_dictlike(device):
     obj = make_df({}, device=device)
 
     assert isinstance(obj, DictLike)
+
+
+@pytest.mark.parametrize("device", [None, "cpu"])
+def test_dataframes_are_dataframelike(device):
+    obj = make_df({}, device=device)
+
+    assert isinstance(obj, DataFrameLike)
+
+
+def test_dictarray_is_dictlike():
+    obj = DictArray({}, {})
+
+    assert isinstance(obj, DictLike)
+
+
+def test_dictarray_is_dataframelike():
+    obj = DictArray({}, {})
+
+    assert isinstance(obj, DataFrameLike)
