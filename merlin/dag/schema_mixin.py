@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from enum import Flag, auto
 
-from merlin.dag.dictarray import DictLike
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 
@@ -35,10 +34,7 @@ class Supports(Flag):
     GPU_DICT_ARRAY = auto()
 
 
-class TransformMixin:
-    def __call__(self, dict_like) -> DictLike:
-        return dict_like
-
+class ComputeSchemaMixin:
     def compute_input_schema(
         self,
         parents_schema: Schema,
@@ -87,7 +83,7 @@ class TransformMixin:
         """
         col_selector = col_selector or ColumnSelector("*")
 
-        if not col_selector or col_selector.all:
+        if not col_selector:
             col_selector = ColumnSelector(input_schema.column_names)
 
         if col_selector.tags:
@@ -168,6 +164,15 @@ class TransformMixin:
             col_schema = method(col_schema, input_schema)
 
         return col_schema
+
+    def _validate_matching_cols(self, schema: Schema, selector: ColumnSelector, method_name: str):
+        selector = selector or ColumnSelector()
+        missing_cols = [name for name in selector.names if name not in schema.column_names]
+        if missing_cols:
+            raise ValueError(
+                f"Missing columns {missing_cols} found in operator"
+                f"{self.__class__.__name__} during {method_name}."
+            )
 
     @property
     def output_dtype(self):

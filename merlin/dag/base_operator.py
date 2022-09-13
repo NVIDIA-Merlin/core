@@ -19,14 +19,65 @@ from typing import Any, List, Union
 
 import merlin.dag
 from merlin.dag.selector import ColumnSelector
-from merlin.dag.transform_mixin import TransformMixin
+from merlin.dag.schema_mixin import ComputeSchemaMixin
 from merlin.schema import Schema
+from merlin.dag.dictarray import Transformable
 
 
-class BaseOperator(TransformMixin):
+class BaseOperator(ComputeSchemaMixin):
     """
     Base class for all operator classes.
     """
+
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
+        """Transform the dataframe by applying this operator to the set of input columns
+
+        Parameters
+        -----------
+        col_selector: ColumnSelector
+            The columns to apply this operator to
+        transformable: Transformable
+            A pandas or cudf dataframe that this operator will work on
+
+        Returns
+        -------
+        Transformable
+            Returns a transformed dataframe or dictarray for this operator
+        """
+        raise NotImplementedError
+
+    def compute_input_schema(
+        self,
+        root_schema: Schema,
+        parents_schema: Schema,
+        deps_schema: Schema,
+        selector: ColumnSelector = None,
+    ) -> Schema:
+        """Given the schemas coming from upstream sources and a column selector for the
+        input columns, returns a set of schemas for the input columns this operator will use
+        Parameters
+        -----------
+        root_schema: Schema
+            Base schema of the dataset before running any operators.
+        parents_schema: Schema
+            The combined schemas of the upstream parents feeding into this operator
+        deps_schema: Schema
+            The combined schemas of the upstream dependencies feeding into this operator
+        col_selector: ColumnSelector
+            The column selector to apply to the input schema
+        Returns
+        -------
+        Schema
+            The schemas of the columns used by this operator
+        """
+        selector = selector or ColumnSelector("*")
+
+        upstream_schema = parents_schema + deps_schema
+        self._validate_matching_cols(upstream_schema, selector, self.compute_input_schema.__name__)
+
+        return upstream_schema
 
     def compute_output_schema(
         self,
@@ -34,14 +85,17 @@ class BaseOperator(TransformMixin):
         col_selector: ColumnSelector = None,
         prev_output_schema: Schema = None,
     ) -> Schema:
-        """Given a set of schemas and a column selector for the input columns,
+        """
+        Given a set of schemas and a column selector for the input columns,
         returns a set of schemas for the transformed columns this operator will produce
+
         Parameters
         -----------
         input_schema: Schema
             The schemas of the columns to apply this operator to
         col_selector: ColumnSelector
             The column selector to apply to the input schema
+
         Returns
         -------
         Schema
@@ -70,15 +124,6 @@ class BaseOperator(TransformMixin):
     @property
     def dynamic_dtypes(self):
         return False
-
-    def _validate_matching_cols(self, schema: Schema, selector: ColumnSelector, method_name: str):
-        selector = selector or ColumnSelector()
-        missing_cols = [name for name in selector.names if name not in schema.column_names]
-        if missing_cols:
-            raise ValueError(
-                f"Missing columns {missing_cols} found in operator"
-                f"{self.__class__.__name__} during {method_name}."
-            )
 
     def output_column_names(self, col_selector: ColumnSelector) -> ColumnSelector:
         """Given a set of columns names returns the names of the transformed columns this
@@ -115,8 +160,8 @@ class BaseOperator(TransformMixin):
     def create_node(self, selector):
         return merlin.dag.Node(selector)
 
-    def _get_columns(self, df, selector):
-        if isinstance(df, dict):
-            return {col_name: df[col_name] for col_name in selector.names}
+    def _get_columns(self, transformable, selector):
+        if isinstance(transformable, dict):
+            return {col_name: transformable[col_name] for col_name in selector.names}
         else:
-            return df[selector.names]
+            return transformable[selector.names]
