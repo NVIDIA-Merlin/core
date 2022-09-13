@@ -25,6 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from merlin.core.compat import HAS_GPU
+from merlin.core.protocols import DataFrameLike
 
 cp = None
 cudf = None
@@ -76,10 +77,8 @@ except ImportError:
 
 
 if HAS_GPU:
-    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
     SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
-    DataFrameType = pd.DataFrame  # type: ignore
     SeriesType = pd.Series  # type: ignore
 
 
@@ -356,12 +355,12 @@ def concat_columns(args: list):
     return None
 
 
-def read_parquet_dispatch(df: DataFrameType) -> Callable:
+def read_parquet_dispatch(df: DataFrameLike) -> Callable:
     """Dispatch function for reading parquet files"""
     return read_dispatch(df=df, fmt="parquet")
 
 
-def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="parquet") -> Callable:
+def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="parquet") -> Callable:
     """Return the necessary read_parquet function to generate
     data of a specified type.
     """
@@ -373,7 +372,7 @@ def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="par
     return getattr(_mod, _attr)
 
 
-def parquet_writer_dispatch(df: DataFrameType, path=None, **kwargs):
+def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     """Return the necessary ParquetWriter class to write
     data of a specified type.
 
