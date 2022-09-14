@@ -16,7 +16,7 @@
 import enum
 import functools
 import itertools
-from typing import Callable, Union
+from typing import Callable
 
 import dask.dataframe as dd
 import numpy as np
