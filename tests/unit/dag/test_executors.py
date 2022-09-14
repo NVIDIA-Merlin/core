@@ -19,7 +19,8 @@ import numpy as np
 from merlin.core.dispatch import make_df
 from merlin.dag import Graph
 from merlin.dag.base_operator import BaseOperator
-from merlin.dag.executors import DataFrameLike, LocalExecutor
+from merlin.dag.dictarray import DictArray
+from merlin.dag.executors import LocalExecutor
 from merlin.schema.schema import ColumnSchema, Schema
 
 
@@ -59,7 +60,7 @@ def test_local_executor_with_multiple_dataframe():
 
 
 def test_local_executor_with_dataframe_like():
-    df = DataFrameLike({"a": [1, 2, 3], "b": [4, 5, 6]}, dtypes={"a": np.int64, "b": np.int64})
+    df = DictArray({"a": [1, 2, 3], "b": [4, 5, 6]}, dtypes={"a": np.int64, "b": np.int64})
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
     graph = Graph(operator)
@@ -73,8 +74,8 @@ def test_local_executor_with_dataframe_like():
 
 
 def test_local_executor_with_multiple_dataframe_like():
-    df0 = DataFrameLike({"a": [1, 2, 3]}, dtypes={"a": np.int64})
-    df1 = DataFrameLike({"a": [4, 5, 6]}, dtypes={"a": np.int64})
+    df0 = DictArray({"a": [1, 2, 3]}, dtypes={"a": np.int64})
+    df1 = DictArray({"a": [4, 5, 6]}, dtypes={"a": np.int64})
 
     schema = Schema([ColumnSchema("a", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
