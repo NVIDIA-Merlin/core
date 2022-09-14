@@ -13,27 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Dict
+from typing import Dict, Optional
 
 from merlin.core.protocols import SeriesLike, Transformable
 
 
 class Column(SeriesLike):
-    def __init__(self, values, dtype):
+    def __init__(self, values, dtype=None):
         self.values = values
-        self.dtype = dtype
+        self.dtype = dtype or values.dtype
 
     def __getitem__(self, index):
         return self.values[index]
 
     def __eq__(self, other):
-        return self.data == other.data and self.dtype == other.dtype
+        return all(self.values == other.values) and self.dtype == other.dtype
 
 
 class DictArray(Transformable):
-    def __init__(self, values: Dict, dtypes: Dict):
+    def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
         self.values = values
-        self.dtypes = dtypes
+        self.dtypes = dtypes or self._dtypes_from_values(self.values)
 
     @property
     def columns(self):
@@ -46,11 +46,11 @@ class DictArray(Transformable):
         return iter(self.values)
 
     def __eq__(self, other):
-        return self.values == other.data and self.dtypes == other.dtypes
+        return self.values == other.values and self.dtypes == other.dtypes
 
     def __setitem__(self, key, value):
-        # TODO: Update dtypes here too?
         self.values[key] = value
+        self.dtypes[key] = value.dtype
 
     def __getitem__(self, key):
         if isinstance(key, list):
@@ -63,6 +63,7 @@ class DictArray(Transformable):
 
     def __delitem__(self, key):
         del self.values[key]
+        del self.dtypes[key]
 
     def _grab_keys(self, source, keys):
         return {k: source[k] for k in keys}
@@ -78,6 +79,10 @@ class DictArray(Transformable):
 
     def update(self, other):
         self.values.update(other)
+        self.dtypes = self._dtypes_from_values(self.values)
 
     def copy(self):
         return DictArray(self.values.copy(), self.dtypes.copy())
+
+    def _dtypes_from_values(self, values):
+        return {key: value.dtype for key, value in values.items()}
