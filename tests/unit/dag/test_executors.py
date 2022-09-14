@@ -60,7 +60,9 @@ def test_local_executor_with_multiple_dataframe():
 
 
 def test_local_executor_with_dataframe_like():
-    df = DictArray({"a": [1, 2, 3], "b": [4, 5, 6]}, dtypes={"a": np.int64, "b": np.int64})
+    df = DictArray(
+        {"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])}, dtypes={"a": np.int64, "b": np.int64}
+    )
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
     graph = Graph(operator)
@@ -74,8 +76,8 @@ def test_local_executor_with_dataframe_like():
 
 
 def test_local_executor_with_multiple_dataframe_like():
-    df0 = DictArray({"a": [1, 2, 3]}, dtypes={"a": np.int64})
-    df1 = DictArray({"a": [4, 5, 6]}, dtypes={"a": np.int64})
+    df0 = DictArray({"a": np.array([1, 2, 3])}, dtypes={"a": np.int64})
+    df1 = DictArray({"a": np.array([4, 5, 6])}, dtypes={"a": np.int64})
 
     schema = Schema([ColumnSchema("a", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
