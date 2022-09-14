@@ -19,10 +19,10 @@ from typing import Protocol, runtime_checkable
 @runtime_checkable
 class DictLike(Protocol):
     def __iter__(self):
-        ...
+        return iter([])
 
     def __len__(self):
-        ...
+        return 0
 
     def __getitem__(self, key):
         ...
