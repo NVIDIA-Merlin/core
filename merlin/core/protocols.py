@@ -66,16 +66,10 @@ class SeriesLike(Protocol):
 
 @runtime_checkable
 class DataFrameLike(Protocol):
-    @property
     def columns(self):
         ...
 
-    @property
     def dtypes(self):
-        ...
-
-    @dtypes.setter
-    def dtypes(self, dtypes):
         ...
 
     def __getitem__(self, index):
