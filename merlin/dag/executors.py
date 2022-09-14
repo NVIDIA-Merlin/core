@@ -15,7 +15,7 @@
 #
 import logging
 from copy import deepcopy
-from typing import Dict, List
+from typing import List
 
 import dask
 import pandas as pd
@@ -28,8 +28,8 @@ from merlin.core.utils import (
     set_client_deprecated,
 )
 from merlin.dag import ColumnSelector, Graph, Node
-from merlin.io.worker import clean_worker_cache
 from merlin.dag.dictarray import Transformable
+from merlin.io.worker import clean_worker_cache
 
 LOG = logging.getLogger("merlin")
 
