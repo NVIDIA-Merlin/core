@@ -63,7 +63,7 @@ class SubtractionOp(BaseOperator):
         root_schema: Schema,
         parents_schema: Schema,
         deps_schema: Schema,
-        selector: ColumnSelector,
+        selector: ColumnSelector = None,
     ) -> Schema:
         """
         Return remaining schemas of columns after removing dependencies

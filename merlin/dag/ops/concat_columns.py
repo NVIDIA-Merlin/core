@@ -68,7 +68,7 @@ class ConcatColumns(BaseOperator):
         root_schema: Schema,
         parents_schema: Schema,
         deps_schema: Schema,
-        selector: ColumnSelector,
+        selector: ColumnSelector = None,
     ) -> Schema:
         """
         Combine schemas from the nodes being added

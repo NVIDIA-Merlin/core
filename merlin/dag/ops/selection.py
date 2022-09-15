@@ -61,7 +61,7 @@ class SelectionOp(BaseOperator):
         root_schema: Schema,
         parents_schema: Schema,
         deps_schema: Schema,
-        selector: ColumnSelector,
+        selector: ColumnSelector = None,
     ) -> Schema:
         """
         Return the schemas of columns
@@ -88,7 +88,7 @@ class SelectionOp(BaseOperator):
     def compute_output_schema(
         self,
         input_schema: Schema,
-        col_selector: ColumnSelector,
+        col_selector: ColumnSelector = None,
         prev_output_schema: Schema = None,
     ) -> Schema:
         """Given a set of schemas and a column selector for the input columns,
