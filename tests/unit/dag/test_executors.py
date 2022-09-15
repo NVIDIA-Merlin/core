@@ -15,6 +15,7 @@
 #
 
 import numpy as np
+import pandas as pd
 
 from merlin.core.dispatch import make_df
 from merlin.dag import DictArray, Graph
@@ -33,7 +34,10 @@ def test_local_executor_with_dataframe():
     executor = LocalExecutor()
     result = executor.transform(df, [graph.output_node])
 
-    assert all(result["a"].to_pandas() == df["a"].to_pandas())
+    result_a = result["a"].to_pandas() if not isinstance(result["a"], pd.Series) else result["a"]
+    df_a = df["a"].to_pandas() if not isinstance(df["a"], pd.Series) else result["a"]
+
+    assert all(result_a == df_a)
     assert "b" not in result.columns
 
 
@@ -48,10 +52,20 @@ def test_local_executor_with_multiple_dataframe():
     executor = LocalExecutor()
     result = executor.transform_multi((df0, df1), (schema, schema), [graph.output_node])
 
-    assert all(result[0]["a"].to_pandas() == df0["a"].to_pandas())
+    result0_a = (
+        result[0]["a"].to_pandas() if not isinstance(result[0]["a"], pd.Series) else result[0]["a"]
+    )
+    df0_a = df0["a"].to_pandas() if not isinstance(df0["a"], pd.Series) else df0["a"]
+
+    assert all(result0_a == df0_a)
     assert "b" not in result[0].columns
 
-    assert all(result[1]["a"].to_pandas() == df1["a"].to_pandas())
+    result1_a = (
+        result[1]["a"].to_pandas() if not isinstance(result[1]["a"], pd.Series) else result[1]["a"]
+    )
+    df1_a = df1["a"].to_pandas() if not isinstance(df1["a"], pd.Series) else df1["a"]
+
+    assert all(result1_a == df1_a)
     assert "b" not in result[1].columns
 
 
