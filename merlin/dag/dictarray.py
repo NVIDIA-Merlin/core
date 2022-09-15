@@ -21,6 +21,10 @@ from merlin.core.protocols import SeriesLike, Transformable
 
 
 class Column(SeriesLike):
+    """
+    A simple wrapper around an array of values
+    """
+
     def __init__(self, values, dtype=None):
         super().__init__()
 
@@ -35,6 +39,10 @@ class Column(SeriesLike):
 
 
 class DictArray(Transformable):
+    """
+    A simple dataframe-like wrapper around a dictionary of values
+    """
+
     def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
         super().__init__()
 
@@ -79,19 +87,34 @@ class DictArray(Transformable):
         return {k: source[k] for k in keys}
 
     def keys(self):
+        """
+        Shortcut to get the dictionary keys
+        """
         return self.arrays.keys()
 
     def items(self):
+        """
+        Shortcut to get the dictionary items
+        """
         return self.arrays.items()
 
     def values(self):
+        """
+        Shortcut to get the dictionary values
+        """
         return self.arrays.values()
 
     def update(self, other):
+        """
+        Shortcut to update the dictionary items
+        """
         self.arrays.update(other)
         self.dtypes = self._dtypes_from_values(self.arrays)
 
     def copy(self):
+        """
+        Create a new DictArray with the same data and dtypes
+        """
         return DictArray(self.arrays.copy(), self.dtypes.copy())
 
     def _dtypes_from_values(self, values):
