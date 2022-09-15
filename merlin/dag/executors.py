@@ -79,7 +79,9 @@ class LocalExecutor:
             input_data = self._build_input_data(node, data, capture_dtypes=capture_dtypes)
 
             if node.op:
-                transformed_data = self._transform_data(node, data, capture_dtypes=capture_dtypes)
+                transformed_data = self._transform_data(
+                    node, input_data, capture_dtypes=capture_dtypes
+                )
             else:
                 transformed_data = input_data
 
