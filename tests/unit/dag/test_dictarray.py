@@ -16,7 +16,7 @@
 import numpy as np
 import pytest
 
-from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike, Transformable
+from merlin.core.protocols import DictLike, SeriesLike, Transformable
 from merlin.dag.dictarray import Column, DictArray
 
 
@@ -27,7 +27,7 @@ def test_column_matches_protocols(protocol):
     assert isinstance(obj, protocol)
 
 
-@pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
+@pytest.mark.parametrize("protocol", [DictLike, Transformable])
 def test_dictarray_matches_protocols(protocol):
     obj = DictArray({}, {})
 

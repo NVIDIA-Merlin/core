@@ -65,7 +65,7 @@ class SeriesLike(Protocol):
 
 
 @runtime_checkable
-class DataFrameLike(Protocol):
+class Transformable(DictLike, Protocol):
     def columns(self):
         ...
 
@@ -77,5 +77,39 @@ class DataFrameLike(Protocol):
 
 
 @runtime_checkable
-class Transformable(DictLike, DataFrameLike, Protocol):
-    ...
+class DataFrameLike(Transformable, Protocol):
+    def drop(self):
+        ...
+
+    def dropna(self):
+        ...
+
+    def groupby(self):
+        ...
+
+    def index(self):
+        ...
+
+    def memory_usage(self):
+        ...
+
+    def merge(self):
+        ...
+
+    def nlargest(self):
+        ...
+
+    def reset_index(self):
+        ...
+
+    def sample(self):
+        ...
+
+    def sort_values(self):
+        ...
+
+    def to_numpy(self):
+        ...
+
+    def to_parquet(self):
+        ...

@@ -35,13 +35,6 @@ def test_dataframes_match_protocols(protocol, device):
 
 
 @pytest.mark.parametrize("device", [None, "cpu"])
-def test_dataframes_are_dataframelike(device):
-    obj = make_df({}, device=device)
-
-    assert isinstance(obj, DataFrameLike)
-
-
-@pytest.mark.parametrize("device", [None, "cpu"])
 def test_series_are_serieslike(device):
     obj = make_series([], device=device)
 
