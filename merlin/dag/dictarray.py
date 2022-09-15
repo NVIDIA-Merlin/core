@@ -22,6 +22,8 @@ from merlin.core.protocols import SeriesLike, Transformable
 
 class Column(SeriesLike):
     def __init__(self, values, dtype=None):
+        super().__init__()
+
         self.values = values
         self.dtype = dtype or values.dtype
 
@@ -34,6 +36,8 @@ class Column(SeriesLike):
 
 class DictArray(Transformable):
     def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
+        super().__init__()
+
         array_values = {}
         for key, value in values.items():
             array_values[key] = np.array(value) if isinstance(value, list) else value
