@@ -189,4 +189,4 @@ class ComputeSchemaMixin:
     @property
     def supports(self) -> Supports:
         """Returns what kind of data representation this operator supports"""
-        return ()
+        return Supports.CPU_DICT_ARRAY | Supports.GPU_DICT_ARRAY

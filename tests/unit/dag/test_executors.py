@@ -17,9 +17,8 @@
 import numpy as np
 
 from merlin.core.dispatch import make_df
-from merlin.dag import Graph
+from merlin.dag import DictArray, Graph
 from merlin.dag.base_operator import BaseOperator
-from merlin.dag.dictarray import DictArray
 from merlin.dag.executors import LocalExecutor
 from merlin.schema.schema import ColumnSchema, Schema
 
@@ -56,9 +55,6 @@ def test_local_executor_with_multiple_dataframe():
     assert "b" not in result[1].columns
 
 
-# ==========================================================================
-
-
 def test_local_executor_with_dataframe_like():
     df = DictArray(
         {"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])}, dtypes={"a": np.int64, "b": np.int64}
@@ -71,7 +67,7 @@ def test_local_executor_with_dataframe_like():
     executor = LocalExecutor()
     result = executor.transform(df, [graph.output_node])
 
-    assert result["a"] == df["a"]
+    assert all(result["a"] == df["a"])
     assert "b" not in result.columns
 
 
@@ -87,8 +83,8 @@ def test_local_executor_with_multiple_dataframe_like():
     executor = LocalExecutor()
     result = executor.transform_multi((df0, df1), (schema, schema), [graph.output_node])
 
-    assert result[0]["a"] == df0["a"]
+    assert all(result[0]["a"] == df0["a"])
     assert "b" not in result[0].columns
 
-    assert result[1]["a"] == df1["a"]
+    assert all(result[1]["a"] == df1["a"])
     assert "b" not in result[0].columns

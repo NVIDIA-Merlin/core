@@ -15,6 +15,8 @@
 #
 from typing import Dict, Optional
 
+import numpy as np
+
 from merlin.core.protocols import SeriesLike, Transformable
 
 
@@ -32,57 +34,61 @@ class Column(SeriesLike):
 
 class DictArray(Transformable):
     def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
-        self.values = values
-        self.dtypes = dtypes or self._dtypes_from_values(self.values)
+        array_values = {}
+        for key, value in values.items():
+            array_values[key] = np.array(value) if isinstance(value, list) else value
+
+        self.arrays = array_values
+        self.dtypes = dtypes or self._dtypes_from_values(self.arrays)
 
     @property
     def columns(self):
-        return list(self.values.keys())
+        return list(self.arrays.keys())
 
     def __len__(self):
-        return len(self.values)
+        return len(self.arrays)
 
     def __iter__(self):
-        return iter(self.values)
+        return iter(self.arrays)
 
     def __eq__(self, other):
-        return self.values == other.values and self.dtypes == other.dtypes
+        return self.arrays == other.values and self.dtypes == other.dtypes
 
     def __setitem__(self, key, value):
-        self.values[key] = value
+        self.arrays[key] = value
         self.dtypes[key] = value.dtype
 
     def __getitem__(self, key):
         if isinstance(key, list):
             return DictArray(
-                values={k: self.values[k] for k in key},
+                values={k: self.arrays[k] for k in key},
                 dtypes={k: self.dtypes[k] for k in key},
             )
         else:
-            return Column(self.values[key], self.dtypes[key])
+            return self.arrays[key]
 
     def __delitem__(self, key):
-        del self.values[key]
+        del self.arrays[key]
         del self.dtypes[key]
 
     def _grab_keys(self, source, keys):
         return {k: source[k] for k in keys}
 
     def keys(self):
-        return self.values.keys()
+        return self.arrays.keys()
 
     def items(self):
-        return self.values.items()
+        return self.arrays.items()
 
     def values(self):
-        return self.values.values()
+        return self.arrays.values()
 
     def update(self, other):
-        self.values.update(other)
-        self.dtypes = self._dtypes_from_values(self.values)
+        self.arrays.update(other)
+        self.dtypes = self._dtypes_from_values(self.arrays)
 
     def copy(self):
-        return DictArray(self.values.copy(), self.dtypes.copy())
+        return DictArray(self.arrays.copy(), self.dtypes.copy())
 
     def _dtypes_from_values(self, values):
         return {key: value.dtype for key, value in values.items()}
