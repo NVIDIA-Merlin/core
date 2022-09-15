@@ -66,6 +66,7 @@ class SeriesLike(Protocol):
 
 @runtime_checkable
 class Transformable(DictLike, Protocol):
+    @property
     def columns(self):
         ...
 
