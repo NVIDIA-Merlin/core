@@ -211,6 +211,8 @@ class ComputeSchemaMixin:
         return col_schema.with_properties(properties)
 
     def _validate_matching_cols(self, schema: Schema, selector: ColumnSelector, method_name: str):
+        selector = selector or ColumnSelector()
+
         missing_cols = [name for name in selector.names if name not in schema.column_names]
         if missing_cols:
             raise ValueError(
