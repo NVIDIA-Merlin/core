@@ -16,7 +16,7 @@
 import enum
 import functools
 import itertools
-from typing import Callable
+from typing import Callable, Union
 
 import dask.dataframe as dd
 import numpy as np
@@ -74,6 +74,14 @@ except ImportError:
             return inner2
 
         return inner1
+
+
+if HAS_GPU:
+    DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
+    SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
+else:
+    DataFrameType = pd.DataFrame  # type: ignore
+    SeriesType = pd.Series  # type: ignore
 
 
 # Define mapping between non-nullable,
@@ -510,9 +518,9 @@ def detect_format(data):
             "csv": ExtData.CSV,
         }
         if isinstance(data, list) and data:
-            file_type = mapping.get(str(data[0]).split(".")[-1], None)
+            file_type = mapping.get(str(data[0]).rsplit(".", maxsplit=1)[-1], None)
         else:
-            file_type = mapping.get(str(data).split(".")[-1], None)
+            file_type = mapping.get(str(data).rsplit(".", maxsplit=1)[-1], None)
         if file_type is None:
             raise ValueError("Data format not recognized.")
         return file_type
