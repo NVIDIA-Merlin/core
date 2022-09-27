@@ -58,6 +58,35 @@ class BaseOperator(ComputeSchemaMixin):
 
         return selector
 
+    def compute_output_schema(
+        self,
+        input_schema: Schema,
+        col_selector: ColumnSelector = None,
+        prev_output_schema: Schema = None,
+    ) -> Schema:
+        """
+        Given a set of schemas and a column selector for the input columns,
+        returns a set of schemas for the transformed columns this operator will produce
+        Parameters
+        -----------
+        input_schema: Schema
+            The schemas of the columns to apply this operator to
+        col_selector: ColumnSelector
+            The column selector to apply to the input schema
+        Returns
+        -------
+        Schema
+            The schemas of the columns produced by this operator
+        """
+        output_schema = super().compute_output_schema(input_schema, col_selector)
+
+        if self.dynamic_dtypes and prev_output_schema:
+            for col_name, col_schema in output_schema.column_schemas.items():
+                dtype = prev_output_schema[col_name].dtype
+                output_schema.column_schemas[col_name] = col_schema.with_dtype(dtype)
+
+        return output_schema
+
     # TODO: Update instructions for how to define custom
     # operators to reflect constructing the column mapping
     # (They should no longer override this method)
