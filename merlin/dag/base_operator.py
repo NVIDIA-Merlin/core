@@ -61,7 +61,7 @@ class BaseOperator(ComputeSchemaMixin):
     def compute_output_schema(
         self,
         input_schema: Schema,
-        col_selector: ColumnSelector = None,
+        col_selector: ColumnSelector,
         prev_output_schema: Schema = None,
     ) -> Schema:
         """
@@ -86,6 +86,37 @@ class BaseOperator(ComputeSchemaMixin):
                 output_schema.column_schemas[col_name] = col_schema.with_dtype(dtype)
 
         return output_schema
+
+    def compute_input_schema(
+        self,
+        root_schema: Schema,
+        parents_schema: Schema,
+        deps_schema: Schema,
+        selector: ColumnSelector,
+    ) -> Schema:
+        """Given the schemas coming from upstream sources and a column selector for the
+        input columns, returns a set of schemas for the input columns this operator will use
+
+        Parameters
+        -----------
+        root_schema: Schema
+            Base schema of the dataset before running any operators.
+        parents_schema: Schema
+            The combined schemas of the upstream parents feeding into this operator
+        deps_schema: Schema
+            The combined schemas of the upstream dependencies feeding into this operator
+        col_selector: ColumnSelector
+            The column selector to apply to the input schema
+
+        Returns
+        -------
+        Schema
+            The schemas of the columns used by this operator
+        """
+        upstream_schema = parents_schema + deps_schema
+        self._validate_matching_cols(upstream_schema, selector, self.compute_input_schema.__name__)
+
+        return upstream_schema
 
     # TODO: Update instructions for how to define custom
     # operators to reflect constructing the column mapping
