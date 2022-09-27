@@ -86,9 +86,7 @@ class ComputeSchemaMixin:
         Schema
             The schemas of the columns produced by this operator
         """
-        col_selector = col_selector or ColumnSelector("*")
-
-        if not col_selector or col_selector.all:
+        if not col_selector:
             col_selector = ColumnSelector(input_schema.column_names)
 
         if col_selector.tags:
@@ -138,8 +136,6 @@ class ComputeSchemaMixin:
         Schema
             The schemas of the columns used by this operator
         """
-        selector = selector or ColumnSelector("*")
-
         self._validate_matching_cols(parents_schema, selector, self.compute_input_schema.__name__)
 
         return parents_schema
@@ -215,7 +211,6 @@ class ComputeSchemaMixin:
         return col_schema.with_properties(properties)
 
     def _validate_matching_cols(self, schema: Schema, selector: ColumnSelector, method_name: str):
-        selector = selector or ColumnSelector("*")
         missing_cols = [name for name in selector.names if name not in schema.column_names]
         if missing_cols:
             raise ValueError(
