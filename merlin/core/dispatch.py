@@ -25,6 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from merlin.core.compat import HAS_GPU
+from merlin.core.protocols import DataFrameLike, SeriesLike
 
 cp = None
 cudf = None
@@ -269,13 +270,13 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesType) -> np.dtype:
+def list_val_dtype(ser: SeriesLike) -> np.dtype:
     """
     Return the dtype of the leaves from a list or nested list
 
     Parameters
     ----------
-    ser : SeriesType
+    ser : SeriesLike
         A series where the rows contain lists or nested lists
 
     Returns
@@ -356,12 +357,12 @@ def concat_columns(args: list):
     return None
 
 
-def read_parquet_dispatch(df: DataFrameType) -> Callable:
+def read_parquet_dispatch(df: DataFrameLike) -> Callable:
     """Dispatch function for reading parquet files"""
     return read_dispatch(df=df, fmt="parquet")
 
 
-def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="parquet") -> Callable:
+def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="parquet") -> Callable:
     """Return the necessary read_parquet function to generate
     data of a specified type.
     """
@@ -373,7 +374,7 @@ def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="par
     return getattr(_mod, _attr)
 
 
-def parquet_writer_dispatch(df: DataFrameType, path=None, **kwargs):
+def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     """Return the necessary ParquetWriter class to write
     data of a specified type.
 
@@ -517,9 +518,9 @@ def detect_format(data):
             "csv": ExtData.CSV,
         }
         if isinstance(data, list) and data:
-            file_type = mapping.get(str(data[0]).split(".")[-1], None)
+            file_type = mapping.get(str(data[0]).rsplit(".", maxsplit=1)[-1], None)
         else:
-            file_type = mapping.get(str(data).split(".")[-1], None)
+            file_type = mapping.get(str(data).rsplit(".", maxsplit=1)[-1], None)
         if file_type is None:
             raise ValueError("Data format not recognized.")
         return file_type
