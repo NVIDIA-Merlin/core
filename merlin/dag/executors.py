@@ -36,7 +36,6 @@ class LocalExecutor:
     An executor for running Merlin operator DAGs locally
     """
 
-    # TODO: Replace `nodes` with `graph` here?
     def transform(
         self,
         df,
