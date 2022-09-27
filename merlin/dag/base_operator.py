@@ -153,6 +153,10 @@ class BaseOperator(ComputeSchemaMixin):
     def label(self) -> str:
         return self.__class__.__name__
 
+    @property
+    def dynamic_dtypes(self):
+        return False
+
     def create_node(self, selector):
         return merlin.dag.Node(selector)
 
