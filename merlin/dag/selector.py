@@ -142,7 +142,8 @@ class ColumnSelector:
     def __eq__(self, other):
         if not isinstance(other, ColumnSelector):
             return False
-        return other.all == self.all or (
+
+        return (other.all and self.all) or (
             other._names == self._names and other.subgroups == self.subgroups
         )
 
@@ -163,7 +164,20 @@ class ColumnSelector:
             new_selector.subgroups.append(group.resolve(schema))
         return new_selector
 
-    def filter_columns(self, other_selector):
+    def filter_columns(self, other_selector: "ColumnSelector"):
+        """
+        Narrow the content of this selector to the columns that would be selected by another
+
+        Parameters
+        ----------
+        other_selector : ColumnSelector
+            Other selector to apply as the filter
+
+        Returns
+        -------
+        ColumnSelector
+            This selector filtered by the other selector
+        """
         remaining_names = []
         remaining_groups = []
 
