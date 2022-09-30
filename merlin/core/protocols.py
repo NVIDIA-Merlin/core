@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# pylint:disable=too-many-public-methods
 from typing import Protocol, runtime_checkable
 
 
@@ -110,38 +112,86 @@ class DataFrameLike(Transformable, Protocol):
     protocol is only intended to match Pandas and cuDF dataframes.
     """
 
+    def apply(self):
+        ...
+
+    def describe(self):
+        ...
+
     def drop(self):
         ...
 
-    def dropna(self):
+    def explode(self):
         ...
 
     def groupby(self):
         ...
 
-    def index(self):
+    def head(self):
         ...
 
-    def memory_usage(self):
+    def interpolate(self):
         ...
 
-    def merge(self):
+    def join(self):
         ...
 
-    def nlargest(self):
+    def max(self):
         ...
 
-    def reset_index(self):
+    def mean(self):
+        ...
+
+    def median(self):
+        ...
+
+    def pipe(self):
+        ...
+
+    def pivot(self):
+        ...
+
+    def product(self):
+        ...
+
+    def quantile(self):
+        ...
+
+    def rename(self):
+        ...
+
+    def replace(self):
         ...
 
     def sample(self):
         ...
 
-    def sort_values(self):
+    def shape(self):
+        ...
+
+    def shift(self):
+        ...
+
+    def std(self):
+        ...
+
+    def sum(self):
+        ...
+
+    def tail(self):
+        ...
+
+    def to_dict(self):
         ...
 
     def to_numpy(self):
         ...
 
-    def to_parquet(self):
+    def transpose(self):
+        ...
+
+    def unstack(self):
+        ...
+
+    def var(self):
         ...
