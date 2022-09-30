@@ -18,6 +18,14 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class DictLike(Protocol):
+    """
+    These methods are present on plain Python dictionaries and also on DataFrames, which
+    are conceptually a dictionary of columns/series. Both Python dictionaries and DataFrames
+    therefore implement this Protocol, although neither sub-classes it. That means that
+    `isinstance(obj, DictLike)` will return `True` at runtime if obj is a dictionary, a DataFrame,
+    or any other type that implements the following methods.
+    """
+
     def __iter__(self):
         return iter({})
 
@@ -51,6 +59,14 @@ class DictLike(Protocol):
 
 @runtime_checkable
 class SeriesLike(Protocol):
+    """
+    These methods are defined by Pandas and cuDF series, and also by the array-wrapping
+    `Column` class defined in `merlin.dag`. If we want to provide column-level transformations
+    on data (e.g. to zero-copy share it across frameworks), the `Column` class would provide
+    a potential place to do that, and this Protocol would allow us to build abstractions that
+    make working with arrays and Series interchangeably possible.
+    """
+
     def values(self):
         ...
 
@@ -66,6 +82,13 @@ class SeriesLike(Protocol):
 
 @runtime_checkable
 class Transformable(DictLike, Protocol):
+    """
+    In addition to the dictionary methods that are shared by dataframes, there are a few
+    methods from dataframes that we use so frequently that it's easier to wrap a dictionary
+    in a class and add them to the wrapper class than it would be to refactor the whole code
+    base to do without them.
+    """
+
     @property
     def columns(self):
         ...
@@ -79,6 +102,14 @@ class Transformable(DictLike, Protocol):
 
 @runtime_checkable
 class DataFrameLike(Transformable, Protocol):
+    """
+    This is the maximal set of methods shared by both Pandas dataframes and cuDF dataframes
+    that aren't already part of the Transformable protocol. In theory, if there were another
+    dataframe library that implemented the methods in this Protocol (e.g. Polars), we could
+    use its dataframes in any place where we use the DataFrameLike type, but right now this
+    protocol is only intended to match Pandas and cuDF dataframes.
+    """
+
     def drop(self):
         ...
 
