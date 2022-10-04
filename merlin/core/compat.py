@@ -15,7 +15,7 @@
 #
 HAS_GPU = False
 try:
-    from numba import cuda
+    from numba import cuda  # pylint: disable=unused-import
 
 except ImportError:
     cuda = None
