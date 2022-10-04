@@ -13,20 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-HAS_GPU = False
 try:
-    from numba import cuda  # pylint: disable=unused-import
+    from numba import cuda
 
 except ImportError:
     cuda = None
 
+HAS_GPU = False
 try:
-    import pynvml
+    from dask.distributed.diagnostics import nvml
 
-    try:
-        pynvml.nvmlInit()
-        HAS_GPU = pynvml.nvmlDeviceGetCount() > 0
-    except pynvml.nvml.NVMLError_LibraryNotFound:
-        pass
+    HAS_GPU = nvml.device_get_count() > 0
 except ImportError:
-    pass
+    # We can use `cuda` to set `HAS_GPU` now that we
+    # know `distributed` is not installed (otherwise
+    # the `nvml` import would have succeeded)
+    HAS_GPU = cuda is not None
