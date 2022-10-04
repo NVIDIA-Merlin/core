@@ -19,16 +19,13 @@ try:
 except ImportError:
     cuda = None
 
-HAS_GPU = False
 try:
-    import dask_cuda
+    import pynvml
 
-    HAS_GPU = dask_cuda.utils.get_gpu_count()
+    try:
+        pynvml.nvmlInit()
+        HAS_GPU = pynvml.nvmlDeviceGetCount() > 0
+    except pynvml.nvml.NVMLError_LibraryNotFound:
+        HAS_GPU = False
 except ImportError:
-    # Don't let numba.cuda set the context
-    # unless dask_cuda is not installed
-    if cuda is not None:
-        try:
-            HAS_GPU = len(cuda.gpus.lst) > 0
-        except cuda.cudadrv.error.CudaSupportError:
-            pass
+    HAS_GPU = False
