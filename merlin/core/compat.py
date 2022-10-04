@@ -13,13 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-HAS_GPU = False
 try:
     from numba import cuda
 
-    try:
-        HAS_GPU = len(cuda.gpus.lst) > 0
-    except cuda.cudadrv.error.CudaSupportError:
-        pass
 except ImportError:
     cuda = None
+
+HAS_GPU = False
+try:
+    import dask_cuda
+
+    HAS_GPU = dask_cuda.utils.get_gpu_count()
+except ImportError:
+    # Don't let numba.cuda set the context
+    # unless dask_cuda is not installed
+    if cuda is not None:
+        try:
+            HAS_GPU = len(cuda.gpus.lst) > 0
+        except cuda.cudadrv.error.CudaSupportError:
+            pass
