@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+HAS_GPU = False
 try:
     from numba import cuda
 
@@ -26,6 +27,6 @@ try:
         pynvml.nvmlInit()
         HAS_GPU = pynvml.nvmlDeviceGetCount() > 0
     except pynvml.nvml.NVMLError_LibraryNotFound:
-        HAS_GPU = False
+        pass
 except ImportError:
-    HAS_GPU = False
+    pass
