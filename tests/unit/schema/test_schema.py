@@ -77,6 +77,16 @@ def test_select():
     assert col2_selection == Schema([col2_schema])
 
 
+def test_select_all():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    schema = Schema([col1_schema, col2_schema])
+
+    selector = ColumnSelector("*")
+    selection = schema.select(selector)
+    assert selection == schema
+
+
 def test_excluding_by_name():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])

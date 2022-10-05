@@ -19,6 +19,7 @@ from enum import Flag, auto
 from typing import Any, List, Union
 
 import merlin.dag
+from merlin.core.protocols import Transformable
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 
@@ -183,8 +184,41 @@ class BaseOperator:
         strict_dtypes : Boolean, optional
             Enables strict checking for column dtype matching if True, by default False
         """
+        ...
+
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
+        """Transform the dataframe by applying this operator to the set of input columns
+
+        Parameters
+        -----------
+        col_selector: ColumnSelector
+            The columns to apply this operator to
+        transformable: Transformable
+            A pandas or cudf dataframe that this operator will work on
+
+        Returns
+        -------
+        Transformable
+            Returns a transformed dataframe or dictarray for this operator
+        """
+        return transformable
 
     def column_mapping(self, col_selector):
+        """
+        Compute which output columns depend on which input columns
+
+        Parameters
+        ----------
+        col_selector : ColumnSelector
+            A selector containing a list of column names
+
+        Returns
+        -------
+        Dict[str, List[str]]
+            Mapping from output column names to list of the input columns they rely on
+        """
         column_mapping = {}
         for col_name in col_selector.names:
             column_mapping[col_name] = [col_name]

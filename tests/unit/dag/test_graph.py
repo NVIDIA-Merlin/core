@@ -65,6 +65,33 @@ def test_subgraph():
         graph.subgraph("sg3")
 
 
+def test_subgraph_with_summed_subgraphs():
+    sg1 = ["a", "b"] >> BaseOperator()
+    sg2 = ["a", "c"] >> BaseOperator()
+    sg3 = ["a", "d"] >> BaseOperator()
+
+    combined1 = sg1 + sg2
+    combined2 = combined1 + sg3
+    combined3 = combined2 + (["x"] >> BaseOperator())
+
+    graph = Graph(
+        combined3,
+        subgraphs={
+            "sg1": sg1,
+            "sg2": sg2,
+            "sg3": sg3,
+            "combined1": combined1,
+            "combined2": combined2,
+        },
+    )
+
+    assert graph.subgraph("sg1").output_node == sg1
+    assert graph.subgraph("sg2").output_node == sg2
+    assert graph.subgraph("sg3").output_node == sg3
+    assert graph.subgraph("combined1").output_node == combined1
+    assert graph.subgraph("combined2").output_node == combined2
+
+
 def test_subgraph_with_unrelated_subgraph():
     sg1 = ["a", "b"] >> BaseOperator()
     sg2 = ["a", "c"] >> BaseOperator()
