@@ -129,9 +129,41 @@ returns a set of schemas for the transformed columns this operator will produce
 </dd></dl>
 
 <dl class="py method">
+<dt id="merlin.dag.BaseOperator.transform">
+<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformable</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.core.protocols.Transformable</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.core.protocols.Transformable</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.transform" title="Permalink to this definition"></a></dt>
+<dd><p>Transform the dataframe by applying this operator to the set of input columns</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – The columns to apply this operator to</p></li>
+<li><p><strong>transformable</strong> (<em>Transformable</em>) – A pandas or cudf dataframe that this operator will work on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns a transformed dataframe or dictarray for this operator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Transformable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="merlin.dag.BaseOperator.column_mapping">
 <code class="sig-name descname"><span class="pre">column_mapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.column_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.column_mapping" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Compute which output columns depend on which input columns</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>col_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – A selector containing a list of column names</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mapping from output column names to list of the input columns they rely on</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.BaseOperator.compute_column_schema">
@@ -381,7 +413,7 @@ that makes up your workflow</p>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.exportable">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">exportable</span></code><a class="headerlink" href="#merlin.dag.Node.exportable" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">exportable</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.exportable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.exportable" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

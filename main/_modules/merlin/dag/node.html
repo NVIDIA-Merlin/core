@@ -459,9 +459,9 @@
 
         <span class="k">return</span> <span class="n">removed_outputs</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">backends</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;exportable_backends&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parents_with_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
