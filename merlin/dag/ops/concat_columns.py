@@ -55,13 +55,10 @@ class ConcatColumns(BaseOperator):
         ColumnSelector
             Combined column selectors of parent and dependency nodes
         """
-        self._validate_matching_cols(
+        return super().compute_selector(
             input_schema,
             parents_selector + dependencies_selector,
-            self.compute_selector.__name__,
         )
-
-        return parents_selector + dependencies_selector
 
     def compute_input_schema(
         self,

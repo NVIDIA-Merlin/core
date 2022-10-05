@@ -46,12 +46,13 @@ class BaseOperator:
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: ColumnSelector = None,
+        dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
+
         self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
-        return selector
+        return selector.resolve(input_schema)
 
     def compute_input_schema(
         self,
@@ -227,7 +228,9 @@ class BaseOperator:
 
     def _validate_matching_cols(self, schema, selector, method_name):
         selector = selector or ColumnSelector()
-        missing_cols = [name for name in selector.names if name not in schema.column_names]
+        resolved_selector = selector.resolve(schema)
+
+        missing_cols = [name for name in selector.names if name not in resolved_selector.names]
         if missing_cols:
             raise ValueError(
                 f"Missing columns {missing_cols} found in operator"

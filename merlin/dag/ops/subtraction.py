@@ -56,7 +56,10 @@ class SubtractionOp(BaseOperator):
         ColumnSelector
             Selector of all columns from the input schema
         """
-        return ColumnSelector(input_schema.column_names)
+        return super().compute_selector(
+            input_schema,
+            ColumnSelector("*"),
+        )
 
     def compute_input_schema(
         self,
