@@ -387,9 +387,9 @@ class Node:
 
         return removed_outputs
 
-    @property
-    def exportable(self):
-        return hasattr(self.op, "export")
+    def exportable(self, backend: str = None):
+        backends = getattr(self.op, "exportable_backends", [])
+        return hasattr(self.op, "export") and backend in backends
 
     @property
     def parents_with_dependencies(self):

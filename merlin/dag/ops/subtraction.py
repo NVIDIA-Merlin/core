@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from merlin.core.dispatch import DataFrameType
+from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
@@ -92,7 +92,9 @@ class SubtractionOp(BaseOperator):
             result = parents_schema.excluding(subtraction_selector)
         return result
 
-    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with computing the schemas
@@ -103,7 +105,7 @@ class SubtractionOp(BaseOperator):
         -----------
         columns: list of str or list of list of str
             The columns to apply this operator to
-        df: Dataframe
+        transformable: Transformable
             A pandas or cudf dataframe that this operator will work on
 
         Returns
@@ -112,4 +114,4 @@ class SubtractionOp(BaseOperator):
             Returns a transformed dataframe for this operator
         """
         selector = self.selector or col_selector
-        return super()._get_columns(df, selector)
+        return super()._get_columns(transformable, selector)
