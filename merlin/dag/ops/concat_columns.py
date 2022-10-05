@@ -33,8 +33,8 @@ class ConcatColumns(BaseOperator):
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: ColumnSelector = None,
+        dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
         """
         Combine selectors from the nodes being added

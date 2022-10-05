@@ -49,6 +49,7 @@ class BaseOperator:
         parents_selector: ColumnSelector = None,
         dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
+        selector = selector or ColumnSelector("*")
 
         self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
