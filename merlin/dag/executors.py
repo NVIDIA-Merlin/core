@@ -36,6 +36,9 @@ class LocalExecutor:
     An executor for running Merlin operator DAGs locally
     """
 
+    def __init__(self, transform_method=""):
+        self.transform_method = transform_method
+
     def transform(
         self,
         transformable,
@@ -151,7 +154,9 @@ class LocalExecutor:
         try:
             # use input_columns to ensure correct grouping (subgroups)
             selection = node.input_columns.resolve(node.input_schema)
-            output_data = node.op.transform(selection, input_data)
+            output_data = getattr(node.op, self.transform_method, node.op.transform)(
+                selection, input_data
+            )
 
             # Update or validate output_data dtypes
             for col_name, output_col_schema in node.output_schema.column_schemas.items():
@@ -203,8 +208,8 @@ class DaskExecutor:
     An executor for running Merlin operator DAGs as distributed Dask jobs
     """
 
-    def __init__(self, client=None):
-        self._executor = LocalExecutor()
+    def __init__(self, client=None, transform_method=""):
+        self._executor = LocalExecutor(transform_method)
 
         # Deprecate `client`
         if client is not None:
