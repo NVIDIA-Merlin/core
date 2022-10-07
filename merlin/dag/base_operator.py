@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from enum import Flag, auto
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 import merlin.dag
 from merlin.core.protocols import Transformable
@@ -46,8 +46,8 @@ class BaseOperator:
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: Optional[ColumnSelector] = None,
+        dependencies_selector: Optional[ColumnSelector] = None,
     ) -> ColumnSelector:
         """
         Provides a hook method for sub-classes to override to implement
@@ -69,9 +69,11 @@ class BaseOperator:
         ColumnSelector
             Revised column selector to apply to the input schema
         """
+        selector = selector or ColumnSelector("*")
+
         self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
-        return selector
+        return selector.resolve(input_schema)
 
     def compute_input_schema(
         self,
@@ -109,7 +111,7 @@ class BaseOperator:
         self,
         input_schema: Schema,
         col_selector: ColumnSelector,
-        prev_output_schema: Schema = None,
+        prev_output_schema: Optional[Schema] = None,
     ) -> Schema:
         """
         Given a set of schemas and a column selector for the input columns,
@@ -281,7 +283,9 @@ class BaseOperator:
 
     def _validate_matching_cols(self, schema, selector, method_name):
         selector = selector or ColumnSelector()
-        missing_cols = [name for name in selector.names if name not in schema.column_names]
+        resolved_selector = selector.resolve(schema)
+
+        missing_cols = [name for name in selector.names if name not in resolved_selector.names]
         if missing_cols:
             raise ValueError(
                 f"Missing columns {missing_cols} found in operator"

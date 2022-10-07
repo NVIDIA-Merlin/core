@@ -34,8 +34,8 @@ class SubtractionOp(BaseOperator):
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: ColumnSelector = None,
+        dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
         """
         Creates selector of all columns from the input schema
@@ -56,7 +56,10 @@ class SubtractionOp(BaseOperator):
         ColumnSelector
             Selector of all columns from the input schema
         """
-        return ColumnSelector(input_schema.column_names)
+        return super().compute_selector(
+            input_schema,
+            ColumnSelector("*"),
+        )
 
     def compute_input_schema(
         self,
