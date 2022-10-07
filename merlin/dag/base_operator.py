@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from enum import Flag, auto
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 import merlin.dag
 from merlin.core.protocols import Transformable
@@ -46,8 +46,8 @@ class BaseOperator:
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector = None,
-        dependencies_selector: ColumnSelector = None,
+        parents_selector: Optional[ColumnSelector] = None,
+        dependencies_selector: Optional[ColumnSelector] = None,
     ) -> ColumnSelector:
         selector = selector or ColumnSelector("*")
 
@@ -89,7 +89,7 @@ class BaseOperator:
         self,
         input_schema: Schema,
         col_selector: ColumnSelector,
-        prev_output_schema: Schema = None,
+        prev_output_schema: Optional[Schema] = None,
     ) -> Schema:
         """Given a set of schemas and a column selector for the input columns,
         returns a set of schemas for the transformed columns this operator will produce
