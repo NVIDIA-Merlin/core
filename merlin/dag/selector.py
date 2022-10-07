@@ -46,11 +46,11 @@ class ColumnSelector:
         self._tags = tags if tags is not None else []
         self.subgroups = subgroups if subgroups is not None else []
 
-        self.all = names == "*"
+        self.all = isinstance(names, str) and names == "*"
         if self.all:
             self._names = []
             self._tags = []
-            self._subgroups = []
+            self.subgroups = []
 
         if isinstance(self._names, merlin.dag.Node):
             raise TypeError("ColumnSelectors can not contain Nodes")
