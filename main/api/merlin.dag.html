@@ -83,28 +83,46 @@
 <p>Base class for all operator classes.</p>
 <dl class="py method">
 <dt id="merlin.dag.BaseOperator.compute_selector">
-<code class="sig-name descname"><span class="pre">compute_selector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.dag.selector.ColumnSelector</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_selector" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">compute_selector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.dag.selector.ColumnSelector</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_selector" title="Permalink to this definition"></a></dt>
+<dd><p>Provides a hook method for sub-classes to override to implement
+custom column selection logic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – Schemas of the columns to apply this operator to</p></li>
+<li><p><strong>selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – Column selector to apply to the input schema</p></li>
+<li><p><strong>parents_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – Combined selectors of the upstream parents feeding into this operator</p></li>
+<li><p><strong>dependencies_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – Combined selectors of the upstream dependencies feeding into this operator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Revised column selector to apply to the input schema</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector">ColumnSelector</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.BaseOperator.compute_input_schema">
 <code class="sig-name descname"><span class="pre">compute_input_schema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_input_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_input_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Given the schemas coming from upstream sources and a column selector for the
-input columns, returns a set of schemas for the input columns this operator will use
-:param root_schema: Base schema of the dataset before running any operators.
-:type root_schema: Schema
-:param parents_schema: The combined schemas of the upstream parents feeding into this operator
-:type parents_schema: Schema
-:param deps_schema: The combined schemas of the upstream dependencies feeding into this operator
-:type deps_schema: Schema
-:param col_selector: The column selector to apply to the input schema
-:type col_selector: ColumnSelector</p>
+input columns, returns a set of schemas for the input columns this operator will use</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The schemas of the columns used by this operator</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – Base schema of the dataset before running any operators.</p></li>
+<li><p><strong>parents_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The combined schemas of the upstream parents feeding into this operator</p></li>
+<li><p><strong>deps_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The combined schemas of the upstream dependencies feeding into this operator</p></li>
+<li><p><strong>col_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – The column selector to apply to the input schema</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The schemas of the columns used by this operator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -113,17 +131,38 @@ input columns, returns a set of schemas for the input columns this operator will
 <dt id="merlin.dag.BaseOperator.compute_output_schema">
 <code class="sig-name descname"><span class="pre">compute_output_schema</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_output_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">merlin.schema.schema.Schema</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.compute_output_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.compute_output_schema" title="Permalink to this definition"></a></dt>
 <dd><p>Given a set of schemas and a column selector for the input columns,
-returns a set of schemas for the transformed columns this operator will produce
-:param input_schema: The schemas of the columns to apply this operator to
-:type input_schema: Schema
-:param col_selector: The column selector to apply to the input schema
-:type col_selector: ColumnSelector</p>
+returns a set of schemas for the transformed columns this operator will produce</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The schemas of the columns produced by this operator</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The schemas of the columns to apply this operator to</p></li>
+<li><p><strong>col_selector</strong> (<a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – The column selector to apply to the input schema</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The schemas of the columns produced by this operator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="merlin.dag.BaseOperator.validate_schemas">
+<code class="sig-name descname"><span class="pre">validate_schemas</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parents_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deps_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_schema</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.schema.schema.Schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict_dtypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.validate_schemas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.validate_schemas" title="Permalink to this definition"></a></dt>
+<dd><p>Provides a hook method that sub-classes can override to implement schema validation logic.</p>
+<p>Sub-class implementations should raise an exception if the schemas are not valid for the
+operations they implement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parents_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The combined schemas of the upstream parents feeding into this operator</p></li>
+<li><p><strong>deps_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The combined schemas of the upstream dependencies feeding into this operator</p></li>
+<li><p><strong>input_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The schemas of the columns to apply this operator to</p></li>
+<li><p><strong>output_schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – The schemas of the columns produced by this operator</p></li>
+<li><p><strong>strict_dtypes</strong> (<em>Boolean</em><em>, </em><em>optional</em>) – Enables strict checking for column dtype matching if True, by default False</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -179,15 +218,16 @@ returns a set of schemas for the transformed columns this operator will produce
 <dt id="merlin.dag.BaseOperator.output_column_names">
 <code class="sig-name descname"><span class="pre">output_column_names</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">merlin.dag.selector.ColumnSelector</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.dag.selector.ColumnSelector</span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.output_column_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.output_column_names" title="Permalink to this definition"></a></dt>
 <dd><p>Given a set of columns names returns the names of the transformed columns this
-operator will produce
-:param columns: The columns to apply this operator to
-:type columns: list of str, or list of list of str</p>
+operator will produce</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The names of columns produced by this operator</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>columns</strong> (<em>list of str</em><em>, or </em><em>list of list of str</em>) – The columns to apply this operator to</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>list of str, or list of list of str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The names of columns produced by this operator</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str, or list of list of str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -196,9 +236,15 @@ operator will produce
 <dt id="merlin.dag.BaseOperator.dependencies">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">dependencies</span></code><a class="headerlink" href="#merlin.dag.BaseOperator.dependencies" title="Permalink to this definition"></a></dt>
 <dd><p>Defines an optional list of column dependencies for this operator. This lets you consume columns
-that aren’t part of the main transformation workflow.
-:returns: Extra dependencies of this operator. Defaults to None
-:rtype: str, list of str or ColumnSelector, optional</p>
+that aren’t part of the main transformation workflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Extra dependencies of this operator. Defaults to None</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, list of str or <a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector">ColumnSelector</a>, optional</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -408,8 +454,20 @@ that makes up your workflow</p>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.remove_inputs">
-<code class="sig-name descname"><span class="pre">remove_inputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_cols</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_inputs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">remove_inputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_cols</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.remove_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.remove_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Remove input columns and all output columns that depend on them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_cols</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – The input columns to remove</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output columns that were removed</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.dag.Node.exportable">
@@ -456,10 +514,31 @@ that makes up your workflow</p>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">graph</span></code><a class="headerlink" href="#merlin.dag.Node.graph" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt id="merlin.dag.Node.Nodable">
+<code class="sig-name descname"><span class="pre">Nodable</span></code><a class="headerlink" href="#merlin.dag.Node.Nodable" title="Permalink to this definition"></a></dt>
+<dd><p>alias of Union[Node, str, List[str], merlin.dag.selector.ColumnSelector, List[Union[Node, str, List[str], merlin.dag.selector.ColumnSelector]]]</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="merlin.dag.Node.construct_from">
-<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">construct_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.construct_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.construct_from" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">construct_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodable</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">merlin.dag.node.Node</span><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">merlin.dag.selector.ColumnSelector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/node.html#Node.construct_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.construct_from" title="Permalink to this definition"></a></dt>
+<dd><p>Convert Node-like objects to a Node or list of Nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nodable</strong> (<em>Nodable</em>) – Node-like objects to convert to a Node or list of Nodes.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New Node(s) corresponding to the Node-like input objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Union[“Node”, List[“Node”]]</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.10)"><strong>TypeError</strong></a> – If supplied input cannot be converted to a Node or list of Nodes</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

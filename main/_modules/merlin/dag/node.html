@@ -300,7 +300,11 @@
                         <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;: &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;ancestor nodes provided dtype &#39;</span><span class="si">{</span><span class="n">source_col_schema</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;expected dtype &#39;</span><span class="si">{</span><span class="n">col_schema</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
-                    <span class="p">)</span></div>
+                    <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">validate_schemas</span><span class="p">(</span>
+                <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">strict_dtypes</span>
+            <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Transforms this Node by applying an BaseOperator</span>
@@ -448,7 +452,20 @@
         <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot; output&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="n">output</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
-<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove input columns and all output columns that depend on them.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_cols : List[str]</span>
+<span class="sd">            The input columns to remove</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[str]</span>
+<span class="sd">            The output columns that were removed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">removed_outputs</span> <span class="o">=</span> <span class="n">_derived_output_cols</span><span class="p">(</span><span class="n">input_cols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_mapping</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="o">.</span><span class="n">without</span><span class="p">(</span><span class="n">input_cols</span><span class="p">)</span>
@@ -545,8 +562,33 @@
     <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_to_graphviz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
+    <span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]]</span>
+    <span class="p">]</span>
+
 <div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">construct_from</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">nodable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">construct_from</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">nodable</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert Node-like objects to a Node or list of Nodes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nodable : Nodable</span>
+<span class="sd">            Node-like objects to convert to a Node or list of Nodes.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Union[&quot;Node&quot;, List[&quot;Node&quot;]]</span>
+<span class="sd">            New Node(s) corresponding to the Node-like input objects</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If supplied input cannot be converted to a Node or list of Nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">([</span><span class="n">nodable</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
@@ -558,8 +600,12 @@
                 <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">nodable</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodable</span><span class="p">]</span>
-                <span class="n">non_selection_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">selector</span><span class="p">]</span>
-                <span class="n">selection_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">selector</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">selector</span><span class="p">]</span>
+                <span class="n">non_selection_nodes</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;selector&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">selection_nodes</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">selector</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;selector&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
+                <span class="p">]</span>
                 <span class="n">selection_nodes</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="p">[</span><span class="n">Node</span><span class="p">(</span><span class="n">_combine_selectors</span><span class="p">(</span><span class="n">selection_nodes</span><span class="p">))]</span> <span class="k">if</span> <span class="n">selection_nodes</span> <span class="k">else</span> <span class="p">[]</span>
                 <span class="p">)</span>
