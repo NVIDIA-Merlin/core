@@ -30,6 +30,7 @@ def test_list_dtypes(tmpdir, cpu):
     df["vals"] = [
         [[0, 1, 2], [3, 4], [5]],
     ]
+    df.set_index(np.array([2]), drop=True, inplace=True)
 
     assert is_list_dtype(df["vals"])
     assert list_val_dtype(df["vals"]) == np.dtype(np.int64)
