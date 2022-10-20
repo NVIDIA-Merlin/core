@@ -291,7 +291,7 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
                 ser = ser.list.leaves
             return ser.dtype
         elif isinstance(ser, pd.Series):
-            return pd.core.dtypes.cast.infer_dtype_from(ser[0][0])[0]
+            return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
     if isinstance(ser, np.ndarray):
         return ser.dtype
     return None
