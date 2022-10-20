@@ -298,6 +298,9 @@ class Schema:
 
         """
         if selector is not None:
+            if selector.all:
+                return self
+
             schema = Schema()
             if selector.names:
                 schema += self.select_by_name(selector.names)
@@ -325,6 +328,8 @@ class Schema:
         """
         schema = self
         if selector is not None:
+            if selector.all:
+                return Schema()
             if selector.names:
                 schema = schema.excluding_by_name(selector.names)
             if selector.tags:
