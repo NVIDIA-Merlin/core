@@ -58,7 +58,7 @@ def test_merlin_to_proto_to_json_to_merlin():
                 properties={
                     "num_buckets": None,
                     "freq_threshold": 0.0,
-                    "domain": {"min": 0, "max": 102987},
+                    "domain": {"min": 0, "max": 102987, "name": "userid"},
                 },
             )
         ]
@@ -195,7 +195,7 @@ def test_tensorflow_metadata_from_json():
     # (and instead should be inferred from the intDomain.isCategorical)
     assert Tags.CATEGORICAL in column_schema.tags
 
-    assert column_schema.properties["domain"] == {"min": 1, "max": 331}
+    assert column_schema.properties["domain"] == {"min": 1, "max": 331, "name": "categories"}
 
     # make sure the JSON formatted extra_metadata properties are human readable
     json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
