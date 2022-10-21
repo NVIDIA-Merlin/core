@@ -14,7 +14,7 @@
 #
 import os
 import pathlib
-from typing import Union
+from typing import Union, Optional
 
 import fsspec
 import numpy
@@ -46,7 +46,7 @@ class TensorflowMetadata:
         self.proto_schema = schema
 
     @classmethod
-    def from_json(cls, json: Union[str, bytes]) -> "TensorflowMetadata":
+    def from_json(cls, json: Union[str, bytes, bytearray]) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON string
 
         Parameters
@@ -204,16 +204,23 @@ class TensorflowMetadata:
 
         return merlin_schema
 
-    def to_json(self) -> str:
+    def to_json(self, indent: Optional[int] = None) -> str:
         """Convert this TensorflowMetadata schema object to a JSON string
+
+        Parameters
+        ----------
+        indent
+            If ``indent`` is a non-negative integer, then JSON array elements and
+            object members will be pretty-printed with that indent level. An indent
+            level of 0 will only insert newlines. ``None`` is the most compact
+            representation.
 
         Returns
         -------
         str
             Schema converted to a JSON string
-
         """
-        return self.proto_schema.to_json()
+        return self.proto_schema.to_json(indent=indent)
 
 
 def _pb_int_domain(column_schema):

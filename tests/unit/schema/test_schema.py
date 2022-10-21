@@ -14,9 +14,70 @@
 # limitations under the License.
 #
 import pytest
+import random
+import numpy as np
 
 from merlin.dag import ColumnSelector
-from merlin.schema import ColumnSchema, Schema
+from merlin.schema import ColumnSchema, Schema, Tags
+
+
+def random_column_schema():
+    """Returns Random ColumnSchema"""
+    column_schema_kwargs = {}
+    properties = {}
+    tags = []
+    dtype = None
+    is_list = None
+    is_ragged = None
+
+    is_list = random.choice([True, False])
+    if is_list:
+        is_ragged = random.choice([True, False])
+
+    name = str(random.randint(0, 1000))
+    if random.random() < 0.5:
+        sep = random.choice(["_", "-", ""])
+        prefix = random.choice(["", "feature", "f", "FEATURE"])
+        name = f"{prefix}{sep}{name}"
+
+    cat_or_cont_tag = random.choice([None, Tags.CONTINUOUS, Tags.CATEGORICAL])
+    if cat_or_cont_tag is not None:
+        tags.append(cat_or_cont_tag)
+    if cat_or_cont_tag == Tags.CATEGORICAL:
+        properties["domain"] = {"min": 0, "max": random.randint(0, 1000)}
+        domain_name = random.choice([None, name, "shared_embedding"])
+        if domain_name is not None:
+            properties["domain"]["name"] = domain_name
+
+        dtype = np.dtype(random.choice(["int32", "int64"]))
+
+    user_or_item_tag = random.choice([Tags.USER, Tags.ITEM, None])
+    if user_or_item_tag is not None:
+        tags.append(user_or_item_tag)
+
+    if tags:
+        column_schema_kwargs["tags"] = tags
+    if properties:
+        column_schema_kwargs["properties"] = properties
+    if dtype is not None:
+        column_schema_kwargs["dtype"] = dtype
+    if is_list is not None:
+        column_schema_kwargs["is_list"] = is_list
+    if is_ragged is not None:
+        column_schema_kwargs["is_ragged"] = is_ragged
+
+    column_schema = ColumnSchema(
+        name,
+        **column_schema_kwargs
+    )
+    return column_schema
+
+
+def random_schema(num_columns=None):
+    if num_columns is None:
+        num_columns = random.randint(0, 20)
+    schema = Schema([random_column_schema() for _ in range(num_columns)])
+    return schema
 
 
 def test_select_by_name():
@@ -159,6 +220,11 @@ def test_schema_to_pandas():
 
     assert isinstance(df, pd.DataFrame)
     assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
+
+
+@pytest.mark.parametrize("schema", [random_schema() for _ in range(20)])
+def test_schema_to_json(schema):
+    assert schema.from_json(schema.to_json()) == schema
 
 
 def test_construct_schema_with_column_names():

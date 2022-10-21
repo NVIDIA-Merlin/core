@@ -506,6 +506,35 @@ class Schema:
 
         return pd.json_normalize(props)
 
+    def to_json(self, indent: Optional[int] = None) -> str:
+        """Returns the encoded JSON representation of this Schema.
+
+        Parameters
+        ----------
+        indent
+            The number of spaces to indent the object members.
+
+        Returns
+        -------
+        str
+            The JSON string representation of this Schema.
+        """
+        from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+        json_schema = TensorflowMetadata.from_merlin_schema(self).to_json(indent=indent)
+        return json_schema
+
+    @classmethod
+    def from_json(cls, value: Union[str, bytes, bytearray]) -> "Schema":
+        """Convert a JSON string into a Schema.
+
+        Parameters
+        ----------
+        value
+            The JSON string value representing teh Schema.
+        """
+        from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+        return TensorflowMetadata.from_json(value).to_merlin_schema()
+
     def __eq__(self, other):
         if not isinstance(other, Schema) or len(self.column_schemas) != len(other.column_schemas):
             return False
