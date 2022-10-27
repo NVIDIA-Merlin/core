@@ -109,5 +109,5 @@ class SelectionOp(BaseOperator):
         """
         selector = col_selector or self.selector
         if selector.all:
-            selector.names = input_schema.column_names
+            selector = ColumnSelector(input_schema.column_names)
         return super().compute_output_schema(input_schema, selector, prev_output_schema)
