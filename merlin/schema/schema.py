@@ -172,12 +172,12 @@ class ColumnSchema:
             raise TypeError("properties must be in dict format, key: value")
 
         # Using new dictionary to avoid passing old ref to new schema
-        properties.update(self.properties)
+        new_properties = {**self.properties, **properties}
 
         return ColumnSchema(
             self.name,
             tags=self.tags,
-            properties=properties,
+            properties=new_properties,
             dtype=self.dtype,
             is_list=self.is_list,
             is_ragged=self.is_ragged,
