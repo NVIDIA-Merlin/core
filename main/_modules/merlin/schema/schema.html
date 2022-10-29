@@ -244,12 +244,12 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;properties must be in dict format, key: value&quot;</span><span class="p">)</span>
 
         <span class="c1"># Using new dictionary to avoid passing old ref to new schema</span>
-        <span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+        <span class="n">new_properties</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">}</span>
 
         <span class="k">return</span> <span class="n">ColumnSchema</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">tags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
-            <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="n">new_properties</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">is_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">,</span>
             <span class="n">is_ragged</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span><span class="p">,</span>
