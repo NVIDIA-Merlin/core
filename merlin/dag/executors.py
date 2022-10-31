@@ -51,6 +51,8 @@ class LocalExecutor:
         nodes = []
         if isinstance(graph, Graph):
             nodes.append(graph.output_node)
+        elif isinstance(graph, Node):
+            nodes.append(graph)
         elif isinstance(graph, list):
             nodes = graph
         else:
@@ -242,6 +244,8 @@ class DaskExecutor:
         nodes = []
         if isinstance(graph, Graph):
             nodes.append(graph.output_node)
+        elif isinstance(graph, Node):
+            nodes.append(graph)
         elif isinstance(graph, list):
             nodes = graph
         else:
