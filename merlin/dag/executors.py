@@ -25,7 +25,7 @@ from merlin.core.utils import (
     global_dask_client,
     set_client_deprecated,
 )
-from merlin.dag import ColumnSelector, Node
+from merlin.dag import ColumnSelector, Graph, Node
 from merlin.io.worker import clean_worker_cache
 
 LOG = logging.getLogger("merlin")
@@ -39,7 +39,7 @@ class LocalExecutor:
     def transform(
         self,
         transformable,
-        nodes,
+        graph,
         output_dtypes=None,
         additional_columns=None,
         capture_dtypes=False,
@@ -48,6 +48,19 @@ class LocalExecutor:
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
         by applying the operators from a collection of Nodes
         """
+        nodes = []
+        if isinstance(graph, Graph):
+            nodes.append(graph.output_node)
+        elif isinstance(graph, list):
+            nodes = graph
+        else:
+            raise TypeError(
+                f"LocalExecutor detected unsupported type of input for graph: {type(graph)}."
+                " `graph` argument must be either a `Graph` object (preferred)"
+                " or a list of `Node` objects (deprecated, but supported for backward "
+                " compatibility.)"
+            )
+
         output_data = None
 
         for node in nodes:
@@ -220,12 +233,24 @@ class DaskExecutor:
         return {k: v for k, v in self.__dict__.items() if k != "client"}
 
     def transform(
-        self, ddf, nodes, output_dtypes=None, additional_columns=None, capture_dtypes=False
+        self, ddf, graph, output_dtypes=None, additional_columns=None, capture_dtypes=False
     ):
         """
         Transforms all partitions of a Dask Dataframe by applying the operators
         from a collection of Nodes
         """
+        nodes = []
+        if isinstance(graph, Graph):
+            nodes.append(graph.output_node)
+        elif isinstance(graph, list):
+            nodes = graph
+        else:
+            raise TypeError(
+                f"DaskExecutor detected unsupported type of input for graph: {type(graph)}."
+                " `graph` argument must be either a `Graph` object (preferred)"
+                " or a list of `Node` objects (deprecated, but supported for backward"
+                " compatibility.)"
+            )
 
         self._clear_worker_cache()
 
