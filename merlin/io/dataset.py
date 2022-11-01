@@ -30,8 +30,13 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-import merlin.core.dispatch as dispatch
-from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
+from merlin.core.dispatch import (
+    convert_data,
+    hex_to_int,
+    is_dataframe_object,
+    is_list_dtype,
+    list_val_dtype,
+)
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
@@ -850,6 +855,7 @@ class Dataset:
                 output_files = [f"part_{i}" + suffix for i in range(output_files)]
             if isinstance(output_files, list):
                 new = {}
+                file_count = 0
                 split = math.ceil(ddf.npartitions / len(output_files))
                 for i in range(0, len(output_files), files_per_task):
                     fns = output_files[i : i + files_per_task]
@@ -857,10 +863,11 @@ class Dataset:
                     stop = min(start + split * len(fns), ddf.npartitions)
                     if start < stop:
                         new[tuple(fns)] = np.arange(start, stop)
+                        file_count += len(fns)
                 # let user know they will not have expected number of output files.
-                if len(new.keys()) < len(output_files):
+                if file_count < len(output_files):
                     warnings.warn(
-                        f"Only created {len(new.keys())} files did not have enough "
+                        f"Only creating {file_count} files. Did not have enough "
                         f"partitions to create {len(output_files)} files."
                     )
                 output_files = new
@@ -1153,8 +1160,8 @@ class Dataset:
             _real_meta = self._real_meta[n]
             annotated = {
                 col: {
-                    "dtype": dispatch.list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
-                    "is_list": dispatch.is_list_dtype(_real_meta[col]),
+                    "dtype": list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
+                    "is_list": is_list_dtype(_real_meta[col]),
                 }
                 for col in _real_meta.columns
             }
