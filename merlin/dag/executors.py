@@ -120,7 +120,8 @@ class LocalExecutor:
         else:
             # If there are no parents, this is an input node,
             # so pull columns directly from root data
-            input_data = transformable[node_input_cols + list(addl_input_cols)]
+            addl_input_cols = list(addl_input_cols) if addl_input_cols else []
+            input_data = transformable[node_input_cols + addl_input_cols]
 
         return input_data
 
@@ -161,6 +162,10 @@ class LocalExecutor:
 
                 if is_list:
                     col_dtype = list_val_dtype(col_series)
+                if hasattr(col_dtype, "as_numpy_dtype"):
+                    col_dtype = col_dtype.as_numpy_dtype()
+                elif hasattr(col_series, "numpy"):
+                    col_dtype = col_series[0].cpu().numpy().dtype
 
                 output_data_schema = output_col_schema.with_dtype(
                     col_dtype, is_list=is_list, is_ragged=is_list
