@@ -43,8 +43,10 @@ class DictArray(Transformable):
     A simple dataframe-like wrapper around a dictionary of values
     """
 
-    def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
+    def __init__(self, values: Optional[Dict] = None, dtypes: Optional[Dict] = None):
         super().__init__()
+
+        values = values or {}
 
         array_values = {}
         for key, value in values.items():
