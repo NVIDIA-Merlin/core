@@ -25,7 +25,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from merlin.core.compat import HAS_GPU
-from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
+from merlin.core.protocols import DataFrameLike, SeriesLike
+from merlin.dag import DictArray
 
 cp = None
 cudf = None
@@ -350,14 +351,8 @@ def concat_columns(args: list):
     """Dispatch function to concatenate DataFrames with axis=1"""
     if len(args) == 1:
         return args[0]
-    elif isinstance(args[0], DataFrameLike):
-        _lib = cudf if HAS_GPU and isinstance(args[0], cudf.DataFrame) else pd
-        return _lib.concat(
-            [a.reset_index(drop=True) for a in args],
-            axis=1,
-        )
-    elif isinstance(args[0], DictLike):
-        result = type(args[0])()
+    elif isinstance(args[0], DictArray):
+        result = DictArray({})
         for arg in args:
             result.update(arg)
         return result
