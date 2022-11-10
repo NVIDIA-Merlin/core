@@ -350,9 +350,13 @@ def concat_columns(args: list):
     """Dispatch function to concatenate DataFrames with axis=1"""
     if len(args) == 1:
         return args[0]
-    elif isinstance(args[0], DataFrameLike):
-        _lib = cudf if HAS_GPU and isinstance(args[0], cudf.DataFrame) else pd
-        return _lib.concat(
+    elif cudf is not None and isinstance(args[0], cudf.DataFrame):
+        return cudf.concat(
+            [a.reset_index(drop=True) for a in args],
+            axis=1,
+        )
+    elif isinstance(args[0], pd.DataFrame):
+        return pd.concat(
             [a.reset_index(drop=True) for a in args],
             axis=1,
         )
@@ -361,12 +365,6 @@ def concat_columns(args: list):
         for arg in args:
             result.update(arg)
         return result
-    else:
-        _lib = cudf if HAS_GPU and isinstance(args[0], cudf.DataFrame) else pd
-        return _lib.concat(
-            [a.reset_index(drop=True) for a in args],
-            axis=1,
-        )
     return None
 
 
