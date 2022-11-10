@@ -17,7 +17,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
-from merlin.core.protocols import SeriesLike, Transformable
+from merlin.core.protocols import SeriesLike
 
 
 class Column(SeriesLike):
@@ -38,13 +38,16 @@ class Column(SeriesLike):
         return all(self.values == other.values) and self.dtype == other.dtype
 
 
-class DictArray(Transformable):
+class DictArray:
     """
-    A simple dataframe-like wrapper around a dictionary of values
+    A simple dataframe-like wrapper around a dictionary of values. Matches the Transformable
+    protocol for (limited) interchangeability with actual dataframes in Merlin DAGs.
     """
 
-    def __init__(self, values: Dict, dtypes: Optional[Dict] = None):
+    def __init__(self, values: Optional[Dict] = None, dtypes: Optional[Dict] = None):
         super().__init__()
+
+        values = values or {}
 
         array_values = {}
         for key, value in values.items():

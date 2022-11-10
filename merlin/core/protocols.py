@@ -91,7 +91,6 @@ class Transformable(DictLike, Protocol):
     base to do without them.
     """
 
-    @property
     def columns(self):
         ...
 
