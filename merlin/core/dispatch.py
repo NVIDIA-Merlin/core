@@ -27,7 +27,6 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-
 cp = None
 cudf = None
 rmm = None

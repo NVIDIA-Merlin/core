@@ -16,7 +16,7 @@
 import numpy as np
 import pytest
 
-from merlin.core.dispatch import HAS_GPU, is_list_dtype, list_val_dtype, make_df, concat_columns
+from merlin.core.dispatch import HAS_GPU, concat_columns, is_list_dtype, list_val_dtype, make_df
 
 if HAS_GPU:
     _DEVICES = ["cpu", "gpu"]
