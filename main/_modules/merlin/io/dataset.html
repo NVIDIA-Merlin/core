@@ -103,8 +103,13 @@
 <span class="kn">from</span> <span class="nn">fsspec.core</span> <span class="kn">import</span> <span class="n">get_fs_token_paths</span>
 <span class="kn">from</span> <span class="nn">fsspec.utils</span> <span class="kn">import</span> <span class="n">stringify_path</span>
 
-<span class="kn">import</span> <span class="nn">merlin.core.dispatch</span> <span class="k">as</span> <span class="nn">dispatch</span>
-<span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="n">convert_data</span><span class="p">,</span> <span class="n">hex_to_int</span><span class="p">,</span> <span class="n">is_dataframe_object</span>
+<span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">convert_data</span><span class="p">,</span>
+    <span class="n">hex_to_int</span><span class="p">,</span>
+    <span class="n">is_dataframe_object</span><span class="p">,</span>
+    <span class="n">is_list_dtype</span><span class="p">,</span>
+    <span class="n">list_val_dtype</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">merlin.core.utils</span> <span class="kn">import</span> <span class="n">device_mem_size</span><span class="p">,</span> <span class="n">global_dask_client</span><span class="p">,</span> <span class="n">set_client_deprecated</span>
 <span class="kn">from</span> <span class="nn">merlin.io.csv</span> <span class="kn">import</span> <span class="n">CSVDatasetEngine</span>
 <span class="kn">from</span> <span class="nn">merlin.io.dask</span> <span class="kn">import</span> <span class="n">_ddf_to_dataset</span><span class="p">,</span> <span class="n">_simple_shuffle</span>
@@ -923,6 +928,7 @@
                 <span class="n">output_files</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;part_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">suffix</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">output_files</span><span class="p">)]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_files</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">new</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">file_count</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">ddf</span><span class="o">.</span><span class="n">npartitions</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_files</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_files</span><span class="p">),</span> <span class="n">files_per_task</span><span class="p">):</span>
                     <span class="n">fns</span> <span class="o">=</span> <span class="n">output_files</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">files_per_task</span><span class="p">]</span>
@@ -930,10 +936,11 @@
                     <span class="n">stop</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">split</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">fns</span><span class="p">),</span> <span class="n">ddf</span><span class="o">.</span><span class="n">npartitions</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span>
                         <span class="n">new</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">fns</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
+                        <span class="n">file_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fns</span><span class="p">)</span>
                 <span class="c1"># let user know they will not have expected number of output files.</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_files</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">file_count</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_files</span><span class="p">):</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Only created </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2"> files did not have enough &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Only creating </span><span class="si">{</span><span class="n">file_count</span><span class="si">}</span><span class="s2"> files. Did not have enough &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;partitions to create </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">output_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> files.&quot;</span>
                     <span class="p">)</span>
                 <span class="n">output_files</span> <span class="o">=</span> <span class="n">new</span>
@@ -1226,8 +1233,8 @@
             <span class="n">_real_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
             <span class="n">annotated</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">col</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dispatch</span><span class="o">.</span><span class="n">list_val_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="ow">or</span> <span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-                    <span class="s2">&quot;is_list&quot;</span><span class="p">:</span> <span class="n">dispatch</span><span class="o">.</span><span class="n">is_list_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]),</span>
+                    <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">list_val_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="ow">or</span> <span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                    <span class="s2">&quot;is_list&quot;</span><span class="p">:</span> <span class="n">is_list_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]),</span>
                 <span class="p">}</span>
                 <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">_real_meta</span><span class="o">.</span><span class="n">columns</span>
             <span class="p">}</span>
