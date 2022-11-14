@@ -1,0 +1,32 @@
+pipeline {
+    agent {
+        docker {
+            image 'nvcr.io/nvstaging/merlin/merlin-ci-runner-wrapper'
+            label 'merlin_gpu'
+            registryCredentialsId 'jawe-nvcr-io'
+            registryUrl 'https://nvcr.io'
+        }
+    }
+
+
+    stages {
+        stage("PR Tests") {
+            steps {
+                runStepsWithNotify({
+                  sh "echo 'Hello Merlin!'"  
+                }, 'Unit tests')
+            }
+        }
+    }
+}
+
+def runStepsWithNotify(Closure steps, ctx) {
+  try {
+    githubNotify description: "Build ${BUILD_NUMBER} is now pending", status: 'PENDING', context: ctx, targetUrl: env.RUN_DISPLAY_URL
+    steps()
+    githubNotify description: "Build ${BUILD_NUMBER} succeeded", status: 'SUCCESS', context: ctx, targetUrl: env.RUN_DISPLAY_URL
+  } catch (e) {
+    githubNotify description: "Build ${BUILD_NUMBER} failed", status: 'FAILURE', context: ctx, targetUrl: env.RUN_DISPLAY_URL
+    error e
+  }
+}
