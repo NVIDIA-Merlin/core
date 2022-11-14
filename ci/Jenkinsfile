@@ -5,28 +5,37 @@ pipeline {
             label 'merlin_gpu'
             registryCredentialsId 'jawe-nvcr-io'
             registryUrl 'https://nvcr.io'
+            args "--runtime=nvidia -e NVIDIA_VISIBLE_DEVICES=all"
         }
     }
 
+    options {
+      buildDiscarder(logRotator(numToKeepStr: '10'))
+      ansiColor('xterm')
+      disableConcurrentBuilds(abortPrevious: true)
+    }
 
     stages {
-        stage("PR Tests") {
+        stage("test-gpu") {
             steps {
-                runStepsWithNotify({
-                  sh "echo 'Hello Merlin!'"  
-                }, 'Unit tests')
+                sh """#!/bin/bash
+#set -e
+printenv
+
+rm -rf $HOME/.cudf/
+export TF_MEMORY_ALLOCATION="0.1"
+export CUDA_VISIBLE_DEVICES=0,1
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python'
+export MKL_SERVICE_FORCE_INTEL=1
+export NR_USER=true
+
+tox -re test-gpu
+
+rm -rf "nvtabular-$GIT_COMMIT"
+rm -rf "models-$GIT_COMMIT"
+rm -rf "systems-$GIT_COMMIT"
+                """
             }
         }
     }
-}
-
-def runStepsWithNotify(Closure steps, ctx) {
-  try {
-    githubNotify description: "Build ${BUILD_NUMBER} is now pending", status: 'PENDING', context: ctx, targetUrl: env.RUN_DISPLAY_URL
-    steps()
-    githubNotify description: "Build ${BUILD_NUMBER} succeeded", status: 'SUCCESS', context: ctx, targetUrl: env.RUN_DISPLAY_URL
-  } catch (e) {
-    githubNotify description: "Build ${BUILD_NUMBER} failed", status: 'FAILURE', context: ctx, targetUrl: env.RUN_DISPLAY_URL
-    error e
-  }
 }
