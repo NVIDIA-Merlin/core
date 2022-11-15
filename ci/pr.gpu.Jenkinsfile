@@ -17,6 +17,9 @@ pipeline {
 
     stages {
         stage("test-gpu") {
+            options {
+                timeout(time: 60, unit: 'MINUTES', activity: true)
+            }
             steps {
                 sh """#!/bin/bash
 #set -e
