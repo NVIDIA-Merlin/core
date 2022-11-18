@@ -75,16 +75,16 @@ class ColumnSchema:
 
         object.__setattr__(self, "dtype", dtype)
 
-        value_count = self.properties.get("value_count")
+        value_count = self.properties.get("value_count", {"min": 0, "max": 0})
 
         if self.is_list is None:
-            if value_count is not None and value_count.get("max", 0) > 0:
+            if value_count["max"] > 0:
                 object.__setattr__(self, "is_list", True)
             else:
                 object.__setattr__(self, "is_list", False)
 
         if self.is_ragged is None:
-            if value_count is not None and value_count.get("max", 0) > value_count.get("min", 0):
+            if value_count["max"] > value_count["min"]:
                 object.__setattr__(self, "is_ragged", True)
             else:
                 object.__setattr__(self, "is_ragged", False)
@@ -93,6 +93,12 @@ class ColumnSchema:
             raise ValueError(
                 "`is_ragged` is set to `True` but `is_list` is not. "
                 "Only list columns can set the `is_ragged` flag."
+            )
+
+        if self.is_ragged and value_count["max"] == value_count["min"]:
+            raise ValueError(
+                "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. "
+                "If value_count min/max are equal. This is a fixed size list and `is_ragged` should be set to False"
             )
 
     @property

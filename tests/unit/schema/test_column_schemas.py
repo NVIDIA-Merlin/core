@@ -197,3 +197,9 @@ def test_list_column_attributes():
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
+
+
+def test_value_count():
+    with pytest.raises(ValueError) as exc_info:
+        ColumnSchema("col", is_ragged=True, properties={"value_count": {"min": 2, "max": 2}})
+    assert "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`" in str(exc_info.value)
