@@ -157,20 +157,28 @@
         <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
         <span class="n">value_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">)</span>
-        <span class="n">value_count_provided</span> <span class="o">=</span> <span class="n">value_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">value_count</span> <span class="o">=</span> <span class="n">value_count</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">value_count_min</span> <span class="o">=</span> <span class="n">value_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">value_count</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">value_count_max</span> <span class="o">=</span> <span class="n">value_count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">value_count</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">value_count_min</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">value_count_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`value_count` min and max must be greater than zero. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Provided min: </span><span class="si">{</span><span class="n">value_count_min</span><span class="si">}</span><span class="s2"> max: </span><span class="si">{</span><span class="n">value_count_max</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value_count</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value_count_max</span> <span class="ow">and</span> <span class="n">value_count_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_list&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_list&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value_count</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">value_count</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">value_count_max</span> <span class="ow">and</span> <span class="n">value_count_min</span> <span class="ow">and</span> <span class="n">value_count_max</span> <span class="o">&gt;</span> <span class="n">value_count_min</span><span class="p">:</span>
                 <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">value_count_max</span> <span class="ow">and</span> <span class="n">value_count_min</span> <span class="ow">and</span> <span class="n">value_count_max</span> <span class="o">==</span> <span class="n">value_count_min</span><span class="p">:</span>
                 <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -178,7 +186,12 @@
                 <span class="s2">&quot;Only list columns can set the `is_ragged` flag.&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">and</span> <span class="n">value_count_provided</span> <span class="ow">and</span> <span class="n">value_count</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">value_count</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span>
+            <span class="ow">and</span> <span class="n">value_count_min</span>
+            <span class="ow">and</span> <span class="n">value_count_max</span>
+            <span class="ow">and</span> <span class="n">value_count_min</span> <span class="o">==</span> <span class="n">value_count_max</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. &quot;</span>
                 <span class="s2">&quot;If value_count min/max are equal. &quot;</span>
