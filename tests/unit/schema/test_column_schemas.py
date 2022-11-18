@@ -23,7 +23,7 @@ from merlin.schema.tags import Tags, TagSet
 
 @pytest.mark.parametrize("d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64])
 def test_dtype_column_schema(d_types):
-    column = ColumnSchema("name", tags=[], properties=[], dtype=d_types)
+    column = ColumnSchema("name", tags=[], properties={}, dtype=d_types)
     assert column.dtype == d_types
 
 
