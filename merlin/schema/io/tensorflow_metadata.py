@@ -329,7 +329,12 @@ def _merlin_domain(feature):
 def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
-        return {"min": value_count.min, "max": value_count.max}
+        value_count_dict = {}
+        if value_count.min > 0:
+            value_count_dict["min"] = value_count.min
+        if value_count.max > 0:
+            value_count_dict["max"] = value_count.max
+        return value_count_dict
 
 
 def _merlin_properties(feature):
