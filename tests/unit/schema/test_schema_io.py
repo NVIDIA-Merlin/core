@@ -81,7 +81,7 @@ def test_merlin_to_proto_to_json_to_merlin():
         [{"min": 0, "max": 0}, False, False],
         [{"min": 1, "max": 1}, True, False],
         [{"min": 1, "max": 2}, True, True],
-    ]
+    ],
 )
 def test_value_count(value_count, expected_is_list, expected_is_ragged):
     schema = Schema(
