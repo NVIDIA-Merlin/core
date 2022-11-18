@@ -76,22 +76,25 @@ class ColumnSchema:
         object.__setattr__(self, "dtype", dtype)
 
         value_count = self.properties.get("value_count")
-        if value_count and (value_count["min"] == 0 or value_count["max"] == 0):
+        value_count_min = value_count.get("min") if value_count else None
+        value_count_max = value_count.get("max") if value_count else None
+
+        if value_count_min == 0 or value_count_max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
-                f'Provided min: {value_count["min"]} max: {value_count["max"]}'
+                f"Provided min: {value_count_min} max: {value_count_max}"
             )
 
         if self.is_list is None:
-            if value_count and value_count["max"] > 0:
+            if value_count_max and value_count_max > 0:
                 object.__setattr__(self, "is_list", True)
             else:
                 object.__setattr__(self, "is_list", False)
 
         if self.is_ragged is None:
-            if value_count and value_count["max"] > value_count["min"]:
+            if value_count_max and value_count_min and value_count_max > value_count_min:
                 object.__setattr__(self, "is_ragged", True)
-            elif value_count and value_count["max"] == value_count["min"]:
+            elif value_count_max and value_count_min and value_count_max == value_count_min:
                 object.__setattr__(self, "is_ragged", False)
             else:
                 object.__setattr__(self, "is_ragged", self.is_list)
@@ -102,7 +105,12 @@ class ColumnSchema:
                 "Only list columns can set the `is_ragged` flag."
             )
 
-        if self.is_ragged and value_count and value_count["max"] == value_count["min"]:
+        if (
+            self.is_ragged
+            and value_count_min
+            and value_count_max
+            and value_count_min == value_count_max
+        ):
             raise ValueError(
                 "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. "
                 "If value_count min/max are equal. "
