@@ -20,7 +20,14 @@ import fsspec
 import numpy
 
 from merlin.schema.io import proto_utils, schema_bp
-from merlin.schema.io.schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from merlin.schema.io.schema_bp import (
+    Feature,
+    FeatureType,
+    FixedShape,
+    FixedShapeDim,
+    FloatDomain,
+    IntDomain,
+)
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
 from merlin.schema.io.schema_bp import ValueCount
 from merlin.schema.schema import ColumnSchema
@@ -281,7 +288,7 @@ def _pb_feature(column_schema):
         max_length = value_count.get("max")
 
         if min_length and max_length and min_length == max_length:
-            feature.shape = FixedShape(min_length)
+            feature.shape = FixedShape([FixedShapeDim(size=min_length)])
         elif min_length and max_length and min_length < max_length:
             feature.value_count = ValueCount(min=min_length, max=max_length)
         else:
