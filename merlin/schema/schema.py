@@ -13,13 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Dict, List, Optional, Text, Union
 
 import numpy as np
 import pandas as pd
 
 from merlin.schema.tags import Tags, TagSet
+
+
+class ColumnQuantity(Enum):
+    """Describes the number of elements in each row of a column"""
+
+    SCALAR = "scalar"
+    FIXED_LIST = "fixed_list"
+    RAGGED_LIST = "ragged_list"
 
 
 @dataclass(frozen=True)
@@ -38,7 +48,7 @@ class ColumnSchema:
     properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
     is_list: bool = False
-    is_ragged: bool = False
+    is_ragged: Optional[bool] = None
 
     def __post_init__(self):
         """Standardize tags and dtypes on initialization
@@ -64,6 +74,34 @@ class ColumnSchema:
             ) from err
 
         object.__setattr__(self, "dtype", dtype)
+
+        if self.is_ragged is None:
+            object.__setattr__(self, "is_ragged", self.is_list)
+
+        if self.is_ragged and not self.is_list:
+            raise ValueError(
+                "`is_ragged` is set to `True` but `is_list` is not. "
+                "Only list columns can set the `is_ragged` flag."
+            )
+
+    @property
+    def quantity(self):
+        """
+        Describes the number of elements in each row of this column
+
+        Returns
+        -------
+        ColumnQuantity
+            SCALAR when one element per row
+            FIXED_LIST when the same number of elements per row
+            RAGGED_LIST when different numbers of elements per row
+        """
+        if self.is_list and self.is_ragged:
+            return ColumnQuantity.RAGGED_LIST
+        elif self.is_list:
+            return ColumnQuantity.FIXED_LIST
+        else:
+            return ColumnQuantity.SCALAR
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
@@ -134,12 +172,12 @@ class ColumnSchema:
             raise TypeError("properties must be in dict format, key: value")
 
         # Using new dictionary to avoid passing old ref to new schema
-        properties.update(self.properties)
+        new_properties = {**self.properties, **properties}
 
         return ColumnSchema(
             self.name,
             tags=self.tags,
-            properties=properties,
+            properties=new_properties,
             dtype=self.dtype,
             is_list=self.is_list,
             is_ragged=self.is_ragged,
@@ -248,6 +286,9 @@ class Schema:
 
         """
         if selector is not None:
+            if selector.all:
+                return self
+
             schema = Schema()
             if selector.names:
                 schema += self.select_by_name(selector.names)
@@ -275,6 +316,8 @@ class Schema:
         """
         schema = self
         if selector is not None:
+            if selector.all:
+                return Schema()
             if selector.names:
                 schema = schema.excluding_by_name(selector.names)
             if selector.tags:

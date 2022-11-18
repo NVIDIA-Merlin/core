@@ -16,20 +16,31 @@
 import numpy as np
 import pytest
 
-from merlin.core.dispatch import HAS_GPU, is_list_dtype, list_val_dtype, make_df
+from merlin.core.dispatch import HAS_GPU, concat_columns, is_list_dtype, list_val_dtype, make_df
 
 if HAS_GPU:
-    _CPU = [True, False]
+    _DEVICES = ["cpu", "gpu"]
 else:
-    _CPU = [True]
+    _DEVICES = ["cpu"]
 
 
-@pytest.mark.parametrize("cpu", _CPU)
-def test_list_dtypes(tmpdir, cpu):
-    df = make_df(device="cpu" if cpu else "gpu")
+@pytest.mark.parametrize("device", _DEVICES)
+def test_list_dtypes(tmpdir, device):
+    df = make_df(device=device)
     df["vals"] = [
         [[0, 1, 2], [3, 4], [5]],
     ]
+    # Check that the index can be arbitrary
+    df.set_index(np.array([2]), drop=True, inplace=True)
 
     assert is_list_dtype(df["vals"])
     assert list_val_dtype(df["vals"]) == np.dtype(np.int64)
+
+
+@pytest.mark.parametrize("device", _DEVICES)
+def test_concat_columns(device):
+    df1 = make_df({"a": [1, 2], "b": [[3], [4, 5]]}, device=device)
+    df2 = make_df({"c": [3, 4, 5]}, device=device)
+    data_frames = [df1, df2]
+    res = concat_columns(data_frames)
+    assert res.columns.to_list() == ["a", "b", "c"]

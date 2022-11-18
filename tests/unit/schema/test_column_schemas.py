@@ -13,13 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import json
-
 import numpy
 import pytest
 
-from merlin.schema import ColumnSchema, Schema
-from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+from merlin.schema import ColumnSchema
+from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -29,154 +27,136 @@ def test_dtype_column_schema(d_types):
     assert column.dtype == d_types
 
 
-def test_column_schema_meta():
-    column = ColumnSchema("name", tags=["tag-1"], properties={"p1": "prop-1"})
-
-    assert column.name == "name"
-    assert "tag-1" in column.tags
-    assert column.with_name("a").name == "a"
-    assert set(column.with_tags("tag-2").tags) == set(["tag-1", "tag-2"])
-    assert column.with_properties({"p2": "prop-2"}).properties == {
-        "p1": "prop-1",
-        "p2": "prop-2",
-    }
-    assert column.with_tags("tag-2").properties == {"p1": "prop-1"}
-    assert set(column.with_properties({"p2": "prop-2"}).tags) == set(["tag-1"])
-
-    assert column == ColumnSchema("name", tags=["tag-1"], properties={"p1": "prop-1"})
-    # should not be the same no properties
-    assert column != ColumnSchema("name", tags=["tag-1"])
-    # should not be the same no tags
-    assert column != ColumnSchema("name", properties={"p1": "prop-1"})
-
-
-@pytest.mark.parametrize("props1", [{}, {"p1": "p1", "p2": "p2"}])
-@pytest.mark.parametrize("props2", [{}, {"p3": "p3", "p4": "p4"}])
-@pytest.mark.parametrize("tags1", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("tags2", [[], ["c", "d", "e"]])
-@pytest.mark.parametrize("d_type", [numpy.float32, numpy.float64, numpy.int32, numpy.int64])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type, list_type):
-    # create a schema
-    col_schema1 = ColumnSchema(
-        "col1", tags=tags1, properties=props1, dtype=d_type, is_list=list_type
-    )
-    col_schema2 = ColumnSchema(
-        "col2", tags=tags2, properties=props2, dtype=d_type, is_list=list_type
-    )
-    schema = Schema([col_schema1, col_schema2])
-
-    # write schema out
-    tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
-    tf_metadata.to_proto_text_file(str(tmpdir))
-
-    # read schema back in
-    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = tf_metadata.to_merlin_schema()
-
-    # compare read to origin
-    assert schema == loaded_schema
+@pytest.mark.parametrize(
+    ["column_schema_a", "column_schema_b"],
+    [
+        [ColumnSchema("col"), ColumnSchema("col")],
+        [ColumnSchema("col_b", tags=["tag-1"]), ColumnSchema("col_b", tags=["tag-1"])],
+        [
+            ColumnSchema("col", dtype=numpy.int32, properties={"domain": {"min": 0, "max": 8}}),
+            ColumnSchema("col", dtype=numpy.int32, properties={"domain": {"min": 0, "max": 8}}),
+        ],
+        [
+            ColumnSchema(
+                "col",
+                dtype=numpy.float32,
+                tags=["tag-2", Tags.CONTINUOUS],
+                properties={"p1": "prop-1"},
+            ),
+            ColumnSchema(
+                "col",
+                dtype=numpy.float32,
+                tags=["tag-2", Tags.CONTINUOUS],
+                properties={"p1": "prop-1"},
+            ),
+        ],
+    ],
+)
+def test_equal(column_schema_a, column_schema_b):
+    assert column_schema_a == column_schema_b
+    assert column_schema_a.name == column_schema_b.name
+    assert column_schema_a.dtype == column_schema_b.dtype
+    assert column_schema_a.tags == column_schema_b.tags
+    assert column_schema_a.properties == column_schema_b.properties
 
 
-@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
-@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
-    # make sure we can round trip a schema to TensorflowMetadata without going to disk
-    schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
-    )
-    loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
-    assert schema == loaded_schema
+@pytest.mark.parametrize(
+    ["column_schema_a", "column_schema_b"],
+    [
+        [ColumnSchema("col_a"), ColumnSchema("col_b")],
+        [ColumnSchema("name"), ColumnSchema("name", tags=["tags-1"])],
+        [ColumnSchema("name"), ColumnSchema("name", properties={"p1": "prop-1"})],
+        [
+            ColumnSchema("name", tags=["tag-1"]),
+            ColumnSchema("name", properties={"p1": "prop-1"}),
+        ],
+        [
+            ColumnSchema("name", tags=["tag-1"], properties={"p1": "prop-1"}),
+            ColumnSchema("name", properties={"p1": "prop-1"}),
+        ],
+    ],
+)
+def test_not_equal(column_schema_a, column_schema_b):
+    assert column_schema_a != column_schema_b
 
 
-@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
-@pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
-@pytest.mark.parametrize("list_type", [True, False])
-def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
-    schema = Schema(
-        [ColumnSchema("col", tags=tags, properties=properties, dtype=dtype, is_list=list_type)]
-    )
-    tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
-    loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
-    assert schema == loaded_schema
+@pytest.mark.parametrize(
+    ["column_schema", "name", "expected_column_schema"],
+    [
+        [ColumnSchema("col_a"), "col_b", ColumnSchema("col_b")],
+        [ColumnSchema("feat", tags=["tag-1"]), "seq", ColumnSchema("seq", tags=["tag-1"])],
+        [
+            ColumnSchema(
+                "feat",
+                tags=["tag-1"],
+                dtype=numpy.float32,
+                properties={"domain": {"min": 0.0, "max": 6.0}},
+            ),
+            "feat_b",
+            ColumnSchema(
+                "feat_b",
+                tags=["tag-1"],
+                dtype=numpy.float32,
+                properties={"domain": {"min": 0.0, "max": 6.0}},
+            ),
+        ],
+    ],
+)
+def test_with_name(column_schema, name, expected_column_schema):
+    assert column_schema.with_name(name) == expected_column_schema
 
 
-def test_tensorflow_metadata_from_json():
-    # make sure we can load up tensorflowmetadata serialized json objects, like done by
-    # merlin-models
-    json_schema = """{"feature": [
-    {
-      "name": "categories",
-      "valueCount": {
-        "min": "1",
-        "max": "4"
-      },
-      "type": "INT",
-      "intDomain": {
-        "name": "categories",
-        "min": "1",
-        "max": "331",
-        "isCategorical": true
-      },
-      "annotation": {
-        "tag": [
-          "item"
-        ]
-      }
-    }]}
-    """
-
-    schema = TensorflowMetadata.from_json(json_schema).to_merlin_schema()
-    column_schema = schema.column_schemas["categories"]
-
-    # make sure the value_count is set appropriately
-    assert column_schema.properties["value_count"] == {"min": 1, "max": 4}
-    assert column_schema.is_list
-    assert column_schema.is_ragged
-
-    # should have CATEGORICAL tag, even though not explicitly listed in annotation
-    # (and instead should be inferred from the intDomain.isCategorical)
-    assert Tags.CATEGORICAL in column_schema.tags
-
-    assert column_schema.properties["domain"] == {"min": 1, "max": 331}
-
-    # make sure the JSON formatted extra_metadata properties are human readable
-    json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
-    assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
-        {"is_list": True, "is_ragged": True, "dtype_item_size": 64.0}
-    ]
+@pytest.mark.parametrize(
+    ["column_schema", "tags", "expected_column_schema"],
+    [
+        [
+            ColumnSchema("example", tags=["tag-1"], properties={"p1": "prop-1"}),
+            "tag-2",
+            ColumnSchema("example", tags=["tag-1", "tag-2"], properties={"p1": "prop-1"}),
+        ],
+        [
+            ColumnSchema("example", tags=["tag-1"], dtype=numpy.float32),
+            ["tag-2", Tags.CONTINUOUS],
+            ColumnSchema("example", tags=["tag-1", "tag-2", Tags.CONTINUOUS], dtype=numpy.float32),
+        ],
+    ],
+)
+def test_with_tags(column_schema, tags, expected_column_schema):
+    assert column_schema.with_tags(tags) == expected_column_schema
 
 
-def test_column_schema_protobuf_domain_check(tmpdir):
-    # create a schema
-    schema1 = ColumnSchema(
-        "col1",
-        tags=[],
-        properties={"domain": {"min": 0, "max": 10}},
-        dtype=numpy.int,
-        is_list=False,
-    )
-    schema2 = ColumnSchema(
-        "col2",
-        tags=[],
-        properties={"domain": {"min": 0.0, "max": 10.0}},
-        dtype=numpy.float,
-        is_list=False,
-    )
-    saved_schema = Schema([schema1, schema2])
-
-    # write schema out
-    tf_metadata = TensorflowMetadata.from_merlin_schema(saved_schema)
-    tf_metadata.to_proto_text_file(str(tmpdir))
-
-    # read schema back in
-    tf_metadata = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = tf_metadata.to_merlin_schema()
-
-    assert saved_schema == loaded_schema
+@pytest.mark.parametrize(
+    ["column_schema", "properties", "expected_column_schema"],
+    [
+        [
+            ColumnSchema("example", properties={"a": "old"}),
+            {"a": "new"},
+            ColumnSchema("example", properties={"a": "new"}),
+        ],
+        [
+            ColumnSchema("example", properties={"a": 1, "b": 2}),
+            {"a": 4, "c": 3},
+            ColumnSchema("example", properties={"a": 4, "b": 2, "c": 3}),
+        ],
+        [
+            ColumnSchema(
+                "example_col_2",
+                dtype=numpy.float32,
+                tags=[Tags.CONTINUOUS],
+                properties={"a": 1, "domain": {"min": 0, "max": 5}},
+            ),
+            {"a": 4, "c": 3, "domain": {"max": 8}},
+            ColumnSchema(
+                "example_col_2",
+                dtype=numpy.float32,
+                tags=[Tags.CONTINUOUS],
+                properties={"a": 4, "c": 3, "domain": {"max": 8}},
+            ),
+        ],
+    ],
+)
+def test_with_properties(column_schema, properties, expected_column_schema):
+    assert column_schema.with_properties(properties) == expected_column_schema
 
 
 def test_column_schema_tags_normalize():
@@ -184,67 +164,36 @@ def test_column_schema_tags_normalize():
     assert schema1.tags == TagSet([Tags.CATEGORICAL, Tags.LIST, Tags.ITEM_ID])
 
 
-def test_dataset_schema_constructor():
-    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
-    schema2 = ColumnSchema("col2", tags=["c", "d", "e"])
+def test_list_column_attributes():
+    col0_schema = ColumnSchema("col0")
 
-    expected = {schema1.name: schema1, schema2.name: schema2}
+    assert not col0_schema.is_list
+    assert not col0_schema.is_ragged
+    assert col0_schema.quantity == ColumnQuantity.SCALAR
 
-    ds_schema_dict = Schema(expected)
-    ds_schema_list = Schema([schema1, schema2])
+    col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
 
-    assert ds_schema_dict.column_schemas == expected
-    assert ds_schema_list.column_schemas == expected
+    assert not col1_schema.is_list
+    assert not col1_schema.is_ragged
+    assert col1_schema.quantity == ColumnQuantity.SCALAR
 
-    with pytest.raises(TypeError) as exception_info:
-        Schema(12345)
+    col2_schema = ColumnSchema("col2", is_list=True)
 
-    assert "column_schemas" in str(exception_info.value)
+    assert col2_schema.is_list
+    assert col2_schema.is_ragged
+    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
 
+    col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
-def test_dataset_schemas_can_be_added():
-    ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
-    ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])
+    assert col3_schema.is_list
+    assert col3_schema.is_ragged
+    assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
-    result = ds1_schema + ds2_schema
+    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
 
-    expected = Schema(
-        [
-            ColumnSchema("col1"),
-            ColumnSchema("col2"),
-            ColumnSchema("col3"),
-            ColumnSchema("col4"),
-        ]
-    )
+    assert col4_schema.is_list
+    assert not col4_schema.is_ragged
+    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
 
-    assert result == expected
-
-
-def test_schema_can_be_added_to_none():
-    schema_set = Schema(["a", "b", "c"])
-
-    assert (schema_set + None) == schema_set
-    assert (None + schema_set) == schema_set
-
-
-def test_schema_to_pandas():
-    import pandas as pd
-
-    schema_set = Schema(["a", "b", "c"])
-    df = schema_set.to_pandas()
-
-    assert isinstance(df, pd.DataFrame)
-    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
-
-
-def test_construct_schema_with_column_names():
-    schema = Schema(["x", "y", "z"])
-    expected = Schema([ColumnSchema("x"), ColumnSchema("y"), ColumnSchema("z")])
-
-    assert schema == expected
-
-
-def test_dataset_schema_column_names():
-    ds_schema = Schema(["x", "y", "z"])
-
-    assert ds_schema.column_names == ["x", "y", "z"]
+    with pytest.raises(ValueError):
+        ColumnSchema("col5", is_list=False, is_ragged=True)

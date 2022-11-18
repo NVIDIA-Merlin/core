@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from merlin.core.dispatch import DataFrameType
+from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
@@ -33,8 +33,8 @@ class ConcatColumns(BaseOperator):
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: ColumnSelector = None,
+        dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
         """
         Combine selectors from the nodes being added
@@ -55,13 +55,10 @@ class ConcatColumns(BaseOperator):
         ColumnSelector
             Combined column selectors of parent and dependency nodes
         """
-        self._validate_matching_cols(
+        return super().compute_selector(
             input_schema,
             parents_selector + dependencies_selector,
-            self.compute_selector.__name__,
         )
-
-        return parents_selector + dependencies_selector
 
     def compute_input_schema(
         self,
@@ -91,7 +88,9 @@ class ConcatColumns(BaseOperator):
         """
         return parents_schema + deps_schema
 
-    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with computing the schemas
@@ -102,7 +101,7 @@ class ConcatColumns(BaseOperator):
         -----------
         columns: list of str or list of list of str
             The columns to apply this operator to
-        df: Dataframe
+        transformable: Transformable
             A pandas or cudf dataframe that this operator will work on
 
         Returns
@@ -110,7 +109,7 @@ class ConcatColumns(BaseOperator):
         DataFrame
             Returns a transformed dataframe for this operator
         """
-        return super()._get_columns(df, col_selector)
+        return super()._get_columns(transformable, col_selector)
 
     @property
     def label(self) -> str:

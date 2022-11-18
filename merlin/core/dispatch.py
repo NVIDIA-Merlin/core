@@ -25,6 +25,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from merlin.core.compat import HAS_GPU
+from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
 cp = None
 cudf = None
@@ -269,13 +270,13 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesType) -> np.dtype:
+def list_val_dtype(ser: SeriesLike) -> np.dtype:
     """
     Return the dtype of the leaves from a list or nested list
 
     Parameters
     ----------
-    ser : SeriesType
+    ser : SeriesLike
         A series where the rows contain lists or nested lists
 
     Returns
@@ -289,7 +290,9 @@ def list_val_dtype(ser: SeriesType) -> np.dtype:
                 ser = ser.list.leaves
             return ser.dtype
         elif isinstance(ser, pd.Series):
-            return pd.core.dtypes.cast.infer_dtype_from(ser[0][0])[0]
+            return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
+    if isinstance(ser, np.ndarray):
+        return ser.dtype
     return None
 
 
@@ -303,7 +306,7 @@ def is_list_dtype(ser):
         # either np.ndarray or a dtype
         if isinstance(ser, np.ndarray):
             ser = ser[0]
-        return pd.api.types.is_list_like(np.dtype(ser))
+        return pd.api.types.is_list_like(ser)
     return cudf_is_list_dtype(ser)
 
 
@@ -347,21 +350,30 @@ def concat_columns(args: list):
     """Dispatch function to concatenate DataFrames with axis=1"""
     if len(args) == 1:
         return args[0]
-    else:
-        _lib = cudf if HAS_GPU and isinstance(args[0], cudf.DataFrame) else pd
-        return _lib.concat(
+    elif cudf is not None and isinstance(args[0], cudf.DataFrame):
+        return cudf.concat(
             [a.reset_index(drop=True) for a in args],
             axis=1,
         )
+    elif isinstance(args[0], pd.DataFrame):
+        return pd.concat(
+            [a.reset_index(drop=True) for a in args],
+            axis=1,
+        )
+    elif isinstance(args[0], DictLike):
+        result = type(args[0])()
+        for arg in args:
+            result.update(arg)
+        return result
     return None
 
 
-def read_parquet_dispatch(df: DataFrameType) -> Callable:
+def read_parquet_dispatch(df: DataFrameLike) -> Callable:
     """Dispatch function for reading parquet files"""
     return read_dispatch(df=df, fmt="parquet")
 
 
-def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="parquet") -> Callable:
+def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="parquet") -> Callable:
     """Return the necessary read_parquet function to generate
     data of a specified type.
     """
@@ -373,7 +385,7 @@ def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="par
     return getattr(_mod, _attr)
 
 
-def parquet_writer_dispatch(df: DataFrameType, path=None, **kwargs):
+def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     """Return the necessary ParquetWriter class to write
     data of a specified type.
 
@@ -438,7 +450,7 @@ def pull_apart_list(original, device=None):
         offsets = original._column.offsets
         elements = original._column.elements
         if isinstance(elements, cudf.core.column.lists.ListColumn):
-            offsets = elements.offsets[offsets]
+            offsets = make_series(elements.offsets)[offsets]
     return make_series(values, device), make_series(offsets, device)
 
 
@@ -517,9 +529,9 @@ def detect_format(data):
             "csv": ExtData.CSV,
         }
         if isinstance(data, list) and data:
-            file_type = mapping.get(str(data[0]).split(".")[-1], None)
+            file_type = mapping.get(str(data[0]).rsplit(".", maxsplit=1)[-1], None)
         else:
-            file_type = mapping.get(str(data).split(".")[-1], None)
+            file_type = mapping.get(str(data).rsplit(".", maxsplit=1)[-1], None)
         if file_type is None:
             raise ValueError("Data format not recognized.")
         return file_type

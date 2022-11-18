@@ -13,10 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import numpy as np
+import pytest
 
-# flake8: noqa
-from merlin.dag.base_operator import BaseOperator, Supports
-from merlin.dag.dictarray import DictArray
-from merlin.dag.graph import Graph
-from merlin.dag.node import Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
-from merlin.dag.selector import ColumnSelector
+from merlin.core.protocols import DictLike, SeriesLike, Transformable
+from merlin.dag.dictarray import Column, DictArray
+
+
+@pytest.mark.parametrize("protocol", [SeriesLike])
+def test_column_matches_protocols(protocol):
+    obj = Column([], np.int32)
+
+    assert isinstance(obj, protocol)
+
+
+@pytest.mark.parametrize("protocol", [DictLike, Transformable])
+def test_dictarray_matches_protocols(protocol):
+    obj = DictArray({}, {})
+
+    assert isinstance(obj, protocol)

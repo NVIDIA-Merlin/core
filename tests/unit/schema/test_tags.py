@@ -15,7 +15,7 @@
 #
 import pytest
 
-from merlin.schema.tags import Tags, TagSet
+from merlin.schema.tags import COMPOUND_TAGS, Tags, TagSet
 
 
 def test_tagset_init_normalizes_tags_to_enum():
@@ -123,3 +123,11 @@ def test_tagset_add_collision_error():
     assert "continuous" in str(err.value)
     assert "categorical" in str(err.value)
     assert "incompatible" in str(err.value)
+
+
+def test_tagset_atomizes_compound_tags():
+    for tag, atomic_tags in COMPOUND_TAGS.items():
+        tag_set = TagSet([tag])
+        assert tag in tag_set
+        for atomic_tag in atomic_tags:
+            assert atomic_tag in tag_set

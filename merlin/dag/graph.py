@@ -16,6 +16,7 @@
 
 import logging
 from collections import deque
+from typing import Dict, Optional
 
 from merlin.dag.node import (
     Node,
@@ -30,8 +31,23 @@ LOG = logging.getLogger("merlin")
 
 
 class Graph:
-    def __init__(self, output_node: Node):
+    def __init__(self, output_node: Node, subgraphs: Optional[Dict[str, Node]] = None):
         self.output_node = output_node
+        self.subgraphs = subgraphs or {}
+
+        parents_with_deps = self.output_node.parents_with_dependencies
+        parents_with_deps.append(output_node)
+
+        for name, sg in self.subgraphs.items():
+            if sg not in parents_with_deps:
+                raise ValueError(
+                    f"The output node of subgraph {name} does not exist in the provided graph."
+                )
+
+    def subgraph(self, name: str) -> "Graph":
+        if name not in self.subgraphs.keys():
+            raise ValueError(f"No subgraph named {name}. Options are: {self.subgraphs.keys()}")
+        return Graph(self.subgraphs[name])
 
     @property
     def input_dtypes(self):

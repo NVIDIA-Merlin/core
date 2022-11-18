@@ -49,3 +49,14 @@ def test_selection_output_schema(df):
     result_schema = op.compute_output_schema(schema, ColumnSelector())
 
     assert result_schema.column_names == ["x", "y"]
+
+
+@pytest.mark.parametrize("engine", ["parquet"])
+def test_selection_wildcard_output_schema(df):
+    selector = ColumnSelector("*")
+    schema = Schema([ColumnSchema(col) for col in df.columns])
+    op = SelectionOp(selector)
+
+    result_schema = op.compute_output_schema(schema, ColumnSelector())
+
+    assert result_schema.column_names == schema.column_names
