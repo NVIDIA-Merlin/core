@@ -47,7 +47,7 @@ class ColumnSchema:
     tags: Optional[TagSet] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
-    is_list: bool = False
+    is_list: Optional[bool] = None
     is_ragged: Optional[bool] = None
 
     def __post_init__(self):
@@ -75,8 +75,19 @@ class ColumnSchema:
 
         object.__setattr__(self, "dtype", dtype)
 
+        value_count = self.properties.get("value_count")
+
+        if self.is_list is None:
+            if value_count is not None and value_count.get("max", 0) > 0:
+                object.__setattr__(self, "is_list", True)
+            else:
+                object.__setattr__(self, "is_list", False)
+
         if self.is_ragged is None:
-            object.__setattr__(self, "is_ragged", self.is_list)
+            if value_count is not None and value_count.get("max", 0) > value_count.get("min", 0):
+                object.__setattr__(self, "is_ragged", True)
+            else:
+                object.__setattr__(self, "is_ragged", False)
 
         if self.is_ragged and not self.is_list:
             raise ValueError(
