@@ -180,8 +180,8 @@ def test_list_column_attributes():
     col2_schema = ColumnSchema("col2", is_list=True)
 
     assert col2_schema.is_list
-    assert not col2_schema.is_ragged
-    assert col2_schema.quantity == ColumnQuantity.FIXED_LIST
+    assert col2_schema.is_ragged
+    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
 
     col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
