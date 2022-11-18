@@ -98,7 +98,8 @@ class ColumnSchema:
         if self.is_ragged and value_count["max"] == value_count["min"]:
             raise ValueError(
                 "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. "
-                "If value_count min/max are equal. This is a fixed size list and `is_ragged` should be set to False"
+                "If value_count min/max are equal. "
+                "This is a fixed size list and `is_ragged` should be set to False. "
             )
 
     @property

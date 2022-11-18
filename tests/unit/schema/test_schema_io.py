@@ -18,8 +18,6 @@ import json
 import numpy
 import pytest
 
-import pytest
-
 from merlin.schema import ColumnSchema, Schema, Tags
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 

@@ -20,7 +20,7 @@ import fsspec
 import numpy
 
 from merlin.schema.io import proto_utils, schema_bp
-from merlin.schema.io.schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
 from merlin.schema.io.schema_bp import ValueCount
 from merlin.schema.schema import ColumnSchema
@@ -330,7 +330,6 @@ def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
         return {"min": value_count.min, "max": value_count.max}
-
 
 
 def _merlin_properties(feature):
