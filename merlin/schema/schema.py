@@ -76,6 +76,11 @@ class ColumnSchema:
         object.__setattr__(self, "dtype", dtype)
 
         value_count = self.properties.get("value_count")
+        if value_count and (value_count["min"] == 0 or value_count["max"] == 0):
+            raise ValueError(
+                "`value_count` min and max must be greater than zero. "
+                f'Provided min: {value_count["min"]} max: {value_count["max"]}'
+            )
 
         if self.is_list is None:
             if value_count and value_count["max"] > 0:
