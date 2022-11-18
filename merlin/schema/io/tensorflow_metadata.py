@@ -357,6 +357,8 @@ def _merlin_properties(feature):
 
     if value_count:
         properties["value_count"] = value_count
+        properties["is_list"] = value_count.get("min") > 0
+        properties["is_ragged"] = value_count.get("min") != value_count.get("max")
 
     return properties
 
