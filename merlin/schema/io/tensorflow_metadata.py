@@ -20,14 +20,7 @@ import fsspec
 import numpy
 
 from merlin.schema.io import proto_utils, schema_bp
-from merlin.schema.io.schema_bp import (
-    Feature,
-    FeatureType,
-    FixedShape,
-    FixedShapeDim,
-    FloatDomain,
-    IntDomain,
-)
+from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
 from merlin.schema.io.schema_bp import ValueCount
 from merlin.schema.schema import ColumnSchema
@@ -282,17 +275,11 @@ def _pb_feature(column_schema):
 
     feature = _set_feature_domain(feature, column_schema)
 
-    if column_schema.is_list:
-        value_count = column_schema.properties.get("value_count", {})
-        min_length = value_count.get("min")
-        max_length = value_count.get("max")
-
-        if min_length and max_length and min_length == max_length:
-            feature.shape = FixedShape([FixedShapeDim(size=min_length)])
-        elif min_length and max_length and min_length < max_length:
-            feature.value_count = ValueCount(min=min_length, max=max_length)
-        else:
-            feature.value_count = ValueCount(min=0, max=0)
+    value_count = column_schema.properties.get("value_count", {})
+    if value_count:
+        min_length = value_count.get("min", 0)
+        max_length = value_count.get("max", 0)
+        feature.value_count = ValueCount(min=min_length, max=max_length)
 
     feature.annotation.tag = _pb_tag(column_schema)
     feature.annotation.extra_metadata.append(_pb_extra_metadata(column_schema))
@@ -342,8 +329,12 @@ def _merlin_domain(feature):
 def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
-        if value_count.min != value_count.max != 0:
-            return {"min": value_count.min, "max": value_count.max}
+        value_count_dict = {}
+        if value_count.min > 0:
+            value_count_dict["min"] = value_count.min
+        if value_count.max > 0:
+            value_count_dict["max"] = value_count.max
+        return value_count_dict
 
 
 def _merlin_properties(feature):
@@ -363,14 +354,17 @@ def _merlin_properties(feature):
         properties = {}
 
     domain = _merlin_domain(feature)
+
     if domain:
         properties["domain"] = domain
 
     value_count = _merlin_value_count(feature)
+
     if value_count:
         properties["value_count"] = value_count
-        properties["is_list"] = True
+        properties["is_list"] = value_count.get("min", 0) > 0 or value_count.get("max", 0) > 0
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
+
     return properties
 
 
