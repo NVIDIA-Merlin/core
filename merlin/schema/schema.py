@@ -34,8 +34,8 @@ class ColumnQuantity(Enum):
 
 @dataclass(frozen=True)
 class Domain:
-    min: Union[int, float]
-    max: Union[int, float]
+    min: Optional[Union[int, float]] = None
+    max: Optional[Union[int, float]] = None
     name: Optional[str] = None
 
 

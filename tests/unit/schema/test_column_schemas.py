@@ -219,3 +219,24 @@ def test_value_count_zero_min_max(properties):
     with pytest.raises(ValueError) as exc_info:
         ColumnSchema("col", is_ragged=True, properties=properties)
     assert "`value_count` min and max must be greater than zero. " in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    ["value_count_min", "value_count_max"],
+    [
+        [None, 4],
+        [3, None],
+        [1, 2],
+    ],
+)
+def test_value_count(value_count_min, value_count_max):
+    value_count = {}
+    if value_count_min:
+        value_count["min"] = value_count_min
+    if value_count_max:
+        value_count["max"] = value_count_max
+
+    col_schema = ColumnSchema("col", properties={"value_count": value_count})
+
+    assert col_schema.value_count.max == value_count_max
+    assert col_schema.value_count.min == value_count_min
