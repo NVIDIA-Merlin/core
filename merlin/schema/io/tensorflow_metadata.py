@@ -242,27 +242,14 @@ def _pb_float_domain(column_schema):
     )
 
 
-def _dtype_name(column_schema):
-    # TODO: Decide if we need this since we've standardized on numpy types
-    if hasattr(column_schema.dtype, "kind"):
-        return numpy.core._dtype._kind_name(column_schema.dtype)
-    elif hasattr(column_schema.dtype, "item"):
-        return type(column_schema.dtype(1).item()).__name__
-    elif isinstance(column_schema.dtype, str):
-        return column_schema.dtype
-    elif hasattr(column_schema.dtype, "__name__"):
-        return column_schema.dtype.__name__
-    else:
-        raise TypeError(f"unsupported dtype for column schema: {column_schema.dtype}")
-
-
 def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["dtype_item_size"] = numpy.dtype(column_schema.dtype).itemsize * 8
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
+    if column_schema.dtype.elemsize:
+        properties["dtype_item_size"] = column_schema.dtype.elemsize
     return schema_bp.Any().from_dict(properties)
 
 
@@ -292,7 +279,7 @@ def _set_feature_domain(feature, column_schema):
         FeatureType.FLOAT: _pb_float_domain,
     }
 
-    pb_type = FEATURE_TYPES.get(_dtype_name(column_schema))
+    pb_type = FEATURE_TYPES.get(column_schema.dtype.elemtype.value)
     if pb_type:
         feature.type = pb_type
 

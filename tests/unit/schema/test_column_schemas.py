@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy
 import pytest
 
+from merlin import dtype
 from merlin.schema import ColumnSchema
 from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
 
 
-@pytest.mark.parametrize("d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64])
+@pytest.mark.parametrize("d_types", [dtype.float32, dtype.float64, dtype.uint32, dtype.uint64])
 def test_dtype_column_schema(d_types):
     column = ColumnSchema("name", tags=[], properties={}, dtype=d_types)
     assert column.dtype == d_types
@@ -33,19 +33,19 @@ def test_dtype_column_schema(d_types):
         [ColumnSchema("col"), ColumnSchema("col")],
         [ColumnSchema("col_b", tags=["tag-1"]), ColumnSchema("col_b", tags=["tag-1"])],
         [
-            ColumnSchema("col", dtype=numpy.int32, properties={"domain": {"min": 0, "max": 8}}),
-            ColumnSchema("col", dtype=numpy.int32, properties={"domain": {"min": 0, "max": 8}}),
+            ColumnSchema("col", dtype=dtype.int32, properties={"domain": {"min": 0, "max": 8}}),
+            ColumnSchema("col", dtype=dtype.int32, properties={"domain": {"min": 0, "max": 8}}),
         ],
         [
             ColumnSchema(
                 "col",
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 tags=["tag-2", Tags.CONTINUOUS],
                 properties={"p1": "prop-1"},
             ),
             ColumnSchema(
                 "col",
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 tags=["tag-2", Tags.CONTINUOUS],
                 properties={"p1": "prop-1"},
             ),
@@ -89,14 +89,14 @@ def test_not_equal(column_schema_a, column_schema_b):
             ColumnSchema(
                 "feat",
                 tags=["tag-1"],
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 properties={"domain": {"min": 0.0, "max": 6.0}},
             ),
             "feat_b",
             ColumnSchema(
                 "feat_b",
                 tags=["tag-1"],
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 properties={"domain": {"min": 0.0, "max": 6.0}},
             ),
         ],
@@ -115,9 +115,9 @@ def test_with_name(column_schema, name, expected_column_schema):
             ColumnSchema("example", tags=["tag-1", "tag-2"], properties={"p1": "prop-1"}),
         ],
         [
-            ColumnSchema("example", tags=["tag-1"], dtype=numpy.float32),
+            ColumnSchema("example", tags=["tag-1"], dtype=dtype.float32),
             ["tag-2", Tags.CONTINUOUS],
-            ColumnSchema("example", tags=["tag-1", "tag-2", Tags.CONTINUOUS], dtype=numpy.float32),
+            ColumnSchema("example", tags=["tag-1", "tag-2", Tags.CONTINUOUS], dtype=dtype.float32),
         ],
     ],
 )
@@ -141,14 +141,14 @@ def test_with_tags(column_schema, tags, expected_column_schema):
         [
             ColumnSchema(
                 "example_col_2",
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 tags=[Tags.CONTINUOUS],
                 properties={"a": 1, "domain": {"min": 0, "max": 5}},
             ),
             {"a": 4, "c": 3, "domain": {"max": 8}},
             ColumnSchema(
                 "example_col_2",
-                dtype=numpy.float32,
+                dtype=dtype.float32,
                 tags=[Tags.CONTINUOUS],
                 properties={"a": 4, "c": 3, "domain": {"max": 8}},
             ),

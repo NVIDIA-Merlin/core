@@ -27,14 +27,20 @@ import numpy as np
 class ElementType(Enum):
     Bool = "bool"
     Int = "int"
+    UInt = "uint"
     Float = "float"
     String = "string"
+    DateTime = "datetime"
+    Object = "object"
 
 
 @dataclass
 class DType:
-    itemtype: ElementType
-    itemsize: Optional[int] = None
+    name: str
+    # TODO: Rename elemsize to bits or bytes for clarity
+    elemtype: ElementType
+    elemsize: Optional[int] = None
+    signed: Optional[bool] = None
     shape: Optional[Tuple] = None
 
     @property
@@ -46,18 +52,22 @@ class DType:
         return self.is_list and None in self.shape
 
 
-int32 = DType(ElementType.Int, 32)
-int64 = DType(ElementType.Int, 64)
-float32 = DType(ElementType.Float, 32)
-float64 = DType(ElementType.Float, 64)
-string = DType(ElementType.String)
-boolean = DType(ElementType.Bool)
-
+int32 = DType("int32", ElementType.Int, 32, signed=True)
+int64 = DType("int64", ElementType.Int, 64, signed=True)
+uint32 = DType("uint32", ElementType.UInt, 32)
+uint64 = DType("uint64", ElementType.UInt, 64)
+float32 = DType("float32", ElementType.Float, 32, signed=True)
+float64 = DType("float64", ElementType.Float, 64, signed=True)
+datetime64us = DType("datetime64[us]", ElementType.DateTime, 64)
+datetime64ns = DType("datetime64[ns]", ElementType.DateTime, 64)
+string = DType("str", ElementType.String)
+boolean = DType("bool", ElementType.Bool)
+object_ = DType("object", ElementType.Object)
 
 _mapping_registry = []
 
 
-# Is there ever a case where we'd want to preempt the built in mappings?
+# Is there ever a case where we'd want to preempt the built-in mappings?
 def register(mapping: Dict[str, DType]):
     _mapping_registry.append(mapping)
 
@@ -68,10 +78,18 @@ register(python_dtypes)
 
 numpy_dtypes = {
     np.int32: int32,
+    np.dtype("int32"): int32,
     np.int64: int64,
+    np.dtype("int64"): int64,
     np.float32: float32,
+    np.dtype("float32"): float32,
     np.float64: float64,
+    np.dtype("float64"): float64,
+    np.datetime64: datetime64ns,
+    np.dtype("datetime64[ns]"): datetime64ns,
+    np.dtype("datetime64[us]"): datetime64us,
     np.str: string,
+    np.dtype("O"): object_,
 }
 register(numpy_dtypes)
 
@@ -83,12 +101,17 @@ register(numpy_dtypes)
 # file)
 class DTypeModule(ModuleType):
     def __call__(self, value: Any, shape: Optional[Tuple] = None):
+        if isinstance(value, DType):
+            return value
         for mapping in _mapping_registry:
-            if value in mapping:
-                merlin_type = copy(mapping[value])
-                if shape is not None:
-                    merlin_type.shape = shape
-                return merlin_type
+            try:
+                if value in mapping:
+                    merlin_type = copy(mapping[value])
+                    if shape is not None:
+                        merlin_type.shape = shape
+                    return merlin_type
+            except TypeError:
+                pass
 
         raise TypeError(
             f"Merlin doesn't have a mapping from {value} to a Merlin dtype. "

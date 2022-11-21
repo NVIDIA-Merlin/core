@@ -21,6 +21,7 @@ from typing import Dict, List, Optional, Text, Union
 import numpy as np
 import pandas as pd
 
+import merlin
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -70,21 +71,25 @@ class ColumnSchema:
         tags = TagSet(self.tags)
         object.__setattr__(self, "tags", tags)
 
-        try:
-            if hasattr(self.dtype, "numpy_dtype"):
-                dtype = np.dtype(self.dtype.numpy_dtype)
-            elif hasattr(self.dtype, "_categories"):
-                dtype = self.dtype._categories.dtype
-            elif isinstance(self.dtype, pd.StringDtype):
-                dtype = np.dtype("O")
-            else:
-                dtype = np.dtype(self.dtype)
-        except TypeError as err:
-            raise TypeError(
-                f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
-            ) from err
-
-        object.__setattr__(self, "dtype", dtype)
+        # This intermediate step of converting external dtypes to numpy dtypes
+        # should be something we can get rid of by creating mappings between
+        # external dtypes and Merlin dtypes. It's still useful for now though,
+        # since there are currently only mappings for Python and Numpy types.
+        if not isinstance(self.dtype, merlin.dtype.DType):
+            try:
+                if hasattr(self.dtype, "numpy_dtype"):
+                    dtype = np.dtype(self.dtype.numpy_dtype)
+                elif hasattr(self.dtype, "_categories"):
+                    dtype = self.dtype._categories.dtype
+                elif isinstance(self.dtype, pd.StringDtype):
+                    dtype = np.dtype("O")
+                else:
+                    dtype = np.dtype(self.dtype)
+            except TypeError as err:
+                raise TypeError(
+                    f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
+                ) from err
+            object.__setattr__(self, "dtype", merlin.dtype(dtype))
 
         value_count = Domain(**self.properties.get("value_count", {}))
 
