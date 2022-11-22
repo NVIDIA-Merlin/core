@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Text, Union
 import numpy as np
 import pandas as pd
 
-import merlin
+from merlin import dtype
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -75,21 +75,21 @@ class ColumnSchema:
         # should be something we can get rid of by creating mappings between
         # external dtypes and Merlin dtypes. It's still useful for now though,
         # since there are currently only mappings for Python and Numpy types.
-        if not isinstance(self.dtype, merlin.dtype.DType):
+        if not isinstance(self.dtype, dtype.DType):
             try:
                 if hasattr(self.dtype, "numpy_dtype"):
-                    dtype = np.dtype(self.dtype.numpy_dtype)
+                    dtype_ = np.dtype(self.dtype.numpy_dtype)
                 elif hasattr(self.dtype, "_categories"):
-                    dtype = self.dtype._categories.dtype
+                    dtype_ = self.dtype._categories.dtype
                 elif isinstance(self.dtype, pd.StringDtype):
-                    dtype = np.dtype("O")
+                    dtype_ = np.dtype("O")
                 else:
-                    dtype = np.dtype(self.dtype)
+                    dtype_ = np.dtype(self.dtype)
             except TypeError as err:
                 raise TypeError(
                     f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
                 ) from err
-            object.__setattr__(self, "dtype", merlin.dtype(dtype))
+            object.__setattr__(self, "dtype", dtype(dtype_))
 
         value_count = Domain(**self.properties.get("value_count", {}))
 
@@ -268,11 +268,11 @@ class ColumnSchema:
 
     @property
     def int_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.integer) else None
+        return self._domain() if self.dtype.elemtype.value == "int" else None
 
     @property
     def float_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.floating) else None
+        return self._domain() if self.dtype.elemtype.value == "float" else None
 
     @property
     def value_count(self) -> Optional[Domain]:

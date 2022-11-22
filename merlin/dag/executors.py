@@ -19,6 +19,7 @@ import dask
 import pandas as pd
 from dask.core import flatten
 
+from merlin import dtype
 from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype
 from merlin.core.utils import (
     ensure_optimize_dataframe_graph,
@@ -269,11 +270,15 @@ class DaskExecutor:
         columns = list(flatten(wfn.output_columns.names for wfn in nodes))
         columns += additional_columns if additional_columns else []
 
+        if isinstance(output_dtypes, dict):
+            for col_name, col_dtype in output_dtypes.items():
+                output_dtypes[col_name] = dtype.to("numpy", col_dtype)
+
         if isinstance(output_dtypes, dict) and isinstance(ddf._meta, pd.DataFrame):
             dtypes = output_dtypes
             output_dtypes = type(ddf._meta)({k: [] for k in columns})
-            for column, dtype in dtypes.items():
-                output_dtypes[column] = output_dtypes[column].astype(dtype)
+            for col_name, col_dtype in dtypes.items():
+                output_dtypes[col_name] = output_dtypes[col_name].astype(col_dtype)
 
         elif not output_dtypes:
             # TODO: constructing meta like this loses dtype information on the ddf

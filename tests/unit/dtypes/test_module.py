@@ -24,9 +24,14 @@ from merlin import dtype
 
 
 def test_type_mappings_can_be_registered():
-    dtype.register({bool: dtype.boolean})
-    merlin_dtype = dtype(bool)
-    assert merlin_dtype == dtype.boolean
+    class TestType:
+        pass
+
+    test_type = dtype.DType("test", dtype.ElementType.Int, 4096, signed=True)
+
+    dtype.register("test", {test_type: TestType})
+    merlin_dtype = dtype(TestType)
+    assert merlin_dtype == test_type
 
 
 ###############################
@@ -81,7 +86,7 @@ def test_dtypes_know_if_theyre_lists(shape, is_list):
 
 @pytest.mark.parametrize(
     "shape, is_ragged",
-    [((None, 10), True), ((10, None), True), ((10, 10), False), ((10,), False), (None, False)],
+    [((10, None), True), ((None, 10), False), ((10, 10), False), ((10,), False), (None, False)],
 )
 def test_dtypes_know_if_theyre_ragged(shape, is_ragged):
     merlin_type = dtype(int, shape)
