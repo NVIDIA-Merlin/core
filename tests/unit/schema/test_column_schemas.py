@@ -23,7 +23,7 @@ from merlin.schema.tags import Tags, TagSet
 
 @pytest.mark.parametrize("d_types", [numpy.float32, numpy.float64, numpy.uint32, numpy.uint64])
 def test_dtype_column_schema(d_types):
-    column = ColumnSchema("name", tags=[], properties=[], dtype=d_types)
+    column = ColumnSchema("name", tags=[], properties={}, dtype=d_types)
     assert column.dtype == d_types
 
 
@@ -197,3 +197,46 @@ def test_list_column_attributes():
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
+
+
+def test_value_count_invalid_min_max():
+    with pytest.raises(ValueError) as exc_info:
+        ColumnSchema("col", is_ragged=True, properties={"value_count": {"min": 2, "max": 2}})
+    assert "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`" in str(
+        exc_info.value
+    )
+
+
+@pytest.mark.parametrize(
+    "properties",
+    [
+        {"value_count": {"max": 0}},
+        {"value_count": {"min": 0}},
+        {"value_count": {"min": 0, "max": 2}},
+    ],
+)
+def test_value_count_zero_min_max(properties):
+    with pytest.raises(ValueError) as exc_info:
+        ColumnSchema("col", is_ragged=True, properties=properties)
+    assert "`value_count` min and max must be greater than zero. " in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    ["value_count_min", "value_count_max"],
+    [
+        [None, 4],
+        [3, None],
+        [1, 2],
+    ],
+)
+def test_value_count(value_count_min, value_count_max):
+    value_count = {}
+    if value_count_min:
+        value_count["min"] = value_count_min
+    if value_count_max:
+        value_count["max"] = value_count_max
+
+    col_schema = ColumnSchema("col", properties={"value_count": value_count})
+
+    assert col_schema.value_count.max == value_count_max
+    assert col_schema.value_count.min == value_count_min

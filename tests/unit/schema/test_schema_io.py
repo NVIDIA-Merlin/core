@@ -75,6 +75,34 @@ def test_merlin_to_proto_to_json_to_merlin():
     assert output_schema == schema
 
 
+@pytest.mark.parametrize(
+    ["value_count", "expected_is_list", "expected_is_ragged"],
+    [
+        [{"min": 1, "max": 1}, True, False],
+        [{"min": 1, "max": 2}, True, True],
+        [{"max": 5}, True, True],
+    ],
+)
+def test_value_count(value_count, expected_is_list, expected_is_ragged):
+    schema = Schema(
+        [
+            ColumnSchema(
+                "example",
+                is_list=True,
+                properties={
+                    "value_count": value_count,
+                },
+            )
+        ]
+    )
+    assert schema["example"].is_list == expected_is_list
+    assert schema["example"].is_ragged == expected_is_ragged
+
+    json_schema = TensorflowMetadata.from_merlin_schema(schema).to_json()
+    output_schema = TensorflowMetadata.from_json(json_schema).to_merlin_schema()
+    assert output_schema == schema
+
+
 def test_column_schema_protobuf_domain_check(tmpdir):
     # create a schema
     schema1 = ColumnSchema(
