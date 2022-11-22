@@ -182,9 +182,7 @@ class LocalExecutor:
                 elif hasattr(col_series, "numpy"):
                     col_dtype = col_series[0].cpu().numpy().dtype
 
-                output_data_schema = output_col_schema.with_dtype(
-                    col_dtype, is_list=is_list, is_ragged=is_list
-                )
+                output_data_schema = output_col_schema.with_dtype(col_dtype, is_list=is_list)
 
                 if capture_dtypes:
                     node.output_schema.column_schemas[col_name] = output_data_schema
