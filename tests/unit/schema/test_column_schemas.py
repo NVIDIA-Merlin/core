@@ -240,3 +240,10 @@ def test_value_count(value_count_min, value_count_max):
 
     assert col_schema.value_count.max == value_count_max
     assert col_schema.value_count.min == value_count_min
+
+
+def test_value_count_assign_properties():
+    col_schema = ColumnSchema("col", is_list=True, is_ragged=True)
+    new_col_schema = col_schema.with_properties({"value_count": {"min": 5, "max": 5}})
+    assert new_col_schema.is_ragged is False
+    assert new_col_schema.value_count.min == new_col_schema.value_count.max == 5
