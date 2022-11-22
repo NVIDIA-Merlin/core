@@ -38,6 +38,17 @@ class Domain:
     max: Optional[Union[int, float]] = None
     name: Optional[str] = None
 
+    @property
+    def is_bounded(self):
+        """Returns True of domain has both a lower and upper bound.
+
+        Returns
+        -------
+        bool
+            True if domain has both min and max defined.
+        """
+        return self.max and self.min
+
 
 @dataclass(frozen=True)
 class ColumnSchema:
@@ -75,26 +86,24 @@ class ColumnSchema:
 
         object.__setattr__(self, "dtype", dtype)
 
-        value_count = self.properties.get("value_count")
-        value_count_min = value_count.get("min") if value_count else None
-        value_count_max = value_count.get("max") if value_count else None
+        value_count = Domain(**self.properties.get("value_count", {}))
 
-        if value_count_min == 0 or value_count_max == 0:
+        if value_count.min == 0 or value_count.max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
-                f"Provided min: {value_count_min} max: {value_count_max}"
+                f"Provided min: {value_count.min} max: {value_count.max}"
             )
 
         if self.is_list is None:
-            if value_count_max and value_count_max > 0:
+            if value_count.max and value_count.max > 0:
                 object.__setattr__(self, "is_list", True)
             else:
                 object.__setattr__(self, "is_list", False)
 
         if self.is_ragged is None:
-            if value_count_max and value_count_min and value_count_max > value_count_min:
+            if value_count.is_bounded and value_count.max > value_count.min:
                 object.__setattr__(self, "is_ragged", True)
-            elif value_count_max and value_count_min and value_count_max == value_count_min:
+            elif value_count.is_bounded and value_count.max == value_count.min:
                 object.__setattr__(self, "is_ragged", False)
             else:
                 object.__setattr__(self, "is_ragged", self.is_list)
@@ -105,12 +114,7 @@ class ColumnSchema:
                 "Only list columns can set the `is_ragged` flag."
             )
 
-        if (
-            self.is_ragged
-            and value_count_min
-            and value_count_max
-            and value_count_min == value_count_max
-        ):
+        if self.is_ragged and value_count.is_bounded and value_count.min == value_count.max:
             raise ValueError(
                 "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. "
                 "If value_count min/max are equal. "
@@ -207,13 +211,18 @@ class ColumnSchema:
         # Using new dictionary to avoid passing old ref to new schema
         new_properties = {**self.properties, **properties}
 
+        is_ragged = self.is_ragged
+        value_count = Domain(**new_properties.get("value_count", {}))
+        if value_count.is_bounded and value_count.max == value_count.min:
+            is_ragged = False
+
         return ColumnSchema(
             self.name,
             tags=self.tags,
             properties=new_properties,
             dtype=self.dtype,
             is_list=self.is_list,
-            is_ragged=self.is_ragged,
+            is_ragged=is_ragged,
         )
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
