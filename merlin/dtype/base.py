@@ -52,7 +52,7 @@ class DType:
         mapping = _dtype_registry.mappings[mapping_name]
 
         # Ignore the shape when matching dtypes
-        dtype = replace(dtype, **{"shape": None})
+        dtype = replace(self, **{"shape": None})
 
         # Always translate to the first external dtype in the list
         return mapping.from_merlin[dtype][0]

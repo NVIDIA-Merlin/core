@@ -272,7 +272,7 @@ class DaskExecutor:
 
         if isinstance(output_dtypes, dict):
             for col_name, col_dtype in output_dtypes.items():
-                output_dtypes[col_name] = dtype.to("numpy", col_dtype)
+                output_dtypes[col_name] = col_dtype.to("numpy")
 
         if isinstance(output_dtypes, dict) and isinstance(ddf._meta, pd.DataFrame):
             dtypes = output_dtypes

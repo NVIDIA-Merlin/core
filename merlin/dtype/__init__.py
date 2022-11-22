@@ -43,7 +43,7 @@ class DTypeModule(ModuleType):
                 return dataclasses.replace(mapping.to_merlin[value], **{"shape": shape})
 
         raise TypeError(
-            f"Merlin doesn't have a mapping from {value} to a Merlin dtype. "
+            f"Merlin doesn't provide a mapping from {value} to a Merlin dtype. "
             "If you'd like to provide one, you can use `merlin.dtype.register()`."
         )
 
