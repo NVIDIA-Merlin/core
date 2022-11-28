@@ -31,11 +31,24 @@ class ElementType(Enum):
     Object = "object"
 
 
+class ElementUnit(Enum):
+    Year = "year"
+    Month = "month"
+    Day = "day"
+    Hour = "hour"
+    Minute = "minute"
+    Second = "second"
+    Millisecond = "millisecond"
+    Microsecond = "microsecond"
+    Nanosecond = "nanosecond"
+
+
 @dataclass(eq=True, frozen=True)
 class DType:
     name: str
     elemtype: ElementType
     elemsize: Optional[int] = None
+    elemunit: Optional[ElementUnit] = None
     signed: Optional[bool] = None
     shape: Optional[Tuple] = None
 
