@@ -44,9 +44,17 @@ numpy_dtypes = {
     dtypes.float32: [np.float32, np.dtype("float32")],
     dtypes.float64: [np.float64, np.dtype("float64")],
     # Date/Time
-    # TODO: Figure out which datetime64 unit is the default
-    dtypes.datetime64ns: [np.datetime64, np.dtype("datetime64[ns]")],
-    dtypes.datetime64us: [np.datetime64, np.dtype("datetime64[us]")],
+    dtypes.datetime64: [np.dtype("datetime64"), np.datetime64],
+    dtypes.datetime64Y: [np.dtype("datetime64[Y]")],
+    dtypes.datetime64M: [np.dtype("datetime64[M]")],
+    dtypes.datetime64D: [np.dtype("datetime64[D]")],
+    dtypes.datetime64h: [np.dtype("datetime64[h]")],
+    dtypes.datetime64m: [np.dtype("datetime64[m]")],
+    dtypes.datetime64s: [np.dtype("datetime64[s]")],
+    dtypes.datetime64ms: [np.dtype("datetime64[ms]")],
+    dtypes.datetime64us: [np.dtype("datetime64[us]")],
+    dtypes.datetime64ns: [np.dtype("datetime64[ns]")],
+    
     # Miscellaneous
     dtypes.string: [np.str],
     dtypes.object_: [np.dtype("O")],
