@@ -72,15 +72,11 @@ class DType:
                 "that defines the mapping been imported successfully?"
             )
 
-        # Ignore the shape when matching dtypes
-        dtype = replace(self, **{"shape": None})
-
-        # Always translate to the first external dtype in the list
         try:
-            return mapping.from_merlin[dtype][0]
+            return mapping.from_merlin(self)
         except KeyError:
             raise ValueError(
-                f"The registered dtype mapping for {mapping_name} doesn't contain type {dtype.name}. "
+                f"The registered dtype mapping for {mapping_name} doesn't contain type {self.name}. "
             )
 
     @property

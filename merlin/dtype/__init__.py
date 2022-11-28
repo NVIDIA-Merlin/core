@@ -38,9 +38,9 @@ class DTypeModule(ModuleType):
         if isinstance(value, DType):
             return value
 
-        for _, mapping in _dtype_registry.mappings.items():
-            if value in mapping.to_merlin:
-                return dataclasses.replace(mapping.to_merlin[value], **{"shape": shape})
+        for mapping in set(_dtype_registry.mappings.values()):
+            if mapping.matches_external(value):
+                return mapping.to_merlin(value, shape)
 
         raise TypeError(
             f"Merlin doesn't provide a mapping from {value} to a Merlin dtype. "
