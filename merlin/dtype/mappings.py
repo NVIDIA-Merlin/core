@@ -17,7 +17,7 @@
 import numpy as np
 
 from merlin.dtype import dtypes
-from merlin.dtype.registry import _dtype_registry
+from merlin.dtype.registry import _dtype_registry, DTypeMapping
 
 python_dtypes = {
     dtypes.boolean: bool,
@@ -90,3 +90,60 @@ try:
     _dtype_registry.register("triton", triton_dtypes)
 except ImportError:
     pass
+
+
+
+try:
+    from torch import uint8, int8, int16, int32, int64
+    from torch import float16, float32, float64
+    from torch import bool as bool_
+
+    torch_dtypes = {
+        # Unsigned Integer
+        dtypes.uint8: [uint8],
+        # Signed integer
+        dtypes.int8: [int8],
+        dtypes.int16: [int16],
+        dtypes.int32: [int32],
+        dtypes.int64: [int64],
+        # Floating Point
+        dtypes.float16: [float16],
+        dtypes.float32: [float32],
+        dtypes.float64: [float64],
+        # Miscellaneous
+        dtypes.boolean: [bool_],
+    }
+    _dtype_registry.register("torch", torch_dtypes)
+    _dtype_registry.register("pytorch", torch_dtypes)
+except ImportError as exc:
+    from warnings import warn
+
+    warn(f"PyTorch dtype mappings did not load successfully due to this error: {exc.msg}")    
+
+try:
+    from tensorflow import dtypes as tf_dtypes
+
+    tf_dtypes = DTypeMapping({
+        # Unsigned Integer
+        dtypes.uint8: [tf_dtypes.uint8],
+        dtypes.uint16: [tf_dtypes.uint16],
+        dtypes.uint32: [tf_dtypes.uint32],
+        dtypes.uint64: [tf_dtypes.uint64],
+        # Signed integer
+        dtypes.int8: [tf_dtypes.int8],
+        dtypes.int16: [tf_dtypes.int16],
+        dtypes.int32: [tf_dtypes.int32],
+        dtypes.int64: [tf_dtypes.int64],
+        # Floating Point
+        dtypes.float16: [tf_dtypes.float16],
+        dtypes.float32: [tf_dtypes.float32],
+        dtypes.float64: [tf_dtypes.float64],
+        # Miscellaneous
+        dtypes.boolean: [tf_dtypes.bool],
+    }, tf_dtypes.DType)
+    _dtype_registry.register("tf", tf_dtypes)
+    _dtype_registry.register("tensorflow", tf_dtypes)
+except ImportError:
+    from warnings import warn
+
+    warn(f"Tensorflow dtype mappings did not load successfully due to this error: {exc.msg}")    
