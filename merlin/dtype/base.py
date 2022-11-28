@@ -52,15 +52,6 @@ class DType:
     signed: Optional[bool] = None
     shape: Optional[Tuple] = None
 
-    # These properties refer to what's in a single row of the DataFrame/DictArray
-    @property
-    def is_list(self):
-        return self.shape is not None and len(self.shape) > 1
-
-    @property
-    def is_ragged(self):
-        return self.is_list and None in self.shape[1:]
-
     def to(self, mapping_name):
         try:
             mapping = _dtype_registry.mappings[mapping_name]
@@ -86,3 +77,22 @@ class DType:
     @property
     def to_python(self):
         return self.to("python")
+
+    # These properties refer to what's in a single row of the DataFrame/DictArray
+    @property
+    def is_list(self):
+        return self.shape is not None and len(self.shape) > 1
+
+    @property
+    def is_ragged(self):
+        return self.is_list and None in self.shape[1:]
+
+
+    # These properties refer to a single scalar (potentiallly a list element)
+    @property
+    def is_integer(self):
+        return self.elemtype.value == "int"
+
+    @property
+    def is_float(self):
+        return self.elemtype.value == "float"
