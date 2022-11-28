@@ -30,19 +30,22 @@ _dtype_registry.register("python", python_dtypes)
 
 numpy_dtypes = {
     # Unsigned Integer
-    dtypes.uint8: [np.uint8, np.dtype("uint8")],
-    dtypes.uint16: [np.uint16, np.dtype("uint16")],
-    dtypes.uint32: [np.uint32, np.dtype("uint32")],
-    dtypes.uint64: [np.uint64, np.dtype("uint64")],
+    dtypes.uint8: [np.dtype("uint8"), np.uint8],
+    dtypes.uint16: [np.dtype("uint16"), np.uint16],
+    dtypes.uint32: [np.dtype("uint32"), np.uint32],
+    dtypes.uint64: [np.dtype("uint64"), np.uint64],
+
     # Signed integer
-    dtypes.int8: [np.int8, np.dtype("int8")],
-    dtypes.int16: [np.int16, np.dtype("int16")],
-    dtypes.int32: [np.int32, np.dtype("int32")],
-    dtypes.int64: [np.int64, np.dtype("int64")],
+    dtypes.int8: [np.dtype("int8"), np.int8],
+    dtypes.int16: [np.dtype("int16"), np.int16],
+    dtypes.int32: [np.dtype("int32"), np.int32],
+    dtypes.int64: [np.dtype("int64"), np.int64],
+    
     # Floating Point
-    dtypes.float16: [np.float16, np.dtype("float16")],
-    dtypes.float32: [np.float32, np.dtype("float32")],
-    dtypes.float64: [np.float64, np.dtype("float64")],
+    dtypes.float16: [np.dtype("float16"), np.float16],
+    dtypes.float32: [np.dtype("float32"), np.float32],
+    dtypes.float64: [np.dtype("float64"), np.float64],
+    
     # Date/Time
     dtypes.datetime64: [np.dtype("datetime64"), np.datetime64],
     dtypes.datetime64Y: [np.dtype("datetime64[Y]")],
@@ -56,8 +59,8 @@ numpy_dtypes = {
     dtypes.datetime64ns: [np.dtype("datetime64[ns]")],
     
     # Miscellaneous
-    dtypes.string: [np.str],
+    dtypes.string: [np.dtype("str"), np.str],
     dtypes.object_: [np.dtype("O")],
-    dtypes.boolean: [np.bool, np.dtype("bool")],
+    dtypes.boolean: [np.dtype("bool"), np.bool],
 }
 _dtype_registry.register("numpy", numpy_dtypes)
