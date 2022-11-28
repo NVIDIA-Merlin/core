@@ -82,3 +82,11 @@ class DType:
             raise ValueError(
                 f"The registered dtype mapping for {mapping_name} doesn't contain type {dtype.name}. "
             )
+
+    @property
+    def to_numpy(self):
+        return self.to("numpy")
+
+    @property
+    def to_python(self):
+        return self.to("python")
