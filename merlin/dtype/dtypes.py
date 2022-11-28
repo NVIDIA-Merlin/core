@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from merlin.dtype.base import DType, ElementType
+from merlin.dtype.base import DType, ElementType, ElementUnit
 
 # Unsigned Integer
 uint8 = DType("uint8", ElementType.UInt, 8)
@@ -34,8 +34,16 @@ float32 = DType("float32", ElementType.Float, 32, signed=True)
 float64 = DType("float64", ElementType.Float, 64, signed=True)
 
 # Date/Time
-datetime64us = DType("datetime64[us]", ElementType.DateTime, 64)
-datetime64ns = DType("datetime64[ns]", ElementType.DateTime, 64)
+datetime64 = DType("datetime64", ElementType.DateTime, 64)
+datetime64Y = DType("datetime64[Y]", ElementType.DateTime, 64, ElementUnit.Year)
+datetime64M = DType("datetime64[M]", ElementType.DateTime, 64, ElementUnit.Month)
+datetime64D = DType("datetime64[D]", ElementType.DateTime, 64, ElementUnit.Day)
+datetime64h = DType("datetime64[h]", ElementType.DateTime, 64, ElementUnit.Hour)
+datetime64m = DType("datetime64[m]", ElementType.DateTime, 64, ElementUnit.Minute)
+datetime64s = DType("datetime64[s]", ElementType.DateTime, 64, ElementUnit.Second)
+datetime64ms = DType("datetime64[ms]", ElementType.DateTime, 64, ElementUnit.Millisecond)
+datetime64us = DType("datetime64[us]", ElementType.DateTime, 64, ElementUnit.Microsecond)
+datetime64ns = DType("datetime64[ns]", ElementType.DateTime, 64, ElementUnit.Nanosecond)
 
 # Miscellaneous
 string = DType("str", ElementType.String)
