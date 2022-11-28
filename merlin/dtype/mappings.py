@@ -16,8 +16,10 @@
 
 import numpy as np
 
+from merlin.core.compat import tritonclient
 from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
+
 
 python_dtypes = {
     dtypes.boolean: bool,
@@ -64,3 +66,34 @@ numpy_dtypes = {
     dtypes.boolean: [np.dtype("bool"), np.bool],
 }
 _dtype_registry.register("numpy", numpy_dtypes)
+
+
+# Only define a Triton dtype mapping if `tritonclient` is available
+try:
+    import tritonclient.grpc.model_config_pb2 as model_config
+
+    triton_dtypes = {
+        # Unsigned Integer
+        dtypes.uint8: [model_config.TYPE_UINT8],
+        dtypes.uint16: [model_config.TYPE_UINT16],
+        dtypes.uint32: [model_config.TYPE_UINT32],
+        dtypes.uint64: [model_config.TYPE_UINT64],
+
+        # Signed integer
+        dtypes.int8: [model_config.TYPE_INT8],
+        dtypes.int16: [model_config.TYPE_INT16],
+        dtypes.int32: [model_config.TYPE_INT32],
+        dtypes.int64: [model_config.TYPE_INT64],
+        
+        # Floating Point
+        dtypes.float16: [model_config.TYPE_FP16],
+        dtypes.float32: [model_config.TYPE_FP32,],
+        dtypes.float64: [model_config.TYPE_FP64],
+        
+        # Miscellaneous
+        dtypes.string: [model_config.TYPE_STRING],
+        dtypes.boolean: [model_config.TYPE_BOOL],
+    }
+    _dtype_registry.register("triton", triton_dtypes)
+except ImportError:
+    pass
