@@ -62,10 +62,23 @@ class DType:
         return self.is_list and None in self.shape[1:]
 
     def to(self, mapping_name):
-        mapping = _dtype_registry.mappings[mapping_name]
+        try:
+            mapping = _dtype_registry.mappings[mapping_name]
+        except KeyError:
+            raise ValueError(
+                f"Merlin doesn't have a registered dtype mapping for '{mapping_name}'. "
+                "If you'd like to register a new dtype mapping, use `merlin.dtype.register()`. "
+                "If you're expecting this mapping to already exist, has the library or package "
+                "that defines the mapping been imported successfully?"
+            )
 
         # Ignore the shape when matching dtypes
         dtype = replace(self, **{"shape": None})
 
         # Always translate to the first external dtype in the list
-        return mapping.from_merlin[dtype][0]
+        try:
+            return mapping.from_merlin[dtype][0]
+        except KeyError:
+            raise ValueError(
+                f"The registered dtype mapping for {mapping_name} doesn't contain type {dtype.name}. "
+            )
