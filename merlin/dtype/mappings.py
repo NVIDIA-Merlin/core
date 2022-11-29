@@ -17,7 +17,7 @@
 import numpy as np
 
 from merlin.dtype import dtypes
-from merlin.dtype.registry import _dtype_registry, DTypeMapping
+from merlin.dtype.registry import DTypeMapping, _dtype_registry
 
 python_dtypes = {
     dtypes.boolean: bool,
@@ -60,6 +60,20 @@ numpy_dtypes = {
     dtypes.boolean: [np.dtype("bool"), np.bool],
 }
 _dtype_registry.register("numpy", numpy_dtypes)
+
+try:
+    import pandas as pd
+
+    pandas_dtypes = DTypeMapping(
+        {
+            dtypes.string: [pd.StringDtype],
+            dtypes.boolean: [pd.BooleanDtype],
+        },
+        preprocessing_lambda=lambda dtype: dtype.numpy_dtype,
+    )
+    _dtype_registry.register("pandas", pandas_dtypes)
+except ImportError:
+    pass
 
 
 # Only define a Triton dtype mapping if `tritonclient` is available
