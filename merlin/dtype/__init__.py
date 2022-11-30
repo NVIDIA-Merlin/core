@@ -19,8 +19,6 @@ import sys
 from types import ModuleType
 from typing import Any, Optional, Tuple
 
-import numpy as np
-
 from merlin.dtype import mappings
 from merlin.dtype.mappings.numpy import _numpy_dtype
 from merlin.dtype.dtypes import *
@@ -33,6 +31,15 @@ from merlin.dtype.registry import _dtype_registry
 register = _dtype_registry.register
 
 
+def _to_merlin(external_dtype):
+    # If the supplied dtype is already a Merlin dtype, then there's
+    # nothing for us to do and we can exit early
+    if isinstance(external_dtype, DType):
+        return external_dtype
+
+    return _dtype_registry.to_merlin(external_dtype)
+
+
 # This class implements the "call" method for the *module*, which
 # allows us to use both `dtype(value)` and `dtype.int32` syntaxes,
 # even though we can't directly add a callable to the `merlin`
@@ -40,29 +47,22 @@ register = _dtype_registry.register
 # file)
 class DTypeModule(ModuleType):
     def __call__(self, external_dtype: Any, shape: Optional[Tuple] = None):
-        # If the supplied dtype is already a Merlin dtype, then there's
-        # nothing for us to do and we can exit early
-        if isinstance(external_dtype, DType):
-            return external_dtype
-
         # We can't raise an error when the supplied dtype is None, because
         # that will break when we load the module, so instead return None
-        # which will either work fine if the dtype is None because it isn't
-        # really being used, or surface issues downstream when something tries
-        # to use it
+        # which will either:
+        # - work fine if the dtype is None because it isn't really being used
+        # - surface issues downstream when something else tries to use it
         if external_dtype is None:
             return None
 
         try:
-            # First attempt to apply all the registered dtype mappings
-            return _dtype_registry.to_merlin(external_dtype)
-
+            # First attempt to apply all the registered Merlin dtype mappings
+            return _to_merlin(external_dtype)
         except TypeError as base_exc:
             # If we don't find a match, fall back to converting to
             # a numpy dtype and trying to match that
             try:
-                numpy_dtype = _numpy_dtype(external_dtype)
-                return _dtype_registry.to_merlin(numpy_dtype)
+                return _to_merlin(_numpy_dtype(external_dtype))
             except TypeError:
                 ...
 
