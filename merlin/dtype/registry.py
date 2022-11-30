@@ -28,11 +28,11 @@ class DTypeMapping:
             for value in values:
                 self.to_merlin_[value] = key
 
-    def matches_external(self, dtype):
-        return self._matches(dtype, self.to_merlin_, self.base_class)
+    def matches_external(self, external_dtype):
+        return self._matches(external_dtype, self.to_merlin_, self.base_class)
 
-    def matches_merlin(self, dtype):
-        return self._matches(dtype, self.from_merlin_)
+    def matches_merlin(self, merlin_dtype):
+        return self._matches(merlin_dtype, self.from_merlin_)
 
     def to_merlin(self, external_dtype, shape=None):
         merlin_dtype = self.to_merlin_[external_dtype]
