@@ -18,7 +18,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Text, Union
 
-import numpy as np
 import pandas as pd
 
 from merlin import dtype
@@ -65,34 +64,21 @@ class ColumnSchema:
     def __post_init__(self):
         """Standardize tags and dtypes on initialization
 
+        This method works around the inability to set attributes on frozen dataclass
+        objects by using object.__setattr__, which bypasses the methods that frozen
+        dataclasses lock down. That approach allows to do some normalization on the
+        object's attribute values in the post init hook that we otherwise wouldn't
+        have a way to implement.
+
         Raises:
             TypeError: If the provided dtype cannot be cast to a numpy dtype
         """
-        tags = TagSet(self.tags)
-        object.__setattr__(self, "tags", tags)
 
-        # This intermediate step of converting external dtypes to numpy dtypes
-        # should be something we can get rid of by creating mappings between
-        # external dtypes and Merlin dtypes. It's still useful for now though,
-        # since there are currently only mappings for Python and Numpy types.
-        if not isinstance(self.dtype, dtype.DType):
-            try:
-                if hasattr(self.dtype, "numpy_dtype"):
-                    dtype_ = np.dtype(self.dtype.numpy_dtype)
-                elif hasattr(self.dtype, "_categories"):
-                    dtype_ = self.dtype._categories.dtype
-                elif isinstance(self.dtype, pd.StringDtype):
-                    dtype_ = np.dtype("O")
-                else:
-                    dtype_ = np.dtype(self.dtype)
-            except TypeError as err:
-                raise TypeError(
-                    f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
-                ) from err
-            object.__setattr__(self, "dtype", dtype(dtype_))
+        object.__setattr__(self, "tags", TagSet(self.tags))
+        object.__setattr__(self, "dtype", dtype(self.dtype))
 
+        # Validate the allowed range of value count
         value_count = Domain(**self.properties.get("value_count", {}))
-
         if value_count.min == 0 or value_count.max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
@@ -100,10 +86,7 @@ class ColumnSchema:
             )
 
         if self.is_list is None:
-            if value_count.max and value_count.max > 0:
-                object.__setattr__(self, "is_list", True)
-            else:
-                object.__setattr__(self, "is_list", False)
+            object.__setattr__(self, "is_list", value_count.max and value_count.max > 0)
 
         if self.is_ragged is None:
             if value_count.is_bounded and value_count.max > value_count.min:

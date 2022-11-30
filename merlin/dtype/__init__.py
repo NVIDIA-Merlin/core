@@ -15,10 +15,11 @@
 #
 
 # flake8: noqa
-import dataclasses
 import sys
 from types import ModuleType
 from typing import Any, Optional, Tuple
+
+import numpy as np
 
 from merlin.dtype.dtypes import *
 from merlin.dtype.dtypes import DType
@@ -34,18 +35,51 @@ register = _dtype_registry.register
 # namespace (since it's implicit and doesn't allow an `__init__.py`
 # file)
 class DTypeModule(ModuleType):
-    def __call__(self, value: Any, shape: Optional[Tuple] = None):
-        if isinstance(value, DType):
-            return value
+    def __call__(self, external_dtype: Any, shape: Optional[Tuple] = None):
+        # If the supplied dtype is already a Merlin dtype, then there's
+        # nothing for us to do and we can exit early
+        if isinstance(external_dtype, DType):
+            return external_dtype
 
-        for mapping in set(_dtype_registry.mappings.values()):
-            if mapping.matches_external(value):
-                return mapping.to_merlin(value, shape)
+        # We can't raise an error when the supplied dtype is None, because
+        # that will break when we load the module, so instead return None
+        # which will either work fine if the dtype is None because it isn't
+        # really being used, or surface issues downstream when something tries
+        # to use it
+        if external_dtype is None:
+            return None
 
-        raise TypeError(
-            f"Merlin doesn't provide a mapping from {value} to a Merlin dtype. "
-            "If you'd like to provide one, you can use `merlin.dtype.register()`."
-        )
+        try:
+            # First attempt to apply all the registered dtype mappings
+            return _dtype_registry.to_merlin(external_dtype, shape)
+
+        except TypeError as base_exc:
+            # If we don't find a match, fall back to converting to
+            # a numpy dtype and trying to match that
+            try:
+                numpy_dtype = _numpy_dtype(external_dtype)
+                return _dtype_registry.to_merlin(numpy_dtype, shape)
+            except TypeError:
+                ...
+
+            raise base_exc
 
 
-sys.modules[__name__].__class__ = DTypeModule
+# We promise that the class defined above is actually a module
+dtype = sys.modules[__name__]
+dtype.__class__ = DTypeModule
+
+
+def _numpy_dtype(raw_dtype):
+    # Many Pandas dtypes have equivalent numpy dtypes
+    if hasattr(raw_dtype, "numpy_dtype"):
+        return np.dtype(raw_dtype.numpy_dtype)
+    # cuDF categorical columns have varying element types
+    elif hasattr(raw_dtype, "_categories"):
+        return raw_dtype._categories.dtype
+    # Rely on Numpy to do conversions from strings to dtypes (for now)
+    elif isinstance(raw_dtype, str):
+        return np.dtype(raw_dtype)
+    # Tensorflow dtypes can convert themselves (in case we missed a mapping)
+    elif hasattr(raw_dtype, "as_numpy_dtype"):
+        return raw_dtype.as_numpy_dtype

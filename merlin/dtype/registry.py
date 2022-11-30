@@ -35,21 +35,34 @@ class DTypeMapping:
     def matches_merlin(self, dtype):
         return self._matches(dtype, self.from_merlin_)
 
-    def to_merlin(self, external_dtype, shape = None):
+    def to_merlin(self, external_dtype, shape=None):
         merlin_dtype = self.to_merlin_[external_dtype]
         return dataclasses.replace(merlin_dtype, **{"shape": shape})
 
     def from_merlin(self, merlin_dtype):
         # Ignore the shape when matching dtypes
         shapeless_merlin_dtype = dataclasses.replace(merlin_dtype, **{"shape": None})
+
         # Always translate to the first external dtype in the list
         return self.from_merlin_[shapeless_merlin_dtype][0]
 
-    def _matches(self, dtype, mapping, base_class = None):
+    def _matches(self, dtype, mapping, base_class=None):
+        # If the mapping requires that the dtype is a subclass
+        # of a particular base class and it isn't, then we
+        # can immediately fail to match and exit.
         if base_class and not isinstance(dtype, base_class):
             return False
 
-        return dtype in mapping.keys()
+        # Some external dtype objects are not hashable, so they
+        # can't be used as dictionary keys. In that case, match
+        # against the dtype class instead.
+        hashable_dtype = dtype
+        try:
+            hash(dtype)
+        except TypeError:
+            hashable_dtype = type(dtype)
+
+        return hashable_dtype in mapping.keys()
 
 
 class DTypeMappingRegistry:
@@ -64,6 +77,40 @@ class DTypeMappingRegistry:
             mapping = DTypeMapping(mapping)
 
         self.mappings[name] = mapping
+
+    def to_merlin(self, external_dtype, shape=None):
+        for mapping in self._unique_mappings:
+            if mapping.matches_external(external_dtype):
+                return mapping.to_merlin(external_dtype, shape)
+
+        raise TypeError(
+            f"Merlin doesn't provide a mapping from {external_dtype} ({type(external_dtype)}) "
+            "to a Merlin dtype. If you'd like to provide one, you can use "
+            "`merlin.dtype.register()`."
+        )
+
+    def from_merlin(self, merlin_dtype, mapping_name):
+        mapping = self.mappings[mapping_name]
+        if mapping.matches_merlin(merlin_dtype):
+            return mapping.to_merlin(merlin_dtype)
+
+        raise TypeError(
+            f"Merlin doesn't provide a mapping from {merlin_dtype} to a {mapping_name} dtype. "
+            "If you'd like to provide one, you can use `merlin.dtype.register()`."
+        )
+
+    @property
+    def _unique_mappings(self):
+        """
+        This is a workaround that allows us to register the same dtype mapping
+        under multiple names (e.g. "tf" and "tensorflow".)
+
+        Returns
+        -------
+        Set[DTypeMapping]
+            The set of unique dtype mappings that have been registered
+        """
+        return set(self.mappings.values())
 
 
 _dtype_registry = DTypeMappingRegistry()

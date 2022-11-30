@@ -178,9 +178,11 @@ class LocalExecutor:
 
                 if is_list:
                     col_dtype = list_val_dtype(col_series)
-                if hasattr(col_dtype, "as_numpy_dtype"):
-                    col_dtype = col_dtype.as_numpy_dtype()
-                elif hasattr(col_series, "numpy"):
+
+                # TODO: Add a utility that condenses the known methods of fetching dtypes
+                # from series/arrays into a single function, so that Tensorflow specific
+                # code doesn't leak into the executors
+                if not hasattr(col_dtype, "as_numpy_dtype") and hasattr(col_series, "numpy"):
                     col_dtype = col_series[0].cpu().numpy().dtype
 
                 output_data_schema = output_col_schema.with_dtype(col_dtype, is_list=is_list)
@@ -188,7 +190,13 @@ class LocalExecutor:
                 if capture_dtypes:
                     node.output_schema.column_schemas[col_name] = output_data_schema
                 elif len(output_data):
-                    if output_col_schema.dtype != output_data_schema.dtype:
+                    # Validate that the dtypes match but only if they both exist
+                    # (since schemas may not have all dtypes specified, especially
+                    # in the tests)
+                    if (
+                        output_col_schema.dtype and output_data_schema.dtype and 
+                        output_col_schema.dtype != output_data_schema.dtype
+                    ):
                         raise TypeError(
                             f"Dtype discrepancy detected for column {col_name}: "
                             f"operator {node.op.label} reported dtype "
@@ -272,7 +280,8 @@ class DaskExecutor:
 
         if isinstance(output_dtypes, dict):
             for col_name, col_dtype in output_dtypes.items():
-                output_dtypes[col_name] = col_dtype.to("numpy")
+                if col_dtype:
+                    output_dtypes[col_name] = col_dtype.to("numpy")
 
         if isinstance(output_dtypes, dict) and isinstance(ddf._meta, pd.DataFrame):
             dtypes = output_dtypes

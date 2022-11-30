@@ -66,8 +66,8 @@ try:
 
     pandas_dtypes = DTypeMapping(
         {
-            dtypes.string: [pd.StringDtype],
-            dtypes.boolean: [pd.BooleanDtype],
+            dtypes.string: [pd.StringDtype(), pd.StringDtype],
+            dtypes.boolean: [pd.BooleanDtype(), pd.BooleanDtype],
         },
         preprocessing_lambda=lambda dtype: dtype.numpy_dtype,
     )
@@ -158,7 +158,7 @@ try:
     )
     _dtype_registry.register("tf", tf_dtypes)
     _dtype_registry.register("tensorflow", tf_dtypes)
-except ImportError:
+except ImportError as exc:
     from warnings import warn
 
     warn(f"Tensorflow dtype mappings did not load successfully due to this error: {exc.msg}")

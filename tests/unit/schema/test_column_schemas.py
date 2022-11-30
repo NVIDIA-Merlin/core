@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pandas as pd
 import pytest
 
 from merlin import dtype
@@ -25,6 +26,12 @@ from merlin.schema.tags import Tags, TagSet
 def test_dtype_column_schema(d_types):
     column = ColumnSchema("name", tags=[], properties={}, dtype=d_types)
     assert column.dtype == d_types
+
+
+@pytest.mark.parametrize("external_dtype, merlin_dtype", [(pd.StringDtype, dtype.string)])
+def test_column_schema_normalizes_dtypes(external_dtype, merlin_dtype):
+    column = ColumnSchema("name", tags=[], properties={}, dtype=external_dtype)
+    assert column.dtype == merlin_dtype
 
 
 @pytest.mark.parametrize(

@@ -181,6 +181,12 @@ class TensorflowMetadata:
         """
         features = []
         for col_name, col_schema in schema.column_schemas.items():
+            if col_schema.dtype is None:
+                raise ValueError(
+                    f"Schema for column `{col_name}` does not have a dtype. "
+                    "ColumnSchema objects must have dtypes in order to be serializable."
+                )
+
             features.append(_pb_feature(col_schema))
 
         proto_schema = ProtoSchema(feature=features)
