@@ -50,7 +50,6 @@ class DType:
     elemsize: Optional[int] = None
     elemunit: Optional[ElementUnit] = None
     signed: Optional[bool] = None
-    shape: Optional[Tuple] = None
 
     def to(self, mapping_name):
         try:
@@ -78,17 +77,7 @@ class DType:
     def to_python(self):
         return self.to("python")
 
-    # These properties refer to what's in a single row of the DataFrame/DictArray
-    @property
-    def is_list(self):
-        return self.shape is not None and len(self.shape) > 1
-
-    @property
-    def is_ragged(self):
-        return self.is_list and None in self.shape[1:]
-
-
-    # These properties refer to a single scalar (potentiallly a list element)
+    # These properties refer to a single scalar (potentially a list element)
     @property
     def is_integer(self):
         return self.elemtype.value == "int"

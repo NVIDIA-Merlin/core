@@ -37,14 +37,11 @@ class DTypeMapping:
 
     def to_merlin(self, external_dtype, shape=None):
         merlin_dtype = self.to_merlin_[external_dtype]
-        return dataclasses.replace(merlin_dtype, **{"shape": shape})
+        return merlin_dtype
 
     def from_merlin(self, merlin_dtype):
-        # Ignore the shape when matching dtypes
-        shapeless_merlin_dtype = dataclasses.replace(merlin_dtype, **{"shape": None})
-
         # Always translate to the first external dtype in the list
-        return self.from_merlin_[shapeless_merlin_dtype][0]
+        return self.from_merlin_[merlin_dtype][0]
 
     def _matches(self, dtype, mapping, base_class=None):
         # If the mapping requires that the dtype is a subclass

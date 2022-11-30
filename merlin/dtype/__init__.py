@@ -51,14 +51,14 @@ class DTypeModule(ModuleType):
 
         try:
             # First attempt to apply all the registered dtype mappings
-            return _dtype_registry.to_merlin(external_dtype, shape)
+            return _dtype_registry.to_merlin(external_dtype)
 
         except TypeError as base_exc:
             # If we don't find a match, fall back to converting to
             # a numpy dtype and trying to match that
             try:
                 numpy_dtype = _numpy_dtype(external_dtype)
-                return _dtype_registry.to_merlin(numpy_dtype, shape)
+                return _dtype_registry.to_merlin(numpy_dtype)
             except TypeError:
                 ...
 
