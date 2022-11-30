@@ -22,6 +22,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 
 from merlin.dtype import mappings
+from merlin.dtype.mappings.numpy import _numpy_dtype
 from merlin.dtype.dtypes import *
 from merlin.dtype.dtypes import DType
 
@@ -73,16 +74,3 @@ dtype = sys.modules[__name__]
 dtype.__class__ = DTypeModule
 
 
-def _numpy_dtype(raw_dtype):
-    # Many Pandas dtypes have equivalent numpy dtypes
-    if hasattr(raw_dtype, "numpy_dtype"):
-        return np.dtype(raw_dtype.numpy_dtype)
-    # cuDF categorical columns have varying element types
-    elif hasattr(raw_dtype, "_categories"):
-        return raw_dtype._categories.dtype
-    # Rely on Numpy to do conversions from strings to dtypes (for now)
-    elif isinstance(raw_dtype, str):
-        return np.dtype(raw_dtype)
-    # Tensorflow dtypes can convert themselves (in case we missed a mapping)
-    elif hasattr(raw_dtype, "as_numpy_dtype"):
-        return raw_dtype.as_numpy_dtype

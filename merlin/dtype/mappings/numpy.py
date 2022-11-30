@@ -19,6 +19,22 @@ from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
 
+
+def _numpy_dtype(raw_dtype):
+    # Many Pandas dtypes have equivalent numpy dtypes
+    if hasattr(raw_dtype, "numpy_dtype"):
+        return np.dtype(raw_dtype.numpy_dtype)
+    # cuDF categorical columns have varying element types
+    elif hasattr(raw_dtype, "_categories"):
+        return raw_dtype._categories.dtype
+    # Rely on Numpy to do conversions from strings to dtypes (for now)
+    elif isinstance(raw_dtype, str):
+        return np.dtype(raw_dtype)
+    # Tensorflow dtypes can convert themselves (in case we missed a mapping)
+    elif hasattr(raw_dtype, "as_numpy_dtype"):
+        return raw_dtype.as_numpy_dtype
+
+
 numpy_dtypes = {
     # Unsigned Integer
     dtypes.uint8: [np.dtype("uint8"), np.uint8],
