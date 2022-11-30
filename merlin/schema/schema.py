@@ -251,11 +251,11 @@ class ColumnSchema:
 
     @property
     def int_domain(self) -> Optional[Domain]:
-        return self._domain() if self.dtype.elemtype.value == "int" else None
+        return self._domain() if self.dtype.is_integer else None
 
     @property
     def float_domain(self) -> Optional[Domain]:
-        return self._domain() if self.dtype.elemtype.value == "float" else None
+        return self._domain() if self.dtype.is_float else None
 
     @property
     def value_count(self) -> Optional[Domain]:
