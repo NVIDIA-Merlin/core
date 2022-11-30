@@ -18,25 +18,10 @@ import pytest
 
 from merlin import dtype
 
-###############################
-#        Registration         #
-###############################
 
-
-def test_type_mappings_can_be_registered():
-    class TestType:
-        pass
-
-    test_type = dtype.DType("test", dtype.ElementType.Int, 4096, signed=True)
-
-    dtype.register("test", {test_type: TestType})
-    merlin_dtype = dtype(TestType)
-    assert merlin_dtype == test_type
-
-
-###############################
-#        Conversions          #
-###############################
+def test_returns_none_dtype_for_none_input():
+    result = dtype(None)
+    assert result is None
 
 
 @pytest.mark.parametrize("python_type, merlin_type", [(int, dtype.int64)])
@@ -49,11 +34,12 @@ def test_numpy_types_convert_correctly(numpy_type, merlin_type):
     assert dtype(numpy_type) == merlin_type
 
 
-###############################
-#         Type Errors         #
-###############################
+def test_type_mappings_can_be_registered():
+    class TestType:
+        pass
 
+    test_type = dtype.DType("test", dtype.ElementType.Int, 4096, signed=True)
 
-def test_returns_none_dtype_for_none_input():
-    result = dtype(None)
-    assert result is None
+    dtype.register("test", {test_type: TestType})
+    merlin_dtype = dtype(TestType)
+    assert merlin_dtype == test_type
