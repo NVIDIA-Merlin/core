@@ -57,11 +57,3 @@ def test_numpy_types_convert_correctly(numpy_type, merlin_type):
 def test_returns_none_dtype_for_none_input():
     result = dtype(None)
     assert result is None
-
-
-def test_unknown_types_raise_error():
-    class UnknownType:
-        pass
-
-    with pytest.raises(TypeError):
-        dtype(UnknownType)
