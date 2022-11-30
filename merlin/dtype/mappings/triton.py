@@ -21,7 +21,7 @@ from merlin.dtype.registry import _dtype_registry
 try:
     import tritonclient.grpc.model_config_pb2 as model_config
 
-    # The type constant on `model_config` are literally integers,
+    # The type constants on `model_config` are literally integers,
     # so this only works if we don't have any other dtypes that
     # either are or are equivalent to integers. We work around
     # this by checking base classes for dtypes that have them (e.g.
