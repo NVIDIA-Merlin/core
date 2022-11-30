@@ -52,10 +52,10 @@ def _numpy_dtype(raw_dtype):
     # here bypasses any further translation, so this is the end of the line.
     
     # Note that the return below replaces including object types in the following
-    # dtype mapping. The effect is the same, but including it below would
-    # mean that the object types handled above would get matched by the
-    # mappings in the DTypeRegistry directly and we'd never end up in this
-    # fallback function to handle them properly.
+    # Numpy dtype mapping. The effect is the same, but including it below would
+    # mean that the object types handled above would get matched by the mappings
+    # in the DTypeRegistry directly and we'd never end up in this fallback function
+    # to have an opportunity to handle them properly.
     return dtypes.object_
 
 
