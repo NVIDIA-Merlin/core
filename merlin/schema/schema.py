@@ -75,7 +75,9 @@ class ColumnSchema:
         """
 
         object.__setattr__(self, "tags", TagSet(self.tags))
-        object.__setattr__(self, "dtype", dtype(self.dtype))
+
+        # dtype is callable here, pylint is just confused
+        object.__setattr__(self, "dtype", dtype(self.dtype))  # pylint:disable=not-callable
 
         # Validate the allowed range of value count
         value_count = Domain(**self.properties.get("value_count", {}))
