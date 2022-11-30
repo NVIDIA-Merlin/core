@@ -14,7 +14,12 @@
 # limitations under the License.
 #
 
+
 class DTypeMapping:
+    """
+    A mapping between Merlin dtypes and the dtypes of one external framework
+    """
+
     def __init__(self, mapping, base_class=None):
         self.from_merlin_ = mapping
         self.to_merlin_ = {}
@@ -26,17 +31,69 @@ class DTypeMapping:
             for value in values:
                 self.to_merlin_[value] = key
 
-    def matches_external(self, external_dtype):
+    def matches_external(self, external_dtype) -> bool:
+        """
+        Check if this mapping can translate the supplied external dtype
+
+        Parameters
+        ----------
+        external_dtype : Any
+            An external framework dtype
+
+        Returns
+        -------
+        bool
+            True if the external dtype can be translated
+        """
         return self._matches(external_dtype, self.to_merlin_, self.base_class)
 
-    def matches_merlin(self, merlin_dtype):
+    def matches_merlin(self, merlin_dtype) -> bool:
+        """
+        Check if this mapping can translate the supplied Merlin dtype
+
+        Parameters
+        ----------
+        merlin_dtype : DType
+            A Merlin DType object
+
+        Returns
+        -------
+        bool
+            True if the Merlin dtype can be translated
+        """
         return self._matches(merlin_dtype, self.from_merlin_)
 
-    def to_merlin(self, external_dtype, shape=None):
+    def to_merlin(self, external_dtype):
+        """
+        Translate an external dtype to a Merlin dtype
+
+        Parameters
+        ----------
+        external_dtype : Any
+            An external framework dtype
+
+        Returns
+        -------
+        DType
+            A Merlin DType object
+        """
         merlin_dtype = self.to_merlin_[external_dtype]
         return merlin_dtype
 
     def from_merlin(self, merlin_dtype):
+        """
+        Translate a Merlin dtype to an external dtype
+
+        Parameters
+        ----------
+        merlin_dtype : DType
+            A Merlin DType object
+
+        Returns
+        -------
+        Any
+            An external framework dtype
+        """
         # Always translate to the first external dtype in the list
         return self.from_merlin_[merlin_dtype][0]
 

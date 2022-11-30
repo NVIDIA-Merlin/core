@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-import numpy as np
-
 from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
@@ -26,4 +23,3 @@ python_dtypes = {
     dtypes.string: str,
 }
 _dtype_registry.register("python", python_dtypes)
-

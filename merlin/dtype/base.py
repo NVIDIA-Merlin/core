@@ -22,6 +22,13 @@ from merlin.dtype.registry import _dtype_registry
 
 
 class ElementType(Enum):
+    """
+    Merlin DType base types
+
+    Since a Merlin DType may describe a list, these are the either the types of
+    scalars or the types of list elements.
+    """
+
     Bool = "bool"
     Int = "int"
     UInt = "uint"
@@ -32,6 +39,13 @@ class ElementType(Enum):
 
 
 class ElementUnit(Enum):
+    """
+    Dtype units, used only for datetime types
+
+    Since a Merlin DType may describe a list, these are the either the units of
+    scalars or the units of list elements.
+    """
+
     Year = "year"
     Month = "month"
     Day = "day"
@@ -45,29 +59,54 @@ class ElementUnit(Enum):
 
 @dataclass(eq=True, frozen=True)
 class DType:
+    """
+    Merlin dtypes are objects of this dataclass
+    """
+
     name: str
     elemtype: ElementType
     elemsize: Optional[int] = None
     elemunit: Optional[ElementUnit] = None
     signed: Optional[bool] = None
 
-    def to(self, mapping_name):
+    def to(self, mapping_name: str):
+        """
+        Convert this Merlin dtype to another framework's dtypes
+
+        Parameters
+        ----------
+        mapping_name : str
+            Name of the framework dtype mapping to apply
+
+        Returns
+        -------
+        Any
+            An external framework dtype object
+
+        Raises
+        ------
+        ValueError
+            If there is no registered mapping for the given framework name
+        ValueError
+            The registered mapping for the given framework name doesn't map
+            this Merlin dtype to a framework dtype
+        """
         try:
             mapping = _dtype_registry.mappings[mapping_name]
-        except KeyError:
+        except KeyError as exc:
             raise ValueError(
                 f"Merlin doesn't have a registered dtype mapping for '{mapping_name}'. "
                 "If you'd like to register a new dtype mapping, use `merlin.dtype.register()`. "
                 "If you're expecting this mapping to already exist, has the library or package "
                 "that defines the mapping been imported successfully?"
-            )
+            ) from exc
 
         try:
             return mapping.from_merlin(self)
-        except KeyError:
+        except KeyError as exc:
             raise ValueError(
-                f"The registered dtype mapping for {mapping_name} doesn't contain type {self.name}. "
-            )
+                f"The registered dtype mapping for {mapping_name} doesn't contain type {self.name}."
+            ) from exc
 
     @property
     def to_numpy(self):

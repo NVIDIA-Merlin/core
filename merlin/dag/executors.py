@@ -19,7 +19,6 @@ import dask
 import pandas as pd
 from dask.core import flatten
 
-from merlin import dtype
 from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype
 from merlin.core.utils import (
     ensure_optimize_dataframe_graph,
@@ -194,8 +193,9 @@ class LocalExecutor:
                     # (since schemas may not have all dtypes specified, especially
                     # in the tests)
                     if (
-                        output_col_schema.dtype and output_data_schema.dtype and 
-                        output_col_schema.dtype != output_data_schema.dtype
+                        output_col_schema.dtype
+                        and output_data_schema.dtype
+                        and output_col_schema.dtype != output_data_schema.dtype
                     ):
                         raise TypeError(
                             f"Dtype discrepancy detected for column {col_name}: "

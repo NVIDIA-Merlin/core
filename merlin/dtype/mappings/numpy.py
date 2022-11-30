@@ -20,7 +20,6 @@ from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
 
-
 def _numpy_dtype(raw_dtype):
     # The following cases account for types that would otherwise be considered
     # `numpy.dtype("O")`, so anything that's left afterward is probably a string.
@@ -46,11 +45,11 @@ def _numpy_dtype(raw_dtype):
     # translate all string types as `np.dtype("str")` -> `dtype.string`
     if is_string_dtype(raw_dtype):
         return np.dtype("str")
-    
+
     # If none of the above worked, this is a weird case we don't know how
     # to handle, so treat it as an object type. Returning a Merlin dtype
     # here bypasses any further translation, so this is the end of the line.
-    
+
     # Note that the return below replaces including object types in the following
     # Numpy dtype mapping. The effect is the same, but including it below would
     # mean that the object types handled above would get matched by the mappings

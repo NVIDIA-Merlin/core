@@ -19,6 +19,10 @@ from merlin.dtype.mapping import DTypeMapping
 
 
 class DTypeMappingRegistry:
+    """
+    A registry of mappings between Merlin dtypes and the dtypes of many external frameworks
+    """
+
     def __init__(self):
         self.mappings = {}
 
@@ -26,15 +30,43 @@ class DTypeMappingRegistry:
         return iter(self.mappings)
 
     def register(self, name: str, mapping: Union[Dict, DTypeMapping]):
+        """
+        Register a mapping between Merlin and external dtypes by name
+
+        Parameters
+        ----------
+        name : str
+            Name of the new mapping to register
+        mapping : Union[Dict, DTypeMapping]
+            Mapping between Merlin and external dtypes
+        """
         if not isinstance(mapping, DTypeMapping):
             mapping = DTypeMapping(mapping)
 
         self.mappings[name] = mapping
 
-    def to_merlin(self, external_dtype, shape=None):
+    def to_merlin(self, external_dtype):
+        """
+        Map an external dtype to a Merlin dtype
+
+        Parameters
+        ----------
+        external_dtype : Any
+            A dtype object from an external framework
+
+        Returns
+        -------
+        DType
+            A Merlin DType object
+
+        Raises
+        ------
+        TypeError
+            If the external dtype can't be mapped to a Merlin dtype
+        """
         for mapping in self._unique_mappings:
             if mapping.matches_external(external_dtype):
-                return mapping.to_merlin(external_dtype, shape)
+                return mapping.to_merlin(external_dtype)
 
         raise TypeError(
             f"Merlin doesn't provide a mapping from {external_dtype} ({type(external_dtype)}) "
@@ -43,6 +75,26 @@ class DTypeMappingRegistry:
         )
 
     def from_merlin(self, merlin_dtype, mapping_name):
+        """
+        Map a Merlin dtype to an external dtype
+
+        Parameters
+        ----------
+        merlin_dtype : DType
+            A Merlin dtype object
+        mapping_name : str
+            The name of the external framework mapping to apply
+
+        Returns
+        -------
+        Any
+            An external framework dtype object
+
+        Raises
+        ------
+        TypeError
+            If the Merlin dtype can't be mapped to an external dtype from the requested framework
+        """
         mapping = self.mappings[mapping_name]
         if mapping.matches_merlin(merlin_dtype):
             return mapping.to_merlin(merlin_dtype)
