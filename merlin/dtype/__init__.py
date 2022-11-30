@@ -21,9 +21,12 @@ from typing import Any, Optional, Tuple
 
 import numpy as np
 
+from merlin.dtype import mappings
 from merlin.dtype.dtypes import *
 from merlin.dtype.dtypes import DType
-from merlin.dtype.mappings import _dtype_registry
+
+from merlin.dtype.registry import _dtype_registry
+
 
 # Convenience alias for this method
 register = _dtype_registry.register
