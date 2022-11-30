@@ -72,5 +72,3 @@ class DTypeModule(ModuleType):
 # We promise that the class defined above is actually a module
 dtype = sys.modules[__name__]
 dtype.__class__ = DTypeModule
-
-
