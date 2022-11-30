@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Optional
 
 from merlin.dtype.registry import _dtype_registry
 
