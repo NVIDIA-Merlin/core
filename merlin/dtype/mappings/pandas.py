@@ -16,7 +16,6 @@
 from merlin.dtype import dtypes
 from merlin.dtype.registry import DTypeMapping, _dtype_registry
 
-
 try:
     import pandas as pd
 

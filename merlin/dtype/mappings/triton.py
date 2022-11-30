@@ -16,7 +16,6 @@
 from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
-
 # Only define a Triton dtype mapping if `tritonclient` is available
 try:
     import tritonclient.grpc.model_config_pb2 as model_config

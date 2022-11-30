@@ -15,9 +15,4 @@
 #
 
 # flake8: noqa
-from . import numpy
-from . import pandas
-from . import python
-from . import tf
-from . import torch
-from . import triton
+from merlin.dtype.mappings import numpy, pandas, python, tf, torch, triton

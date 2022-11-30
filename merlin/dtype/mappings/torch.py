@@ -16,7 +16,6 @@
 from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
-
 try:
     from torch import bool as bool_
     from torch import float16, float32, float64, int8, int16, int32, int64, uint8
