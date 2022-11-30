@@ -38,6 +38,13 @@ cudf = pytest.importorskip("cudf")
 dask_cudf = pytest.importorskip("dask_cudf")
 
 
+def _check_partition_lens(ds):
+    # Simple utility to check that the Parquet metadata
+    # is correctly encoding the partition lengths
+    _lens = [len(part) for part in ds.to_ddf().partitions]
+    assert ds.engine._partition_lens == _lens
+
+
 def test_validate_dataset_bad_schema(tmpdir):
     if Version(dask.__version__) <= Version("2.30.0"):
         # Older versions of Dask will not handle schema mismatch
@@ -156,6 +163,9 @@ def test_dask_dataset_itr(tmpdir, datasets, engine, gpu_memory_frac):
     for chunk in my_iter:
         size += chunk.shape[0]
         assert chunk["id"].dtype == np.int32
+
+    if engine == "parquet":
+        _check_partition_lens(ds)
 
     assert size == df1.shape[0]
     assert len(my_iter) == size
@@ -330,7 +340,7 @@ def test_dask_dataframe_methods(tmpdir):
 
 @pytest.mark.parametrize("inp_format", ["dask", "dask_cudf", "cudf", "pandas"])
 def test_ddf_dataset_itr(tmpdir, datasets, inp_format):
-    paths = glob.glob(str(datasets["parquet"]) + "/*." + "parquet".split("-")[0])
+    paths = glob.glob(str(datasets["parquet"]) + "/*." + "parquet".split("-", maxsplit=1)[0])
     ddf1 = dask_cudf.read_parquet(paths)[mycols_pq]
     df1 = ddf1.compute()
     if inp_format == "dask":
@@ -678,7 +688,7 @@ def test_dataset_shuffle_on_keys(tmpdir, cpu, partition_on, keys, npartitions):
 
     # A successful shuffle will return the same unique-value
     # count for both the full dask algorithm and a partition-wise sum
-    n1 = sum([len(p[keys].drop_duplicates()) for p in ddf2.partitions])
+    n1 = sum(len(p[keys].drop_duplicates()) for p in ddf2.partitions)
     n2 = len(ddf2[keys].drop_duplicates())
     assert n1 == n2
 
@@ -768,6 +778,7 @@ def test_parquet_aggregate_files(tmpdir, cpu):
         path, cpu=cpu, engine="parquet", aggregate_files="timestamp", part_size="1GB"
     )
     assert ds.to_ddf().npartitions == len(ddf.timestamp.unique())
+    _check_partition_lens(ds)
 
     # Combining `aggregate_files` and `filters` should work
     ds = merlin.io.Dataset(
@@ -780,3 +791,4 @@ def test_parquet_aggregate_files(tmpdir, cpu):
     )
     assert ds.to_ddf().npartitions == 1
     assert len(ds.to_ddf().timestamp.unique()) == 1
+    _check_partition_lens(ds)
