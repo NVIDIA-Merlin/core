@@ -15,24 +15,48 @@
 #
 import numpy as np
 
+from merlin.core.dispatch import is_string_dtype
 from merlin.dtype import dtypes
 from merlin.dtype.registry import _dtype_registry
 
 
 
 def _numpy_dtype(raw_dtype):
+    # The following cases account for types that would otherwise be considered
+    # `numpy.dtype("O")`, so anything that's left afterward is probably a string.
+
     # Many Pandas dtypes have equivalent numpy dtypes
     if hasattr(raw_dtype, "numpy_dtype"):
         return np.dtype(raw_dtype.numpy_dtype)
     # cuDF categorical columns have varying element types
     elif hasattr(raw_dtype, "_categories"):
-        return raw_dtype._categories.dtype
-    # Rely on Numpy to do conversions from strings to dtypes (for now)
-    elif isinstance(raw_dtype, str):
-        return np.dtype(raw_dtype)
+        category_type = raw_dtype._categories.dtype
+        if is_string_dtype(category_type):
+            return np.dtype("str")
+        else:
+            return category_type
     # Tensorflow dtypes can convert themselves (in case we missed a mapping)
     elif hasattr(raw_dtype, "as_numpy_dtype"):
         return raw_dtype.as_numpy_dtype
+    # Rely on Numpy to do conversions from string dtype names to dtypes (for now)
+    elif isinstance(raw_dtype, str):
+        return np.dtype(raw_dtype)
+
+    # Our accounting for string types is simpler than Numpy's, so
+    # translate all string types as `np.dtype("str")` -> `dtype.string`
+    if is_string_dtype(raw_dtype):
+        return np.dtype("str")
+    
+    # If none of the above worked, this is a weird case we don't know how
+    # to handle, so treat it as an object type. Returning a Merlin dtype
+    # here bypasses any further translation, so this is the end of the line.
+    
+    # Note that the return below replaces including object types in the following
+    # dtype mapping. The effect is the same, but including it below would
+    # mean that the object types handled above would get matched by the
+    # mappings in the DTypeRegistry directly and we'd never end up in this
+    # fallback function to handle them properly.
+    return dtypes.object_
 
 
 numpy_dtypes = {
@@ -63,7 +87,6 @@ numpy_dtypes = {
     dtypes.datetime64ns: [np.dtype("datetime64[ns]")],
     # Miscellaneous
     dtypes.string: [np.dtype("str"), np.str],
-    dtypes.object_: [np.dtype("O")],
     dtypes.boolean: [np.dtype("bool"), np.bool],
 }
 _dtype_registry.register("numpy", numpy_dtypes)
