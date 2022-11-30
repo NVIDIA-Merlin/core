@@ -38,7 +38,7 @@ try:
             # Miscellaneous
             dtypes.boolean: [tf_dtypes.bool],
         },
-        tf_dtypes.DType,
+        base_class=tf_dtypes.DType,
     )
     _dtype_registry.register("tf", tf_dtypes)
     _dtype_registry.register("tensorflow", tf_dtypes)
