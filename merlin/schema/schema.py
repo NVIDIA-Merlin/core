@@ -86,7 +86,7 @@ class ColumnSchema:
             )
 
         if self.is_list is None:
-            object.__setattr__(self, "is_list", value_count.max and value_count.max > 0)
+            object.__setattr__(self, "is_list", bool(value_count.max and value_count.max > 0))
 
         if self.is_ragged is None:
             if value_count.is_bounded and value_count.max > value_count.min:
@@ -94,7 +94,7 @@ class ColumnSchema:
             elif value_count.is_bounded and value_count.max == value_count.min:
                 object.__setattr__(self, "is_ragged", False)
             else:
-                object.__setattr__(self, "is_ragged", self.is_list)
+                object.__setattr__(self, "is_ragged", bool(self.is_list))
 
         if self.is_ragged and not self.is_list:
             raise ValueError(
