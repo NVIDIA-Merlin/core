@@ -65,29 +65,3 @@ def test_unknown_types_raise_error():
 
     with pytest.raises(TypeError):
         dtype(UnknownType)
-
-
-###############################
-#           Shapes            #
-###############################
-
-
-def test_dtypes_can_hold_shapes():
-    shape = (10, 10)
-    merlin_type = dtype(int, shape)
-    assert merlin_type.shape == shape
-
-
-@pytest.mark.parametrize("shape, is_list", [((10, 10), True), ((10,), False), (None, False)])
-def test_dtypes_know_if_theyre_lists(shape, is_list):
-    merlin_type = dtype(int, shape)
-    assert merlin_type.is_list == is_list
-
-
-@pytest.mark.parametrize(
-    "shape, is_ragged",
-    [((10, None), True), ((None, 10), False), ((10, 10), False), ((10,), False), (None, False)],
-)
-def test_dtypes_know_if_theyre_ragged(shape, is_ragged):
-    merlin_type = dtype(int, shape)
-    assert merlin_type.is_ragged == is_ragged
