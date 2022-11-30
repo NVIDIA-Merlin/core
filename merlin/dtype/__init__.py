@@ -20,17 +20,15 @@ from types import ModuleType
 from typing import Any, Optional, Tuple
 
 from merlin.dtype import mappings
-from merlin.dtype.mappings.numpy import _numpy_dtype
 from merlin.dtype.dtypes import *
 from merlin.dtype.dtypes import DType
-
+from merlin.dtype.mappings.numpy import _numpy_dtype
 from merlin.dtype.registry import _dtype_registry
 
-
-# Convenience alias for this method
+# Convenience alias for registering dtypes
 register = _dtype_registry.register
 
-
+# Helper for the module below
 def _to_merlin(external_dtype):
     # If the supplied dtype is already a Merlin dtype, then there's
     # nothing for us to do and we can exit early
@@ -40,12 +38,15 @@ def _to_merlin(external_dtype):
     return _dtype_registry.to_merlin(external_dtype)
 
 
-# This class implements the "call" method for the *module*, which
-# allows us to use both `dtype(value)` and `dtype.int32` syntaxes,
-# even though we can't directly add a callable to the `merlin`
-# namespace (since it's implicit and doesn't allow an `__init__.py`
-# file)
 class DTypeModule(ModuleType):
+    """
+    This class implements the "call" method for the *module*, which
+    allows us to use both `dtype(value)` and `dtype.int32` syntaxes,
+    even though we can't directly add a callable to the `merlin`
+    namespace (since it's implicit and doesn't allow an `__init__.py`
+    file)
+    """
+
     def __call__(self, external_dtype: Any, shape: Optional[Tuple] = None):
         # We can't raise an error when the supplied dtype is None, because
         # that will break when we load the module, so instead return None
@@ -66,9 +67,14 @@ class DTypeModule(ModuleType):
             except TypeError:
                 ...
 
+            # If we fail to find a match even after we try converting to
+            # numpy, re-raise the original exception since it has more
+            # information about the original external dtype that's causing
+            # the problem. (We want to highlight that one, not whatever
+            # numpy dtype it was converted to.)
             raise base_exc
 
 
-# We promise that the class defined above is actually a module
+# Here we promise that the class defined above is actually a module
 dtype = sys.modules[__name__]
 dtype.__class__ = DTypeModule
