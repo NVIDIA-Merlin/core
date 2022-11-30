@@ -69,7 +69,6 @@ try:
             dtypes.string: [pd.StringDtype(), pd.StringDtype],
             dtypes.boolean: [pd.BooleanDtype(), pd.BooleanDtype],
         },
-        preprocessing_lambda=lambda dtype: dtype.numpy_dtype,
     )
     _dtype_registry.register("pandas", pandas_dtypes)
 except ImportError:
