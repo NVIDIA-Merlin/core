@@ -20,7 +20,7 @@ from typing import Dict, List, Optional, Text, Union
 
 import pandas as pd
 
-from merlin import dtype
+import merlin.dtypes as mn
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -75,9 +75,7 @@ class ColumnSchema:
         """
 
         object.__setattr__(self, "tags", TagSet(self.tags))
-
-        # dtype is callable here, pylint is just confused
-        object.__setattr__(self, "dtype", dtype(self.dtype))  # pylint:disable=not-callable
+        object.__setattr__(self, "dtype", mn.dtype(self.dtype))
 
         # Validate the allowed range of value count
         value_count = Domain(**self.properties.get("value_count", {}))

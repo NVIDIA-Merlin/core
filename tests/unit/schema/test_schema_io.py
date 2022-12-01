@@ -18,7 +18,7 @@ import json
 import numpy
 import pytest
 
-from merlin import dtype
+import merlin.dtypes as mn
 from merlin.schema import ColumnSchema, Schema, Tags
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
@@ -33,7 +33,7 @@ def test_json_serialization_with_embedded_dicts():
         [
             ColumnSchema(
                 "userid",
-                dtype=dtype.int32,
+                dtype=mn.int32,
                 tags=[Tags.USER_ID, Tags.CATEGORICAL],
                 properties={
                     "embedding_sizes": {"cardinality": 102987, "dimension": 2.0},
@@ -56,7 +56,7 @@ def test_merlin_to_proto_to_json_to_merlin():
         [
             ColumnSchema(
                 "userid",
-                dtype=dtype.int32,
+                dtype=mn.int32,
                 tags=[Tags.USER_ID, Tags.CATEGORICAL],
                 properties={
                     "num_buckets": None,
@@ -91,7 +91,7 @@ def test_value_count(value_count, expected_is_list, expected_is_ragged):
         [
             ColumnSchema(
                 "example",
-                dtype=dtype.int32,
+                dtype=mn.int32,
                 is_list=True,
                 properties={
                     "value_count": value_count,

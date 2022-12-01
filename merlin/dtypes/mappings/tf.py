@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dtype import dtypes
-from merlin.dtype.registry import DTypeMapping, _dtype_registry
+import merlin.dtypes.aliases as mn
+from merlin.dtypes.registry import DTypeMapping, _dtype_registry
 
 try:
     from tensorflow import dtypes as tf_dtypes
@@ -22,21 +22,21 @@ try:
     tf_dtypes = DTypeMapping(
         {
             # Unsigned Integer
-            dtypes.uint8: [tf_dtypes.uint8],
-            dtypes.uint16: [tf_dtypes.uint16],
-            dtypes.uint32: [tf_dtypes.uint32],
-            dtypes.uint64: [tf_dtypes.uint64],
+            mn.uint8: [tf_dtypes.uint8],
+            mn.uint16: [tf_dtypes.uint16],
+            mn.uint32: [tf_dtypes.uint32],
+            mn.uint64: [tf_dtypes.uint64],
             # Signed integer
-            dtypes.int8: [tf_dtypes.int8],
-            dtypes.int16: [tf_dtypes.int16],
-            dtypes.int32: [tf_dtypes.int32],
-            dtypes.int64: [tf_dtypes.int64],
+            mn.int8: [tf_dtypes.int8],
+            mn.int16: [tf_dtypes.int16],
+            mn.int32: [tf_dtypes.int32],
+            mn.int64: [tf_dtypes.int64],
             # Floating Point
-            dtypes.float16: [tf_dtypes.float16],
-            dtypes.float32: [tf_dtypes.float32],
-            dtypes.float64: [tf_dtypes.float64],
+            mn.float16: [tf_dtypes.float16],
+            mn.float32: [tf_dtypes.float32],
+            mn.float64: [tf_dtypes.float64],
             # Miscellaneous
-            dtypes.boolean: [tf_dtypes.bool],
+            mn.boolean: [tf_dtypes.bool],
         },
         base_class=tf_dtypes.DType,
     )

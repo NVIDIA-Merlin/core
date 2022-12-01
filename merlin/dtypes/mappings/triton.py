@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dtype import dtypes
-from merlin.dtype.registry import _dtype_registry
+import merlin.dtypes.aliases as mn
+from merlin.dtypes.registry import _dtype_registry
 
 # Only define a Triton dtype mapping if `tritonclient` is available
 try:
@@ -27,24 +27,24 @@ try:
     # Tensorflow.)
     triton_dtypes = {
         # Unsigned Integer
-        dtypes.uint8: [model_config.TYPE_UINT8],
-        dtypes.uint16: [model_config.TYPE_UINT16],
-        dtypes.uint32: [model_config.TYPE_UINT32],
-        dtypes.uint64: [model_config.TYPE_UINT64],
+        mn.uint8: [model_config.TYPE_UINT8],
+        mn.uint16: [model_config.TYPE_UINT16],
+        mn.uint32: [model_config.TYPE_UINT32],
+        mn.uint64: [model_config.TYPE_UINT64],
         # Signed integer
-        dtypes.int8: [model_config.TYPE_INT8],
-        dtypes.int16: [model_config.TYPE_INT16],
-        dtypes.int32: [model_config.TYPE_INT32],
-        dtypes.int64: [model_config.TYPE_INT64],
+        mn.int8: [model_config.TYPE_INT8],
+        mn.int16: [model_config.TYPE_INT16],
+        mn.int32: [model_config.TYPE_INT32],
+        mn.int64: [model_config.TYPE_INT64],
         # Floating Point
-        dtypes.float16: [model_config.TYPE_FP16],
-        dtypes.float32: [
+        mn.float16: [model_config.TYPE_FP16],
+        mn.float32: [
             model_config.TYPE_FP32,
         ],
-        dtypes.float64: [model_config.TYPE_FP64],
+        mn.float64: [model_config.TYPE_FP64],
         # Miscellaneous
-        dtypes.string: [model_config.TYPE_STRING],
-        dtypes.boolean: [model_config.TYPE_BOOL],
+        mn.string: [model_config.TYPE_STRING],
+        mn.boolean: [model_config.TYPE_BOOL],
     }
     _dtype_registry.register("triton", triton_dtypes)
 except ImportError as exc:

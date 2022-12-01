@@ -16,30 +16,30 @@
 import numpy
 import pytest
 
-from merlin import dtype
+import merlin.dtypes as mn
 
 
 def test_returns_none_dtype_for_none_input():
-    result = dtype(None)
+    result = mn.dtype(None)
     assert result is None
 
 
-@pytest.mark.parametrize("python_type, merlin_type", [(int, dtype.int64)])
+@pytest.mark.parametrize("python_type, merlin_type", [(int, mn.int64)])
 def test_python_types_convert_correctly(python_type, merlin_type):
-    assert dtype(python_type) == merlin_type
+    assert mn.dtype(python_type) == merlin_type
 
 
-@pytest.mark.parametrize("numpy_type, merlin_type", [(numpy.int64, dtype.int64)])
+@pytest.mark.parametrize("numpy_type, merlin_type", [(numpy.int64, mn.int64)])
 def test_numpy_types_convert_correctly(numpy_type, merlin_type):
-    assert dtype(numpy_type) == merlin_type
+    assert mn.dtype(numpy_type) == merlin_type
 
 
 def test_type_mappings_can_be_registered():
     class TestType:
         pass
 
-    test_type = dtype.DType("test", dtype.ElementType.Int, 4096, signed=True)
+    test_type = mn.DType("test", mn.ElementType.Int, 4096, signed=True)
 
-    dtype.register("test", {test_type: TestType})
-    merlin_dtype = dtype(TestType)
+    mn.register("test", {test_type: TestType})
+    merlin_dtype = mn.dtype(TestType)
     assert merlin_dtype == test_type

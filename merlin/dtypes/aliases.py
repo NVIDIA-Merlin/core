@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from merlin.dtype.base import DType, ElementType, ElementUnit
+from merlin.dtypes.base import DType, ElementType, ElementUnit
 
 # Unsigned Integer
 uint8 = DType("uint8", ElementType.UInt, 8)

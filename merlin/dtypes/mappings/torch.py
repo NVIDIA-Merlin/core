@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dtype import dtypes
-from merlin.dtype.registry import _dtype_registry
+import merlin.dtypes.aliases as mn
+from merlin.dtypes.registry import _dtype_registry
 
 try:
     from torch import bool as bool_
@@ -22,18 +22,18 @@ try:
 
     torch_dtypes = {
         # Unsigned Integer
-        dtypes.uint8: [uint8],
+        mn.uint8: [uint8],
         # Signed integer
-        dtypes.int8: [int8],
-        dtypes.int16: [int16],
-        dtypes.int32: [int32],
-        dtypes.int64: [int64],
+        mn.int8: [int8],
+        mn.int16: [int16],
+        mn.int32: [int32],
+        mn.int64: [int64],
         # Floating Point
-        dtypes.float16: [float16],
-        dtypes.float32: [float32],
-        dtypes.float64: [float64],
+        mn.float16: [float16],
+        mn.float32: [float32],
+        mn.float64: [float64],
         # Miscellaneous
-        dtypes.boolean: [bool_],
+        mn.boolean: [bool_],
     }
     _dtype_registry.register("torch", torch_dtypes)
     _dtype_registry.register("pytorch", torch_dtypes)

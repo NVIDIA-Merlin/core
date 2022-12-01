@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dtype import dtypes
-from merlin.dtype.registry import DTypeMapping, _dtype_registry
+import merlin.dtypes.aliases as mn
+from merlin.dtypes.registry import DTypeMapping, _dtype_registry
 
 try:
     import pandas as pd
 
     pandas_dtypes = DTypeMapping(
         {
-            dtypes.string: [pd.StringDtype(), pd.StringDtype],
-            dtypes.boolean: [pd.BooleanDtype(), pd.BooleanDtype],
+            mn.string: [pd.StringDtype(), pd.StringDtype],
+            mn.boolean: [pd.BooleanDtype(), pd.BooleanDtype],
         },
     )
     _dtype_registry.register("pandas", pandas_dtypes)

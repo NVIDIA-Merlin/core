@@ -15,7 +15,7 @@
 #
 from typing import Dict, Union
 
-from merlin.dtype.mapping import DTypeMapping
+from merlin.dtypes.mapping import DTypeMapping
 
 
 class DTypeMappingRegistry:

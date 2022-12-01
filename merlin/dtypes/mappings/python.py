@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dtype import dtypes
-from merlin.dtype.registry import _dtype_registry
+import merlin.dtypes.aliases as mn
+from merlin.dtypes.registry import _dtype_registry
 
 python_dtypes = {
-    dtypes.boolean: bool,
-    dtypes.int64: int,
-    dtypes.float64: float,
-    dtypes.string: str,
+    mn.boolean: bool,
+    mn.int64: int,
+    mn.float64: float,
+    mn.string: str,
 }
 _dtype_registry.register("python", python_dtypes)
