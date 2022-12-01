@@ -184,6 +184,34 @@ if cudf is not None:
                     df._data[col_name] = col.astype(typ)
 
 
+def _read_partition_lens(part, fs):
+    # Manually read row-count statistics from the Parquet
+    # metadata for a single `read_parquet` `part`. Return
+    # the result in the same format that `read_metadata`
+    # returns statistics
+
+    if not isinstance(part, list):
+        part = [part]
+
+    num_rows = 0
+    for p in part:
+        piece = p["piece"]
+        path = piece[0]
+        row_groups = piece[1]
+        if row_groups == [None]:
+            row_groups = None
+        with fs.open(path, default_cache="none") as f:
+            md = pq.ParquetFile(f).metadata
+        if row_groups is None:
+            row_groups = list(range(md.num_row_groups))
+        for rg in row_groups:
+            row_group = md.row_group(rg)
+            num_rows += row_group.num_rows
+
+    # Ignore column-statistics (for now)
+    return {"num-rows": num_rows, "columns": []}
+
+
 def _override_read_metadata(
     parent_read_metadata,
     fs,
@@ -205,29 +233,25 @@ def _override_read_metadata(
     # For now, disallow the user from setting `chunksize`
     if chunksize:
         raise ValueError(
-            "NVTabular does not yet support the explicit use " "of Dask's `chunksize` argument."
+            "NVTabular does not yet support the explicit use of Dask's `chunksize` argument."
         )
 
     # Extract metadata_collector from the dataset "container"
     dataset = dataset or {}
     metadata_collector = dataset.pop("metadata_collector", None)
 
-    # Gather statistics by default.
-    # This enables optimized length calculations
-    if gather_statistics is None:
-        gather_statistics = True
+    # gather_statistics is deprecated in `dask.dataframe`
+    if gather_statistics:
+        warnings.warn(
+            "`gather_statistics` is now deprecated and will be ignored.",
+            FutureWarning,
+        )
 
     # Use a local_kwarg dictionary to make it easier to exclude
     # `aggregate_files` for older Dask versions
     local_kwargs = {
         "index": index,
         "filters": filters,
-        # Use chunksize=1 to "ensure" statistics are gathered
-        # if `gather_statistics=True`.  Note that Dask will bail
-        # from statistics gathering if it does not expect statistics
-        # to be "used" after `read_metadata` returns.
-        "chunksize": 1 if gather_statistics else None,
-        "gather_statistics": gather_statistics,
         "split_row_groups": split_row_groups,
     }
     if aggregate_row_groups is not None:
@@ -247,7 +271,7 @@ def _override_read_metadata(
     statistics = read_metadata_result[1].copy()
 
     # Process the statistics.
-    # Note that these steps are usaually performed after
+    # Note that these steps are usually performed after
     # `engine.read_metadata` returns (in Dask), but we are doing
     # it ourselves in NVTabular (to capture the expected output
     # partitioning plan)
@@ -400,6 +424,10 @@ class ParquetDatasetEngine(DatasetEngine):
         # in parts and stats
         parts = self._pp_metadata["parts"]
         stats = self._pp_metadata["stats"]
+        if not stats:
+            # Update stats if `dd.read_parquet` didn't populate it
+            stats = [_read_partition_lens(part, self.fs) for part in parts]
+            self._pp_metadata["stats"] = stats
         _pp_map = {}
         _pp_nrows = []
         distinct_files = True
