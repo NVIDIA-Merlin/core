@@ -208,11 +208,8 @@ class Dataset:
         This overrides the derived schema behavior.
     **kwargs :
         Key-word arguments to pass through to Dask.dataframe IO function.
-        For the Parquet engine(s), notable arguments include `filters`,
-        `aggregate_files`, and `gather_statistics`. Note that users who
-        do not need to know the number of rows in their dataset (and do
-        not plan to preserve a file-partition mapping) may wish to use
-        `gather_statistics=False` for better client-side performance.
+        For the Parquet engine(s), notable arguments include `filters`
+        and `aggregate_files` (the latter is experimental).
     """
 
     def __init__(
