@@ -289,11 +289,8 @@
 <span class="sd">        This overrides the derived schema behavior.</span>
 <span class="sd">    **kwargs :</span>
 <span class="sd">        Key-word arguments to pass through to Dask.dataframe IO function.</span>
-<span class="sd">        For the Parquet engine(s), notable arguments include `filters`,</span>
-<span class="sd">        `aggregate_files`, and `gather_statistics`. Note that users who</span>
-<span class="sd">        do not need to know the number of rows in their dataset (and do</span>
-<span class="sd">        not plan to preserve a file-partition mapping) may wish to use</span>
-<span class="sd">        `gather_statistics=False` for better client-side performance.</span>
+<span class="sd">        For the Parquet engine(s), notable arguments include `filters`</span>
+<span class="sd">        and `aggregate_files` (the latter is experimental).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>

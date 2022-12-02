@@ -224,11 +224,8 @@ used to preserve file-partition mapping information.</p></li>
 <li><p><strong>schema</strong> (<a class="reference internal" href="merlin.schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – Optional argument, to support custom user defined Schemas.
 This overrides the derived schema behavior.</p></li>
 <li><p><strong>**kwargs</strong> – Key-word arguments to pass through to Dask.dataframe IO function.
-For the Parquet engine(s), notable arguments include <cite>filters</cite>,
-<cite>aggregate_files</cite>, and <cite>gather_statistics</cite>. Note that users who
-do not need to know the number of rows in their dataset (and do
-not plan to preserve a file-partition mapping) may wish to use
-<cite>gather_statistics=False</cite> for better client-side performance.</p></li>
+For the Parquet engine(s), notable arguments include <cite>filters</cite>
+and <cite>aggregate_files</cite> (the latter is experimental).</p></li>
 </ul>
 </dd>
 </dl>
