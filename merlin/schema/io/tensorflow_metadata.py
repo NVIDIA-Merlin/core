@@ -17,8 +17,8 @@ import pathlib
 from typing import Union
 
 import fsspec
-import numpy
 
+import merlin.dtypes as md
 from merlin.schema.io import proto_utils, schema_bp
 from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
@@ -362,17 +362,17 @@ def _merlin_properties(feature):
 
 
 int_dtypes_map = {
-    8: numpy.int8,
-    16: numpy.int16,
-    32: numpy.int32,
-    64: numpy.int64,
+    8: md.int8,
+    16: md.int16,
+    32: md.int32,
+    64: md.int64,
 }
 
 
 float_dtypes_map = {
-    16: numpy.float16,
-    32: numpy.float32,
-    64: numpy.float64,
+    16: md.float16,
+    32: md.float32,
+    64: md.float64,
 }
 
 
@@ -383,12 +383,14 @@ def _merlin_dtype(feature, properties):
         if item_size and item_size in int_dtypes_map:
             dtype = int_dtypes_map[item_size]
         else:
-            dtype = numpy.int
+            dtype = md.int64
     elif feature.type == FeatureType.FLOAT:
         if item_size and item_size in float_dtypes_map:
             dtype = float_dtypes_map[item_size]
         else:
-            dtype = numpy.float
+            dtype = md.float64
+    elif feature.type == FeatureType.BYTES:
+        dtype = md.string
     return dtype
 
 

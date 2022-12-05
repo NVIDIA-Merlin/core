@@ -45,35 +45,6 @@ class DTypeMappingRegistry:
 
         self.mappings[name] = mapping
 
-    def to_merlin(self, external_dtype):
-        """
-        Map an external dtype to a Merlin dtype
-
-        Parameters
-        ----------
-        external_dtype : Any
-            A dtype object from an external framework
-
-        Returns
-        -------
-        DType
-            A Merlin DType object
-
-        Raises
-        ------
-        TypeError
-            If the external dtype can't be mapped to a Merlin dtype
-        """
-        for mapping in self._unique_mappings:
-            if mapping.matches_external(external_dtype):
-                return mapping.to_merlin(external_dtype)
-
-        raise TypeError(
-            f"Merlin doesn't provide a mapping from {external_dtype} ({type(external_dtype)}) "
-            "to a Merlin dtype. If you'd like to provide one, you can use "
-            "`merlin.dtype.register()`."
-        )
-
     def from_merlin(self, merlin_dtype, mapping_name):
         """
         Map a Merlin dtype to an external dtype
@@ -104,18 +75,68 @@ class DTypeMappingRegistry:
             "If you'd like to provide one, you can use `merlin.dtype.register()`."
         )
 
-    @property
-    def _unique_mappings(self):
+    def to_merlin(self, external_dtype):
         """
-        This is a workaround that allows us to register the same dtype mapping
-        under multiple names (e.g. "tf" and "tensorflow".)
+        Map an external dtype to a Merlin dtype
+
+        Parameters
+        ----------
+        external_dtype : Any
+            A dtype object from an external framework
 
         Returns
         -------
-        Set[DTypeMapping]
-            The set of unique dtype mappings that have been registered
+        DType
+            A Merlin DType object
+
+        Raises
+        ------
+        TypeError
+            If the external dtype can't be mapped to a Merlin dtype
         """
-        return set(self.mappings.values())
+        for framework, mapping in self.mappings.items():
+            if mapping.matches_external(external_dtype):
+                return mapping.to_merlin(external_dtype)
+
+        raise TypeError(
+            f"Merlin doesn't provide a mapping from {external_dtype} ({type(external_dtype)}) "
+            "to a Merlin dtype. If you'd like to provide one, you can use "
+            "`merlin.dtype.register()`."
+        )
+
+    def to_merlin_via_numpy(self, external_dtype):
+        """
+        Map an external dtype to a Merlin dtype by converting the external type to Numpy first
+
+        This is sometimes useful for external framework dtypes that don't have a clear
+        one-to-one mapping with a Merlin dtype, like cuDF's CategoricalDtype. We can often do
+        some additional preprocessing on the external framework's dtype to determine the
+        Numpy dtype of the elements, and then use that as an intermediary to find the
+        corresponding Merlin dtype.
+
+        Parameters
+        ----------
+        external_dtype : Any
+            A dtype object from an external framework
+
+        Returns
+        -------
+        DType
+            A Merlin DType object
+
+        Raises
+        ------
+        TypeError
+            If the external dtype can't be mapped to a Merlin dtype
+        """
+        numpy_dtype = None
+
+        for mapping in self.mappings.values():
+            if mapping.translator and mapping.translator.matches(external_dtype):
+                numpy_dtype = mapping.translator.to_numpy(external_dtype)
+                break
+
+        return self.to_merlin(numpy_dtype)
 
 
 _dtype_registry = DTypeMappingRegistry()

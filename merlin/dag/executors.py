@@ -19,6 +19,7 @@ import dask
 import pandas as pd
 from dask.core import flatten
 
+import merlin.dtypes as md
 from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype
 from merlin.core.utils import (
     ensure_optimize_dataframe_graph,
@@ -195,6 +196,7 @@ class LocalExecutor:
                     if (
                         output_col_schema.dtype
                         and output_data_schema.dtype
+                        and output_col_schema.dtype != md.string
                         and output_col_schema.dtype != output_data_schema.dtype
                     ):
                         raise TypeError(
@@ -281,7 +283,7 @@ class DaskExecutor:
         if isinstance(output_dtypes, dict):
             for col_name, col_dtype in output_dtypes.items():
                 if col_dtype:
-                    output_dtypes[col_name] = col_dtype.to("numpy")
+                    output_dtypes[col_name] = md.dtype(col_dtype).to_numpy
 
         if isinstance(output_dtypes, dict) and isinstance(ddf._meta, pd.DataFrame):
             dtypes = output_dtypes

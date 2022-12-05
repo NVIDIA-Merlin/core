@@ -36,6 +36,7 @@ class ElementType(Enum):
     String = "string"
     DateTime = "datetime"
     Object = "object"
+    Unknown = "unknown"
 
 
 class ElementUnit(Enum):

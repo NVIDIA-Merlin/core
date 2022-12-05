@@ -49,3 +49,4 @@ datetime64ns = DType("datetime64[ns]", ElementType.DateTime, 64, ElementUnit.Nan
 string = DType("str", ElementType.String)
 boolean = DType("bool", ElementType.Bool)
 object_ = DType("object", ElementType.Object)
+unknown = DType("unknown", ElementType.Unknown)

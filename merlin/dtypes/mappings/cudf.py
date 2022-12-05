@@ -15,24 +15,30 @@
 #
 import numpy as np
 
-import merlin.dtypes.aliases as mn
+from merlin.core.dispatch import is_string_dtype
 from merlin.dtypes.mapping import DTypeMapping, NumpyPreprocessor
 from merlin.dtypes.registry import _dtype_registry
 
-try:
-    import pandas as pd
 
-    pandas_dtypes = DTypeMapping(
-        {
-            mn.string: [pd.StringDtype(), pd.StringDtype],
-            mn.boolean: [pd.BooleanDtype(), pd.BooleanDtype],
-        },
-        translator=NumpyPreprocessor(
-            "pandas", lambda raw: np.dtype(raw.numpy_dtype), attrs=["numpy_dtype"]
-        ),
+def cudf_translator(raw_dtype) -> np.dtype:
+    category_type = raw_dtype._categories.dtype
+    if is_string_dtype(category_type):
+        return np.dtype("str")
+    else:
+        return category_type
+
+
+try:
+    # We only want to register this mapping if cudf is available, even though
+    # the mapping itself doesn't use cudf (yet?)
+
+    import cudf  # pylint:disable=unused-import # noqa: F401
+
+    cudf_dtypes = DTypeMapping(
+        translator=NumpyPreprocessor("cudf", cudf_translator, attrs=["_categories"]),
     )
-    _dtype_registry.register("pandas", pandas_dtypes)
+    _dtype_registry.register("cudf", cudf_dtypes)
 except ImportError as exc:
     from warnings import warn
 
-    warn(f"Pandas dtype mappings did not load successfully due to an error: {exc.msg}")
+    warn(f"cuDF dtype mappings did not load successfully due to an error: {exc.msg}")

@@ -13,6 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import List, Optional
+
+import numpy as np
+
+
+class NumpyPreprocessor:
+    def __init__(
+        self,
+        framework,
+        translation_fn,
+        attrs: Optional[List[str]] = None,
+        classes: Optional[List[type]] = None,
+    ):
+        self.framework = framework
+        self.translation_fn = translation_fn
+        self.attrs = attrs or []
+        self.classes = classes or []
+
+    def matches(self, raw_dtype) -> bool:
+        for attr in self.attrs:
+            if hasattr(raw_dtype, attr):
+                return True
+        for cls_ in self.classes:
+            if isinstance(raw_dtype, cls_):
+                return True
+        return False
+
+    def to_numpy(self, raw_dtype) -> np.dtype:
+        return self.translation_fn(raw_dtype)
 
 
 class DTypeMapping:
@@ -20,12 +49,13 @@ class DTypeMapping:
     A mapping between Merlin dtypes and the dtypes of one external framework
     """
 
-    def __init__(self, mapping, base_class=None):
-        self.from_merlin_ = mapping
+    def __init__(self, mapping=None, base_class=None, translator=None):
+        self.from_merlin_ = mapping or {}
         self.to_merlin_ = {}
         self.base_class = base_class
+        self.translator = translator
 
-        for key, values in mapping.items():
+        for key, values in self.from_merlin_.items():
             if not isinstance(values, list):
                 values = [values]
             for value in values:

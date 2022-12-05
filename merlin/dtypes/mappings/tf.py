@@ -14,7 +14,8 @@
 # limitations under the License.
 #
 import merlin.dtypes.aliases as mn
-from merlin.dtypes.registry import DTypeMapping, _dtype_registry
+from merlin.dtypes.mapping import DTypeMapping, NumpyPreprocessor
+from merlin.dtypes.registry import _dtype_registry
 
 try:
     from tensorflow import dtypes as tf_dtypes
@@ -39,6 +40,9 @@ try:
             mn.boolean: [tf_dtypes.bool],
         },
         base_class=tf_dtypes.DType,
+        translator=NumpyPreprocessor(
+            "tf", lambda raw: raw.as_numpy_dtype, attrs=["as_numpy_dtype"]
+        ),
     )
     _dtype_registry.register("tf", tf_dtypes)
     _dtype_registry.register("tensorflow", tf_dtypes)

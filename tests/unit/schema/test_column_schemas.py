@@ -16,19 +16,19 @@
 import pandas as pd
 import pytest
 
-import merlin.dtypes as mn
+import merlin.dtypes as md
 from merlin.schema import ColumnSchema
 from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
 
 
-@pytest.mark.parametrize("d_types", [mn.float32, mn.float64, mn.uint32, mn.uint64])
+@pytest.mark.parametrize("d_types", [md.float32, md.float64, md.uint32, md.uint64])
 def test_dtype_column_schema(d_types):
     column = ColumnSchema("name", tags=[], properties={}, dtype=d_types)
     assert column.dtype == d_types
 
 
-@pytest.mark.parametrize("external_dtype, merlin_dtype", [(pd.StringDtype, mn.string)])
+@pytest.mark.parametrize("external_dtype, merlin_dtype", [(pd.StringDtype, md.string)])
 def test_column_schema_normalizes_dtypes(external_dtype, merlin_dtype):
     column = ColumnSchema("name", tags=[], properties={}, dtype=external_dtype)
     assert column.dtype == merlin_dtype
@@ -40,19 +40,19 @@ def test_column_schema_normalizes_dtypes(external_dtype, merlin_dtype):
         [ColumnSchema("col"), ColumnSchema("col")],
         [ColumnSchema("col_b", tags=["tag-1"]), ColumnSchema("col_b", tags=["tag-1"])],
         [
-            ColumnSchema("col", dtype=mn.int32, properties={"domain": {"min": 0, "max": 8}}),
-            ColumnSchema("col", dtype=mn.int32, properties={"domain": {"min": 0, "max": 8}}),
+            ColumnSchema("col", dtype=md.int32, properties={"domain": {"min": 0, "max": 8}}),
+            ColumnSchema("col", dtype=md.int32, properties={"domain": {"min": 0, "max": 8}}),
         ],
         [
             ColumnSchema(
                 "col",
-                dtype=mn.float32,
+                dtype=md.float32,
                 tags=["tag-2", Tags.CONTINUOUS],
                 properties={"p1": "prop-1"},
             ),
             ColumnSchema(
                 "col",
-                dtype=mn.float32,
+                dtype=md.float32,
                 tags=["tag-2", Tags.CONTINUOUS],
                 properties={"p1": "prop-1"},
             ),
@@ -96,14 +96,14 @@ def test_not_equal(column_schema_a, column_schema_b):
             ColumnSchema(
                 "feat",
                 tags=["tag-1"],
-                dtype=mn.float32,
+                dtype=md.float32,
                 properties={"domain": {"min": 0.0, "max": 6.0}},
             ),
             "feat_b",
             ColumnSchema(
                 "feat_b",
                 tags=["tag-1"],
-                dtype=mn.float32,
+                dtype=md.float32,
                 properties={"domain": {"min": 0.0, "max": 6.0}},
             ),
         ],
@@ -122,9 +122,9 @@ def test_with_name(column_schema, name, expected_column_schema):
             ColumnSchema("example", tags=["tag-1", "tag-2"], properties={"p1": "prop-1"}),
         ],
         [
-            ColumnSchema("example", tags=["tag-1"], dtype=mn.float32),
+            ColumnSchema("example", tags=["tag-1"], dtype=md.float32),
             ["tag-2", Tags.CONTINUOUS],
-            ColumnSchema("example", tags=["tag-1", "tag-2", Tags.CONTINUOUS], dtype=mn.float32),
+            ColumnSchema("example", tags=["tag-1", "tag-2", Tags.CONTINUOUS], dtype=md.float32),
         ],
     ],
 )
@@ -148,14 +148,14 @@ def test_with_tags(column_schema, tags, expected_column_schema):
         [
             ColumnSchema(
                 "example_col_2",
-                dtype=mn.float32,
+                dtype=md.float32,
                 tags=[Tags.CONTINUOUS],
                 properties={"a": 1, "domain": {"min": 0, "max": 5}},
             ),
             {"a": 4, "c": 3, "domain": {"max": 8}},
             ColumnSchema(
                 "example_col_2",
-                dtype=mn.float32,
+                dtype=md.float32,
                 tags=[Tags.CONTINUOUS],
                 properties={"a": 4, "c": 3, "domain": {"max": 8}},
             ),

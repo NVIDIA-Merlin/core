@@ -20,7 +20,8 @@ from typing import Dict, List, Optional, Text, Union
 
 import pandas as pd
 
-import merlin.dtypes as mn
+import merlin.dtypes as md
+from merlin.dtypes import DType
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -57,7 +58,7 @@ class ColumnSchema:
     name: Text
     tags: Optional[TagSet] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
-    dtype: Optional[object] = None
+    dtype: Optional[DType] = None
     is_list: Optional[bool] = None
     is_ragged: Optional[bool] = None
 
@@ -73,9 +74,8 @@ class ColumnSchema:
         Raises:
             TypeError: If the provided dtype cannot be cast to a numpy dtype
         """
-
         object.__setattr__(self, "tags", TagSet(self.tags))
-        object.__setattr__(self, "dtype", mn.dtype(self.dtype))
+        object.__setattr__(self, "dtype", md.dtype(self.dtype or md.unknown))
 
         # Validate the allowed range of value count
         value_count = Domain(**self.properties.get("value_count", {}))
