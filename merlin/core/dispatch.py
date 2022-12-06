@@ -293,7 +293,7 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
             return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
     if isinstance(ser, np.ndarray):
         return ser.dtype
-    #adds detection when in merlin column
+    # adds detection when in merlin column
     if hasattr(ser, "is_list"):
         return ser[0].dtype
     return None
