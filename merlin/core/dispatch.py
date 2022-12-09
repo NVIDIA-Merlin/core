@@ -303,8 +303,7 @@ def is_list_dtype(ser):
     """Check if Series contains list elements"""
     # adds detection for merlin column
     if hasattr(ser, "is_list"):
-        if isinstance(ser.values[0], np.ndarray):
-            return True
+        return ser.is_list
     if isinstance(ser, pd.Series):
         if not len(ser):  # pylint: disable=len-as-condition
             return False
