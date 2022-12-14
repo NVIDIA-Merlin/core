@@ -792,3 +792,13 @@ def test_parquet_aggregate_files(tmpdir, cpu):
     assert ds.to_ddf().npartitions == 1
     assert len(ds.to_ddf().timestamp.unique()) == 1
     _check_partition_lens(ds)
+
+
+def test_to_parquet_dtypes_schema(tmpdir):
+    df = dispatch.make_df({"a": np.array([1, 2, 3], dtype=np.int32)})
+    dataset = merlin.io.Dataset(df)
+    dataset.to_parquet(output_path=str(tmpdir), dtypes={"a": np.float32})
+    assert dataset.schema["a"].dtype == np.int32
+    reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
+    assert reloaded_dataset.schema["a"].dtype == np.float32
+

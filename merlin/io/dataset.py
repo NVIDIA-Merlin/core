@@ -895,9 +895,12 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = self.schema
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
         fs.mkdirs(output_path, exist_ok=True)
@@ -921,7 +924,7 @@ class Dataset:
             self.cpu,
             suffix=suffix,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(
