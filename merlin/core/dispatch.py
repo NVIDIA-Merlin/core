@@ -612,6 +612,21 @@ def from_host(x):
 
 
 def build_cudf_list_column(new_elements, new_offsets):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : cudf.Series
+        The elements of a pandas series
+    row_lengths : cudf.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    cudf.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
     if not HAS_GPU:
         return []
     return build_column(
@@ -623,6 +638,21 @@ def build_cudf_list_column(new_elements, new_offsets):
 
 
 def build_pandas_list_column(elements, row_lengths):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : pd.Series
+        The elements of a pandas series
+    row_lengths : pd.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    pd.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
     offset = 0
     rows = []
     for row_length in row_lengths:
@@ -639,7 +669,7 @@ def create_multihot_col(offsets, elements):
     data = cudf series with the list data flattened to 1-d
     """
     if isinstance(elements, pd.Series):
-        lh= pd.Series(offsets[1:]).reset_index(drop=True)
+        lh = pd.Series(offsets[1:]).reset_index(drop=True)
         rh = pd.Series(offsets[:-1]).reset_index(drop=True)
         row_lengths = lh - rh
 
