@@ -27,10 +27,6 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-cp = None
-cudf = None
-rmm = None
-
 if HAS_GPU:
     try:
         import cudf
@@ -50,6 +46,9 @@ if HAS_GPU:
 
     except ImportError:
         HAS_GPU = False
+        cudf = None
+        cp = None
+        rmm = None
 
 
 try:

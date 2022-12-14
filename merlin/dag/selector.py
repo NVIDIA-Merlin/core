@@ -38,7 +38,7 @@ class ColumnSelector:
 
     def __init__(
         self,
-        names: List[str] = None,
+        names: Union[str, List[str]] = None,
         subgroups: List["ColumnSelector"] = None,
         tags: List[Union[Tags, str]] = None,
     ):

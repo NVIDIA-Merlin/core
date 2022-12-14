@@ -55,7 +55,7 @@ class ColumnSchema:
     """A schema containing metadata of a dataframe column."""
 
     name: Text
-    tags: Optional[TagSet] = field(default_factory=TagSet)
+    tags: Optional[Union[TagSet, List[Union[str, Tags]]]] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[object] = None
     is_list: Optional[bool] = None
@@ -179,7 +179,7 @@ class ColumnSchema:
         """
         return ColumnSchema(
             self.name,
-            tags=self.tags.override(tags),
+            tags=self.tags.override(tags),  # type: ignore
             properties=self.properties,
             dtype=self.dtype,
             is_list=self.is_list,
