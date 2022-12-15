@@ -27,12 +27,16 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
+cudf = None
+cp = None
+rmm = None
+
 if HAS_GPU:
     try:
-        import cudf
-        import cupy as cp
+        import cudf  # type: ignore[no-redef]
+        import cupy as cp  # type: ignore[no-redef]
         import dask_cudf
-        import rmm
+        import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
         try:
@@ -46,9 +50,6 @@ if HAS_GPU:
 
     except ImportError:
         HAS_GPU = False
-        cudf = None
-        cp = None
-        rmm = None
 
 
 try:
@@ -284,7 +285,7 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
         The dtype of the innermost elements
     """
     if is_list_dtype(ser):
-        if HAS_GPU and isinstance(ser, cudf.Series):
+        if cudf is not None and isinstance(ser, cudf.Series):
             if is_list_dtype(ser):
                 ser = ser.list.leaves
             return ser.dtype
@@ -385,7 +386,14 @@ def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="par
     if cpu or isinstance(df, pd.DataFrame) or not HAS_GPU:
         _mod = dd if collection else pd
     else:
-        _mod = dask_cudf if collection else cudf.io
+        if collection:
+            _mod = dask_cudf
+        elif cudf is not None:
+            _mod = cudf.io
+        else:
+            raise ValueError(
+                "Unable to load cudf. Please check your environment GPU and cudf available."
+            )
     _attr = "read_csv" if fmt == "csv" else "read_parquet"
     return getattr(_mod, _attr)
 
@@ -404,8 +412,10 @@ def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
         _cls = pq.ParquetWriter
         if path:
             _args.append(pa.Table.from_pandas(df, preserve_index=False).schema)
-    else:
+    elif cudf is not None:
         _cls = cudf.io.parquet.ParquetWriter
+    else:
+        ValueError("Unable to load cudf. Please check your environment GPU and cudf available.")
 
     if not path:
         return _cls
