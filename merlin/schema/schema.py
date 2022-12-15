@@ -34,6 +34,11 @@ class ColumnQuantity(Enum):
 
 @dataclass(frozen=True)
 class Domain:
+    """Describes an integer or float domain.
+
+    Can be partially specified. With any of name, min, max.
+    """
+
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
     name: Optional[str] = None
