@@ -110,12 +110,7 @@ def _get_partition_groups(df, partition_cols, fs, output_path, filename):
         keys = tuple(sub_df[col].iloc[0] for col in partition_cols)
         if not isinstance(keys, tuple):
             keys = (keys,)
-        subdir = fs.sep.join(
-            [
-                "{colname}={value}".format(colname=name, value=val)
-                for name, val in zip(partition_cols, keys)
-            ]
-        )
+        subdir = fs.sep.join([f"{name}={val}" for name, val in zip(partition_cols, keys)])
         prefix = fs.sep.join([output_path, subdir])
         fs.mkdirs(prefix, exist_ok=True)
         fns.append(fs.sep.join([subdir, filename]))

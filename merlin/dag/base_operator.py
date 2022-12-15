@@ -186,7 +186,6 @@ class BaseOperator:
         strict_dtypes : Boolean, optional
             Enables strict checking for column dtype matching if True, by default False
         """
-        ...
 
     def transform(
         self, col_selector: ColumnSelector, transformable: Transformable
@@ -313,8 +312,8 @@ class BaseOperator:
 
     @property
     def dependencies(self) -> List[Union[str, Any]]:
-        """Defines an optional list of column dependencies for this operator. This lets you consume columns
-        that aren't part of the main transformation workflow.
+        """Defines an optional list of column dependencies for this operator.
+        This lets you consume columns that aren't part of the main transformation workflow.
 
         Returns
         -------
