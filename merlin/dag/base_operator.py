@@ -312,8 +312,8 @@ class BaseOperator:
 
     @property
     def dependencies(self) -> List[Union[str, Any]]:
-        """Defines an optional list of column dependencies for this operator. This lets you consume columns
-        that aren't part of the main transformation workflow.
+        """Defines an optional list of column dependencies for this operator.
+        This lets you consume columns that aren't part of the main transformation workflow.
 
         Returns
         -------
