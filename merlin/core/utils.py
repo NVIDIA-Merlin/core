@@ -49,7 +49,7 @@ def pynvml_mem_size(kind="total", index=0):
     elif kind == "total":
         size = int(pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(index)).total)
     else:
-        raise ValueError("{0} not a supported option for device_mem_size.".format(kind))
+        raise ValueError(f"{kind} not a supported option for device_mem_size.")
     pynvml.nvmlShutdown()
     return size
 
@@ -68,7 +68,7 @@ def device_mem_size(kind="total", cpu=False):
         return int(1e9)
 
     if kind not in ["free", "total"]:
-        raise ValueError("{0} not a supported option for device_mem_size.".format(kind))
+        raise ValueError(f"{kind} not a supported option for device_mem_size.")
     try:
         if kind == "free":
             return int(cuda.current_context().get_memory_info()[0])
@@ -79,7 +79,7 @@ def device_mem_size(kind="total", cpu=False):
             # Not using NVML "free" memory, because it will not include RMM-managed memory
             warnings.warn("get_memory_info is not supported. Using total device memory from NVML.")
         size = pynvml_mem_size(kind="total", index=0)
-    return size
+        return size
 
 
 def get_rmm_size(size):

@@ -186,7 +186,6 @@ class BaseOperator:
         strict_dtypes : Boolean, optional
             Enables strict checking for column dtype matching if True, by default False
         """
-        ...
 
     def transform(
         self, col_selector: ColumnSelector, transformable: Transformable
