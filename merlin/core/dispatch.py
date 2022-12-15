@@ -621,6 +621,21 @@ def from_host(x):
 
 
 def build_cudf_list_column(new_elements, new_offsets):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : cudf.Series
+        The elements of a pandas series
+    row_lengths : cudf.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    cudf.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
     if not HAS_GPU:
         return []
     return build_column(
@@ -631,32 +646,47 @@ def build_cudf_list_column(new_elements, new_offsets):
     )
 
 
+def build_pandas_list_column(elements, row_lengths):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : pd.Series
+        The elements of a pandas series
+    row_lengths : pd.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    pd.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
+    offset = 0
+    rows = []
+    for row_length in row_lengths:
+        row_length = int(row_length)
+        row = elements[offset : offset + row_length]
+        offset += row_length
+        rows.append(row.values)
+    return pd.Series(rows)
+
+
 def create_multihot_col(offsets, elements):
     """
     offsets = cudf series with offset values for list data
     data = cudf series with the list data flattened to 1-d
     """
     if isinstance(elements, pd.Series):
-        col = pd.Series()
-        lh, rh = pd.Series(offsets[1:]).reset_index(drop=True), pd.Series(offsets[:-1]).reset_index(
-            drop=True
-        )
-        vals_per_entry = lh - rh
-        vals_used = 0
-        entries = []
-        for vals_count in vals_per_entry:
-            vals_count = int(vals_count)
-            entry = elements[vals_used : vals_used + vals_count]
-            if len(entry) == 1:
-                entry = entry[0]
-            vals_used += vals_count
-            entries.append(entry.values)
-        col = col.append(pd.Series(entries))
+        lh = pd.Series(offsets[1:]).reset_index(drop=True)
+        rh = pd.Series(offsets[:-1]).reset_index(drop=True)
+        row_lengths = lh - rh
+
+        col = build_pandas_list_column(elements, row_lengths)
     else:
         offsets = as_column(offsets, dtype="int32")
         elements = as_column(elements)
         col = build_cudf_list_column(elements, offsets)
-        col = cudf.Series(col)
     return col
 
 
