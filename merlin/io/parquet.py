@@ -1029,7 +1029,7 @@ class BaseParquetWriter(ThreadedWriter):
                 self.queue.task_done()
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         """Write global _metadata file"""
         raise (NotImplementedError)
 
@@ -1071,10 +1071,10 @@ class GPUParquetWriter(BaseParquetWriter):
         writer.write_table(data)
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         # Sort metadata by file name and convert list of
         # tuples to a list of metadata byte-blobs
-        md_list = [m[1] for m in sorted(list(md.items()), key=lambda x: natural_sort_key(x[0]))]
+        md_list = [m[1] for m in sorted(list(data.items()), key=lambda x: natural_sort_key(x[0]))]
 
         # Aggregate metadata and write _metadata file
         _write_pq_metadata_file_cudf(md_list, fs, out_dir)
@@ -1143,10 +1143,10 @@ class CPUParquetWriter(BaseParquetWriter):
         writer.write_table(table, row_group_size=self._get_row_group_size(data))
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         # Sort metadata by file name and convert list of
         # tuples to a list of metadata byte-blobs
-        md_list = [m[1] for m in sorted(list(md.items()), key=lambda x: natural_sort_key(x[0]))]
+        md_list = [m[1] for m in sorted(list(data.items()), key=lambda x: natural_sort_key(x[0]))]
 
         # Aggregate metadata and write _metadata file
         _write_pq_metadata_file_pyarrow(md_list, fs, out_dir)

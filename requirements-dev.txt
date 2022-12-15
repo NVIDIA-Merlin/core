@@ -1,14 +1,6 @@
 # packages necessary to run tests and push PRs
 # assumes requirements for merlin-core are already installed
 
-black==22.3.0
-click<8.1.0
-flake8==3.9.2
-isort==5.9.3
-pylint==2.7.4
-bandit==1.7.0
-interrogate==1.5.0
 pytest>=5
 pytest-cov>=2
 pytest-xdist
-codespell
