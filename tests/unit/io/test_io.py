@@ -801,4 +801,3 @@ def test_to_parquet_dtypes_schema(tmpdir):
     assert dataset.schema["a"].dtype == np.int32
     reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
     assert reloaded_dataset.schema["a"].dtype == np.float32
-
