@@ -1,7 +1,7 @@
 # Save schema files as JSON in `.merlin` directory
 
 * **Status:** pending
-* **Last Updated:** 2023-12
+* **Last Updated:** 2022-12
 * **Objective:** Set a default file type and directory structure for schema information.
 
 ## Context & Problem Statement
