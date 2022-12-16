@@ -266,8 +266,7 @@
 <span class="sd">            The schemas of the columns produced by this operator</span>
 <span class="sd">        strict_dtypes : Boolean, optional</span>
 <span class="sd">            Enables strict checking for column dtype matching if True, by default False</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="o">...</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="BaseOperator.transform"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">transformable</span><span class="p">:</span> <span class="n">Transformable</span>
@@ -394,8 +393,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Defines an optional list of column dependencies for this operator. This lets you consume columns</span>
-<span class="sd">        that aren&#39;t part of the main transformation workflow.</span>
+        <span class="sd">&quot;&quot;&quot;Defines an optional list of column dependencies for this operator.</span>
+<span class="sd">        This lets you consume columns that aren&#39;t part of the main transformation workflow.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

@@ -225,7 +225,7 @@
 
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tag_set</span><span class="p">:</span>
             <span class="n">atomized_tags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">COMPOUND_TAGS</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">COMPOUND_TAGS</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Compound tags like </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2"> have been deprecated &quot;</span>
                     <span class="s2">&quot;and will be removed in a future version. &quot;</span>
