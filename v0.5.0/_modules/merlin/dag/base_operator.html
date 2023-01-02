@@ -105,7 +105,7 @@
 
 
 <span class="k">class</span> <span class="nc">Supports</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Indicates what type of data representation this operator supports for transformations&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicates what type of data representation this operator supports for transformations&quot;&quot;&quot;</span>
 
     <span class="c1"># cudf dataframe</span>
     <span class="n">CPU_DATAFRAME</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
@@ -118,7 +118,7 @@
 
 
 <div class="viewcode-block" id="BaseOperator"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator">[docs]</a><span class="k">class</span> <span class="nc">BaseOperator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all operator classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -140,7 +140,7 @@
         <span class="n">deps_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
         <span class="n">selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Given the schemas coming from upstream sources and a column selector for the</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given the schemas coming from upstream sources and a column selector for the</span>
 <span class="sd">        input columns, returns a set of schemas for the input columns this operator will use</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -169,7 +169,7 @@
         <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span>
         <span class="n">prev_output_schema</span><span class="p">:</span> <span class="n">Schema</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schema</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Given a set of schemas and a column selector for the input columns,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a set of schemas and a column selector for the input columns,</span>
 <span class="sd">        returns a set of schemas for the transformed columns this operator will produce</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -286,7 +286,7 @@
     <span class="c1"># operators to reflect constructing the column mapping</span>
     <span class="c1"># (They should no longer override this method)</span>
 <div class="viewcode-block" id="BaseOperator.output_column_names"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.output_column_names">[docs]</a>    <span class="k">def</span> <span class="nf">output_column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnSelector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Given a set of columns names returns the names of the transformed columns this</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a set of columns names returns the names of the transformed columns this</span>
 <span class="sd">        operator will produce</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -301,7 +301,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Defines an optional list of column dependencies for this operator. This lets you consume columns</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Defines an optional list of column dependencies for this operator. This lets you consume columns</span>
 <span class="sd">        that aren&#39;t part of the main transformation workflow.</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -334,7 +334,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">supports</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Supports</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns what kind of data representation this operator supports&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns what kind of data representation this operator supports&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Supports</span><span class="o">.</span><span class="n">CPU_DATAFRAME</span> <span class="o">|</span> <span class="n">Supports</span><span class="o">.</span><span class="n">GPU_DATAFRAME</span>
 
     <span class="k">def</span> <span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>

@@ -137,7 +137,7 @@
 
 
 <div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Universal external-data wrapper for NVTabular</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Universal external-data wrapper for NVTabular</span>
 
 <span class="sd">    The NVTabular `Workflow` and `DataLoader`-related APIs require all</span>
 <span class="sd">    external data to be converted to the universal `Dataset` type.  The</span>
@@ -432,7 +432,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">infer_schema</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Dataset.to_ddf"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.to_ddf">[docs]</a>    <span class="k">def</span> <span class="nf">to_ddf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert `Dataset` object to `dask_cudf.DataFrame`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert `Dataset` object to `dask_cudf.DataFrame`</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -499,7 +499,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">to_gpu</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Dataset.shuffle_by_keys"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.shuffle_by_keys">[docs]</a>    <span class="k">def</span> <span class="nf">shuffle_by_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">hive_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">npartitions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Shuffle the in-memory Dataset so that all unique-key</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Shuffle the in-memory Dataset so that all unique-key</span>
 <span class="sd">        combinations are moved to the same partition.</span>
 
 <span class="sd">        Parameters</span>
@@ -606,7 +606,7 @@
         <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ddf</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">npartitions</span><span class="o">=</span><span class="n">npartitions</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Dataset.repartition"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.repartition">[docs]</a>    <span class="k">def</span> <span class="nf">repartition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">npartitions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">partition_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Repartition the underlying ddf, and return a new Dataset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Repartition the underlying ddf, and return a new Dataset</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -630,7 +630,7 @@
 
 <div class="viewcode-block" id="Dataset.merge"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.merge">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Merge two Dataset objects</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge two Dataset objects</span>
 
 <span class="sd">        Produces a new Dataset object. If the ``cpu`` Dataset attributes</span>
 <span class="sd">        do not match, the right side will be modified. See Dask-Dataframe</span>
@@ -673,7 +673,7 @@
 <div class="viewcode-block" id="Dataset.to_iter"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.to_iter">[docs]</a>    <span class="k">def</span> <span class="nf">to_iter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_file_metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert `Dataset` object to a `cudf.DataFrame` iterator.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert `Dataset` object to a `cudf.DataFrame` iterator.</span>
 
 <span class="sd">        Note that this method will use `to_ddf` to produce a</span>
 <span class="sd">        `dask_cudf.DataFrame`, and materialize a single partition for</span>
@@ -753,7 +753,7 @@
         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;subgraph&quot;</span><span class="p">,</span>
         <span class="n">write_hugectr_keyset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes out to a parquet dataset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Writes out to a parquet dataset</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1018,7 +1018,7 @@
         <span class="n">num_threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">dtypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Writes out to a hugectr dataset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Writes out to a hugectr dataset</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1103,7 +1103,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">()</span><span class="o">.</span><span class="n">npartitions</span>
 
 <div class="viewcode-block" id="Dataset.validate_dataset"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.validate_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">validate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Validate for efficient processing.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate for efficient processing.</span>
 
 <span class="sd">        The purpose of this method is to validate that the Dataset object</span>
 <span class="sd">        meets the minimal requirements for efficient NVTabular processing.</span>
@@ -1149,7 +1149,7 @@
         <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;EXPERIMENTAL:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;EXPERIMENTAL:</span>
 <span class="sd">        Regenerate an NVTabular Dataset for efficient processing by writing</span>
 <span class="sd">        out new Parquet files. In contrast to default ``to_parquet`` behavior,</span>
 <span class="sd">        this method preserves the original ordering.</span>
@@ -1202,7 +1202,7 @@
             <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="Dataset.infer_schema"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.infer_schema">[docs]</a>    <span class="k">def</span> <span class="nf">infer_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a schema containing the column names and inferred dtypes of the Dataset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a schema containing the column names and inferred dtypes of the Dataset</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            n (int, optional): Number of rows to sample to infer the dtypes. Defaults to 1.</span>
@@ -1223,7 +1223,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span></div>
 
 <div class="viewcode-block" id="Dataset.sample_dtypes"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.sample_dtypes">[docs]</a>    <span class="k">def</span> <span class="nf">sample_dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">annotate_lists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the real dtypes of the Dataset</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the real dtypes of the Dataset</span>
 
 <span class="sd">        Use cached metadata if this operation was</span>
 <span class="sd">        already performed. Otherwise, call down to the</span>
@@ -1250,7 +1250,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_bind_dd_method</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Bind Dask-Dataframe method to the Dataset class&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bind Dask-Dataframe method to the Dataset class&quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">_meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
