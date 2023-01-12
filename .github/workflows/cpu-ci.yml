@@ -57,12 +57,15 @@ jobs:
       id: conda_build
       run: |
         conda update conda
+        conda create -n merlin-core-conda
+        conda activate merlin-core-conda
         conda install -c conda-forge mamba
         mamba install -c conda-forge conda-build boa
         conda mambabuild . -c defaults -c conda-forge -c numba -c rapidsai --output-folder ./conda_packages
         export CONDA_PACKAGE=$(find ./conda_packages/ -name merlin-core*.tar.bz2)
         echo "conda_package : $CONDA_PACKAGE"
         echo "conda_package=$CONDA_PACKAGE" >> $GITHUB_OUTPUT
+        conda deactivate
     - name: Upload conda artifacts to github
       uses: actions/upload-artifact@v3
       with:
