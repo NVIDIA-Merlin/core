@@ -57,6 +57,7 @@ jobs:
       id: conda_build
       run: |
         conda init bash
+        source /home/runner/.bashrc
         conda update conda
         conda create -n merlin-core-conda
         conda activate merlin-core-conda
