@@ -56,6 +56,7 @@ jobs:
     - name: Generate package for conda
       id: conda_build
       run: |
+        conda init bash
         conda update conda
         conda create -n merlin-core-conda
         conda activate merlin-core-conda
