@@ -47,9 +47,9 @@ class HugeCTRWriter(ThreadedWriter):
         nnz = np.intc(1)
         np_cats = data[self.cats].to_pandas().astype(np.uintc).to_numpy()
         # Write all the data samples
-        for i, _ in enumerate(np_label):
+        for i, label in enumerate(np_label):
             # Write Label
-            self.data_writers[idx].write(np_label[i].tobytes())
+            self.data_writers[idx].write(label.tobytes())
             # Write conts (HugeCTR: dense)
             self.data_writers[idx].write(np_conts[i].tobytes())
             # Write cats (HugeCTR: Slots)

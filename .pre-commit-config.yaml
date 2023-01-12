@@ -5,30 +5,30 @@ repos:
     hooks:
       - id: absolufy-imports
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
+    rev: 5.11.2
     hooks:
     - id: isort
       additional_dependencies: [toml]
-      exclude: examples/*
+      exclude: ^examples/
   # types
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v0.971'
+    rev: 'v0.991'
     hooks:
     - id: mypy
       language_version: python3
-      args: [--no-strict-optional, --ignore-missing-imports, --show-traceback, --install-types, --non-interactive]
-      exclude: docs/*
+      args: [--non-interactive, --install-types, --namespace-packages, --explicit-package-bases]
+      exclude: ^docs/
   # code style
   - repo: https://github.com/python/black
-    rev: 22.6.0
+    rev: 22.12.0
     hooks:
     - id: black
   - repo: https://github.com/pycqa/pylint
-    rev: v2.14.5
+    rev: v2.15.8
     hooks:
     - id: pylint
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
     hooks:
     - id: flake8
   # notebooks
@@ -45,7 +45,7 @@ repos:
       exclude: ^(build|docs|merlin/io|tests|setup.py|versioneer.py)
       args: [--config=pyproject.toml]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.1
+    rev: v2.2.2
     hooks:
     - id: codespell
   # security

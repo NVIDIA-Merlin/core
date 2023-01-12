@@ -67,7 +67,14 @@ class Node:
 
     # These methods must maintain grouping
     def add_dependency(
-        self, dep: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+        self,
+        dep: Union[
+            str,
+            List[str],
+            ColumnSelector,
+            "Node",
+            List[Union[str, List[str], "Node", ColumnSelector]],
+        ],
     ):
         """
         Adding a dependency node to this node
@@ -90,7 +97,14 @@ class Node:
         self.dependencies.append(dep_node)
 
     def add_parent(
-        self, parent: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+        self,
+        parent: Union[
+            str,
+            List[str],
+            ColumnSelector,
+            "Node",
+            List[Union[str, List[str], "Node", ColumnSelector]],
+        ],
     ):
         """
         Adding a parent node to this node
@@ -111,7 +125,14 @@ class Node:
         self.parents.extend(parent_nodes)
 
     def add_child(
-        self, child: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+        self,
+        child: Union[
+            str,
+            List[str],
+            ColumnSelector,
+            "Node",
+            List[Union[str, List[str], "Node", ColumnSelector]],
+        ],
     ):
         """
         Adding a child node to this node
@@ -132,7 +153,14 @@ class Node:
         self.children.extend(child_nodes)
 
     def remove_child(
-        self, child: Union[str, ColumnSelector, "Node", List[Union[str, "Node", ColumnSelector]]]
+        self,
+        child: Union[
+            str,
+            List[str],
+            ColumnSelector,
+            "Node",
+            List[Union[str, List[str], "Node", ColumnSelector]],
+        ],
     ):
         """
         Removing a child node from this node

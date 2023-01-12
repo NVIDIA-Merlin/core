@@ -27,16 +27,16 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-cp = None
 cudf = None
+cp = None
 rmm = None
 
 if HAS_GPU:
     try:
-        import cudf
-        import cupy as cp
+        import cudf  # type: ignore[no-redef]
+        import cupy as cp  # type: ignore[no-redef]
         import dask_cudf
-        import rmm
+        import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
         try:
@@ -285,7 +285,7 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
         The dtype of the innermost elements
     """
     if is_list_dtype(ser):
-        if HAS_GPU and isinstance(ser, cudf.Series):
+        if cudf is not None and isinstance(ser, cudf.Series):
             if is_list_dtype(ser):
                 ser = ser.list.leaves
             return ser.dtype
@@ -293,11 +293,17 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
             return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
     if isinstance(ser, np.ndarray):
         return ser.dtype
+    # adds detection when in merlin column
+    if hasattr(ser, "is_list"):
+        return ser[0].dtype
     return None
 
 
 def is_list_dtype(ser):
     """Check if Series contains list elements"""
+    # adds detection for merlin column
+    if hasattr(ser, "is_list"):
+        return ser.is_list
     if isinstance(ser, pd.Series):
         if not len(ser):  # pylint: disable=len-as-condition
             return False
@@ -380,7 +386,14 @@ def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="par
     if cpu or isinstance(df, pd.DataFrame) or not HAS_GPU:
         _mod = dd if collection else pd
     else:
-        _mod = dask_cudf if collection else cudf.io
+        if collection:
+            _mod = dask_cudf
+        elif cudf is not None:
+            _mod = cudf.io
+        else:
+            raise ValueError(
+                "Unable to load cudf. Please check your environment GPU and cudf available."
+            )
     _attr = "read_csv" if fmt == "csv" else "read_parquet"
     return getattr(_mod, _attr)
 
@@ -399,8 +412,10 @@ def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
         _cls = pq.ParquetWriter
         if path:
             _args.append(pa.Table.from_pandas(df, preserve_index=False).schema)
-    else:
+    elif cudf is not None:
         _cls = cudf.io.parquet.ParquetWriter
+    else:
+        ValueError("Unable to load cudf. Please check your environment GPU and cudf available.")
 
     if not path:
         return _cls
@@ -606,6 +621,21 @@ def from_host(x):
 
 
 def build_cudf_list_column(new_elements, new_offsets):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : cudf.Series
+        The elements of a pandas series
+    row_lengths : cudf.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    cudf.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
     if not HAS_GPU:
         return []
     return build_column(
@@ -616,27 +646,43 @@ def build_cudf_list_column(new_elements, new_offsets):
     )
 
 
+def build_pandas_list_column(elements, row_lengths):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : pd.Series
+        The elements of a pandas series
+    row_lengths : pd.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    pd.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
+    offset = 0
+    rows = []
+    for row_length in row_lengths:
+        row_length = int(row_length)
+        row = elements[offset : offset + row_length]
+        offset += row_length
+        rows.append(row.values)
+    return pd.Series(rows)
+
+
 def create_multihot_col(offsets, elements):
     """
     offsets = cudf series with offset values for list data
     data = cudf series with the list data flattened to 1-d
     """
     if isinstance(elements, pd.Series):
-        col = pd.Series()
-        lh, rh = pd.Series(offsets[1:]).reset_index(drop=True), pd.Series(offsets[:-1]).reset_index(
-            drop=True
-        )
-        vals_per_entry = lh - rh
-        vals_used = 0
-        entries = []
-        for vals_count in vals_per_entry:
-            vals_count = int(vals_count)
-            entry = elements[vals_used : vals_used + vals_count]
-            if len(entry) == 1:
-                entry = entry[0]
-            vals_used += vals_count
-            entries.append(entry.values)
-        col = col.append(pd.Series(entries))
+        lh = pd.Series(offsets[1:]).reset_index(drop=True)
+        rh = pd.Series(offsets[:-1]).reset_index(drop=True)
+        row_lengths = lh - rh
+
+        col = build_pandas_list_column(elements, row_lengths)
     else:
         offsets = as_column(offsets, dtype="int32")
         elements = as_column(elements)

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Dict, List, Optional, Text, Union
 
@@ -35,6 +35,11 @@ class ColumnQuantity(Enum):
 
 @dataclass(frozen=True)
 class Domain:
+    """Describes an integer or float domain.
+
+    Can be partially specified. With any of name, min, max.
+    """
+
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
     name: Optional[str] = None
@@ -56,7 +61,7 @@ class ColumnSchema:
     """A schema containing metadata of a dataframe column."""
 
     name: Text
-    tags: Optional[TagSet] = field(default_factory=TagSet)
+    tags: Optional[Union[TagSet, List[Union[str, Tags]]]] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
     dtype: Optional[DType] = None
     is_list: Optional[bool] = None
@@ -142,14 +147,7 @@ class ColumnSchema:
             Copied object with new column name
 
         """
-        return ColumnSchema(
-            name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, name=name)
 
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
@@ -165,14 +163,7 @@ class ColumnSchema:
             Copied object with new column tags
 
         """
-        return ColumnSchema(
-            self.name,
-            tags=self.tags.override(tags),
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, tags=self.tags.override(tags))  # type: ignore
 
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
@@ -204,14 +195,7 @@ class ColumnSchema:
         if value_count.is_bounded and value_count.max == value_count.min:
             is_ragged = False
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=new_properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=is_ragged,
-        )
+        return replace(self, properties=new_properties, is_ragged=is_ragged)
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
@@ -240,14 +224,7 @@ class ColumnSchema:
         else:
             is_ragged = False
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=dtype,
-            is_list=is_list,
-            is_ragged=is_ragged,
-        )
+        return replace(self, dtype=dtype, is_list=is_list, is_ragged=is_ragged)
 
     @property
     def int_domain(self) -> Optional[Domain]:
