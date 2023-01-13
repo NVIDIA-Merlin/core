@@ -4,8 +4,6 @@ This folder contains the scripts necessary to build documentation for the
 merlin-core library. You can find the [generated documentation
 here](https://nvidia-merlin.github.io/core).
 
-
-
 1. Follow the instructions to create a Python developer environment. See the
    [installation instructions](https://github.com/NVIDIA-Merlin/models).
 
@@ -33,4 +31,3 @@ here](https://nvidia-merlin.github.io/core).
    ```sh
    python -m http.server -d build/html
    ```
-
