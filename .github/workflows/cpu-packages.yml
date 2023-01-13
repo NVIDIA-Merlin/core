@@ -1,4 +1,4 @@
-name: Core Tests (CPU)
+name: Build Core Packages (CPU)
 
 on:
   workflow_dispatch:
