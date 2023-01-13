@@ -254,8 +254,8 @@ def _pb_extra_metadata(column_schema):
     }
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
-    if column_schema.dtype.elemsize:
-        properties["dtype_item_size"] = column_schema.dtype.elemsize
+    if column_schema.dtype.element_size:
+        properties["dtype_item_size"] = column_schema.dtype.element_size
     return schema_bp.Any().from_dict(properties)
 
 
@@ -285,7 +285,7 @@ def _set_feature_domain(feature, column_schema):
         FeatureType.FLOAT: _pb_float_domain,
     }
 
-    pb_type = FEATURE_TYPES.get(column_schema.dtype.elemtype.value)
+    pb_type = FEATURE_TYPES.get(column_schema.dtype.element_type.value)
     if pb_type:
         feature.type = pb_type
 

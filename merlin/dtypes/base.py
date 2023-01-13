@@ -65,9 +65,9 @@ class DType:
     """
 
     name: str
-    elemtype: ElementType
-    elemsize: Optional[int] = None
-    elemunit: Optional[ElementUnit] = None
+    element_type: ElementType
+    element_size: Optional[int] = None
+    element_unit: Optional[ElementUnit] = None
     signed: Optional[bool] = None
 
     def to(self, mapping_name: str):
@@ -120,8 +120,8 @@ class DType:
     # These properties refer to a single scalar (potentially a list element)
     @property
     def is_integer(self):
-        return self.elemtype.value == "int"
+        return self.element_type.value == "int"
 
     @property
     def is_float(self):
-        return self.elemtype.value == "float"
+        return self.element_type.value == "float"
