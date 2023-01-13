@@ -543,7 +543,8 @@ class Dataset:
             .repartition(
                 npartitions=npartitions,
                 partition_size=partition_size,
-            )
+            ),
+            schema=self.schema,
         )
 
     @classmethod
