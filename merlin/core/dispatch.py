@@ -687,6 +687,7 @@ def create_multihot_col(offsets, elements):
         offsets = as_column(offsets, dtype="int32")
         elements = as_column(elements)
         col = build_cudf_list_column(elements, offsets)
+        col = cudf.Series(col)
     return col
 
 

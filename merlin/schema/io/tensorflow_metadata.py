@@ -17,8 +17,8 @@ import pathlib
 from typing import Union
 
 import fsspec
-import numpy
 
+import merlin.dtypes as md
 from merlin.schema.io import proto_utils, schema_bp
 from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
@@ -181,6 +181,12 @@ class TensorflowMetadata:
         """
         features = []
         for col_name, col_schema in schema.column_schemas.items():
+            if col_schema.dtype is None:
+                raise ValueError(
+                    f"Schema for column `{col_name}` does not have a dtype. "
+                    "ColumnSchema objects must have dtypes in order to be serializable."
+                )
+
             features.append(_pb_feature(col_schema))
 
         proto_schema = ProtoSchema(feature=features)
@@ -242,27 +248,14 @@ def _pb_float_domain(column_schema):
     )
 
 
-def _dtype_name(column_schema):
-    # TODO: Decide if we need this since we've standardized on numpy types
-    if hasattr(column_schema.dtype, "kind"):
-        return numpy.core._dtype._kind_name(column_schema.dtype)
-    elif hasattr(column_schema.dtype, "item"):
-        return type(column_schema.dtype(1).item()).__name__
-    elif isinstance(column_schema.dtype, str):
-        return column_schema.dtype
-    elif hasattr(column_schema.dtype, "__name__"):
-        return column_schema.dtype.__name__
-    else:
-        raise TypeError(f"unsupported dtype for column schema: {column_schema.dtype}")
-
-
 def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["dtype_item_size"] = numpy.dtype(column_schema.dtype).itemsize * 8
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
+    if column_schema.dtype.element_size:
+        properties["dtype_item_size"] = column_schema.dtype.element_size
     return schema_bp.Any().from_dict(properties)
 
 
@@ -292,7 +285,7 @@ def _set_feature_domain(feature, column_schema):
         FeatureType.FLOAT: _pb_float_domain,
     }
 
-    pb_type = FEATURE_TYPES.get(_dtype_name(column_schema))
+    pb_type = FEATURE_TYPES.get(column_schema.dtype.element_type.value)
     if pb_type:
         feature.type = pb_type
 
@@ -369,17 +362,17 @@ def _merlin_properties(feature):
 
 
 int_dtypes_map = {
-    8: numpy.int8,
-    16: numpy.int16,
-    32: numpy.int32,
-    64: numpy.int64,
+    8: md.int8,
+    16: md.int16,
+    32: md.int32,
+    64: md.int64,
 }
 
 
 float_dtypes_map = {
-    16: numpy.float16,
-    32: numpy.float32,
-    64: numpy.float64,
+    16: md.float16,
+    32: md.float32,
+    64: md.float64,
 }
 
 
@@ -390,12 +383,14 @@ def _merlin_dtype(feature, properties):
         if item_size and item_size in int_dtypes_map:
             dtype = int_dtypes_map[item_size]
         else:
-            dtype = numpy.int
+            dtype = md.int64
     elif feature.type == FeatureType.FLOAT:
         if item_size and item_size in float_dtypes_map:
             dtype = float_dtypes_map[item_size]
         else:
-            dtype = numpy.float
+            dtype = md.float64
+    elif feature.type == FeatureType.BYTES:
+        dtype = md.string
     return dtype
 
 
