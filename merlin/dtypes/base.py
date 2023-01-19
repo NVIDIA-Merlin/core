@@ -109,7 +109,7 @@ class DType:
             ) from exc
 
         try:
-            return mapping.from_merlin(self)
+            return mapping.from_merlin(replace(self, shape=None))
         except KeyError as exc:
             raise ValueError(
                 f"The registered dtype mapping for {mapping_name} doesn't contain type {self.name}."
