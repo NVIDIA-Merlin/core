@@ -161,3 +161,15 @@ class DType:
             )
 
         return replace(self, shape=shape)
+
+    @property
+    def without_shape(self):
+        """
+        Create a copy of this object without the shape
+
+        Returns
+        -------
+        DType
+            A copy of this object with the shape removed
+        """
+        return self.with_shape(Shape())
