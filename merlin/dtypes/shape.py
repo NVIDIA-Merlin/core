@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional, Tuple
 
 
@@ -66,25 +66,41 @@ class Shape:
     The range of potential sizes for all the dimensions of a field or column
     """
 
-    dims: Tuple = field(default_factory=tuple)
+    dims: Optional[Tuple] = None
 
     def __post_init__(self):
-        new_dims = []
-        for i, dim in enumerate(self.dims):
-            if isinstance(dim, Dimension):
-                new_dim = dim
-            elif isinstance(dim, tuple) and len(dim) == 2:
-                new_dim = Dimension(dim[0], dim[1])
-            elif isinstance(dim, int):
-                new_dim = Dimension(dim, dim)
-            else:
-                raise ValueError(
-                    "Invalid shape tuple format: {self.dims}. Each dimension is expected to be "
-                    "either a single integer or a length 2 tuple."
-                )
-            new_dims.append(new_dim)
+        if self.dims is not None:
+            new_dims = []
+            for i, dim in enumerate(self.dims):
+                if isinstance(dim, Dimension):
+                    new_dim = dim
+                elif isinstance(dim, tuple) and len(dim) == 2:
+                    new_dim = Dimension(dim[0], dim[1])
+                elif isinstance(dim, int):
+                    new_dim = Dimension(dim, dim)
+                else:
+                    raise ValueError(
+                        "Invalid shape tuple format: {self.dims}. Each dimension is expected to be "
+                        "either a single integer or a length 2 tuple."
+                    )
+                new_dims.append(new_dim)
 
-        object.__setattr__(self, "dims", tuple(new_dims))
+            object.__setattr__(self, "dims", tuple(new_dims))
+
+    def __eq__(self, other):
+        """
+        Make `dims is None` a wildcard when determining equality
+
+        This definition of equality allows an unknown shape with `dims is None` to be
+        considered equal or compatible with a known shape with `dims is not None`.
+        """
+        if not isinstance(other, Shape):
+            return False
+
+        if self.dims is None or other.dims is None:
+            return True
+
+        return self.dims == other.dims
 
     @property
     def min(self) -> Tuple:
@@ -112,7 +128,7 @@ class Shape:
 
     @property
     def is_list(self):
-        return len(self.dims) > 1
+        return self.dims is not None and len(self.dims) > 1
 
     @property
     def is_ragged(self):

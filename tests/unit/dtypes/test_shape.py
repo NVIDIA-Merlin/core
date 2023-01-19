@@ -118,8 +118,15 @@ def test_is_variable():
 # Shape
 
 
-def test_shape_without_args_represents_scalar():
+def test_shape_without_args_represents_unknown():
     shape = Shape()
+    assert shape.dims is None
+    assert shape.is_list is False
+    assert shape.is_ragged is False
+
+
+def test_shape_with_empty_tuple_represents_scalar():
+    shape = Shape(())
     assert shape.dims == ()
     assert shape.is_list is False
     assert shape.is_ragged is False
