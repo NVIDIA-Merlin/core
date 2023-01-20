@@ -4,30 +4,48 @@ This folder contains the scripts necessary to build documentation for the
 merlin-core library. You can find the [generated documentation
 here](https://nvidia-merlin.github.io/core).
 
-1. Follow the instructions to create a Python developer environment. See the
-   [installation instructions](https://github.com/NVIDIA-Merlin/models).
+## Contributing to Docs
 
-2. Install required documentation tools and extensions:
+You build the documentation with the `tox` command and specify the `docs` environment.
+The following steps are one way of many to build the documentation before opening a merge request.
 
-   ```sh
-   cd models
-   pip install -r requirements/dev.txt
+1. Create a virtual environment:
+
+   ```shell
+   python -m venv .venv
    ```
 
-3. Navigate to `models/docs/` and transform the documentation to HTML output:
+1. Activate the virtual environment:
 
-   ```sh
-   make html
+   ```shell
+   source .venv/bin/activate
    ```
 
-   This should run Sphinx in your shell, and output HTML in
-   `build/html/index.html`
+1. Install tox in the virtual environment:
 
-## Preview the documentation build
-
-1. To view the docs build, run the following command from the `build/html`
-   directory:
-
-   ```sh
-   python -m http.server -d build/html
+   ```shell
+   python -m pip install --upgrade pip
+   python -m pip install tox
    ```
+
+1. Build the documentation with tox:
+
+   ```shell
+   tox -e docs
+   ```
+
+These steps run Sphinx in your shell and create HTML in the `docs/build/html/`
+directory.
+
+## Preview the Changes
+
+View the docs web page by opening the HTML in your browser. First, navigate to
+the `build/html/` directory and then run the following command:
+
+```shell
+python -m http.server
+```
+
+Afterward, open a web browser and access <https://localhost:8000>.
+
+Check that yours edits formatted correctly and read well.
