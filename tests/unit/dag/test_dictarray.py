@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
 import pytest
 
 from merlin.core.protocols import DictLike, SeriesLike, Transformable
@@ -21,14 +20,14 @@ from merlin.dag.dictarray import Column, DictArray
 
 
 @pytest.mark.parametrize("protocol", [SeriesLike])
-def test_column_matches_protocols(protocol):
-    obj = Column([], np.int32)
+def test_numpy_column_matches_protocols(protocol):
+    obj = Column.empty()
 
     assert isinstance(obj, protocol)
 
 
 @pytest.mark.parametrize("protocol", [DictLike, Transformable])
 def test_dictarray_matches_protocols(protocol):
-    obj = DictArray({}, {})
+    obj = DictArray()
 
     assert isinstance(obj, protocol)
