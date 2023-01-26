@@ -37,7 +37,7 @@ class DictArray:
         super().__init__()
         values = values or {}
 
-        self._columns = {key: _make_column(value) for key, value in values.items()}
+        self._columns = {key: Column.from_value(value) for key, value in values.items()}
 
     @property
     def columns(self):
@@ -57,7 +57,7 @@ class DictArray:
         return self.values() == other.values() and self.dtypes() == other.dtypes()
 
     def __setitem__(self, key, value):
-        self._columns[key] = _make_column(value)
+        self._columns[key] = Column.from_value(value)
 
     def __getitem__(self, key):
         if isinstance(key, list):
@@ -154,27 +154,3 @@ def get_series_offsets(series):
         return np.asarray(row_lengths)
     else:
         return series._column.offsets.values[1:] - series._column.offsets.values[:-1]
-
-
-def _make_column(value):
-    # If it's already a column, there's nothing to do
-    if isinstance(value, Column):
-        return value
-
-    # Handle (values, lengths) tuples
-    if isinstance(value, tuple):
-        values, row_lengths = value
-        return Column(values, row_lengths=row_lengths)
-
-    # Otherwise, assume value is a Numpy/Cupy array
-    if hasattr(value, "shape"):
-        if len(value.shape) > 2:
-            raise ValueError("Values with dimensions higher than 2 aren't supported.")
-        elif len(value.shape) == 2:
-            num_values = value.shape[0]
-            row_lengths = [value.shape[1]] * num_values
-            # raise ValueError(value, row_lengths)
-            return Column(value, row_lengths=row_lengths)
-
-    column = Column(value) if not isinstance(value, Column) else value
-    return column

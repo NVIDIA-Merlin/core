@@ -42,6 +42,19 @@ class Column(SeriesLike):
 
     @classmethod
     def empty(cls, dtype=None):
+        """
+        Create an empty column
+
+        Parameters
+        ----------
+        dtype : Union[DType, numpy.dtype], optional
+            The dtype of the empty column, by default None
+
+        Returns
+        -------
+        Column
+            An empty column with the requested dtype
+        """
         # This allows us to accept either Numpy or Merlin dtypes
         try:
             dtype = dtype.to_numpy()
@@ -50,6 +63,30 @@ class Column(SeriesLike):
 
         values = np.array([], dtype=dtype)
         return Column(values)
+
+    @classmethod
+    def from_value(cls, value):
+        # If it's already a column, there's nothing to do
+        if isinstance(value, Column):
+            return value
+
+        # Handle (values, lengths) tuples
+        if isinstance(value, tuple):
+            values, row_lengths = value
+            return Column(values, row_lengths=row_lengths)
+
+        # Otherwise, assume value is a Numpy/Cupy array
+        if hasattr(value, "shape"):
+            if len(value.shape) > 2:
+                raise ValueError("Values with dimensions higher than 2 aren't supported.")
+            elif len(value.shape) == 2:
+                num_values = value.shape[0]
+                row_lengths = [value.shape[1]] * num_values
+                # raise ValueError(value, row_lengths)
+                return Column(value, row_lengths=row_lengths)
+
+        column = Column(value) if not isinstance(value, Column) else value
+        return column
 
     def __init__(self, values, row_lengths=None):
         super().__init__()
