@@ -144,7 +144,7 @@ class TagSet:
 
         for tag in tag_set:
             atomized_tags.add(tag)
-            if tag in COMPOUND_TAGS.keys():
+            if tag in COMPOUND_TAGS:
                 warnings.warn(
                     f"Compound tags like {tag} have been deprecated "
                     "and will be removed in a future version. "

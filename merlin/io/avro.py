@@ -33,7 +33,7 @@ class AvroDatasetEngine(DatasetEngine):
     def __init__(self, paths, part_size, storage_options=None, cpu=False, **kwargs):
         # pylint: disable=access-member-before-definition
         super().__init__(paths, part_size, storage_options=storage_options, cpu=cpu)
-        if kwargs != {}:
+        if kwargs:
             raise ValueError("Unexpected AvroDatasetEngine argument(s).")
         self.blocksize = part_size
 

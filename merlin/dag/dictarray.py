@@ -17,6 +17,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
+import merlin.dtypes as md
 from merlin.core.protocols import SeriesLike
 
 
@@ -29,7 +30,7 @@ class Column(SeriesLike):
         super().__init__()
 
         self.values = values
-        self.dtype = dtype or values.dtype
+        self.dtype = md.dtype(dtype or values.dtype)
 
     def __getitem__(self, index):
         return self.values[index]

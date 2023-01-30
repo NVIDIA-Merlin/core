@@ -14,13 +14,14 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Dict, List, Optional, Text, Union
 
-import numpy as np
 import pandas as pd
 
+import merlin.dtypes as md
+from merlin.dtypes import DType
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -34,6 +35,11 @@ class ColumnQuantity(Enum):
 
 @dataclass(frozen=True)
 class Domain:
+    """Describes an integer or float domain.
+
+    Can be partially specified. With any of name, min, max.
+    """
+
     min: Optional[Union[int, float]] = None
     max: Optional[Union[int, float]] = None
     name: Optional[str] = None
@@ -55,39 +61,29 @@ class ColumnSchema:
     """A schema containing metadata of a dataframe column."""
 
     name: Text
-    tags: Optional[TagSet] = field(default_factory=TagSet)
+    tags: Optional[Union[TagSet, List[Union[str, Tags]]]] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
-    dtype: Optional[object] = None
+    dtype: Optional[DType] = None
     is_list: Optional[bool] = None
     is_ragged: Optional[bool] = None
 
     def __post_init__(self):
         """Standardize tags and dtypes on initialization
 
+        This method works around the inability to set attributes on frozen dataclass
+        objects by using object.__setattr__, which bypasses the methods that frozen
+        dataclasses lock down. That approach allows to do some normalization on the
+        object's attribute values in the post init hook that we otherwise wouldn't
+        have a way to implement.
+
         Raises:
             TypeError: If the provided dtype cannot be cast to a numpy dtype
         """
-        tags = TagSet(self.tags)
-        object.__setattr__(self, "tags", tags)
+        object.__setattr__(self, "tags", TagSet(self.tags))
+        object.__setattr__(self, "dtype", md.dtype(self.dtype or md.unknown))
 
-        try:
-            if hasattr(self.dtype, "numpy_dtype"):
-                dtype = np.dtype(self.dtype.numpy_dtype)
-            elif hasattr(self.dtype, "_categories"):
-                dtype = self.dtype._categories.dtype
-            elif isinstance(self.dtype, pd.StringDtype):
-                dtype = np.dtype("O")
-            else:
-                dtype = np.dtype(self.dtype)
-        except TypeError as err:
-            raise TypeError(
-                f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
-            ) from err
-
-        object.__setattr__(self, "dtype", dtype)
-
+        # Validate the allowed range of value count
         value_count = Domain(**self.properties.get("value_count", {}))
-
         if value_count.min == 0 or value_count.max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
@@ -95,10 +91,7 @@ class ColumnSchema:
             )
 
         if self.is_list is None:
-            if value_count.max and value_count.max > 0:
-                object.__setattr__(self, "is_list", True)
-            else:
-                object.__setattr__(self, "is_list", False)
+            object.__setattr__(self, "is_list", bool(value_count.max and value_count.max > 0))
 
         if self.is_ragged is None:
             if value_count.is_bounded and value_count.max > value_count.min:
@@ -106,7 +99,7 @@ class ColumnSchema:
             elif value_count.is_bounded and value_count.max == value_count.min:
                 object.__setattr__(self, "is_ragged", False)
             else:
-                object.__setattr__(self, "is_ragged", self.is_list)
+                object.__setattr__(self, "is_ragged", bool(self.is_list))
 
         if self.is_ragged and not self.is_list:
             raise ValueError(
@@ -154,14 +147,7 @@ class ColumnSchema:
             Copied object with new column name
 
         """
-        return ColumnSchema(
-            name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, name=name)
 
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
@@ -177,14 +163,7 @@ class ColumnSchema:
             Copied object with new column tags
 
         """
-        return ColumnSchema(
-            self.name,
-            tags=self.tags.override(tags),
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, tags=self.tags.override(tags))  # type: ignore
 
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
@@ -216,14 +195,7 @@ class ColumnSchema:
         if value_count.is_bounded and value_count.max == value_count.min:
             is_ragged = False
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=new_properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=is_ragged,
-        )
+        return replace(self, properties=new_properties, is_ragged=is_ragged)
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
@@ -252,22 +224,15 @@ class ColumnSchema:
         else:
             is_ragged = False
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=dtype,
-            is_list=is_list,
-            is_ragged=is_ragged,
-        )
+        return replace(self, dtype=dtype, is_list=is_list, is_ragged=is_ragged)
 
     @property
     def int_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.integer) else None
+        return self._domain() if self.dtype.is_integer else None
 
     @property
     def float_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.floating) else None
+        return self._domain() if self.dtype.is_float else None
 
     @property
     def value_count(self) -> Optional[Domain]:

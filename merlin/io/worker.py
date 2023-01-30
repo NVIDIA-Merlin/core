@@ -51,7 +51,7 @@ def _get_worker_cache(name):
     except ValueError:
         # There is no dask.distributed worker.
         # Assume client/worker are same process
-        global _WORKER_CACHE  # pylint: disable=global-statement
+        global _WORKER_CACHE  # pylint: disable=global-variable-not-assigned
         if name not in _WORKER_CACHE:
             _WORKER_CACHE[name] = {}
         return _WORKER_CACHE[name]
@@ -124,7 +124,7 @@ def clean_worker_cache(name=None):
             worker = get_worker()
         except ValueError:
             global _WORKER_CACHE  # pylint: disable=global-statement
-            if _WORKER_CACHE != {}:
+            if _WORKER_CACHE:
                 if name:
                     del _WORKER_CACHE[name]
                 else:
