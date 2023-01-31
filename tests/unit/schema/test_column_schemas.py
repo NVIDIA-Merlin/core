@@ -254,3 +254,21 @@ def test_value_count_assign_properties():
     new_col_schema = col_schema.with_properties({"value_count": {"min": 5, "max": 5}})
     assert new_col_schema.is_ragged is False
     assert new_col_schema.value_count.min == new_col_schema.value_count.max == 5
+
+
+def test_pipe_merge():
+    col_schema_a = ColumnSchema("col", dtype=md.float32)
+    col_schema_b = ColumnSchema(
+        "col",
+        dtype=md.float64,
+        is_list=True,
+        is_ragged=False,
+        properties={"value_count": {"min": 5, "max": 5}},
+    )
+
+    new_schema = col_schema_a | col_schema_b
+
+    assert new_schema.dtype == md.float32
+    assert new_schema.properties == {"value_count": {"min": 5, "max": 5}}
+    assert new_schema.is_list
+    assert not new_schema.is_ragged
