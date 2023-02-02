@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import numba
+
 try:
     from numba import cuda
 
@@ -20,5 +22,8 @@ except ImportError:
     cuda = None
 
 HAS_GPU = False
-if cuda and len(cuda.gpus) > 0:
-    HAS_GPU = True
+try:
+    if cuda and len(cuda.gpus) > 0:
+        HAS_GPU = True
+except numba.cuda.CudaSupportError:
+    ...
