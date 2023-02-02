@@ -29,3 +29,26 @@ except ImportError:
     # know `distributed` is not installed (otherwise
     # the `nvml` import would have succeeded)
     HAS_GPU = cuda is not None
+
+
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
+try:
+    import cupy
+except ImportError:
+    cupy = None
+
+try:
+    import tensorflow
+    from tensorflow.python.framework import ops as tf_ops
+except ImportError:
+    tensorflow = None
+    tf_ops = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
