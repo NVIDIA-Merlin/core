@@ -34,9 +34,7 @@ rmm = None
 if HAS_GPU:
     try:
         import cudf  # type: ignore[no-redef]
-        import cupy as cp  # type: ignore[no-redef]
         import dask_cudf
-        import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
         try:
@@ -47,9 +45,18 @@ if HAS_GPU:
             # cudf < 21.08
             from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
-
     except ImportError:
-        HAS_GPU = False
+        ...
+    try:
+        import cupy as cp  # type: ignore[no-redef]
+    except ImportError:
+        ...
+    try:
+        import rmm  # type: ignore[no-redef]
+    except ImportError:
+        ...
+    # except ImportError:
+    #     HAS_GPU = False
 
 
 try:
@@ -489,16 +496,21 @@ def concat(objs, **kwargs):
 
 def make_df(_like_df=None, device=None):
     """Return a DataFrame with the same dtype as `_like_df`"""
-    if not cudf or isinstance(_like_df, (pd.DataFrame, pd.Series)):
-        return pd.DataFrame(_like_df)
-    elif isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+    if not cudf or device == "cpu" or isinstance(_like_df, (pd.DataFrame, pd.Series)):
+        # move to pandas need it on CPU (host memory)
+        # can be a cudf, cupy or numpy Series
+        if cudf and isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+            # move to cpu
+            return _like_df.to_pandas()
+        if cp and isinstance(_like_df, cp.ndarray):
+            return pd.DataFrame(cp.asarray(_like_df))
+        else:
+            return pd.DataFrame(_like_df)
+    else:
+        if isinstance(_like_df, dict) and len(_like_df) > 0:
+            if all(isinstance(v, pd.Series) for v in _like_df.values()):
+                return pd.DataFrame(_like_df)
         return cudf.DataFrame(_like_df)
-    elif device is None and isinstance(_like_df, dict) and len(_like_df) > 0:
-        is_pandas = all(isinstance(v, pd.Series) for v in _like_df.values())
-        return pd.DataFrame(_like_df) if is_pandas else cudf.DataFrame(_like_df)
-    if device == "cpu":
-        return pd.DataFrame(_like_df)
-    return cudf.DataFrame(_like_df)
 
 
 def make_series(_like_ser=None, device=None):
