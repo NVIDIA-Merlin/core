@@ -240,7 +240,7 @@ class ColumnSchema:
         return Domain(**value_count) if value_count else None
 
     def __or__(self, other):
-        dtype = self.dtype if self.dtype != md.unknown else other.dtype
+        dtype = other.dtype if other.dtype != md.unknown else self.dtype
 
         col_schema = (
             self.with_tags(other.tags)
