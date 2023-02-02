@@ -20,12 +20,5 @@ except ImportError:
     cuda = None
 
 HAS_GPU = False
-try:
-    from dask.distributed.diagnostics import nvml
-
-    HAS_GPU = nvml.device_get_count() > 0
-except ImportError:
-    # We can use `cuda` to set `HAS_GPU` now that we
-    # know `distributed` is not installed (otherwise
-    # the `nvml` import would have succeeded)
-    HAS_GPU = cuda is not None
+if cuda and len(cuda.gpus) > 0:
+    HAS_GPU = True
