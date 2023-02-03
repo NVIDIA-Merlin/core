@@ -15,17 +15,18 @@
 #
 try:
     from numba import cuda
-
 except ImportError:
     cuda = None
 
-HAS_GPU = False
-try:
-    from dask.distributed.diagnostics import nvml
+from dask.distributed.diagnostics import nvml
 
-    HAS_GPU = nvml.device_get_count() > 0
-except ImportError:
-    # We can use `cuda` to set `HAS_GPU` now that we
-    # know `distributed` is not installed (otherwise
-    # the `nvml` import would have succeeded)
-    HAS_GPU = cuda is not None
+# Using the `dask.distributed.diagnostics.nvml.device_get_count`
+# helper function from dask to check device counts with NVML
+# since this handles some complexity of checking NVML state for us.
+
+# Note: We can't use `numba.cuda.gpus`, since this has some side effects
+# that are incompatible with Dask-CUDA. If CUDA runtime functions are
+# called before Dask-CUDA can spawn worker processes
+# then Dask-CUDA it will not work correctly (raises an exception)
+
+HAS_GPU = nvml.device_get_count() > 0
