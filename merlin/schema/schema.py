@@ -14,15 +14,15 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass, field, replace
+from dataclasses import InitVar, dataclass, field, replace
 from enum import Enum
-from typing import Dict, List, Optional, Text, Union
+from typing import Dict, List, Optional, Text, Tuple, Union
 
 import pandas as pd
 
 import merlin.dtypes as md
 from merlin.dtypes import DType
-from merlin.dtypes.shape import Dimension
+from merlin.dtypes.shape import Shape
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -67,8 +67,9 @@ class ColumnSchema:
     dtype: Optional[DType] = None
     is_list: Optional[bool] = None
     is_ragged: Optional[bool] = None
+    dims: InitVar[Union[Tuple, Shape]] = None
 
-    def __post_init__(self):
+    def __post_init__(self, dims):
         """Standardize tags and dtypes on initialization
 
         This method works around the inability to set attributes on frozen dataclass
@@ -83,44 +84,37 @@ class ColumnSchema:
         object.__setattr__(self, "tags", TagSet(self.tags))
         object.__setattr__(self, "dtype", md.dtype(self.dtype or md.unknown))
 
+        dims_shape = Shape(dims) if dims else None
+
+        if dims_shape is None and len(self.dtype.shape.dims) > 0:
+            dims_shape = self.dtype.shape
+
+        value_counts = self.properties.get("value_count", {})
+        value_count = Domain(**value_counts)
+
         # Validate the allowed range of value count
-        value_count = Domain(**self.properties.get("value_count", {}))
         if value_count.min == 0 or value_count.max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
                 f"Provided min: {value_count.min} max: {value_count.max}"
             )
 
-        if self.is_list is None:
-            object.__setattr__(self, "is_list", bool(value_count.max and value_count.max > 0))
+        counts_shape = (
+            Shape(((0, None), (value_count.min or 0, value_count.max))) if value_counts else None
+        )
 
-        if self.is_ragged is None:
-            if value_count.is_bounded and value_count.max > value_count.min:
-                object.__setattr__(self, "is_ragged", True)
-            elif value_count.is_bounded and value_count.max == value_count.min:
-                object.__setattr__(self, "is_ragged", False)
-            else:
-                object.__setattr__(self, "is_ragged", bool(self.is_list))
+        list_shape = Shape(((0, None), (0, None))) if self.is_list else None
 
-        if self.is_ragged and not self.is_list:
-            raise ValueError(
-                "`is_ragged` is set to `True` but `is_list` is not. "
-                "Only list columns can set the `is_ragged` flag."
-            )
+        self._validate_shapes_and_flags(
+            dims_shape, value_counts, counts_shape, self.is_list, self.is_ragged
+        )
 
-        if self.is_ragged and value_count.is_bounded and value_count.min == value_count.max:
-            raise ValueError(
-                "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. "
-                "If value_count min/max are equal. "
-                "This is a fixed size list and `is_ragged` should be set to False. "
-            )
+        new_shape = dims_shape or counts_shape or list_shape
+        if new_shape:
+            object.__setattr__(self, "dtype", self.dtype.with_shape(new_shape))
 
-        if self.shape:
-            # Convert raw (min,max) tuples to Dimension objects for convenience
-            new_shape = (
-                Dimension(dim) if not isinstance(dim, Dimension) else dim for dim in self.shape
-            )
-            object.__setattr__(self, "shape", new_shape)
+        object.__setattr__(self, "is_list", self.dtype.shape.is_list)
+        object.__setattr__(self, "is_ragged", self.dtype.shape.is_ragged)
 
     @property
     def shape(self):
@@ -202,12 +196,10 @@ class ColumnSchema:
         # Using new dictionary to avoid passing old ref to new schema
         new_properties = {**self.properties, **properties}
 
-        is_ragged = self.is_ragged
-        value_count = Domain(**new_properties.get("value_count", {}))
-        if value_count.is_bounded and value_count.max == value_count.min:
-            is_ragged = False
-
-        return replace(self, properties=new_properties, is_ragged=is_ragged)
+        return replace(
+            self,
+            properties=new_properties,
+        )
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
@@ -238,6 +230,28 @@ class ColumnSchema:
 
         return replace(self, dtype=dtype, is_list=is_list, is_ragged=is_ragged)
 
+    def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
+        """
+        Create a copy of this object with a new shape
+
+        Parameters
+        ----------
+        shape : Union[Tuple, Shape]
+            Object to set as shape, must be either a tuple or Shape.
+
+        Returns
+        -------
+        ColumnSchema
+            A copy of this object containing the provided shape value
+
+        Raises
+        ------
+        TypeError
+            If value is not either a tuple or a Shape
+        """
+        dtype_with_shape = self.dtype.with_shape(shape)
+        return replace(self, dtype=dtype_with_shape)
+
     @property
     def int_domain(self) -> Optional[Domain]:
         return self._domain() if self.dtype.is_integer else None
@@ -252,12 +266,13 @@ class ColumnSchema:
         return Domain(**value_count) if value_count else None
 
     def __merge__(self, other):
-        col_schema = self.with_tags(other.tags)
-        col_schema = col_schema.with_properties(other.properties)
-        col_schema = col_schema.with_dtype(
-            other.dtype, is_list=other.is_list, is_ragged=other.is_ragged
+        col_schema = (
+            self.with_name(other.name)
+            .with_dtype(other.dtype)
+            .with_tags(other.tags)
+            .with_properties(other.properties)
+            .with_shape(other.shape)
         )
-        col_schema = col_schema.with_name(other.name)
         return col_schema
 
     def __str__(self) -> str:
@@ -267,6 +282,45 @@ class ColumnSchema:
         """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
+
+    def _validate_shapes_and_flags(
+        self, dims_shape, value_counts, counts_shape, is_list, is_ragged
+    ):
+        if dims_shape and counts_shape and counts_shape != dims_shape:
+            raise ValueError(
+                f"Provided value counts `{value_counts}` "
+                f"are inconsistent with shape `{dims_shape}`."
+            )
+        elif dims_shape and is_list is not None and dims_shape.is_list != is_list:
+            raise ValueError(
+                f"Provided value of `is_list={is_list}` "
+                f"is inconsistent with shape `{dims_shape}`."
+            )
+        elif dims_shape and is_ragged is not None and dims_shape.is_ragged != is_ragged:
+            raise ValueError(
+                f"Provided value of `is_ragged={is_ragged}` "
+                f"is inconsistent with shape `{dims_shape}`."
+            )
+        elif counts_shape and is_list is not None and counts_shape.is_list != is_list:
+            raise ValueError(
+                f"Provided value of `is_list={is_list}` "
+                f"is inconsistent with value counts `{value_counts}`."
+            )
+        elif counts_shape and is_ragged is not None and counts_shape.is_ragged != is_ragged:
+            raise ValueError(
+                f"Provided value of `is_ragged={is_ragged}` "
+                f"is inconsistent with value counts `{value_counts}`."
+            )
+        elif not dims_shape and not counts_shape and is_list is True and is_ragged is False:
+            raise ValueError(
+                "Can't determine a shape for this column from "
+                "`is_list=True` and `is_ragged=False` without value counts. "
+            )
+        elif not dims_shape and not counts_shape and is_list is False and is_ragged is True:
+            raise ValueError(
+                "Columns with `is_list=False` can't set `is_ragged=True`, "
+                "since non-list columns can't be ragged."
+            )
 
 
 class Schema:

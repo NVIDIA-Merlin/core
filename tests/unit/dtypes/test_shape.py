@@ -118,6 +118,13 @@ def test_is_variable():
 # Shape
 
 
+def test_shape_without_args_represents_scalar():
+    shape = Shape()
+    assert shape.dims == ()
+    assert shape.is_list is False
+    assert shape.is_ragged is False
+
+
 def test_flat_tuple_creates_fixed_shape():
     shape = Shape((1, 2, 3))
     assert shape.is_fixed is True
@@ -194,7 +201,7 @@ def test_shape_properties():
 
 
 def test_dtype_has_a_shape():
-    assert md.int32.shape is None
+    assert md.int32.shape == Shape()
 
 
 def test_dtype_with_shape():

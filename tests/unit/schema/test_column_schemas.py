@@ -17,6 +17,7 @@ import pandas as pd
 import pytest
 
 import merlin.dtypes as md
+from merlin.dtypes.shape import Shape
 from merlin.schema import ColumnSchema
 from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
@@ -196,11 +197,8 @@ def test_list_column_attributes():
     assert col3_schema.is_ragged
     assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
-    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
-
-    assert col4_schema.is_list
-    assert not col4_schema.is_ragged
-    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
+    with pytest.raises(ValueError):
+        ColumnSchema("col4", is_list=True, is_ragged=False)
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
@@ -209,7 +207,7 @@ def test_list_column_attributes():
 def test_value_count_invalid_min_max():
     with pytest.raises(ValueError) as exc_info:
         ColumnSchema("col", is_ragged=True, properties={"value_count": {"min": 2, "max": 2}})
-    assert "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`" in str(
+    assert "Provided value of `is_ragged=True` is inconsistent with value counts" in str(
         exc_info.value
     )
 
@@ -249,8 +247,28 @@ def test_value_count(value_count_min, value_count_max):
     assert col_schema.value_count.min == value_count_min
 
 
-def test_value_count_assign_properties():
-    col_schema = ColumnSchema("col", is_list=True, is_ragged=True)
-    new_col_schema = col_schema.with_properties({"value_count": {"min": 5, "max": 5}})
-    assert new_col_schema.is_ragged is False
-    assert new_col_schema.value_count.min == new_col_schema.value_count.max == 5
+def test_value_count_inconsistency_with_flags():
+    with pytest.raises(ValueError) as exc_info:
+        ColumnSchema(
+            "col", properties={"value_count": {"min": 5, "max": 5}}, is_list=True, is_ragged=True
+        )
+    assert "Provided value of `is_ragged=True` is inconsistent with value counts" in str(
+        exc_info.value
+    )
+
+
+def test_column_schema_with_shape():
+    col_schema = ColumnSchema("col")
+    assert col_schema.shape == Shape()
+
+    col_schema = ColumnSchema("col", dtype=md.int32.with_shape((3, 4, 5)))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))
+
+    col_schema = ColumnSchema("col", dims=(3, 4, 5))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))
+
+    col_schema = col_schema.with_shape((3, 4, 5))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))

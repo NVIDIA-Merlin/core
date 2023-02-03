@@ -72,6 +72,10 @@ class DType:
     signed: Optional[bool] = None
     shape: Optional[Shape] = None
 
+    def __post_init__(self):
+        if not self.shape:
+            object.__setattr__(self, "shape", Shape())
+
     def to(self, mapping_name: str):
         """
         Convert this Merlin dtype to another framework's dtypes
