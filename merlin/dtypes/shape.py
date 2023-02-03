@@ -80,8 +80,8 @@ class Shape:
                     new_dim = Dimension(dim, dim)
                 else:
                     raise ValueError(
-                        "Invalid shape tuple format: {self.dims}. Each dimension is expected to be "
-                        "either a single integer or a length 2 tuple."
+                        f"Invalid shape tuple format: {self.dims}. Each dimension is expected "
+                        " to be either a single integer or a length 2 tuple."
                     )
                 new_dims.append(new_dim)
 
