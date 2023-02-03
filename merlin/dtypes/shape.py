@@ -111,10 +111,6 @@ class Shape:
         return tuple(dim.max for dim in self.dims)
 
     @property
-    def fixed(self) -> Tuple:
-        return tuple(dim.min if dim.is_fixed else None for dim in self.dims)
-
-    @property
     def is_bounded(self):
         return all(dim.is_bounded for dim in self.dims)
 
