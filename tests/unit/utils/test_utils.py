@@ -30,7 +30,6 @@ _HAS_GPU = cudf is not None
 
 @pytest.mark.parametrize("cpu", _CPU)
 def test_serial_context(client, cpu):
-
     # Set distributed client
     set_dask_client(client=client)
     assert global_dask_client() == client
@@ -48,7 +47,6 @@ def test_serial_context(client, cpu):
 @pytest.mark.parametrize("cpu", [True, False])
 @pytest.mark.parametrize("nested_serial", _CPU)
 def test_nvt_distributed(cpu, nested_serial):
-
     if cpu:
         distributed = pytest.importorskip("distributed")
         cluster_type = "cpu"
@@ -84,7 +82,6 @@ def test_nvt_distributed(cpu, nested_serial):
 
 @pytest.mark.parametrize("cpu", _CPU)
 def test_nvt_distributed_force(client, cpu):
-
     if cpu:
         distributed = pytest.importorskip("distributed")
         cluster_type = "cpu"
