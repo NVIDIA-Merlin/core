@@ -130,7 +130,6 @@ class ThreadedWriter(Writer):
 
     @annotate("add_data", color="orange", domain="merlin_python")
     def add_data(self, df):
-
         # Early return
         if isinstance(df, list) and not df:
             return
