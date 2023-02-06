@@ -69,6 +69,9 @@ class Shape:
     dims: Optional[Tuple] = None
 
     def __post_init__(self):
+        if isinstance(self.dims, Shape):
+            object.__setattr__(self, "dims", self.dims.dims)
+
         if self.dims is not None:
             new_dims = []
             for i, dim in enumerate(self.dims):
@@ -131,3 +134,7 @@ class Shape:
     @property
     def is_ragged(self):
         return self.is_list and any(dim.min != dim.max for dim in self.dims[1:])
+
+    @property
+    def as_tuple(self):
+        return ((dim.min, dim.max) for dim in self.dims) if self.dims else None
