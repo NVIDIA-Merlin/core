@@ -415,9 +415,9 @@ def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     elif cudf is not None:
         _cls = cudf.io.parquet.ParquetWriter
     elif cudf is None:
-        ValueError(
+        raise ValueError(
             "Unable to load cudf. Please check your environment GPU and cudf available."
-        )  # pylint: disable=pointless-exception-statement
+        )
 
     if not path:
         return _cls
