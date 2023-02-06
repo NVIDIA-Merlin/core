@@ -104,7 +104,6 @@ if cudf is not None:
             if (cudf_version.major == 21 and cudf_version.minor == 10) or (
                 cudf_version.major == 0 and cudf_version.minor == 0
             ):
-
                 # We only need this work-around for cudf-21.10
                 return _override_read_metadata(_cudf_read_metadata, *args, **kwargs)
             return _override_read_metadata(CudfEngine.read_metadata, *args, **kwargs)
@@ -287,7 +286,6 @@ def _override_read_metadata(
 
         # Apply file aggregation
         if aggregate_row_groups is not None:
-
             # Convert `aggregate_files` to an integer `aggregation_depth`
             aggregation_depth = False
             if len(parts) and aggregate_files:
@@ -448,7 +446,6 @@ class ParquetDatasetEngine(DatasetEngine):
         self._pp_map = _pp_map
 
     def to_ddf(self, columns=None, cpu=None):
-
         # Check if we are using cpu or gpu backend
         cpu = self.cpu if cpu is None else cpu
         backend_engine = CPUParquetEngine if cpu else GPUParquetEngine
@@ -825,7 +822,6 @@ class ParquetDatasetEngine(DatasetEngine):
         out_parts = 0
         remaining_out_part_rows = rows_per_part
         for i, in_part_size in enumerate(size_list):
-
             # The `split` dictionary will be passed to this input
             # partition to dictate how that partition will be split
             # into different output partitions/files.  The "key" of
@@ -834,7 +830,6 @@ class ParquetDatasetEngine(DatasetEngine):
             split = {}
             last = 0
             while in_part_size >= remaining_out_part_rows:
-
                 gets[out_parts].append(i)
                 split[out_parts] = (last, last + remaining_out_part_rows)
                 last += remaining_out_part_rows
@@ -911,7 +906,6 @@ class ParquetDatasetEngine(DatasetEngine):
 
 
 def _write_metadata_file(md_list, fs, output_path, gmd_base):
-
     # Prepare both "general" and parquet metadata
     gmd = gmd_base.copy()
     pmd = {}
@@ -939,7 +933,6 @@ def _write_metadata_file(md_list, fs, output_path, gmd_base):
 
 
 def _write_data(data_list, output_path, fs, fn):
-
     # Initialize chunked writer
     path = fs.sep.join([output_path, fn])
     writer = pwriter_cudf(path, compression=None)
@@ -1125,7 +1118,6 @@ class CPUParquetWriter(BaseParquetWriter):
         return md
 
     def _append_writer(self, path, schema=None):
-
         # Define "metadata collector" for pyarrow
         _md_collector = []
         _args = [schema]

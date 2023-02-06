@@ -49,7 +49,6 @@ class CSVDatasetEngine(DatasetEngine):
             self.paths = self.fs.glob(self.fs.sep.join([self.paths[0], "*"]))
 
     def to_ddf(self, columns=None, cpu=None):
-
         # Check if we are using cpu
         cpu = self.cpu if cpu is None else cpu
         if cpu:
