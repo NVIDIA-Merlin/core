@@ -92,21 +92,13 @@ class ColumnSchema:
         value_counts = self.properties.get("value_count", {})
         self._validate_shape_info(self.shape, value_counts, self.is_list, self.is_ragged)
 
-        # Validate the allowed range of value count
-        value_count = Domain(**value_counts)
-        if value_count.min == 0 or value_count.max == 0:
-            raise ValueError(
-                "`value_count` min and max must be greater than zero. "
-                f"Provided min: {value_count.min} max: {value_count.max}"
-            )
-
         # Pick which source to pull shape info from
         if dims:
             new_shape = Shape(dims)
         elif dtype.shape.dims:
             new_shape = dtype.shape
         elif value_counts:
-            new_shape = self._shape_from_counts(value_count)
+            new_shape = self._shape_from_counts(Domain(**value_counts))
         elif self.is_list:
             new_shape = self._shape_from_flags(self.is_list)
         else:

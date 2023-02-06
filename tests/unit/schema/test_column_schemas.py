@@ -205,20 +205,6 @@ def test_list_column_attributes():
 
 
 @pytest.mark.parametrize(
-    "properties",
-    [
-        {"value_count": {"max": 0}},
-        {"value_count": {"min": 0}},
-        {"value_count": {"min": 0, "max": 2}},
-    ],
-)
-def test_value_count_zero_min_max(properties):
-    with pytest.raises(ValueError) as exc_info:
-        ColumnSchema("col", is_ragged=True, properties=properties)
-    assert "`value_count` min and max must be greater than zero. " in str(exc_info.value)
-
-
-@pytest.mark.parametrize(
     ["value_count_min", "value_count_max"],
     [
         [None, 4],
