@@ -78,10 +78,12 @@ class Shape:
                     new_dim = Dimension(dim[0], dim[1])
                 elif isinstance(dim, int):
                     new_dim = Dimension(dim, dim)
+                elif dim is None:
+                    new_dim = Dimension()
                 else:
                     raise ValueError(
                         f"Invalid shape tuple format: {self.dims}. Each dimension is expected "
-                        " to be either a single integer or a length 2 tuple."
+                        " to be None, a single integer, or a tuple with length 2."
                     )
                 new_dims.append(new_dim)
 

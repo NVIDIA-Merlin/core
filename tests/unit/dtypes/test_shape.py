@@ -137,6 +137,11 @@ def test_flat_tuple_creates_fixed_shape():
     assert shape.is_fixed is True
 
 
+def test_none_is_shorthand_for_unknown_unbounded():
+    shape = Shape((None, (4, 16)))
+    assert shape == Shape(((0, None), (4, 16)))
+
+
 def test_nested_tuple_creates_variable_shape():
     shape = Shape(((5, 5), (2, 2), (3, 3)))
     assert shape.is_variable is False
