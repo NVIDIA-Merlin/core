@@ -15,6 +15,7 @@
 #
 
 import collections
+from copy import deepcopy
 import logging
 import math
 import random
@@ -892,7 +893,8 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
-        schema = self.schema
+        schema = deepcopy(self.schema)
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
