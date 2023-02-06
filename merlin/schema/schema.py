@@ -80,39 +80,54 @@ class ColumnSchema:
 
         Raises:
             TypeError: If the provided dtype cannot be cast to a numpy dtype
+            ValueError: If the provided shape, value counts, and/or flags are inconsistent
         """
+        # Provide defaults and minor conversions for convenience
         object.__setattr__(self, "tags", TagSet(self.tags))
-        object.__setattr__(self, "dtype", md.dtype(self.dtype or md.unknown))
 
-        existing_shape = self.shape if self.shape.dims is not None else None
-        dims_shape = Shape(dims) if dims else None
+        dtype = md.dtype(self.dtype or md.unknown)
+        object.__setattr__(self, "dtype", dtype)
 
+        # Validate that everything provided is consistent
         value_counts = self.properties.get("value_count", {})
-        value_count = Domain(**value_counts)
+        self._validate_shape_info(self.shape, value_counts, self.is_list, self.is_ragged)
 
         # Validate the allowed range of value count
+        value_count = Domain(**value_counts)
         if value_count.min == 0 or value_count.max == 0:
             raise ValueError(
                 "`value_count` min and max must be greater than zero. "
                 f"Provided min: {value_count.min} max: {value_count.max}"
             )
 
-        counts_shape = (
-            Shape(((0, None), (value_count.min or 0, value_count.max))) if value_counts else None
-        )
+        # Pick which source to pull shape info from
+        if dims:
+            new_shape = Shape(dims)
+        elif dtype.shape.dims:
+            new_shape = dtype.shape
+        elif value_counts:
+            new_shape = self._shape_from_counts(value_count)
+        elif self.is_list:
+            new_shape = self._shape_from_flags(self.is_list)
+        else:
+            new_shape = Shape()
 
-        list_shape = Shape(((0, None), (0, None))) if self.is_list else None
+        # Update the shape and propagate out to flags and value counts
+        dtype = dtype.with_shape(new_shape)
+        object.__setattr__(self, "dtype", dtype)
+        object.__setattr__(self, "is_list", dtype.shape.is_list)
+        object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
 
-        new_shape = dims_shape or counts_shape or existing_shape or list_shape
+        if new_shape.dims is not None and len(new_shape.dims) > 1:
+            value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
+            properties = {**self.properties, **{"value_count": value_counts}}
+            object.__setattr__(self, "properties", properties)
 
-        self._validate_counts(new_shape, value_counts, self.is_ragged)
-        self._validate_flags(new_shape, self.is_list, self.is_ragged)
+    def _shape_from_flags(self, is_list):
+        return Shape(((0, None), (0, None))) if is_list else None
 
-        if new_shape:
-            object.__setattr__(self, "dtype", self.dtype.with_shape(new_shape))
-
-        object.__setattr__(self, "is_list", self.dtype.shape.is_list)
-        object.__setattr__(self, "is_ragged", self.dtype.shape.is_ragged)
+    def _shape_from_counts(self, value_count):
+        return Shape(((0, None), (value_count.min or 0, value_count.max)))
 
     @property
     def shape(self):
@@ -189,15 +204,26 @@ class ColumnSchema:
 
         """
         if not isinstance(properties, dict):
-            raise TypeError("properties must be in dict format, key: value")
+            raise TypeError("ColumnSchema properties must be a dictionary")
 
         # Using new dictionary to avoid passing old ref to new schema
         new_properties = {**self.properties, **properties}
 
-        return replace(
-            self,
-            properties=new_properties,
-        )
+        value_counts = properties.get("value_count", {})
+
+        if value_counts:
+            return replace(
+                self,
+                properties=new_properties,
+                dtype=self.dtype.without_shape,
+                is_list=None,
+                is_ragged=None,
+            )
+        else:
+            return replace(
+                self,
+                properties=new_properties,
+            )
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
@@ -219,13 +245,6 @@ class ColumnSchema:
             Copied object with new column dtype
 
         """
-        is_list = is_list if is_list is not None else self.is_list
-
-        if is_list:
-            is_ragged = is_ragged if is_ragged is not None else self.is_ragged
-        else:
-            is_ragged = False
-
         return replace(self, dtype=dtype, is_list=is_list, is_ragged=is_ragged)
 
     def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
@@ -247,8 +266,11 @@ class ColumnSchema:
         TypeError
             If value is not either a tuple or a Shape
         """
-        dtype_with_shape = self.dtype.with_shape(shape)
-        return replace(self, dtype=dtype_with_shape)
+        new_dtype = self.dtype.with_shape(shape)
+
+        new_col_schema = replace(self, dtype=new_dtype, is_list=None, is_ragged=None)
+
+        return new_col_schema
 
     @property
     def int_domain(self) -> Optional[Domain]:
@@ -281,49 +303,56 @@ class ColumnSchema:
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
 
-    def _validate_counts(self, new_shape, value_counts, is_ragged):
-        if new_shape and value_counts:
-            min_count = value_counts.get("min", None)
-            max_count = value_counts.get("max", None)
-            ragged_counts = min_count != max_count
+    def _validate_shape_info(self, shape, value_counts, is_list, is_ragged):
+        value_counts = value_counts or {}
 
-            if is_ragged is not None and is_ragged != ragged_counts:
+        min_count = value_counts.get("min", None)
+        max_count = value_counts.get("max", None)
+        ragged_counts = min_count != max_count
+
+        if shape and shape.dims is not None:
+            if is_ragged is not None and shape.is_ragged != is_ragged:
                 raise ValueError(
                     f"Provided value of `is_ragged={is_ragged}` "
-                    f"is inconsistent with value counts `{value_counts}`."
+                    f"is inconsistent with shape `{shape}`."
+                )
+            elif is_list is not None and shape.is_list != is_list:
+                raise ValueError(
+                    f"Provided value of `is_list={is_list}` "
+                    f"is inconsistent with shape `{shape}`."
                 )
 
-            if (min_count and min_count != new_shape.dims[1].min) or (
-                max_count and max_count != new_shape.dims[1].max
+        if value_counts and shape and shape.dims is not None:
+            if (min_count and min_count != shape.dims[1].min) or (
+                max_count and max_count != shape.dims[1].max
             ):
                 raise ValueError(
                     f"Provided value counts `{value_counts}` "
-                    f"are inconsistent with shape `{new_shape}`."
+                    f"are inconsistent with shape `{shape}`."
                 )
 
-    def _validate_flags(self, new_shape, is_list, is_ragged):
-        if new_shape:
-            if is_ragged is not None and new_shape.is_ragged != is_ragged:
-                raise ValueError(
-                    f"Provided value of `is_ragged={is_ragged}` "
-                    f"is inconsistent with shape `{new_shape}`."
-                )
-            elif is_list is not None and new_shape.is_list != is_list:
-                raise ValueError(
-                    f"Provided value of `is_list={is_list}` "
-                    f"is inconsistent with shape `{new_shape}`."
-                )
-        else:
-            if is_list is True and is_ragged is False:
-                raise ValueError(
-                    "Can't determine a shape for this column from "
-                    "`is_list=True` and `is_ragged=False` without value counts. "
-                )
-            elif is_list is False and is_ragged is True:
-                raise ValueError(
-                    "Columns with `is_list=False` can't set `is_ragged=True`, "
-                    "since non-list columns can't be ragged."
-                )
+        if is_list is False and is_ragged is True:
+            raise ValueError(
+                "Columns with `is_list=False` can't set `is_ragged=True`, "
+                "since non-list columns can't be ragged."
+            )
+
+        if (
+            not value_counts
+            and not (shape and shape.dims)
+            and is_list is True
+            and is_ragged is False
+        ):
+            raise ValueError(
+                "Can't determine a shape for this column from "
+                "`is_list=True` and `is_ragged=False` without value counts. "
+            )
+
+        if value_counts and is_ragged is not None and is_ragged != ragged_counts:
+            raise ValueError(
+                f"Provided value of `is_ragged={is_ragged}` "
+                f"is inconsistent with value counts `{value_counts}`."
+            )
 
 
 class Schema:
