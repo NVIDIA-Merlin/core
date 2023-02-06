@@ -49,7 +49,6 @@ def dtype(external_dtype):
     try:
         return _dtype_registry.to_merlin(external_dtype)
     except TypeError as base_exc:
-
         try:
             return _dtype_registry.to_merlin_via_numpy(external_dtype)
         except TypeError as exc:
