@@ -61,4 +61,5 @@ def test_pandas_cupy_combo():
 
     assert "Implicit conversion to a NumPy array is not allowed" in str(exc_info)
 
-    assert pd.DataFrame(cp_arr.get())
+    pdf = pd.DataFrame({"col": cp_arr.get()})
+    assert all(pdf["col"].to_numpy() == cp_arr.get())
