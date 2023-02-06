@@ -22,8 +22,7 @@ from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import tf_ops
 from merlin.core.compat import torch as th
-from merlin.core.protocols import SeriesLike
-from merlin.dag.table.tensor_column import TensorColumn
+from merlin.dag.table.tensor_column import Device, TensorColumn
 
 
 class TensorflowColumn(TensorColumn):
@@ -36,6 +35,10 @@ class TensorflowColumn(TensorColumn):
     def __init__(self, values: tf.Tensor, offsets: tf.Tensor = None, dtype=None):
         super().__init__(values, offsets, dtype)
 
+    @property
+    def device(self) -> Device:
+        return Device.GPU if "GPU" in self.values.device else Device.CPU
+
 
 def to_tf(tensor):
     return _to_tf(tensor)
@@ -43,13 +46,14 @@ def to_tf(tensor):
 
 @singledispatch
 def _to_tf(tensor):
-    raise NotImplemented
+    raise NotImplementedError
 
 
 if cp:
 
     @_to_tf.register
     def cupy_to_tf(tensor: cp.ndarray):
+        # TODO: Use CUDA array interface or DLpack
         return tf.convert_to_tensor(cp.asnumpy(tensor))
 
 
@@ -57,14 +61,20 @@ if np:
 
     @_to_tf.register
     def numpy_to_tf(tensor: np.ndarray):
-        return tf.convert_to_tensor(tensor)
+        with tf.device("CPU"):
+            return tf.convert_to_tensor(tensor)
 
 
 if th:
 
     @_to_tf.register
     def torch_to_tf(tensor: th.Tensor):
-        return tf.convert_to_tensor(tensor.numpy())
+        # TODO: Use CUDA array interface or DLpack
+        is_gpu = tensor.is_cuda
+        device_num = th.cuda.current_device() if is_gpu else ""
+        device = "GPU" if is_gpu else "CPU"
+        with tf.device(f"{device}{device_num}"):
+            return tf.convert_to_tensor(tensor.numpy())
 
 
 if tf:

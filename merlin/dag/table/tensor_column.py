@@ -13,20 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from functools import singledispatch
-from typing import Any, Union
+from abc import ABC, abstractproperty
+from enum import Enum
+from typing import Any
 
 import merlin.dtypes as md
-from merlin.core.compat import cupy as cp
-from merlin.core.compat import numpy as np
-from merlin.core.compat import tensorflow as tf
-from merlin.core.compat import tf_ops
-from merlin.core.compat import torch as th
 from merlin.core.protocols import SeriesLike
 
 
+class Device(Enum):
+    CPU = 0
+    GPU = 1
+
+
 # This should always contains arrays or tensors, not series
-class TensorColumn(SeriesLike):
+class TensorColumn(ABC):
     """
     A simple wrapper around an array of values
     """
@@ -37,3 +38,7 @@ class TensorColumn(SeriesLike):
         self.values = values
         self.offsets = offsets
         self.dtype = md.dtype(dtype or values.dtype)
+
+    @abstractproperty
+    def device(self) -> Device:
+        ...

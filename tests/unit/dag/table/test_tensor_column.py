@@ -21,6 +21,7 @@ import torch as th
 
 import merlin.dtypes as md
 from merlin.dag.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
+from merlin.dag.table.tensor_column import Device
 
 
 @pytest.mark.parametrize(
@@ -47,31 +48,41 @@ def test_array_types(column_class, constructor, dtype):
 
 
 @pytest.mark.parametrize(
-    "source_class,constructor,dtype",
+    "source_class,constructor,dtype,source_device",
     [
-        (NumpyColumn, np.array, np.int32),
-        (CupyColumn, cp.array, cp.int32),
-        (TensorflowColumn, tf.constant, tf.int32),
-        (TorchColumn, th.tensor, th.int32),
+        (NumpyColumn, np.array, np.int32, Device.CPU),
+        (CupyColumn, cp.array, cp.int32, Device.GPU),
+        (TensorflowColumn, tf.constant, tf.int32, Device.GPU),
+        (TorchColumn, th.tensor, th.int32, Device.CPU),
+        # TODO: Create Torch GPU tensor
+        # TODO: Create Tensorflow CPU tensor
     ],
 )
 @pytest.mark.parametrize(
-    "dest_class,dest_type",
+    "dest_class,dest_type,dest_device",
     [
-        (NumpyColumn, np.ndarray),
-        (CupyColumn, cp._core.core.ndarray),
-        (TensorflowColumn, tf.Tensor),
-        (TorchColumn, th.Tensor),
+        (NumpyColumn, np.ndarray, Device.CPU),
+        (CupyColumn, cp._core.core.ndarray, Device.GPU),
+        (TensorflowColumn, tf.Tensor, None),
+        (TorchColumn, th.Tensor, None),
     ],
 )
-def test_column_casting(source_class, constructor, dtype, dest_class, dest_type):
+def test_column_casting(
+    source_class, constructor, dtype, source_device, dest_class, dest_type, dest_device
+):
+    dest_device = dest_device or source_device
+
     values = constructor([1, 2, 3, 4, 5], dtype=dtype)
     offsets = constructor([0, 3, 5], dtype=dtype)
 
     source_column = source_class(values, offsets)
+
+    assert source_column.device == source_device
+
     dest_column = dest_class.cast(source_column)
 
     assert dest_column is not None
     assert isinstance(dest_column, dest_class)
     assert isinstance(dest_column.values, dest_type)
     assert isinstance(dest_column.offsets, dest_type)
+    assert dest_column.device == dest_device

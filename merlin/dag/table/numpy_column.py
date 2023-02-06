@@ -23,7 +23,7 @@ from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import tf_ops
 from merlin.core.compat import torch as th
 from merlin.core.protocols import SeriesLike
-from merlin.dag.table.tensor_column import TensorColumn
+from merlin.dag.table.tensor_column import Device, TensorColumn
 
 
 class NumpyColumn(TensorColumn):
@@ -36,6 +36,10 @@ class NumpyColumn(TensorColumn):
     def __init__(self, values: np.ndarray, offsets: np.ndarray = None, dtype=None):
         super().__init__(values, offsets, dtype)
 
+    @property
+    def device(self) -> Device:
+        return Device.CPU
+
 
 # This wrapper method allows us to use explicit conditional dispatch
 # in conjunction with type-based single-dispatch (which may be useful
@@ -46,7 +50,7 @@ def to_numpy(tensor):
 
 @singledispatch
 def _to_numpy(tensor):
-    raise NotImplemented
+    raise NotImplementedError
 
 
 if np:
