@@ -15,11 +15,11 @@
 #
 
 import collections
-from copy import deepcopy
 import logging
 import math
 import random
 import warnings
+from copy import deepcopy
 from pathlib import Path
 
 import dask
