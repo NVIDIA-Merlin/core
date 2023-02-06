@@ -329,22 +329,24 @@ class ColumnSchema:
                 "since non-list columns can't be ragged."
             )
 
-        if (
-            not value_counts
-            and not (shape and shape.dims)
-            and is_list is True
-            and is_ragged is False
-        ):
-            raise ValueError(
-                "Can't determine a shape for this column from "
-                "`is_list=True` and `is_ragged=False` without value counts. "
-            )
-
         if value_counts and is_ragged is not None and is_ragged != ragged_counts:
             raise ValueError(
                 f"Provided value of `is_ragged={is_ragged}` "
                 f"is inconsistent with value counts `{value_counts}`."
             )
+
+        # TODO: Enable this validation once we've removed these cases
+        #       from downstream Merlin libraries
+        # if (
+        #     not value_counts
+        #     and not (shape and shape.dims)
+        #     and is_list is True
+        #     and is_ragged is False
+        # ):
+        #     raise ValueError(
+        #         "Can't determine a shape for this column from "
+        #         "`is_list=True` and `is_ragged=False` without value counts. "
+        #     )
 
 
 class Schema:

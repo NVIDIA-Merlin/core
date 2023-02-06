@@ -197,8 +197,11 @@ def test_list_column_attributes():
     assert col3_schema.is_ragged
     assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
-    with pytest.raises(ValueError):
-        ColumnSchema("col4", is_list=True, is_ragged=False)
+    # TODO: Re-enable this test case once we've addressed cases
+    #       like this in downstream libraries
+
+    # with pytest.raises(ValueError):
+    #     ColumnSchema("col4", is_list=True, is_ragged=False)
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
