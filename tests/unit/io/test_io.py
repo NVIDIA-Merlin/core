@@ -789,8 +789,13 @@ def test_parquet_aggregate_files(tmpdir, cpu):
 def test_to_parquet_dtypes_schema(tmpdir):
     df = dispatch.make_df({"a": np.array([1, 2, 3], dtype=np.int32)})
     dataset = merlin.io.Dataset(df)
-    assert dataset.schema["a"].dtype == md.dtype("int32")
+
     # save to parquet with different dtypes and reload
     dataset.to_parquet(output_path=str(tmpdir), dtypes={"a": np.float32})
+
+    # check that dtypes are unchanged
+    assert dataset.schema["a"].dtype == md.dtype("int32")
+
     reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
+    # check that data was saved with the requested dtype
     assert reloaded_dataset.schema["a"].dtype == md.dtype("float32")
