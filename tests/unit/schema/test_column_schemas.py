@@ -247,7 +247,7 @@ def test_column_schema_with_shape():
     assert col_schema.shape != (3, 4, 5)
     assert col_schema.shape == Shape((3, 4, 5))
 
-    col_schema = col_schema.with_shape((3, 4, 5))
+    col_schema = ColumnSchema("col").with_shape((3, 4, 5))
     assert col_schema.shape != (3, 4, 5)
     assert col_schema.shape == Shape((3, 4, 5))
 
