@@ -237,14 +237,15 @@ class ColumnSchema:
             Copied object with new column dtype
 
         """
-        shapeless_dtype = md.dtype(dtype).without_shape
+        new_dtype = md.dtype(dtype).with_shape(self.shape)
 
         properties = self.properties.copy()
         if is_list is not None or is_ragged is not None:
             properties.pop("value_count", None)
+            new_dtype = new_dtype.without_shape
 
         return replace(
-            self, dtype=shapeless_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
+            self, dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
         )
 
     def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
