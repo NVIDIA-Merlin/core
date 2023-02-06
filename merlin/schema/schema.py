@@ -85,7 +85,7 @@ class ColumnSchema:
         # Provide defaults and minor conversions for convenience
         object.__setattr__(self, "tags", TagSet(self.tags))
 
-        dtype = md.dtype(self.dtype or md.unknown)
+        dtype = md.dtype(self.dtype or md.unknown).without_shape
         object.__setattr__(self, "dtype", dtype)
 
         # Validate that everything provided is consistent
