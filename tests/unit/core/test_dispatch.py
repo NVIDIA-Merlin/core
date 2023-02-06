@@ -14,9 +14,16 @@
 # limitations under the License.
 #
 import numpy as np
+import pandas as pd
 import pytest
 
 from merlin.core.dispatch import HAS_GPU, concat_columns, is_list_dtype, list_val_dtype, make_df
+
+try:
+    import cupy as cp
+except ImportError:
+    cp = None
+
 
 if HAS_GPU:
     _DEVICES = ["cpu", "gpu"]
@@ -44,3 +51,14 @@ def test_concat_columns(device):
     data_frames = [df1, df2]
     res = concat_columns(data_frames)
     assert res.columns.to_list() == ["a", "b", "c"]
+
+
+@pytest.mark.skipif(not cp, reason="Cupy not available")
+def test_pandas_cupy_combo():
+    cp_arr = cp.random.uniform(0.0, 1.0, size=100)
+    with pytest.raises(TypeError) as exc_info:
+        pd.DataFrame({"col": cp_arr})
+
+    assert "Implicit conversion to a NumPy array is not allowed" in str(exc_info)
+
+    assert pd.DataFrame(cp_arr.get())

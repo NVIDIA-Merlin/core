@@ -503,7 +503,7 @@ def make_df(_like_df=None, device=None):
             # move to cpu
             return _like_df.to_pandas()
         if cp and isinstance(_like_df, cp.ndarray):
-            return pd.DataFrame(cp.asarray(_like_df))
+            return pd.DataFrame(_like_df.get())
         else:
             return pd.DataFrame(_like_df)
     else:
