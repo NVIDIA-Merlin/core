@@ -27,6 +27,7 @@ import pytest
 from dask.dataframe import assert_eq
 from packaging.version import Version
 
+import merlin.dtypes as md
 import merlin.io
 from merlin.core import dispatch
 from merlin.io.parquet import GPUParquetWriter
@@ -788,7 +789,8 @@ def test_parquet_aggregate_files(tmpdir, cpu):
 def test_to_parquet_dtypes_schema(tmpdir):
     df = dispatch.make_df({"a": np.array([1, 2, 3], dtype=np.int32)})
     dataset = merlin.io.Dataset(df)
+    assert dataset.schema["a"].dtype == md.dtype("int32")
+    # save to parquet with different dtypes and reload
     dataset.to_parquet(output_path=str(tmpdir), dtypes={"a": np.float32})
-    assert dataset.schema["a"].dtype == np.int32
     reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
-    assert reloaded_dataset.schema["a"].dtype == np.float32
+    assert reloaded_dataset.schema["a"].dtype == md.dtype("float32")
