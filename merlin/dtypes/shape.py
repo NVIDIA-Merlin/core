@@ -15,7 +15,7 @@
 #
 
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ class Shape:
     The range of potential sizes for all the dimensions of a field or column
     """
 
-    dims: Optional[Tuple] = None
+    dims: Optional[Union[Tuple, "Shape"]] = None
 
     def __post_init__(self):
         if isinstance(self.dims, Shape):
@@ -106,6 +106,9 @@ class Shape:
             return True
 
         return self.dims == other.dims
+
+    def __iter__(self):
+        return self.dims
 
     @property
     def min(self) -> Tuple:

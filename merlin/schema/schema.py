@@ -237,7 +237,15 @@ class ColumnSchema:
             Copied object with new column dtype
 
         """
-        return replace(self, dtype=dtype, is_list=is_list, is_ragged=is_ragged)
+        shapeless_dtype = md.dtype(dtype).without_shape
+
+        properties = self.properties.copy()
+        if is_list is not None or is_ragged is not None:
+            properties.pop("value_count", None)
+
+        return replace(
+            self, dtype=shapeless_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
+        )
 
     def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
         """
@@ -258,11 +266,16 @@ class ColumnSchema:
         TypeError
             If value is not either a tuple or a Shape
         """
-        new_dtype = self.dtype.with_shape(shape)
-
-        new_col_schema = replace(self, dtype=new_dtype, is_list=None, is_ragged=None)
-
-        return new_col_schema
+        dims = Shape(shape).as_tuple
+        properties = self.properties.copy()
+        properties.pop("value_count", None)
+        return replace(
+            self,
+            dims=dims,
+            properties=properties,
+            is_list=None,
+            is_ragged=None,
+        )
 
     @property
     def int_domain(self) -> Optional[Domain]:
