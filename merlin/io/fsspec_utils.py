@@ -113,7 +113,6 @@ def _optimized_read_partition_remote(
 
 
 def _optimized_read_remote(path, row_groups, columns, fs, **kwargs):
-
     if row_groups is not None and not isinstance(row_groups, list):
         row_groups = [row_groups]
 
@@ -254,7 +253,6 @@ def _fsspec_data_transfer(
     mode="rb",
     **kwargs,
 ):
-
     # Calculate total file size
     file_size = file_size or fs.size(path_or_fob)
 
@@ -265,7 +263,6 @@ def _fsspec_data_transfer(
     # Threaded read into "dummy" buffer
     buf = np.zeros(file_size, dtype="b")
     if byte_ranges:
-
         # Optimize/merge the ranges
         byte_ranges = _merge_ranges(
             byte_ranges,
@@ -320,7 +317,7 @@ def _merge_ranges(byte_ranges, max_block=256_000_000, max_gap=64_000):
         return new_ranges
 
     offset, size = byte_ranges[0]
-    for (new_offset, new_size) in byte_ranges[1:]:
+    for new_offset, new_size in byte_ranges[1:]:
         gap = new_offset - (offset + size)
         if gap > max_gap or (size + new_size + gap) > max_block:
             # Gap is too large or total read is too large
@@ -349,9 +346,8 @@ def _read_byte_ranges(
     fs,
     **kwargs,
 ):
-
     workers = []
-    for (offset, nbytes) in ranges:
+    for offset, nbytes in ranges:
         if len(ranges) > 1:
             workers.append(
                 Thread(target=_assign_block, args=(fs, path_or_fob, local_buffer, offset, nbytes))
