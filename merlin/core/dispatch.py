@@ -78,7 +78,7 @@ except ImportError:
         return inner1
 
 
-if HAS_GPU:
+if HAS_GPU and cudf:
     DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
     SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
