@@ -196,8 +196,9 @@ class LocalExecutor:
                     if (
                         output_col_schema.dtype
                         and output_data_schema.dtype
-                        and output_col_schema.dtype != md.string
-                        and output_col_schema.dtype != output_data_schema.dtype
+                        and output_col_schema.dtype.without_shape != md.string
+                        and output_col_schema.dtype.without_shape
+                        != output_data_schema.dtype.without_shape
                     ):
                         raise TypeError(
                             f"Dtype discrepancy detected for column {col_name}: "
