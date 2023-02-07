@@ -17,6 +17,7 @@ import pandas as pd
 import pytest
 
 import merlin.dtypes as md
+from merlin.dtypes.shape import Shape
 from merlin.schema import ColumnSchema
 from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
@@ -196,36 +197,14 @@ def test_list_column_attributes():
     assert col3_schema.is_ragged
     assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
-    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
+    # TODO: Re-enable this test case once we've addressed cases
+    #       like this in downstream libraries
 
-    assert col4_schema.is_list
-    assert not col4_schema.is_ragged
-    assert col4_schema.quantity == ColumnQuantity.FIXED_LIST
+    # with pytest.raises(ValueError):
+    #     ColumnSchema("col4", is_list=True, is_ragged=False)
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
-
-
-def test_value_count_invalid_min_max():
-    with pytest.raises(ValueError) as exc_info:
-        ColumnSchema("col", is_ragged=True, properties={"value_count": {"min": 2, "max": 2}})
-    assert "`is_ragged` is set to `True` but `value_count.min` == `value_count.max`" in str(
-        exc_info.value
-    )
-
-
-@pytest.mark.parametrize(
-    "properties",
-    [
-        {"value_count": {"max": 0}},
-        {"value_count": {"min": 0}},
-        {"value_count": {"min": 0, "max": 2}},
-    ],
-)
-def test_value_count_zero_min_max(properties):
-    with pytest.raises(ValueError) as exc_info:
-        ColumnSchema("col", is_ragged=True, properties=properties)
-    assert "`value_count` min and max must be greater than zero. " in str(exc_info.value)
 
 
 @pytest.mark.parametrize(
@@ -246,14 +225,66 @@ def test_value_count(value_count_min, value_count_max):
     col_schema = ColumnSchema("col", properties={"value_count": value_count})
 
     assert col_schema.value_count.max == value_count_max
-    assert col_schema.value_count.min == value_count_min
+    assert col_schema.value_count.min == (value_count_min or 0)
 
 
-def test_value_count_assign_properties():
-    col_schema = ColumnSchema("col", is_list=True, is_ragged=True)
-    new_col_schema = col_schema.with_properties({"value_count": {"min": 5, "max": 5}})
-    assert new_col_schema.is_ragged is False
-    assert new_col_schema.value_count.min == new_col_schema.value_count.max == 5
+def test_value_count_inconsistency_with_flags():
+    with pytest.raises(ValueError) as exc_info:
+        ColumnSchema(
+            "col", properties={"value_count": {"min": 5, "max": 5}}, is_list=True, is_ragged=True
+        )
+    assert "Provided value of `is_ragged=True` is inconsistent with value counts" in str(
+        exc_info.value
+    )
+
+
+def test_column_schema_with_shape():
+    col_schema = ColumnSchema("col")
+    assert col_schema.shape == Shape()
+
+    col_schema = ColumnSchema("col", dtype=md.int32.with_shape((3, 4, 5)))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))
+
+    col_schema = ColumnSchema("col", dims=(3, 4, 5))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))
+
+    col_schema = ColumnSchema("col").with_shape((3, 4, 5))
+    assert col_schema.shape != (3, 4, 5)
+    assert col_schema.shape == Shape((3, 4, 5))
+
+
+def test_setting_value_counts_updates_shape_and_flags():
+    col_schema = ColumnSchema("col", dims=(None,))
+
+    counts = {"min": 4, "max": 5}
+    updated_schema = col_schema.with_properties({"value_count": counts})
+
+    assert updated_schema.properties["value_count"] == counts
+    assert updated_schema.shape == Shape((None, (4, 5)))
+    assert updated_schema.is_list
+    assert updated_schema.is_ragged
+
+
+def test_setting_shape_updates_value_counts_and_flags():
+    col_schema = ColumnSchema("col")
+    updated_schema = col_schema.with_shape((64, (4, 16)))
+
+    assert updated_schema.shape == Shape((64, (4, 16)))
+    assert updated_schema.properties["value_count"] == {"min": 4, "max": 16}
+    assert updated_schema.is_list
+    assert updated_schema.is_ragged
+
+
+def test_setting_flags_updates_shape_and_value_counts():
+    col_schema = ColumnSchema("col")
+    updated_schema = col_schema.with_dtype(md.int64, is_list=True, is_ragged=True)
+
+    assert updated_schema.shape == Shape((None, None))
+    assert updated_schema.properties["value_count"] == {"min": 0, "max": None}
+    assert updated_schema.is_list
+    assert updated_schema.is_ragged
 
 
 def test_pipe_merge():
