@@ -47,11 +47,11 @@ if HAS_GPU:
             from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
     except ImportError:
-        ...
+        pass
     try:
         import cupy as cp  # type: ignore[no-redef]
     except ImportError:
-        ...
+        pass
 
 
 try:
