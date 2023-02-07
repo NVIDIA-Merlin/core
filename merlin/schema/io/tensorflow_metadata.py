@@ -270,8 +270,8 @@ def _pb_feature(column_schema):
 
     value_count = column_schema.properties.get("value_count", {})
     if value_count:
-        min_length = value_count.get("min", 0)
-        max_length = value_count.get("max", 0)
+        min_length = value_count.get("min", 0) or 0
+        max_length = value_count.get("max", 0) or 0
         feature.value_count = ValueCount(min=min_length, max=max_length)
 
     feature.annotation.tag = _pb_tag(column_schema)
@@ -323,9 +323,9 @@ def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
         value_count_dict = {}
-        if value_count.min > 0:
+        if value_count.min and value_count.min > 0:
             value_count_dict["min"] = value_count.min
-        if value_count.max > 0:
+        if value_count.max and value_count.max > 0:
             value_count_dict["max"] = value_count.max
         return value_count_dict
 
