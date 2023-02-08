@@ -90,6 +90,12 @@ class ColumnSchema:
 
         # Validate that everything provided is consistent
         value_counts = self.properties.get("value_count", {})
+        if self.is_list and not self.is_ragged:
+            if "max" in value_counts and "min" not in value_counts:
+                value_counts["min"] = value_counts["max"]
+            if "max" not in value_counts and "min" in value_counts:
+                value_counts["max"] = value_counts["min"]
+
         self._validate_shape_info(self.shape, value_counts, self.is_list, self.is_ragged)
 
         # Pick which source to pull shape info from
