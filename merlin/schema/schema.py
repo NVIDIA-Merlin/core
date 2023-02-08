@@ -15,7 +15,6 @@
 #
 
 from dataclasses import InitVar, dataclass, field, replace
-from enum import Enum
 from typing import Dict, List, Optional, Text, Tuple, Union
 
 import pandas as pd
@@ -24,14 +23,6 @@ import merlin.dtypes as md
 from merlin.dtypes import DType
 from merlin.dtypes.shape import Shape
 from merlin.schema.tags import Tags, TagSet
-
-
-class ColumnQuantity(Enum):
-    """Describes the number of elements in each row of a column"""
-
-    SCALAR = "scalar"
-    FIXED_LIST = "fixed_list"
-    RAGGED_LIST = "ragged_list"
 
 
 @dataclass(frozen=True)
@@ -124,25 +115,6 @@ class ColumnSchema:
     @property
     def shape(self):
         return self.dtype.shape
-
-    @property
-    def quantity(self):
-        """
-        Describes the number of elements in each row of this column
-
-        Returns
-        -------
-        ColumnQuantity
-            SCALAR when one element per row
-            FIXED_LIST when the same number of elements per row
-            RAGGED_LIST when different numbers of elements per row
-        """
-        if self.is_list and self.is_ragged:
-            return ColumnQuantity.RAGGED_LIST
-        elif self.is_list:
-            return ColumnQuantity.FIXED_LIST
-        else:
-            return ColumnQuantity.SCALAR
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
