@@ -141,3 +141,7 @@ class Shape:
     @property
     def as_tuple(self):
         return ((dim.min, dim.max) for dim in self.dims) if self.dims else None
+
+    @property
+    def is_unknown(self):
+        return self.dims is None
