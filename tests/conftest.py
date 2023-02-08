@@ -152,8 +152,20 @@ def datasets(tmpdir_factory):
     half = int(len(df) // 2)
 
     # Write Parquet Dataset
-    df.iloc[:half].to_parquet(str(datadir["parquet"].join("dataset-0.parquet")), chunk_size=1000)
-    df.iloc[half:].to_parquet(str(datadir["parquet"].join("dataset-1.parquet")), chunk_size=1000)
+    if cudf:
+        df.iloc[:half].to_parquet(
+            str(datadir["parquet"].join("dataset-0.parquet")), row_group_size_rows=5000
+        )
+        df.iloc[half:].to_parquet(
+            str(datadir["parquet"].join("dataset-1.parquet")), row_group_size_rows=5000
+        )
+    else:
+        df.iloc[:half].to_parquet(
+            str(datadir["parquet"].join("dataset-0.parquet")), chunk_size=1000
+        )
+        df.iloc[half:].to_parquet(
+            str(datadir["parquet"].join("dataset-1.parquet")), chunk_size=1000
+        )
 
     # Write CSV Dataset (Leave out categorical column)
     df.iloc[:half].drop(columns=["name-cat"]).to_csv(
