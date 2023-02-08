@@ -292,13 +292,16 @@ class ColumnSchema:
         return Domain(**value_count) if value_count else None
 
     def __or__(self, other):
-        dtype = other.dtype if other.dtype != md.unknown else self.dtype
-
+        # self should take priority over other
+        dtype = self.dtype if self.dtype != md.unknown else other.dtype
+        is_list = self.is_list if self.is_list is not None else other.is_list
+        is_ragged = self.is_ragged if self.is_ragged is not None else other.is_ragged
+        properties = {**self.properties, **other.properties}
         col_schema = (
-            self.with_tags(other.tags)
-            .with_properties(other.properties)
-            .with_dtype(dtype, is_list=other.is_list, is_ragged=other.is_ragged)
-            .with_name(other.name)
+            other.with_tags(self.tags)
+            .with_dtype(dtype.without_shape, is_list=is_list, is_ragged=is_ragged)
+            .with_properties(properties)
+            .with_name(self.name)
         )
         return col_schema
 
@@ -646,7 +649,7 @@ class Schema:
             if col_name in self.column_schemas:
                 # check which one
                 self_schema = self.column_schemas[col_name]
-                col_schemas.append(self_schema | other_schema)
+                col_schemas.append(other_schema | self_schema)
             else:
                 col_schemas.append(other_schema)
 
