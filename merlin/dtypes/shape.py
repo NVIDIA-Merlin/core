@@ -15,7 +15,13 @@
 #
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional, Tuple, Union
+
+
+class DefaultShapes(Enum):
+    LIST = (None, None)
+    SCALAR = (None,)
 
 
 @dataclass(frozen=True)
@@ -69,6 +75,9 @@ class Shape:
     dims: Optional[Union[Tuple, "Shape"]] = None
 
     def __post_init__(self):
+        if isinstance(self.dims, DefaultShapes):
+            object.__setattr__(self, "dims", self.dims.value)
+
         if isinstance(self.dims, Shape):
             object.__setattr__(self, "dims", self.dims.dims)
 
