@@ -95,14 +95,15 @@
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#</span>
 
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">InitVar</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">replace</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Text</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">merlin.dtypes</span> <span class="k">as</span> <span class="nn">md</span>
 <span class="kn">from</span> <span class="nn">merlin.dtypes</span> <span class="kn">import</span> <span class="n">DType</span>
+<span class="kn">from</span> <span class="nn">merlin.dtypes.shape</span> <span class="kn">import</span> <span class="n">Shape</span>
 <span class="kn">from</span> <span class="nn">merlin.schema.tags</span> <span class="kn">import</span> <span class="n">Tags</span><span class="p">,</span> <span class="n">TagSet</span>
 
 
@@ -147,8 +148,9 @@
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">is_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">is_ragged</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dims</span><span class="p">:</span> <span class="n">InitVar</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">,</span> <span class="n">Shape</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Standardize tags and dtypes on initialization</span>
 
 <span class="sd">        This method works around the inability to set attributes on frozen dataclass</span>
@@ -159,41 +161,50 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            TypeError: If the provided dtype cannot be cast to a numpy dtype</span>
+<span class="sd">            ValueError: If the provided shape, value counts, and/or flags are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Provide defaults and minor conversions for convenience</span>
         <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">TagSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">))</span>
-        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">or</span> <span class="n">md</span><span class="o">.</span><span class="n">unknown</span><span class="p">))</span>
 
-        <span class="c1"># Validate the allowed range of value count</span>
-        <span class="n">value_count</span> <span class="o">=</span> <span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-        <span class="k">if</span> <span class="n">value_count</span><span class="o">.</span><span class="n">min</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`value_count` min and max must be greater than zero. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Provided min: </span><span class="si">{</span><span class="n">value_count</span><span class="o">.</span><span class="n">min</span><span class="si">}</span><span class="s2"> max: </span><span class="si">{</span><span class="n">value_count</span><span class="o">.</span><span class="n">max</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">or</span> <span class="n">md</span><span class="o">.</span><span class="n">unknown</span><span class="p">)</span><span class="o">.</span><span class="n">without_shape</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_list&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="c1"># Validate that everything provided is consistent</span>
+        <span class="n">value_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_shape_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value_counts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">value_count</span><span class="o">.</span><span class="n">is_bounded</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;</span> <span class="n">value_count</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
-                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">value_count</span><span class="o">.</span><span class="n">is_bounded</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="o">==</span> <span class="n">value_count</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
-                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">))</span>
+        <span class="c1"># Pick which source to pull shape info from</span>
+        <span class="k">if</span> <span class="n">dims</span><span class="p">:</span>
+            <span class="n">new_shape</span> <span class="o">=</span> <span class="n">Shape</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dtype</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">new_shape</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">elif</span> <span class="n">value_counts</span><span class="p">:</span>
+            <span class="n">new_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_from_counts</span><span class="p">(</span><span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="n">value_counts</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">:</span>
+            <span class="n">new_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_from_flags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_shape</span> <span class="o">=</span> <span class="n">Shape</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`is_ragged` is set to `True` but `is_list` is not. &quot;</span>
-                <span class="s2">&quot;Only list columns can set the `is_ragged` flag.&quot;</span>
-            <span class="p">)</span>
+        <span class="c1"># Update the shape and propagate out to flags and value counts</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">with_shape</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_list&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_list</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;is_ragged&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_ragged</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">is_bounded</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">min</span> <span class="o">==</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`is_ragged` is set to `True` but `value_count.min` == `value_count.max`. &quot;</span>
-                <span class="s2">&quot;If value_count min/max are equal. &quot;</span>
-                <span class="s2">&quot;This is a fixed size list and `is_ragged` should be set to False. &quot;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_shape</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">value_counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">new_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">new_shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">}</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;value_count&quot;</span><span class="p">:</span> <span class="n">value_counts</span><span class="p">}}</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_shape_from_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">is_list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Shape</span><span class="p">(((</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)))</span> <span class="k">if</span> <span class="n">is_list</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_shape_from_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value_count</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Shape</span><span class="p">(((</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">value_count</span><span class="o">.</span><span class="n">min</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -266,17 +277,26 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;properties must be in dict format, key: value&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ColumnSchema properties must be a dictionary&quot;</span><span class="p">)</span>
 
         <span class="c1"># Using new dictionary to avoid passing old ref to new schema</span>
         <span class="n">new_properties</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">}</span>
 
-        <span class="n">is_ragged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span>
-        <span class="n">value_count</span> <span class="o">=</span> <span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="n">new_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="p">{}))</span>
-        <span class="k">if</span> <span class="n">value_count</span><span class="o">.</span><span class="n">is_bounded</span> <span class="ow">and</span> <span class="n">value_count</span><span class="o">.</span><span class="n">max</span> <span class="o">==</span> <span class="n">value_count</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
-            <span class="n">is_ragged</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">value_counts</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">new_properties</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">is_ragged</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">value_counts</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">replace</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">properties</span><span class="o">=</span><span class="n">new_properties</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">without_shape</span><span class="p">,</span>
+                <span class="n">is_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">is_ragged</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">replace</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">properties</span><span class="o">=</span><span class="n">new_properties</span><span class="p">,</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ColumnSchema.with_dtype"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.ColumnSchema.with_dtype">[docs]</a>    <span class="k">def</span> <span class="nf">with_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">is_ragged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ColumnSchema&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a copy of this ColumnSchema object with different column dtype</span>
@@ -298,14 +318,46 @@
 <span class="sd">            Copied object with new column dtype</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">is_list</span> <span class="o">=</span> <span class="n">is_list</span> <span class="k">if</span> <span class="n">is_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span>
+        <span class="n">new_dtype</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">with_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
-            <span class="n">is_ragged</span> <span class="o">=</span> <span class="n">is_ragged</span> <span class="k">if</span> <span class="n">is_ragged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">is_ragged</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">is_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">is_ragged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">properties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">new_dtype</span> <span class="o">=</span> <span class="n">new_dtype</span><span class="o">.</span><span class="n">without_shape</span>
 
-        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">is_ragged</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">new_dtype</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">is_ragged</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ColumnSchema.with_shape"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.ColumnSchema.with_shape">[docs]</a>    <span class="k">def</span> <span class="nf">with_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">,</span> <span class="n">Shape</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ColumnSchema&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a copy of this object with a new shape</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shape : Union[Tuple, Shape]</span>
+<span class="sd">            Object to set as shape, must be either a tuple or Shape.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ColumnSchema</span>
+<span class="sd">            A copy of this object containing the provided shape value</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        TypeError</span>
+<span class="sd">            If value is not either a tuple or a Shape</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="n">Shape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">as_tuple</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">replace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
+            <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+            <span class="n">is_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">is_ragged</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">int_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Domain</span><span class="p">]:</span>
@@ -321,12 +373,13 @@
         <span class="k">return</span> <span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="n">value_count</span><span class="p">)</span> <span class="k">if</span> <span class="n">value_count</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__merge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="n">col_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_tags</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
-        <span class="n">col_schema</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_properties</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
-        <span class="n">col_schema</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">is_ragged</span>
+        <span class="n">col_schema</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_tags</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_properties</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">with_shape</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">col_schema</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">col_schema</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -335,7 +388,60 @@
     <span class="k">def</span> <span class="nf">_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Domain</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="n">domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;domain&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="n">domain</span><span class="p">)</span> <span class="k">if</span> <span class="n">domain</span> <span class="k">else</span> <span class="kc">None</span></div>
+        <span class="k">return</span> <span class="n">Domain</span><span class="p">(</span><span class="o">**</span><span class="n">domain</span><span class="p">)</span> <span class="k">if</span> <span class="n">domain</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_validate_shape_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">value_counts</span><span class="p">,</span> <span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="p">):</span>
+        <span class="n">value_counts</span> <span class="o">=</span> <span class="n">value_counts</span> <span class="ow">or</span> <span class="p">{}</span>
+
+        <span class="n">min_count</span> <span class="o">=</span> <span class="n">value_counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">max_count</span> <span class="o">=</span> <span class="n">value_counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">ragged_counts</span> <span class="o">=</span> <span class="n">min_count</span> <span class="o">!=</span> <span class="n">max_count</span>
+
+        <span class="k">if</span> <span class="n">shape</span> <span class="ow">and</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_ragged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">shape</span><span class="o">.</span><span class="n">is_ragged</span> <span class="o">!=</span> <span class="n">is_ragged</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Provided value of `is_ragged=</span><span class="si">{</span><span class="n">is_ragged</span><span class="si">}</span><span class="s2">` &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;is inconsistent with shape `</span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">`.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">is_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">shape</span><span class="o">.</span><span class="n">is_list</span> <span class="o">!=</span> <span class="n">is_list</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Provided value of `is_list=</span><span class="si">{</span><span class="n">is_list</span><span class="si">}</span><span class="s2">` &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;is inconsistent with shape `</span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">`.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">value_counts</span> <span class="ow">and</span> <span class="n">shape</span> <span class="ow">and</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">min_count</span> <span class="ow">and</span> <span class="n">min_count</span> <span class="o">!=</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">max_count</span> <span class="ow">and</span> <span class="n">max_count</span> <span class="o">!=</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Provided value counts `</span><span class="si">{</span><span class="n">value_counts</span><span class="si">}</span><span class="s2">` &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;are inconsistent with shape `</span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">`.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_list</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">is_ragged</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Columns with `is_list=False` can&#39;t set `is_ragged=True`, &quot;</span>
+                <span class="s2">&quot;since non-list columns can&#39;t be ragged.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">value_counts</span> <span class="ow">and</span> <span class="n">is_ragged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_ragged</span> <span class="o">!=</span> <span class="n">ragged_counts</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Provided value of `is_ragged=</span><span class="si">{</span><span class="n">is_ragged</span><span class="si">}</span><span class="s2">` &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;is inconsistent with value counts `</span><span class="si">{</span><span class="n">value_counts</span><span class="si">}</span><span class="s2">`.&quot;</span>
+            <span class="p">)</span></div>
+
+        <span class="c1"># TODO: Enable this validation once we&#39;ve removed these cases</span>
+        <span class="c1">#       from downstream Merlin libraries</span>
+        <span class="c1"># if (</span>
+        <span class="c1">#     not value_counts</span>
+        <span class="c1">#     and not (shape and shape.dims)</span>
+        <span class="c1">#     and is_list is True</span>
+        <span class="c1">#     and is_ragged is False</span>
+        <span class="c1"># ):</span>
+        <span class="c1">#     raise ValueError(</span>
+        <span class="c1">#         &quot;Can&#39;t determine a shape for this column from &quot;</span>
+        <span class="c1">#         &quot;`is_list=True` and `is_ragged=False` without value counts. &quot;</span>
+        <span class="c1">#     )</span>
 
 
 <div class="viewcode-block" id="Schema"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Schema">[docs]</a><span class="k">class</span> <span class="nc">Schema</span><span class="p">:</span>
