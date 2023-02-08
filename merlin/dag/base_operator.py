@@ -146,10 +146,12 @@ class BaseOperator:
 
         output_schema = Schema()
         for output_col_name, input_col_names in self.column_mapping(col_selector).items():
+            input_col_schema = input_schema[input_col_names]
             col_schema = ColumnSchema(output_col_name)
-            col_schema = self._compute_dtype(col_schema, input_schema[input_col_names])
-            col_schema = self._compute_tags(col_schema, input_schema[input_col_names])
-            col_schema = self._compute_properties(col_schema, input_schema[input_col_names])
+            col_schema = self._compute_dtype(col_schema, input_col_schema)
+            col_schema = self._compute_tags(col_schema, input_col_schema)
+            col_schema = self._compute_properties(col_schema, input_col_schema)
+            col_schema = self._compute_shape(col_schema, input_col_schema)
             output_schema += Schema([col_schema])
 
         if self.dynamic_dtypes and prev_output_schema:
@@ -239,21 +241,24 @@ class BaseOperator:
 
     def _compute_dtype(self, col_schema, input_schema):
         dtype = col_schema.dtype
-        is_list = col_schema.is_list
-        is_ragged = col_schema.is_ragged
 
         if input_schema.column_schemas:
             source_col_name = input_schema.column_names[0]
             dtype = input_schema[source_col_name].dtype
-            is_list = input_schema[source_col_name].is_list
-            is_ragged = input_schema[source_col_name].is_ragged
 
         if self.output_dtype is not None:
             dtype = self.output_dtype
-            is_list = any(cs.is_list for _, cs in input_schema.column_schemas.items())
-            is_ragged = any(cs.is_ragged for _, cs in input_schema.column_schemas.items())
 
-        return col_schema.with_dtype(dtype, is_list=is_list, is_ragged=is_ragged)
+        return col_schema.with_dtype(dtype)
+
+    def _compute_shape(self, col_schema, input_schema):
+        shape = col_schema.shape
+
+        if input_schema.column_schemas:
+            source_col_name = input_schema.column_names[0]
+            shape = input_schema[source_col_name].shape
+
+        return col_schema.with_shape(shape)
 
     @property
     def dynamic_dtypes(self):
