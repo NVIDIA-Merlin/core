@@ -473,7 +473,6 @@ class Dataset:
                             hive_mapping[_key].append(_val)
 
             if set(hive_mapping.keys()) == set(keys):
-
                 # Generate hive-mapping DataFrame summary
                 hive_mapping = type(ddf._meta)(hive_mapping)
                 cols = list(hive_mapping.columns)
@@ -752,7 +751,6 @@ class Dataset:
         """
 
         if partition_on:
-
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
             if output_files:
@@ -763,7 +761,6 @@ class Dataset:
                 raise ValueError("`preserve_files` not supported when `partition_on` is used.")
 
         else:
-
             # Check that method (algorithm) is valid
             if method not in ("subgraph", "worker"):
                 raise ValueError(f"{method} not a recognized method for `Dataset.to_parquet`")
@@ -800,7 +797,6 @@ class Dataset:
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
         if output_files:
-
             #   NOTES on `output_files`:
             #
             # - If a list of file names is specified, a contiguous range of
