@@ -239,15 +239,13 @@ class ColumnSchema:
         value_count = self.properties.get("value_count")
         return Domain(**value_count) if value_count else None
 
-    def __or__(self, other):
-        dtype = self.dtype if self.dtype != md.unknown else other.dtype
-
-        col_schema = (
-            other.with_tags(self.tags)
-            .with_properties(self.properties)
-            .with_dtype(dtype, is_list=self.is_list, is_ragged=self.is_ragged)
-            .with_name(self.name)
+    def __merge__(self, other):
+        col_schema = self.with_tags(other.tags)
+        col_schema = col_schema.with_properties(other.properties)
+        col_schema = col_schema.with_dtype(
+            other.dtype, is_list=other.is_list, is_ragged=other.is_ragged
         )
+        col_schema = col_schema.with_name(other.name)
         return col_schema
 
     def __str__(self) -> str:
@@ -541,7 +539,7 @@ class Schema:
             if col_name in self.column_schemas:
                 # check which one
                 self_schema = self.column_schemas[col_name]
-                col_schemas.append(other_schema | self_schema)
+                col_schemas.append(self_schema.__merge__(other_schema))
             else:
                 col_schemas.append(other_schema)
 
