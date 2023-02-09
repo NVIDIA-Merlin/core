@@ -146,12 +146,8 @@ class BaseOperator:
 
         output_schema = Schema()
         for output_col_name, input_col_names in self.column_mapping(col_selector).items():
-            input_col_schema = input_schema[input_col_names]
-            col_schema = ColumnSchema(output_col_name)
-            col_schema = self._compute_dtype(col_schema, input_col_schema)
-            col_schema = self._compute_shape(col_schema, input_col_schema)
-            col_schema = self._compute_tags(col_schema, input_col_schema)
-            col_schema = self._compute_properties(col_schema, input_col_schema)
+            input_schema_fragment = input_schema[input_col_names]
+            col_schema = self.compute_column_schema(output_col_name, input_schema_fragment)
             output_schema += Schema([col_schema])
 
         if self.dynamic_dtypes and prev_output_schema:
@@ -230,9 +226,9 @@ class BaseOperator:
     def compute_column_schema(self, col_name, input_schema):
         methods = [
             self._compute_dtype,
-            self._compute_shape,
             self._compute_tags,
             self._compute_properties,
+            self._compute_shape,
         ]
         return self._compute_column_schema(col_name, input_schema, methods=methods)
 
