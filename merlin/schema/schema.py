@@ -90,7 +90,7 @@ class ColumnSchema:
 
         # Validate that everything provided is consistent
         value_counts = self.properties.get("value_count", {})
-        if self.is_list and not self.is_ragged:
+        if self.is_list and self.is_ragged is False:
             if "max" in value_counts and "min" not in value_counts:
                 value_counts["min"] = value_counts["max"]
             if "max" not in value_counts and "min" in value_counts:
