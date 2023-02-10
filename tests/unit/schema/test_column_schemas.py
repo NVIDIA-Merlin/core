@@ -288,7 +288,9 @@ def test_setting_flags_updates_shape_and_value_counts():
 
 
 def test_pipe_merge():
-    col_schema_a = ColumnSchema("col_a", dtype=md.float32)
+    col_schema_a = ColumnSchema(
+        "col_a", dtype=md.float32, properties={"value_count": {"min": 3, "max": 5}}
+    )
     col_schema_b = ColumnSchema(
         "col_b",
         dtype=md.float64,
@@ -308,7 +310,7 @@ def test_pipe_merge():
     new_schema = col_schema_a | col_schema_b
 
     assert new_schema.dtype.without_shape == col_schema_a.dtype.without_shape
-    assert new_schema.properties == col_schema_b.properties
-    assert new_schema.is_list == col_schema_b.is_list
-    assert not col_schema_b.is_ragged
+    assert new_schema.properties == col_schema_a.properties
+    assert new_schema.is_list == col_schema_a.is_list
+    assert new_schema.is_ragged
     assert new_schema.name == col_schema_a.name

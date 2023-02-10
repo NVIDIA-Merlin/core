@@ -296,7 +296,7 @@ class ColumnSchema:
         dtype = self.dtype if self.dtype != md.unknown else other.dtype
         is_list = self.is_list if self.is_list is not None else other.is_list
         is_ragged = self.is_ragged if self.is_ragged is not None else other.is_ragged
-        properties = {**self.properties, **other.properties}
+        properties = {**other.properties, **self.properties}
         col_schema = (
             other.with_tags(self.tags)
             .with_dtype(dtype.without_shape, is_list=is_list, is_ragged=is_ragged)
