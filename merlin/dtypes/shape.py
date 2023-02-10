@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Optional, Tuple, Union
 
@@ -64,6 +64,16 @@ class Dimension:
     @property
     def is_variable(self):
         return not self.is_fixed
+
+    @property
+    def is_unknown(self):
+        return self.min == 0 and self.max is None
+
+    def with_min(self, value):
+        return replace(self, min=value)
+
+    def with_max(self, value):
+        return replace(self, max=value)
 
 
 @dataclass(frozen=True)
@@ -118,6 +128,17 @@ class Shape:
 
     def __iter__(self):
         return self.dims
+
+    def with_dim(self, index, value):
+        new_dims = list(self.dims)
+        new_dims[index] = value
+        return replace(self, dims=tuple(new_dims))
+
+    def with_dim_min(self, index, value):
+        return self.with_dim(index, self.dims[index].with_min(value))
+
+    def with_dim_max(self, index, value):
+        return self.with_dim(index, self.dims[index].with_max(value))
 
     @property
     def min(self) -> Tuple:
