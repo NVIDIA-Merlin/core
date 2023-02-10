@@ -171,6 +171,12 @@
 
         <span class="c1"># Validate that everything provided is consistent</span>
         <span class="n">value_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value_count&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;max&quot;</span> <span class="ow">in</span> <span class="n">value_counts</span> <span class="ow">and</span> <span class="s2">&quot;min&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value_counts</span><span class="p">:</span>
+                <span class="n">value_counts</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_counts</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;max&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value_counts</span> <span class="ow">and</span> <span class="s2">&quot;min&quot;</span> <span class="ow">in</span> <span class="n">value_counts</span><span class="p">:</span>
+                <span class="n">value_counts</span><span class="p">[</span><span class="s2">&quot;max&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_counts</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_shape_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value_counts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_ragged</span><span class="p">)</span>
 
         <span class="c1"># Pick which source to pull shape info from</span>
