@@ -255,6 +255,17 @@ def test_column_schema_with_shape():
     assert col_schema.shape == Shape((3, 4, 5))
 
 
+@pytest.mark.parametrize("value_count", [{"max": 10}, {"min": 10}])
+def test_setting_partial_value_count(value_count):
+    col_schema = ColumnSchema(
+        "col", is_list=True, is_ragged=False, properties={"value_count": value_count}
+    )
+    assert col_schema.is_list
+    assert not col_schema.is_ragged
+    assert col_schema.shape == Shape((None, 10))
+    assert col_schema.properties["value_count"] == {"min": 10, "max": 10}
+
+
 def test_setting_value_counts_updates_shape_and_flags():
     col_schema = ColumnSchema("col", dims=(None,))
 
