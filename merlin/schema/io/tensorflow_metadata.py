@@ -252,6 +252,7 @@ def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
+    properties["_dims"] = list(list(dim) for dim in column_schema.shape.as_tuple or [])
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     if column_schema.dtype.element_size:
@@ -377,7 +378,7 @@ float_dtypes_map = {
 
 
 def _merlin_dtype(feature, properties):
-    dtype = None
+    dtype = md.unknown
     item_size = int(properties.get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
         if item_size and item_size in int_dtypes_map:
@@ -391,6 +392,18 @@ def _merlin_dtype(feature, properties):
             dtype = md.float64
     elif feature.type == FeatureType.BYTES:
         dtype = md.string
+
+    dims_list = properties.pop("_dims", None)
+
+    if dims_list:
+        dims_tuple = tuple(tuple(dim) for dim in dims_list)
+        dtype = dtype.with_shape(dims_tuple)
+
+        # If we found dims, avoid overwriting that shape with one inferred from counts or flags
+        properties.pop("value_count", None)
+        properties.pop("is_list", None)
+        properties.pop("is_ragged", None)
+
     return dtype
 
 
@@ -409,7 +422,12 @@ def _merlin_column(feature):
         if Tags.CATEGORICAL not in tags:
             tags.append(Tags.CATEGORICAL)
 
-    return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
+    dims = dtype.shape.as_tuple
+
+    if dims:
+        return ColumnSchema(name, tags, properties, dtype, dims=dims)
+    else:
+        return ColumnSchema(name, tags, properties, dtype, is_list=is_list, is_ragged=is_ragged)
 
 
 def _read_file(path: os.PathLike):
