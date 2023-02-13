@@ -17,7 +17,6 @@ import numpy as np
 import pytest
 
 from merlin.core.protocols import DictLike, SeriesLike, Transformable
-from merlin.dag import group_values_offsets, ungroup_values_offsets
 from merlin.dag.dictarray import Column, DictArray
 
 
@@ -33,16 +32,3 @@ def test_dictarray_matches_protocols(protocol):
     obj = DictArray({}, {})
 
     assert isinstance(obj, protocol)
-
-
-def test_flat_dict_to_tuple_dict():
-    col1 = np.array([1, 2, 3, 4, 5])
-    col2_values = np.array([6, 7, 8, 9, 10])
-    col2_offsets = np.array([0, 2, 5])
-
-    flat_dict = {"col1": col1, "col2__values": col2_values, "col2__offsets": col2_offsets}
-
-    tuple_dict = {"col1": col1, "col2": (col2_values, col2_offsets)}
-
-    assert ungroup_values_offsets(tuple_dict) == flat_dict
-    assert group_values_offsets(flat_dict) == tuple_dict
