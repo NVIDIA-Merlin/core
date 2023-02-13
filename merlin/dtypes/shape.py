@@ -140,4 +140,4 @@ class Shape:
 
     @property
     def as_tuple(self):
-        return ((dim.min, dim.max) for dim in self.dims) if self.dims else None
+        return tuple(((dim.min, dim.max) for dim in self.dims)) if self.dims else None
