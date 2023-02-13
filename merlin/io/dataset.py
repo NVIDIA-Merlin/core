@@ -893,14 +893,18 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = Schema({**self.schema.column_schemas})
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
         fs.mkdirs(output_path, exist_ok=True)
 
-        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
+        tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
         tf_metadata.to_proto_text_file(output_path)
 
         # Output dask_cudf DataFrame to dataset
@@ -919,7 +923,7 @@ class Dataset:
             self.cpu,
             suffix=suffix,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(

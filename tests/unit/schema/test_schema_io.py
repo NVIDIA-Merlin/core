@@ -19,6 +19,7 @@ import numpy
 import pytest
 
 import merlin.dtypes as md
+from merlin.dtypes.shape import Shape
 from merlin.schema import ColumnSchema, Schema, Tags
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
@@ -231,6 +232,22 @@ def test_tensorflow_metadata_from_json():
 
     # make sure the JSON formatted extra_metadata properties are human readable
     json_schema = json.loads(TensorflowMetadata.from_merlin_schema(schema).to_json())
-    assert json_schema["feature"][0]["annotation"]["extraMetadata"] == [
-        {"is_list": True, "is_ragged": True, "dtype_item_size": 64.0}
-    ]
+    extra_metadata = json_schema["feature"][0]["annotation"]["extraMetadata"][0]
+    extra_metadata = {
+        key: value for key, value in extra_metadata.items() if not key.startswith("_")
+    }
+    assert extra_metadata == {"is_list": True, "is_ragged": True, "dtype_item_size": 64.0}
+
+
+@pytest.mark.parametrize("dim1", [1, None, (1, 3), (3, 3), (0, None), (4, None)])
+@pytest.mark.parametrize("dim2", [1, None, (1, 3), (3, 3), (0, None), (4, None)])
+@pytest.mark.parametrize("dim3", [1, None, (1, 3), (3, 3), (0, None), (4, None)])
+def test_shapes_survive_round_trip(dim1, dim2, dim3):
+    dims = (dim1, dim2, dim3)
+
+    col_schema1 = ColumnSchema("col1", dtype=numpy.int, dims=dims)
+
+    schema = Schema([col_schema1])
+    loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
+
+    assert loaded_schema["col1"].shape == Shape(dims)
