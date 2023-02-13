@@ -19,6 +19,10 @@ import numpy as np
 
 
 class NumpyPreprocessor:
+    """
+    Allows converting framework dtypes to numpy dtypes before mapping to Merlin types
+    """
+
     def __init__(
         self,
         framework,
@@ -32,6 +36,19 @@ class NumpyPreprocessor:
         self.classes = classes or []
 
     def matches(self, raw_dtype) -> bool:
+        """
+        Check if this preprocessor has a translation available for a dtype
+
+        Parameters
+        ----------
+        raw_dtype : external framework dtype
+            The dtype to be translated to numpy
+
+        Returns
+        -------
+        bool
+            True if this preprocessor can convert the external dtype to Numpy
+        """
         for attr in self.attrs:
             if hasattr(raw_dtype, attr):
                 return True
@@ -41,6 +58,19 @@ class NumpyPreprocessor:
         return False
 
     def to_numpy(self, raw_dtype) -> np.dtype:
+        """
+        Translate an external framework dtype to Numpy
+
+        Parameters
+        ----------
+        raw_dtype : external framework dtype
+            The dtype to be translated to numpy
+
+        Returns
+        -------
+        np.dtype
+            The result of translating raw_dtype to Numpy
+        """
         return self.translation_fn(raw_dtype)
 
 
