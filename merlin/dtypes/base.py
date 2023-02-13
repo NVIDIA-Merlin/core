@@ -172,4 +172,4 @@ class DType:
         DType
             A copy of this object with the shape removed
         """
-        return self.with_shape(Shape())
+        return replace(self, shape=Shape())
