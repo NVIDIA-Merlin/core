@@ -59,7 +59,7 @@ class ElementUnit(Enum):
     Nanosecond = "nanosecond"
 
 
-@dataclass(frozen=True)
+@dataclass(eq=True, frozen=True)
 class DType:
     """
     Merlin dtypes are objects of this dataclass
