@@ -437,6 +437,27 @@ def test_to_parquet_output_files(tmpdir, datasets, output_files, out_files_per_p
         assert len(ddf0) == len(ddf1)
 
 
+@pytest.mark.parametrize("row_group_size", [5000, 10000])
+@pytest.mark.parametrize("cpu", [True, False])
+def test_to_parquet_row_group_size(tmpdir, cpu, row_group_size):
+    # Test that row_group_size argument is satisfied.
+    # NOTE: cuDF prohibits row_group_size_rows<5000
+    outdir = str(tmpdir)
+    ddf0 = dd.from_pandas(
+        (pd if cpu else cudf).DataFrame({"a": range(50_000)}),
+        npartitions=2,
+    )
+    dataset = merlin.io.Dataset(ddf0)
+    dataset.to_parquet(
+        outdir,
+        output_files=1,
+        row_group_size=row_group_size,
+    )
+
+    result = dd.read_parquet(outdir, split_row_groups=True)
+    assert all([len(part) <= row_group_size for part in result.partitions])
+
+
 @pytest.mark.parametrize("engine", ["csv", "parquet"])
 def test_validate_dataset(datasets, engine):
     with warnings.catch_warnings():

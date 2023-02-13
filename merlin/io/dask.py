@@ -67,6 +67,7 @@ def _write_output_partition(
     num_threads,
     cpu,
     suffix,
+    row_group_size,
 ):
     df_size = len(df)
     out_files_per_proc = out_files_per_proc or 1
@@ -85,6 +86,8 @@ def _write_output_partition(
                 num_threads=num_threads,
                 cpu=cpu,
                 suffix=suffix,
+                fs=fs,
+                row_group_size=row_group_size,
             )
             writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
             writer_cache[processed_path] = writer
@@ -136,6 +139,7 @@ def _write_partitioned(
     output_format,
     num_threads,
     cpu,
+    row_group_size,
 ):
     # Logic copied from cudf/cudf/io/parquet.py
     data_cols = df.columns.drop(partition_cols)
@@ -152,6 +156,7 @@ def _write_partitioned(
         num_threads=num_threads,
         cpu=cpu,
         fns=fns,
+        row_group_size=row_group_size,
     )
     writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
 
@@ -176,6 +181,7 @@ def _write_subgraph(
     num_threads,
     cpu,
     suffix,
+    row_group_size,
 ):
     fns = fns if isinstance(fns, (tuple, list)) else (fns,)
     writer = writer_factory(
@@ -187,6 +193,8 @@ def _write_subgraph(
         num_threads=num_threads,
         cpu=cpu,
         fns=[fn + suffix for fn in fns],
+        fs=fs,
+        row_group_size=row_group_size,
     )
     writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
 
@@ -250,12 +258,13 @@ def _ddf_to_dataset(
     num_threads,
     cpu,
     suffix="",
+    row_group_size=None,
     partition_on=None,
     schema=None,
 ):
     # Construct graph for Dask-based dataset write
     token = tokenize(
-        ddf, shuffle, out_files_per_proc, cat_names, cont_names, label_names, suffix, partition_on
+        ddf, shuffle, out_files_per_proc, cat_names, cont_names, label_names, suffix, partition_on, row_group_size
     )
     name = "write-processed-" + token
     write_name = name + "-partition" + token
@@ -284,6 +293,7 @@ def _ddf_to_dataset(
                 output_format,
                 num_threads,
                 cpu,
+                row_group_size,
             )
         dsk[name] = (
             _write_metadata_files,
@@ -315,6 +325,7 @@ def _ddf_to_dataset(
                 num_threads,
                 cpu,
                 suffix,
+                row_group_size,
             )
         dsk[name] = (
             _write_metadata_files,
@@ -342,6 +353,7 @@ def _ddf_to_dataset(
                 num_threads,
                 cpu,
                 suffix,
+                row_group_size,
             )
             task_list.append(key)
         dsk[name] = (lambda x: x, task_list)
