@@ -59,7 +59,7 @@ class ElementUnit(Enum):
     Nanosecond = "nanosecond"
 
 
-@dataclass(eq=True, frozen=True)
+@dataclass(frozen=True)
 class DType:
     """
     Merlin dtypes are objects of this dataclass
@@ -172,4 +172,7 @@ class DType:
         DType
             A copy of this object with the shape removed
         """
+        if self.shape.dims is None:
+            return self
+
         return replace(self, shape=Shape())
