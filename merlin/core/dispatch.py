@@ -34,7 +34,6 @@ rmm = None
 if HAS_GPU:
     try:
         import cudf  # type: ignore[no-redef]
-        import cupy as cp  # type: ignore[no-redef]
         import dask_cudf
         import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
@@ -47,9 +46,12 @@ if HAS_GPU:
             # cudf < 21.08
             from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
-
     except ImportError:
-        HAS_GPU = False
+        pass
+    try:
+        import cupy as cp  # type: ignore[no-redef]
+    except ImportError:
+        pass
 
 try:
     # Dask >= 2021.5.1
@@ -75,7 +77,7 @@ except ImportError:
         return inner1
 
 
-if HAS_GPU:
+if HAS_GPU and cudf:
     DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
     SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
