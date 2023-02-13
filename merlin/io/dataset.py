@@ -19,7 +19,6 @@ import logging
 import math
 import random
 import warnings
-from copy import deepcopy
 from pathlib import Path
 
 import dask
@@ -893,7 +892,7 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
-        schema = deepcopy(self.schema)
+        schema = Schema({**self.schema.column_schemas})
 
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
