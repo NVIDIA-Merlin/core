@@ -55,11 +55,11 @@ def test_concat_columns(device):
 
 @pytest.mark.skipif(not cp, reason="Cupy not available")
 def test_pandas_cupy_combo():
-    cp_arr = cp.random.uniform(0.0, 1.0, size=100)
+    rand_cp_nd_arr = cp.random.uniform(0.0, 1.0, size=100)
     with pytest.raises(TypeError) as exc_info:
-        pd.DataFrame({"col": cp_arr})
+        pd.DataFrame(rand_cp_nd_arr)
 
     assert "Implicit conversion to a NumPy array is not allowed" in str(exc_info)
-
-    pdf = pd.DataFrame({"col": cp_arr.get()})
-    assert all(pdf["col"].to_numpy() == cp_arr.get())
+    pd_df = pd.DataFrame(rand_cp_nd_arr.get())[0]
+    mk_df = make_df(rand_cp_nd_arr)[0]
+    assert all(pd_df.to_numpy() == mk_df.to_numpy())
