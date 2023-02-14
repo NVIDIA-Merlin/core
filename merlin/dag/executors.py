@@ -27,6 +27,7 @@ from merlin.core.utils import (
     set_client_deprecated,
 )
 from merlin.dag import ColumnSelector, Graph, Node
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.worker import clean_worker_cache
 
 LOG = logging.getLogger("merlin")
@@ -161,6 +162,8 @@ class LocalExecutor:
             Dataframe to run the graph ending with node on
         capture_dtypes : bool, optional
             Overrides the schema dtypes with the actual dtypes when True, by default False
+        validate_dtypes : bool, optional
+            Checks the dtype of returned data against the schema, by default True
         Returns
         -------
         Transformable
@@ -169,7 +172,7 @@ class LocalExecutor:
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
-            as the output schema columns
+            as the output schema columns when validate_dtypes is True
         RuntimeError
             If no DataFrame or DictArray is returned from the operator
         """
@@ -183,10 +186,14 @@ class LocalExecutor:
                 for col_name, output_col_schema in node.output_schema.column_schemas.items():
                     col_series = output_data[col_name]
                     output_data_dtype = col_series.dtype
+                    col_shape = output_col_schema.shape
                     is_list = is_list_dtype(col_series)
 
                     if is_list:
                         output_data_dtype = list_val_dtype(col_series)
+
+                        if not col_shape.is_list or col_shape.is_unknown:
+                            col_shape = DefaultShapes.LIST
 
                     # TODO: Add a utility that condenses the known methods of fetching dtypes
                     # from series/arrays into a single function, so that Tensorflow specific
@@ -196,10 +203,12 @@ class LocalExecutor:
                     ):
                         output_data_dtype = col_series[0].cpu().numpy().dtype
 
+                    output_data_schema = output_col_schema.with_dtype(output_data_dtype).with_shape(
+                        col_shape
+                    )
+
                     if capture_dtypes:
-                        node.output_schema.column_schemas[col_name] = output_col_schema.with_dtype(
-                            output_data_dtype, is_list=is_list
-                        )
+                        node.output_schema.column_schemas[col_name] = output_data_schema
                     elif validate_dtypes and len(output_data):
                         # Validate that the dtypes match but only if they both exist
                         # (since schemas may not have all dtypes specified, especially
