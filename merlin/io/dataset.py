@@ -38,6 +38,7 @@ from merlin.core.dispatch import (
     list_val_dtype,
 )
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -1142,8 +1143,10 @@ class Dataset:
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
-            is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
+
+            dims = DefaultShapes.LIST if dtype_info["is_list"] else DefaultShapes.SCALAR
+            col_schema = ColumnSchema(column, dtype=dtype_val, dims=dims)
+
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)

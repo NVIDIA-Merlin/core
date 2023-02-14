@@ -19,7 +19,6 @@ import pytest
 import merlin.dtypes as md
 from merlin.dtypes.shape import Shape
 from merlin.schema import ColumnSchema
-from merlin.schema.schema import ColumnQuantity
 from merlin.schema.tags import Tags, TagSet
 
 
@@ -177,25 +176,21 @@ def test_list_column_attributes():
 
     assert not col0_schema.is_list
     assert not col0_schema.is_ragged
-    assert col0_schema.quantity == ColumnQuantity.SCALAR
 
     col1_schema = ColumnSchema("col1", is_list=False, is_ragged=False)
 
     assert not col1_schema.is_list
     assert not col1_schema.is_ragged
-    assert col1_schema.quantity == ColumnQuantity.SCALAR
 
     col2_schema = ColumnSchema("col2", is_list=True)
 
     assert col2_schema.is_list
     assert col2_schema.is_ragged
-    assert col2_schema.quantity == ColumnQuantity.RAGGED_LIST
 
     col3_schema = ColumnSchema("col3", is_list=True, is_ragged=True)
 
     assert col3_schema.is_list
     assert col3_schema.is_ragged
-    assert col3_schema.quantity == ColumnQuantity.RAGGED_LIST
 
     # TODO: Re-enable this test case once we've addressed cases
     #       like this in downstream libraries

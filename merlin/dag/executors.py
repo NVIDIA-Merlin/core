@@ -27,6 +27,7 @@ from merlin.core.utils import (
     set_client_deprecated,
 )
 from merlin.dag import ColumnSelector, Graph, Node
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.worker import clean_worker_cache
 
 LOG = logging.getLogger("merlin")
@@ -44,6 +45,7 @@ class LocalExecutor:
         output_dtypes=None,
         additional_columns=None,
         capture_dtypes=False,
+        validate_dtypes=True,
     ):
         """
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
@@ -67,11 +69,13 @@ class LocalExecutor:
         output_data = None
 
         for node in nodes:
-            input_data = self._build_input_data(node, transformable, capture_dtypes=capture_dtypes)
+            input_data = self._build_input_data(
+                node, transformable, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
+            )
 
             if node.op:
                 transformed_data = self._transform_data(
-                    node, input_data, capture_dtypes=capture_dtypes
+                    node, input_data, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
                 )
             else:
                 transformed_data = input_data
@@ -85,7 +89,7 @@ class LocalExecutor:
 
         return output_data
 
-    def _build_input_data(self, node, transformable, capture_dtypes=False):
+    def _build_input_data(self, node, transformable, capture_dtypes=False, validate_dtypes=True):
         """
         Recurse through the graph executing parent and dependency operators
         to form the input dataframe for each output node
@@ -114,7 +118,12 @@ class LocalExecutor:
 
             for parent in node.parents_with_dependencies:
                 parent_output_cols = _get_unique(parent.output_schema.column_names)
-                parent_data = self.transform(transformable, [parent], capture_dtypes=capture_dtypes)
+                parent_data = self.transform(
+                    transformable,
+                    [parent],
+                    capture_dtypes=capture_dtypes,
+                    validate_dtypes=validate_dtypes,
+                )
                 if input_data is None or not len(input_data):
                     input_data = parent_data[parent_output_cols]
                     seen_columns = set(parent_output_cols)
@@ -141,7 +150,7 @@ class LocalExecutor:
 
         return input_data
 
-    def _transform_data(self, node, input_data, capture_dtypes=False):
+    def _transform_data(self, node, input_data, capture_dtypes=False, validate_dtypes=True):
         """
         Run the transform represented by the final node in the graph
         and check output dtypes against the output schema
@@ -153,6 +162,8 @@ class LocalExecutor:
             Dataframe to run the graph ending with node on
         capture_dtypes : bool, optional
             Overrides the schema dtypes with the actual dtypes when True, by default False
+        validate_dtypes : bool, optional
+            Checks the dtype of returned data against the schema, by default True
         Returns
         -------
         Transformable
@@ -161,7 +172,7 @@ class LocalExecutor:
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
-            as the output schema columns
+            as the output schema columns when validate_dtypes is True
         RuntimeError
             If no DataFrame or DictArray is returned from the operator
         """
@@ -171,41 +182,51 @@ class LocalExecutor:
             output_data = node.op.transform(selection, input_data)
 
             # Update or validate output_data dtypes
-            for col_name, output_col_schema in node.output_schema.column_schemas.items():
-                col_series = output_data[col_name]
-                col_dtype = col_series.dtype
-                is_list = is_list_dtype(col_series)
+            if capture_dtypes or validate_dtypes:
+                for col_name, output_col_schema in node.output_schema.column_schemas.items():
+                    col_series = output_data[col_name]
+                    output_data_dtype = col_series.dtype
+                    col_shape = output_col_schema.shape
+                    is_list = is_list_dtype(col_series)
 
-                if is_list:
-                    col_dtype = list_val_dtype(col_series)
+                    if is_list:
+                        output_data_dtype = list_val_dtype(col_series)
 
-                # TODO: Add a utility that condenses the known methods of fetching dtypes
-                # from series/arrays into a single function, so that Tensorflow specific
-                # code doesn't leak into the executors
-                if not hasattr(col_dtype, "as_numpy_dtype") and hasattr(col_series, "numpy"):
-                    col_dtype = col_series[0].cpu().numpy().dtype
+                        if not col_shape.is_list or col_shape.is_unknown:
+                            col_shape = DefaultShapes.LIST
 
-                output_data_schema = output_col_schema.with_dtype(col_dtype, is_list=is_list)
-
-                if capture_dtypes:
-                    node.output_schema.column_schemas[col_name] = output_data_schema
-                elif len(output_data):
-                    # Validate that the dtypes match but only if they both exist
-                    # (since schemas may not have all dtypes specified, especially
-                    # in the tests)
-                    if (
-                        output_col_schema.dtype
-                        and output_data_schema.dtype
-                        and output_col_schema.dtype.without_shape != md.string
-                        and output_col_schema.dtype.without_shape
-                        != output_data_schema.dtype.without_shape
+                    # TODO: Add a utility that condenses the known methods of fetching dtypes
+                    # from series/arrays into a single function, so that Tensorflow specific
+                    # code doesn't leak into the executors
+                    if not hasattr(output_data_dtype, "as_numpy_dtype") and hasattr(
+                        col_series, "numpy"
                     ):
-                        raise TypeError(
-                            f"Dtype discrepancy detected for column {col_name}: "
-                            f"operator {node.op.label} reported dtype "
-                            f"`{output_col_schema.dtype}` but returned dtype "
-                            f"`{output_data_schema.dtype}`."
-                        )
+                        output_data_dtype = col_series[0].cpu().numpy().dtype
+
+                    output_data_schema = output_col_schema.with_dtype(output_data_dtype).with_shape(
+                        col_shape
+                    )
+
+                    if capture_dtypes:
+                        node.output_schema.column_schemas[col_name] = output_data_schema
+                    elif validate_dtypes and len(output_data):
+                        # Validate that the dtypes match but only if they both exist
+                        # (since schemas may not have all dtypes specified, especially
+                        # in the tests)
+                        output_schema_dtype = output_col_schema.dtype.without_shape
+                        output_data_dtype = md.dtype(output_data_dtype).without_shape
+                        if (
+                            output_schema_dtype
+                            and output_data_dtype
+                            and output_schema_dtype != md.string
+                            and output_schema_dtype != output_data_dtype
+                        ):
+                            raise TypeError(
+                                f"Dtype discrepancy detected for column {col_name}: "
+                                f"operator {node.op.label} reported dtype "
+                                f"`{output_schema_dtype}` but returned dtype "
+                                f"`{output_data_dtype}`."
+                            )
         except Exception:
             LOG.exception("Failed to transform operator %s", node.op)
             raise
