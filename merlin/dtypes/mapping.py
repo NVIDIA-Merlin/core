@@ -167,10 +167,7 @@ class DTypeMapping:
         # Some external dtype objects are not hashable, so they
         # can't be used as dictionary keys. In that case, match
         # against the dtype class instead.
-        hashable_dtype = dtype
         try:
-            hash(dtype)
+            return dtype in mapping.keys()
         except TypeError:
-            hashable_dtype = type(dtype)
-
-        return hashable_dtype in mapping.keys()
+            return type(dtype) in mapping.keys()
