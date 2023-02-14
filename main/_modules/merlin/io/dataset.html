@@ -973,14 +973,18 @@
                         <span class="n">output_files</span><span class="p">[</span><span class="n">fn</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">]</span> <span class="o">=</span> <span class="n">rgs</span>
             <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># Don&#39;t add a suffix later - Names already include it</span>
 
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">({</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">})</span>
+
         <span class="k">if</span> <span class="n">dtypes</span><span class="p">:</span>
             <span class="n">_meta</span> <span class="o">=</span> <span class="n">_set_dtypes</span><span class="p">(</span><span class="n">ddf</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="n">dtypes</span><span class="p">)</span>
             <span class="n">ddf</span> <span class="o">=</span> <span class="n">ddf</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="n">_set_dtypes</span><span class="p">,</span> <span class="n">dtypes</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">_meta</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">col_dtype</span> <span class="ow">in</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">schema</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span><span class="n">col_dtype</span><span class="p">)</span>
 
         <span class="n">fs</span> <span class="o">=</span> <span class="n">get_fs_token_paths</span><span class="p">(</span><span class="n">output_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">tf_metadata</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_merlin_schema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+        <span class="n">tf_metadata</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_merlin_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
         <span class="n">tf_metadata</span><span class="o">.</span><span class="n">to_proto_text_file</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
 
         <span class="c1"># Output dask_cudf DataFrame to dataset</span>
@@ -999,7 +1003,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
             <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
             <span class="n">partition_on</span><span class="o">=</span><span class="n">partition_on</span><span class="p">,</span>
-            <span class="n">schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="k">if</span> <span class="n">write_hugectr_keyset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">=</span><span class="n">schema</span> <span class="k">if</span> <span class="n">write_hugectr_keyset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Dataset.to_hugectr"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.to_hugectr">[docs]</a>    <span class="k">def</span> <span class="nf">to_hugectr</span><span class="p">(</span>
