@@ -227,10 +227,8 @@
 
         <span class="n">output_schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">output_col_name</span><span class="p">,</span> <span class="n">input_col_names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_mapping</span><span class="p">(</span><span class="n">col_selector</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">col_schema</span> <span class="o">=</span> <span class="n">ColumnSchema</span><span class="p">(</span><span class="n">output_col_name</span><span class="p">)</span>
-            <span class="n">col_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_dtype</span><span class="p">(</span><span class="n">col_schema</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">input_col_names</span><span class="p">])</span>
-            <span class="n">col_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_tags</span><span class="p">(</span><span class="n">col_schema</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">input_col_names</span><span class="p">])</span>
-            <span class="n">col_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_properties</span><span class="p">(</span><span class="n">col_schema</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">input_col_names</span><span class="p">])</span>
+            <span class="n">input_schema_fragment</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">input_col_names</span><span class="p">]</span>
+            <span class="n">col_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_column_schema</span><span class="p">(</span><span class="n">output_col_name</span><span class="p">,</span> <span class="n">input_schema_fragment</span><span class="p">)</span>
             <span class="n">output_schema</span> <span class="o">+=</span> <span class="n">Schema</span><span class="p">([</span><span class="n">col_schema</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamic_dtypes</span> <span class="ow">and</span> <span class="n">prev_output_schema</span><span class="p">:</span>
@@ -307,7 +305,12 @@
         <span class="k">return</span> <span class="n">column_mapping</span></div>
 
 <div class="viewcode-block" id="BaseOperator.compute_column_schema"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.compute_column_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_column_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
-        <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_compute_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_tags</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_properties</span><span class="p">]</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_dtype</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_tags</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_properties</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_shape</span><span class="p">,</span>
+        <span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_column_schema</span><span class="p">(</span><span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="n">methods</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_compute_column_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -320,21 +323,24 @@
 
     <span class="k">def</span> <span class="nf">_compute_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_schema</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">dtype</span>
-        <span class="n">is_list</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">is_list</span>
-        <span class="n">is_ragged</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">is_ragged</span>
 
         <span class="k">if</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">:</span>
             <span class="n">source_col_name</span> <span class="o">=</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">source_col_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
-            <span class="n">is_list</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">source_col_name</span><span class="p">]</span><span class="o">.</span><span class="n">is_list</span>
-            <span class="n">is_ragged</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">source_col_name</span><span class="p">]</span><span class="o">.</span><span class="n">is_ragged</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dtype</span>
-            <span class="n">is_list</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">is_list</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_schemas</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-            <span class="n">is_ragged</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">is_ragged</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">cs</span> <span class="ow">in</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_schemas</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
-        <span class="k">return</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="n">is_list</span><span class="p">,</span> <span class="n">is_ragged</span><span class="o">=</span><span class="n">is_ragged</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_schema</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_schemas</span><span class="p">:</span>
+            <span class="n">source_col_name</span> <span class="o">=</span> <span class="n">input_schema</span><span class="o">.</span><span class="n">column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">input_schema</span><span class="p">[</span><span class="n">source_col_name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">return</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">with_shape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dynamic_dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

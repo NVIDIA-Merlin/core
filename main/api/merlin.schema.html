@@ -325,22 +325,6 @@ to a single column via select_by_name or select_by_tag, and just want the value<
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="merlin.schema.ColumnSchema.quantity">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantity</span></code><a class="headerlink" href="#merlin.schema.ColumnSchema.quantity" title="Permalink to this definition"></a></dt>
-<dd><p>Describes the number of elements in each row of this column</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>SCALAR when one element per row
-FIXED_LIST when the same number of elements per row
-RAGGED_LIST when different numbers of elements per row</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>ColumnQuantity</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="merlin.schema.ColumnSchema.with_name">
 <code class="sig-name descname"><span class="pre">with_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.ColumnSchema</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#ColumnSchema.with_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.ColumnSchema.with_name" title="Permalink to this definition"></a></dt>
 <dd><p>Create a copy of this ColumnSchema object with a different column name</p>
