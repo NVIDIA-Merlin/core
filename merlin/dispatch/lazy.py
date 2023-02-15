@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 from functools import singledispatch
+from inspect import isclass
 
 
 class LazyDispatcher:
@@ -74,21 +75,25 @@ class LazyDispatcher:
 
         return wrapper(func) if func is not None else wrapper
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args_, **kwargs_):
         try:
-            return self._singledispatch(*args, **kwargs)
+            dispatch_type = self._dispatch_type(args_[0])
+            return self._singledispatch(dispatch_type, *args_, **kwargs_)
         except NotImplementedError:
             try:
-                module_name = args[0].__module__.partition(".")[0]
+                module_name = dispatch_type.__module__.partition(".")[0]
                 self._lazy[module_name]()
                 self._lazy.pop(module_name, None)
             except (AttributeError, KeyError):
-                self._raise_not_impl(self.func, args[0])
+                self._raise_not_impl(self.func, args_[0])
             else:
-                return self._singledispatch(*args, **kwargs)
+                return self._singledispatch(dispatch_type, *args_, **kwargs_)
 
-    def _singledispatch(self, *args, **kwargs):
-        return self.dispatcher.dispatch(args[0].__class__)(*args, **kwargs)
+    def _singledispatch(self, obj_type, *args, **kwargs):
+        return self.dispatcher.dispatch(obj_type)(*args, **kwargs)
+
+    def _dispatch_type(self, arg):
+        return arg if isclass(arg) else type(arg)
 
     def _raise_not_impl(self, func, arg):
         funcname = getattr(func, "__name__", "lazysingledispatch function")
