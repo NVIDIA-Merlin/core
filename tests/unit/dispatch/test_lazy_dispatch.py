@@ -14,9 +14,13 @@
 # limitations under the License.
 #
 import pytest
-import tensorflow as tf
 
 from merlin.dispatch.lazy import lazysingledispatch
+
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 
 @lazysingledispatch
@@ -43,6 +47,7 @@ def register_tf_to_array():
         return "tensor"
 
 
+@pytest.mark.skipif(not tf, reason="requires tensorflow")
 def test_lazy_dispatch():
     result = return_type_name(5)
     assert result == "int"
