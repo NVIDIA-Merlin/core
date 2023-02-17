@@ -38,10 +38,6 @@ class TensorflowColumn(TensorColumn):
     def supported_devices(cls):
         return [Device.CPU, Device.GPU]
 
-    @classmethod
-    def cast(cls, other):
-        return convert_column(other, target_type=cls)
-
     def __init__(self, values: tf.Tensor, offsets: tf.Tensor = None, dtype=None, _ref=None):
         values_device = self._tf_device(values)
         offsets_device = self._tf_device(offsets)

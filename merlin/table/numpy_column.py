@@ -32,12 +32,6 @@ class NumpyColumn(TensorColumn):
     def supported_devices(cls):
         return [Device.CPU]
 
-    @classmethod
-    def cast(cls, other):
-        column = cls(to_numpy(other.values), to_numpy(other.offsets))
-        column._ref = (other.values, other.offsets)
-        return column
-
     def __init__(self, values: np.ndarray, offsets: np.ndarray = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref=_ref)
 

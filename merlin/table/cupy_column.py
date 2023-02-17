@@ -27,12 +27,6 @@ class CupyColumn(TensorColumn):
     def supported_devices(cls):
         return [Device.GPU]
 
-    @classmethod
-    def cast(cls, other):
-        column = cls(to_cupy(other.values), to_cupy(other.offsets))
-        column._ref = (other.values, other.offsets)
-        return column
-
     def __init__(self, values: cp.ndarray, offsets: cp.ndarray = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref)
 
