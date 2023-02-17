@@ -18,9 +18,19 @@ from merlin.table.tensor_column import Device, TensorColumn
 
 
 class TorchColumn(TensorColumn):
-    def __init__(self, values: th.Tensor, offsets: th.Tensor = None, dtype=None):
-        super().__init__(values, offsets, dtype)
+    def __init__(self, values: th.Tensor, offsets: th.Tensor = None, dtype=None, _ref=None):
+        values_device = self._th_device(values)
+        offsets_device = self._th_device(offsets)
+        if values_device != offsets_device:
+            raise ValueError(
+                f"Values and offsets were detected on different devices: "
+                f"values ({values_device}) and offsets ({offsets_device})."
+            )
+        super().__init__(values, offsets, dtype, _ref=_ref)
 
     @property
     def device(self) -> Device:
+        return Device.GPU if self.values.is_cuda else Device.CPU
+
+    def _th_device(self, tensor):
         return Device.GPU if self.values.is_cuda else Device.CPU
