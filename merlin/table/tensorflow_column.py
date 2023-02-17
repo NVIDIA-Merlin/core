@@ -14,19 +14,29 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import Any
+from enum import Enum
+from typing import Any, Tuple
 
 from merlin.core.compat import tensorflow as tf
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
 
+class DlpackDevice(Enum):
+    CPU = 1
+    CUDA = 2
+
+
 @dataclass(frozen=True)
 class TensorflowDlpackWrapper:
     capsule: Any
+    device: Tuple[DlpackDevice, int]
 
     def __dlpack__(self):
         return self.capsule
+
+    def __dlpack_device__(self):
+        return self.device
 
 
 class TensorflowColumn(TensorColumn):
@@ -61,7 +71,17 @@ def register_to_dlpack_from_tf():
     @_to_dlpack.register(tf.Tensor)
     @_to_dlpack.register(eager_tensor_type)
     def _to_dlpack_from_tf_tensor(tensor):
-        return TensorflowDlpackWrapper(tf.experimental.dlpack.to_dlpack(tensor))
+        if "GPU" in tensor.device:
+            dlpack_device = DlpackDevice.CUDA
+        else:
+            dlpack_device = DlpackDevice.CPU
+
+        device_number = tensor.device.split(":")[-1]
+
+        capsule = tf.experimental.dlpack.to_dlpack(tensor)
+        device = (dlpack_device, device_number)
+
+        return TensorflowDlpackWrapper(capsule, device)
 
 
 @_from_dlpack_cpu.register_lazy("tensorflow")
