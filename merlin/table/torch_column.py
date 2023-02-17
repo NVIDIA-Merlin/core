@@ -14,10 +14,19 @@
 # limitations under the License.
 #
 from merlin.core.compat import torch as th
+from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
 
 class TorchColumn(TensorColumn):
+    @classmethod
+    def array_type(cls):
+        return th.Tensor
+
+    @classmethod
+    def supported_devices(cls):
+        return [Device.CPU, Device.GPU]
+
     def __init__(self, values: th.Tensor, offsets: th.Tensor = None, dtype=None, _ref=None):
         values_device = self._th_device(values)
         offsets_device = self._th_device(offsets)
@@ -30,7 +39,34 @@ class TorchColumn(TensorColumn):
 
     @property
     def device(self) -> Device:
-        return Device.GPU if self.values.is_cuda else Device.CPU
+        return self._th_device(self.values)
 
     def _th_device(self, tensor):
-        return Device.GPU if self.values.is_cuda else Device.CPU
+        return Device.GPU if tensor.is_cuda else Device.CPU
+
+
+@_to_dlpack.register_lazy("torch")
+def register_to_dlpack_from_tf():
+    import torch as th
+
+    @_to_dlpack.register(th.Tensor)
+    def _to_dlpack_from_tf_tensor(tensor):
+        return tensor
+
+
+@_from_dlpack_cpu.register_lazy("torch")
+def register_from_dlpack_cpu_to_tf():
+    import torch as th
+
+    @_from_dlpack_cpu.register(th.Tensor)
+    def _from_dlpack_cpu_to_tf(target_type, array):
+        return th.utils.dlpack.from_dlpack(array)
+
+
+@_from_dlpack_gpu.register_lazy("torch")
+def register_from_dlpack_gpu_to_tf():
+    import torch as th
+
+    @_from_dlpack_gpu.register(th.Tensor)
+    def _from_dlpack_gpu_to_tf(target_type, array):
+        return th.utils.dlpack.from_dlpack(array)
