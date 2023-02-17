@@ -48,9 +48,6 @@ class TensorflowColumn(TensorColumn):
             )
         super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
 
-    def to(self, target_type):
-        return convert_column(self, target_type=target_type)
-
     def _tf_device(self, tensor):
         return Device.GPU if "GPU" in tensor.device else Device.CPU
 
