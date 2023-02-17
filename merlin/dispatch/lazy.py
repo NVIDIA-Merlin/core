@@ -82,6 +82,7 @@ class LazyDispatcher:
         except NotImplementedError:
             try:
                 module_name = dispatch_type.__module__.partition(".")[0]
+                # lookup column for module
                 self._lazy[module_name]()
                 self._lazy.pop(module_name, None)
             except (AttributeError, KeyError):
@@ -96,10 +97,11 @@ class LazyDispatcher:
         return arg if isclass(arg) else type(arg)
 
     def _raise_not_impl(self, func, arg):
+        arg_type = type(arg)
         funcname = getattr(func, "__name__", "lazysingledispatch function")
+        typename = f"{arg_type.__module__}.{arg_type.__name__}"
         raise NotImplementedError(
-            f"{funcname} doesn't have a registered implementation "
-            f"for type of {arg} ({type(arg)})"
+            f"{funcname} doesn't have a registered implementation " f"for type `{typename}`"
         )
 
 

@@ -47,3 +47,26 @@ def _get_gpu_count():
 
 
 HAS_GPU = _get_gpu_count() > 0
+
+
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
+try:
+    import cupy
+except ImportError:
+    cupy = None
+
+try:
+    import tensorflow
+    from tensorflow.python.framework import ops as tf_ops
+except ImportError:
+    tensorflow = None
+    tf_ops = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
