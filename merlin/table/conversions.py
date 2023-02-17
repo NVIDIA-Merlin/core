@@ -17,9 +17,8 @@ from functools import singledispatch
 from typing import Type
 
 from merlin.dispatch.lazy import lazysingledispatch
-from merlin.table.tensor_column import (
+from merlin.table.tensor_column import (  # CudaArrayColumn,
     ArrayColumn,
-    CudaArrayColumn,
     Device,
     DlpackColumn,
     TensorColumn,
@@ -98,13 +97,13 @@ def from_array_col(array_col: ArrayColumn, target_col_type: TensorColumn):
     return target_col_type(values, offsets, _ref=array_col.ref)
 
 
-def to_dlpack_col(column):
+def to_dlpack_col(column: TensorColumn) -> DlpackColumn:
     vals_cap = _to_dlpack(column.values)
     offs_cap = _to_dlpack(column.offsets)
     return DlpackColumn(vals_cap, offs_cap, column)
 
 
-def from_dlpack_col(dlpack_col: DlpackColumn, target_col_type: TensorColumn):
+def from_dlpack_col(dlpack_col: DlpackColumn, target_col_type: TensorColumn) -> TensorColumn:
     target_array_type = target_col_type.array_type()
     if dlpack_col.ref.device == Device.GPU:
         values = _from_dlpack_gpu(target_array_type, dlpack_col.values)
@@ -115,11 +114,11 @@ def from_dlpack_col(dlpack_col: DlpackColumn, target_col_type: TensorColumn):
     return target_col_type(values, offsets, _ref=dlpack_col.ref)
 
 
-def from_cuda_array_col(array_col: CudaArrayColumn, target_col_type: TensorColumn):
-    target_array_type = target_col_type.array_type()
-    if array_col.ref.device == Device.GPU:
-        values = _from_cuda_array(target_array_type, array_col.values)
-        offsets = _from_cuda_array(target_array_type, array_col.offsets)
-    else:
-        raise NotImplementedError
-    return target_col_type(values, offsets, _ref=array_col.ref)
+# def from_cuda_array_col(array_col: CudaArrayColumn, target_col_type: TensorColumn):
+#     target_array_type = target_col_type.array_type()
+#     if array_col.ref.device == Device.GPU:
+#         values = _from_cuda_array(target_array_type, array_col.values)
+#         offsets = _from_cuda_array(target_array_type, array_col.offsets)
+#     else:
+#         raise NotImplementedError
+#     return target_col_type(values, offsets, _ref=array_col.ref)

@@ -13,13 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
 import merlin.dtypes as md
-from merlin.core.protocols import SeriesLike
 
 
 class Device(Enum):
@@ -30,8 +29,18 @@ class Device(Enum):
 # This should always contains arrays or tensors, not series
 class TensorColumn(ABC):
     """
-    A simple wrapper around an array of values
+    A simple wrapper around an array of values and an optional array of offsets
     """
+
+    @abstractmethod
+    @classmethod
+    def array_type(cls):
+        return None
+
+    @abstractmethod
+    @classmethod
+    def supported_devices(cls):
+        return []
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
         super().__init__()
