@@ -32,19 +32,17 @@ class TensorColumn(ABC):
     A simple wrapper around an array of values and an optional array of offsets
     """
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def array_type(cls):
         return None
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def supported_devices(cls):
         return []
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
-        super().__init__()
-
         self.values = values
         self.offsets = offsets
         self.dtype = md.dtype(dtype or values.dtype)
