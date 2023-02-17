@@ -38,8 +38,8 @@ class NumpyColumn(TensorColumn):
         column._ref = (other.values, other.offsets)
         return column
 
-    def __init__(self, values: np.ndarray, offsets: np.ndarray = None, dtype=None):
-        super().__init__(values, offsets, dtype)
+    def __init__(self, values: np.ndarray, offsets: np.ndarray = None, dtype=None, _ref=None):
+        super().__init__(values, offsets, dtype, _ref=_ref)
 
     @property
     def device(self) -> Device:
@@ -85,4 +85,4 @@ def register_from_numpy_to_dlpack_cpu():
 
     @_to_dlpack.register(np.ndarray)
     def _to_dlpack_cpu_from_numpy(array):
-        return array.__dlpack__()
+        return array
