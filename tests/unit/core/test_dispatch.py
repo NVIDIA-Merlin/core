@@ -55,6 +55,14 @@ def test_concat_columns(device):
 
 @pytest.mark.parametrize("device", _DEVICES)
 def test_concat_columns_empty(device):
+    df1 = make_df({"a": [1, 2], "b": ["x", "y"]}, device=device)[[]]
+    df2 = make_df({"b": ["x", "y", "z"]}, device=device)[[]]
+    res = concat_columns([df1, df2])
+    assert res.dtypes.to_dict() == df1.dtypes.to_dict()
+
+
+@pytest.mark.parametrize("device", _DEVICES)
+def test_concat_columns_one_empty(device):
     df1 = make_df({"a": [1, 2], "b": ["x", "y"]}, device=device)
     df2 = make_df({"b": ["x", "y", "z"]}, device=device)[[]]
     res = concat_columns([df1, df2])

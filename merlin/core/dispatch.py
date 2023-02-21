@@ -358,15 +358,15 @@ def concat_columns(args: list):
     if len(args) == 1:
         return args[0]
     elif cudf is not None and isinstance(args[0], cudf.DataFrame):
-        return cudf.concat(
-            [a.reset_index(drop=True) for a in args if not a.empty],
-            axis=1,
-        )
+        objs = [a.reset_index(drop=True) for a in args if not a.empty]
+        if objs == []:
+            return cudf.DataFrame()
+        return cudf.concat(objs, axis=1)
     elif isinstance(args[0], pd.DataFrame):
-        return pd.concat(
-            [a.reset_index(drop=True) for a in args if not a.empty],
-            axis=1,
-        )
+        objs = [a.reset_index(drop=True) for a in args if not a.empty]
+        if objs == []:
+            return pd.DataFrame()
+        return pd.concat(objs, axis=1)
     elif isinstance(args[0], DictLike):
         result = type(args[0])()
         for arg in args:
