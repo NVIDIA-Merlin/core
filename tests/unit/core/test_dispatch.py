@@ -53,6 +53,14 @@ def test_concat_columns(device):
     assert res.columns.to_list() == ["a", "b", "c"]
 
 
+@pytest.mark.parametrize("device", _DEVICES)
+def test_concat_columns_empty(device):
+    df1 = make_df({"a": [1, 2], "b": ["x", "y"]}, device=device)
+    df2 = make_df({"b": ["x", "y", "z"]}, device=device)[[]]
+    res = concat_columns([df1, df2])
+    assert res.dtypes.to_dict() == df1.dtypes.to_dict()
+
+
 @pytest.mark.skipif(not cp, reason="Cupy not available")
 def test_pandas_cupy_combo():
     rand_cp_nd_arr = cp.random.uniform(0.0, 1.0, size=100)
