@@ -29,13 +29,14 @@ class TorchColumn(TensorColumn):
 
     def __init__(self, values: th.Tensor, offsets: th.Tensor = None, dtype=None, _ref=None):
         values_device = self._th_device(values)
-        offsets_device = self._th_device(offsets)
-        if values_device != offsets_device:
-            raise ValueError(
-                f"Values and offsets were detected on different devices: "
-                f"values ({values_device}) and offsets ({offsets_device})."
-            )
-        super().__init__(values, offsets, dtype, _ref=_ref)
+        if offsets is not None:
+            offsets_device = self._th_device(offsets)
+            if values_device != offsets_device:
+                raise ValueError(
+                    f"Values and offsets were detected on different devices: "
+                    f"values ({values_device}) and offsets ({offsets_device})."
+                )
+        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
 
     @property
     def device(self) -> Device:

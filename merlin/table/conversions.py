@@ -99,7 +99,7 @@ def from_array_col(array_col: ArrayColumn, target_col_type: TensorColumn):
 
 def to_dlpack_col(column: TensorColumn) -> DlpackColumn:
     vals_cap = _to_dlpack(column.values)
-    offs_cap = _to_dlpack(column.offsets)
+    offs_cap = _to_dlpack(column.offsets) if column.offsets is not None else None
     return DlpackColumn(vals_cap, offs_cap, column)
 
 
@@ -107,10 +107,18 @@ def from_dlpack_col(dlpack_col: DlpackColumn, target_col_type: TensorColumn) -> 
     target_array_type = target_col_type.array_type()
     if dlpack_col.ref.device == Device.GPU:
         values = _from_dlpack_gpu(target_array_type, dlpack_col.values)
-        offsets = _from_dlpack_gpu(target_array_type, dlpack_col.offsets)
+        offsets = (
+            _from_dlpack_gpu(target_array_type, dlpack_col.offsets)
+            if dlpack_col.offsets is not None
+            else None
+        )
     else:
         values = _from_dlpack_cpu(target_array_type, dlpack_col.values)
-        offsets = _from_dlpack_cpu(target_array_type, dlpack_col.offsets)
+        offsets = (
+            _from_dlpack_cpu(target_array_type, dlpack_col.offsets)
+            if dlpack_col.offsets is not None
+            else None
+        )
     return target_col_type(values, offsets, _ref=dlpack_col.ref)
 
 
