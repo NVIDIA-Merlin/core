@@ -44,8 +44,8 @@ class TensorColumn(ABC, SeriesLike):
         return []
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
-        if offsets is not None:
-            self._validate_offsets(values, offsets)
+        # if offsets is not None:
+        #     self._validate_offsets(values, offsets)
 
         self._values = values
         self._offsets = offsets

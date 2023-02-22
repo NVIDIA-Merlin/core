@@ -50,4 +50,5 @@ def register_from_dlpack_gpu_to_cupy():
 
     @_from_dlpack_gpu.register(cp.ndarray)
     def _from_dlpack_gpu_to_cupy(to, array):
-        return cp.fromDlpack(array.__dlpack__())
+        breakpoint()
+        return cp.from_dlpack(array)

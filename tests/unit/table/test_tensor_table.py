@@ -28,6 +28,7 @@ from merlin.table.tensor_column import TensorColumn
 from merlin.table.tensor_table import TensorTable
 
 array_constructors = []
+cpu_target_packages = []
 if np:
     array_constructors.append((np.array, NumpyColumn))
 
@@ -36,7 +37,6 @@ if cp:
 
 if tf:
     array_constructors.append((tf.constant, TensorflowColumn))
-
 if th:
     array_constructors.append((th.tensor, TorchColumn))
 
@@ -76,20 +76,22 @@ def test_tensortable_with_ragged_columns():
 
 
 class PaddingOperator(BaseOperator):
-    def __init__(self, length=None):
+    def __init__(self, length=None, array_lib=np):
         self.length = length
+        self.array_lib = array_lib
 
     def transform(self, col_selector, transformable):
         for col_name, col_data in transformable[col_selector.names].items():
             # dtype = col_data.dtype.to("numpy")
-            dtype = np.int32
+
+            dtype = self.array_lib.int32
             num_rows = len(col_data.offsets) - 1
-            result = np.zeros((num_rows, self.length), dtype=dtype)
+            result = self.array_lib.zeros((num_rows, self.length), dtype=dtype)
 
             for i in range(num_rows):
                 row_length = len(col_data[i])
-                padding = np.array([0] * (self.length - row_length), dtype=dtype)
-                padded_row = np.append(col_data[i], padding)
+                padding = self.array_lib.array([0] * (self.length - row_length), dtype=dtype)
+                padded_row = self.array_lib.append(col_data[i], padding)
                 result[i] = padded_row.astype(dtype)
             transformable[col_name] = type(col_data)(result)
 
@@ -97,8 +99,10 @@ class PaddingOperator(BaseOperator):
 
     # TODO: Define what this op supports (and doesn't)
 
+#target input, target column
+#source input, source column
 
-def test_tensor_table_operator():
+def test_tensor_numpy_tf_table_operator():
     op = PaddingOperator(3)
     expected_output = np.array([[1, 0, 0], [2, 3, 0]])
 
@@ -122,7 +126,7 @@ def test_tensor_table_operator():
             "a__values": tf.constant([1, 2, 3]),
             "a__offsets": tf.constant([0, 1, 3]),
         }
-        tensor_table = TensorTable(tensor_dict)
+    tensor_table = TensorTable(tensor_dict)
 
     # Column conversions would happen in the executor
     for col_name, column in tensor_table.items():
@@ -142,6 +146,54 @@ def test_tensor_table_operator():
 
     assert result["a"].values.shape == expected_output.shape
     assert all(tf.reshape(result["a"].values.numpy() == expected_output, -1))
+
+
+
+def test_tensor_cupy_tf_table_operator():
+    op = PaddingOperator(3, array_lib=cp)
+    expected_output = cp.asarray([[1, 0, 0], [2, 3, 0]])
+
+    tensor_dict = {
+        "a__values": cp.asarray([1, 2, 3]),
+        "a__offsets": cp.asarray([0, 1, 3]),
+    }
+    tensor_table = TensorTable(tensor_dict)
+
+    result = op.transform(ColumnSelector(["a"]), tensor_table)
+
+    assert isinstance(result, TensorTable)
+    for column in result.values():
+        assert isinstance(column, CupyColumn)
+
+    assert result["a"].values.shape == expected_output.shape
+    assert all((result["a"].values == expected_output).reshape(-1))
+
+    with tf.device("/GPU"):
+        tensor_dict = {
+            "a__values": tf.constant([1, 2, 3]),
+            "a__offsets": tf.constant([0, 1, 3]),
+        }
+    tensor_table = TensorTable(tensor_dict)
+
+    # Column conversions would happen in the executor
+    for col_name, column in tensor_table.items():
+        tensor_table[col_name] = convert_col(column, CupyColumn)
+
+    # Executor runs the ops
+    result = op.transform(ColumnSelector(["a"]), tensor_table)
+
+    # Column conversions would happen in the executor
+    for col_name, column in result.items():
+        result[col_name] = convert_col(column, TensorflowColumn)
+
+    # Check the results
+    assert isinstance(result, TensorTable)
+    for column in result.values():
+        assert isinstance(column, TensorflowColumn)
+
+    assert result["a"].values.shape == expected_output.shape
+    assert all(tf.reshape(result["a"].values.numpy() == cp.asnumpy(expected_output.get()), -1))
+
 
 
 # TODO: Try the test above with Numpy and CPU Torch

@@ -15,7 +15,7 @@
 #
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple, Union
 
 from merlin.core.compat import tensorflow as tf
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
@@ -32,11 +32,12 @@ class TensorflowDlpackWrapper:
     capsule: Any
     device: Tuple[DlpackDevice, int]
 
-    def __dlpack__(self):
+    def __dlpack__(self, stream: Optional[Union[int, Any]] = None):
+        # TODO: Figure out what if anything we can do with a stream here
         return self.capsule
 
     def __dlpack_device__(self):
-        return self.device
+        return (self.device[0].value, int(self.device[1]))
 
 
 class TensorflowColumn(TensorColumn):
@@ -79,7 +80,7 @@ def register_to_dlpack_from_tf():
         else:
             dlpack_device = DlpackDevice.CPU
 
-        device_number = tensor.device.split(":")[-1]
+        device_number = int(tensor.device.split(":")[-1])
 
         capsule = tf.experimental.dlpack.to_dlpack(tensor)
         device = (dlpack_device, device_number)
