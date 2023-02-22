@@ -1,5 +1,6 @@
-dask>=2022.3.0
-distributed>=2022.3.0
+dask==2022.8.1
+distributed==2022.8.1
+fsspec==2022.8.2
 pandas>=1.2.0,<1.6.0dev0
 numba>=0.54
 pyarrow>=5.0.0
@@ -8,4 +9,3 @@ tqdm>=4.0
 tensorflow-metadata>=1.2.0
 betterproto<2.0.0
 packaging
-fsspec==2022.5.0
