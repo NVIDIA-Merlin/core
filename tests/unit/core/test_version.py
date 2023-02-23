@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
 from packaging.version import Version
 
 import merlin.core
+
+pytest.mark.skip(reason="requires full clone of repo to ensure versions are detected.")
 
 
 def test_version():
