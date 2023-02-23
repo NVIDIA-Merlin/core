@@ -103,7 +103,7 @@ class LazyDispatcher:
         )
 
 
-def lazysingledispatch(func):
+def lazy_singledispatch(func):
     """
     Single-dispatch generic function decorator with lazy registration.
 

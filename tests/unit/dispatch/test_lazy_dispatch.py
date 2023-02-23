@@ -15,7 +15,7 @@
 #
 import pytest
 
-from merlin.dispatch.lazy import lazysingledispatch
+from merlin.dispatch.lazy import lazy_singledispatch
 
 try:
     import tensorflow as tf
@@ -23,7 +23,7 @@ except ImportError:
     tf = None
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def return_type_name(arg):
     raise NotImplementedError()
 
