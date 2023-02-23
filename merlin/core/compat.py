@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
+
 try:
     from numba import cuda  # pylint: disable=unused-import
 except ImportError:
@@ -20,13 +22,28 @@ except ImportError:
 
 from dask.distributed.diagnostics import nvml
 
-# Using the `dask.distributed.diagnostics.nvml.device_get_count`
-# helper function from dask to check device counts with NVML
-# since this handles some complexity of checking NVML state for us.
 
-# Note: We can't use `numba.cuda.gpus`, since this has some side effects
-# that are incompatible with Dask-CUDA. If CUDA runtime functions are
-# called before Dask-CUDA can spawn worker processes
-# then Dask-CUDA it will not work correctly (raises an exception)
+def _get_gpu_count():
+    """Get Number of GPU devices accounting for CUDA_VISIBLE_DEVICES environment variable"""
+    # Using the `dask.distributed.diagnostics.nvml.device_get_count`
+    # helper function from dask to check device counts with NVML
+    # since this handles some complexity of checking NVML state for us.
 
-HAS_GPU = nvml.device_get_count() > 0
+    # Note: We can't use `numba.cuda.gpus`, since this has some side effects
+    # that are incompatible with Dask-CUDA. If CUDA runtime functions are
+    # called before Dask-CUDA can spawn worker processes
+    # then Dask-CUDA it will not work correctly (raises an exception)
+    nvml_device_count = nvml.device_get_count()
+    if nvml_device_count == 0:
+        return 0
+    try:
+        cuda_visible_devices = os.environ["CUDA_VISIBLE_DEVICES"]
+        if cuda_visible_devices:
+            return len(cuda_visible_devices.split(","))
+        else:
+            return 0
+    except KeyError:
+        return nvml_device_count
+
+
+HAS_GPU = _get_gpu_count() > 0
