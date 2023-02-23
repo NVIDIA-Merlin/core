@@ -23,9 +23,7 @@ except ImportError:
     tf = None
 
 
-@lazy_singledispatch
-def return_type_name(arg):
-    raise NotImplementedError()
+return_type_name = lazy_singledispatch("return_type_name")
 
 
 @return_type_name.register

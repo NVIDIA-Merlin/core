@@ -24,9 +24,9 @@ class LazyDispatcher:
     available later.
     """
 
-    def __init__(self, func):
-        self.dispatcher = singledispatch(func)
-        self.func = func
+    def __init__(self, func_or_name):
+        self.func = self._apply_default_impl(func_or_name)
+        self.dispatcher = singledispatch(self.func)
         self._lazy = {}
 
     def register(self, cls, func=None):
@@ -94,6 +94,26 @@ class LazyDispatcher:
 
     def _dispatch_type(self, arg):
         return arg if isclass(arg) else type(arg)
+
+    def _apply_default_impl(self, func_or_name):
+        if callable(func_or_name):
+            name = func_or_name.__name__
+            func = func_or_name
+        elif isinstance(func_or_name, str):
+            name = func_or_name
+            func = None
+        else:
+            raise TypeError(
+                "Argument to `lazy_singledispatch` must be either a function or a string."
+            )
+        if func is None:
+
+            def _default(*args, **kwargs):
+                raise NotImplementedError()
+
+            _default.__name__ = name
+            func = _default
+        return func
 
     def _raise_not_impl(self, func, arg):
         funcname = getattr(func, "__name__", "lazysingledispatch function")
