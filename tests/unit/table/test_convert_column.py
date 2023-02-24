@@ -14,16 +14,17 @@
 # limitations under the License.
 #
 import pytest
+from typings import List, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
-from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
+from merlin.table import CupyColumn, NumpyColumn, TensorColumn, TensorflowColumn, TorchColumn
 from merlin.table.conversions import convert_col
 
-source_cols = []
-output_col_types = []
+source_cols: List[TensorColumn] = []
+output_col_types: List[Type] = []
 
 if cp:
     cp_array = cp.asarray([1, 2, 3, 4])
@@ -31,11 +32,11 @@ if cp:
     source_cols.append(CupyColumn(values=cp_array, offsets=cp_array))
     output_col_types.append(CupyColumn)
 
-# if np:
-#     np_array = np.array([1, 2, 3, 4])
+if np:
+    np_array = np.array([1, 2, 3, 4])
 
-#     source_cols.append(NumpyColumn(values=np_array, offsets=np_array))
-#     output_col_types.append(NumpyColumn)
+    source_cols.append(NumpyColumn(values=np_array, offsets=np_array))
+    output_col_types.append(NumpyColumn)
 
 if tf:
     with tf.device("/CPU"):
@@ -48,15 +49,15 @@ if tf:
     source_cols.extend([cpu_tf_column, gpu_tf_column])
     output_col_types.append(TensorflowColumn)
 
-# if th:
-#     th_tensor = th.tensor([1, 2, 3, 4])
-#     cpu_th_column = TorchColumn(values=th_tensor, offsets=th_tensor)
+if th:
+    th_tensor = th.tensor([1, 2, 3, 4])
+    cpu_th_column = TorchColumn(values=th_tensor, offsets=th_tensor)
 
-#     th_tensor = th.tensor([1, 2, 3, 4]).cuda()
-#     gpu_th_column = TorchColumn(values=th_tensor, offsets=th_tensor)
+    th_tensor = th.tensor([1, 2, 3, 4]).cuda()
+    gpu_th_column = TorchColumn(values=th_tensor, offsets=th_tensor)
 
-#     source_cols.extend([cpu_th_column, gpu_th_column])
-#     output_col_types.append(TorchColumn)
+    source_cols.extend([cpu_th_column, gpu_th_column])
+    output_col_types.append(TorchColumn)
 
 
 @pytest.mark.parametrize("source_cols", source_cols)
@@ -65,7 +66,6 @@ def test_convert_col(source_cols, output_col):
     if source_cols.device not in output_col.supported_devices():
         with pytest.raises(NotImplementedError) as exc:
             converted_col = convert_col(source_cols, output_col)
-        breakpoint()
         assert "Could not convert from type" in str(exc.value)
     else:
         converted_col = convert_col(source_cols, output_col)

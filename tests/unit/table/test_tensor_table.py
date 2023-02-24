@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
 import pytest
+from typings import Tuple
 
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
@@ -24,20 +24,52 @@ from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
 from merlin.table.conversions import convert_col
-from merlin.table.tensor_column import TensorColumn
 from merlin.table.tensor_table import TensorTable
 
-array_constructors = []
-cpu_target_packages = []
+array_constructors: Tuple = []
+cpu_target_packages: Tuple = []
+gpu_target_packages: Tuple = []
 if np:
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
     array_constructors.append((np.array, NumpyColumn))
+    cpu_target_packages.append((NumpyColumn, tensor_dict))
 
 if cp:
+    tensor_dict = {
+        "a__values": cp.asarray([1, 2, 3]),
+        "a__offsets": cp.asarray([0, 1, 3]),
+    }
     array_constructors.append((cp.asarray, CupyColumn))
+    gpu_target_packages.append((CupyColumn, tensor_dict))
 
 if tf:
+    with tf.device("/CPU"):
+        tensor_dict_cpu = {
+            "a__values": tf.convert_to_tensor(np.array([1, 2, 3])),
+            "a__offsets": tf.convert_to_tensor(np.array([0, 1, 3])),
+        }
+    with tf.device("/GPU:0"):
+        tensor_dict_gpu = {
+            "a__values": tf.convert_to_tensor(np.array([1, 2, 3])),
+            "a__offsets": tf.convert_to_tensor(np.array([0, 1, 3])),
+        }
+    cpu_target_packages.append((TensorflowColumn, tensor_dict_cpu))
+    gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
     array_constructors.append((tf.constant, TensorflowColumn))
 if th:
+    tensor_dict_cpu = {
+        "a__values": th.tensor([1, 2, 3], dtype=th.int32),
+        "a__offsets": th.tensor([0, 1, 3], dtype=th.int32),
+    }
+    tensor_dict_gpu = {
+        "a__values": th.tensor([1, 2, 3], dtype=th.int32).cuda(),
+        "a__offsets": th.tensor([0, 1, 3], dtype=th.int32).cuda(),
+    }
+    cpu_target_packages.append((TorchColumn, tensor_dict_cpu))
+    gpu_target_packages.append((TorchColumn, tensor_dict_gpu))
     array_constructors.append((th.tensor, TorchColumn))
 
 
@@ -99,106 +131,73 @@ class PaddingOperator(BaseOperator):
 
     # TODO: Define what this op supports (and doesn't)
 
-#target input, target column
-#source input, source column
 
-def test_tensor_numpy_tf_table_operator():
-    op = PaddingOperator(3)
-    expected_output = np.array([[1, 0, 0], [2, 3, 0]])
+# target input, target column
+# source input, source column
+@pytest.mark.parametrize("source_column", [(NumpyColumn, np.array, np)])
+@pytest.mark.parametrize("target_column", cpu_target_packages)
+def test_tensor_cpu_table_operator(source_column, target_column):
+    source_column_type, source_col_constructor, array_lib = source_column
+    target_column_type, target_input = target_column
+    op = PaddingOperator(3, array_lib=array_lib)
+    expected_output = source_col_constructor([[1, 0, 0], [2, 3, 0]])
 
-    tensor_dict = {
-        "a__values": np.array([1, 2, 3]),
-        "a__offsets": np.array([0, 1, 3]),
-    }
-    tensor_table = TensorTable(tensor_dict)
-
-    result = op.transform(ColumnSelector(["a"]), tensor_table)
-
-    assert isinstance(result, TensorTable)
-    for column in result.values():
-        assert isinstance(column, NumpyColumn)
-
-    assert result["a"].values.shape == expected_output.shape
-    assert all((result["a"].values == expected_output).reshape(-1))
-
-    with tf.device("/CPU"):
-        tensor_dict = {
-            "a__values": tf.constant([1, 2, 3]),
-            "a__offsets": tf.constant([0, 1, 3]),
-        }
-    tensor_table = TensorTable(tensor_dict)
+    tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
     for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, NumpyColumn)
+        tensor_table[col_name] = convert_col(column, source_column_type)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
     for col_name, column in result.items():
-        result[col_name] = convert_col(column, TensorflowColumn)
+        result[col_name] = convert_col(column, target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
     for column in result.values():
-        assert isinstance(column, TensorflowColumn)
+        assert isinstance(column, target_column_type)
 
     assert result["a"].values.shape == expected_output.shape
-    assert all(tf.reshape(result["a"].values.numpy() == expected_output, -1))
+    results = result["a"].values
+    results = results.numpy() if hasattr(results, "numpy") else results
+    assert np.array_equal(results, expected_output)
 
 
+@pytest.mark.parametrize("source_column", [(CupyColumn, cp.asarray, cp)])
+@pytest.mark.parametrize("target_column", gpu_target_packages)
+def test_tensor_gpu_table_operator(source_column, target_column):
+    source_column_type, source_col_constructor, array_lib = source_column
+    target_column_type, target_input = target_column
+    op = PaddingOperator(3, array_lib=array_lib)
+    expected_output = source_col_constructor([[1, 0, 0], [2, 3, 0]])
 
-def test_tensor_cupy_tf_table_operator():
-    op = PaddingOperator(3, array_lib=cp)
-    expected_output = cp.asarray([[1, 0, 0], [2, 3, 0]])
-
-    tensor_dict = {
-        "a__values": cp.asarray([1, 2, 3]),
-        "a__offsets": cp.asarray([0, 1, 3]),
-    }
-    tensor_table = TensorTable(tensor_dict)
-
-    result = op.transform(ColumnSelector(["a"]), tensor_table)
-
-    assert isinstance(result, TensorTable)
-    for column in result.values():
-        assert isinstance(column, CupyColumn)
-
-    assert result["a"].values.shape == expected_output.shape
-    assert all((result["a"].values == expected_output).reshape(-1))
-
-    with tf.device("/GPU"):
-        tensor_dict = {
-            "a__values": tf.constant([1, 2, 3]),
-            "a__offsets": tf.constant([0, 1, 3]),
-        }
-    tensor_table = TensorTable(tensor_dict)
+    tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
     for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, CupyColumn)
+        tensor_table[col_name] = convert_col(column, source_column_type)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
     for col_name, column in result.items():
-        result[col_name] = convert_col(column, TensorflowColumn)
+        result[col_name] = convert_col(column, target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
     for column in result.values():
-        assert isinstance(column, TensorflowColumn)
+        assert isinstance(column, target_column_type)
 
     assert result["a"].values.shape == expected_output.shape
-    assert all(tf.reshape(result["a"].values.numpy() == cp.asnumpy(expected_output.get()), -1))
+    results = result["a"].values
+    results = results.cpu() if hasattr(results, "cpu") else results
+    results = results.numpy() if hasattr(results, "numpy") else cp.asnumpy(results)
+    assert np.array_equal(results, cp.asnumpy(expected_output.get()))
 
-
-
-# TODO: Try the test above with Numpy and CPU Torch
-# TODO: Try the test above with CuPy and GPU Tensorflow
-# TODO: Try the test above with CuPy and GPU Torch
 
 # TODO: Convert from tensor tables to dictionaries
 # TODO: Convert dictionaries to tensor tables (mostly done)

@@ -15,18 +15,8 @@
 #
 
 # flake8: noqa
-from merlin.core.compat import cupy as cp
-from merlin.core.compat import numpy as np
-from merlin.core.compat import tensorflow as tf
-from merlin.core.compat import torch as th
-if cp:
-    from merlin.table.cupy_column import CupyColumn
-
-if np:
-    from merlin.table.numpy_column import NumpyColumn
-if tf:
-    from merlin.table.tensorflow_column import TensorflowColumn
-if th:
-    from merlin.table.torch_column import TorchColumn
-
+from merlin.table.cupy_column import CupyColumn
+from merlin.table.numpy_column import NumpyColumn
 from merlin.table.tensor_column import TensorColumn
+from merlin.table.tensorflow_column import TensorflowColumn
+from merlin.table.torch_column import TorchColumn

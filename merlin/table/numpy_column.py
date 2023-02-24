@@ -24,15 +24,25 @@ from merlin.table.tensor_column import Device, TensorColumn
 
 
 class NumpyColumn(TensorColumn):
+    """
+    A SeriesLike column backed by NumPy arrays
+    """
+
     @classmethod
     def array_type(cls):
+        """
+        The type of the arrays backing this column
+        """
         return np.ndarray
 
     @classmethod
     def supported_devices(cls):
+        """
+        List of device types supported by this column type
+        """
         return [Device.CPU]
 
-    def __init__(self, values: np.ndarray, offsets: np.ndarray = None, dtype=None, _ref=None):
+    def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref=_ref)
 
     @property
@@ -41,7 +51,7 @@ class NumpyColumn(TensorColumn):
 
 
 @_to_array_interface.register_lazy("numpy")
-def register_to_array_interface_numpy():
+def _register_to_array_interface_numpy():
     import numpy as np
 
     @_to_array_interface.register(np.ndarray)
@@ -50,7 +60,7 @@ def register_to_array_interface_numpy():
 
 
 @_from_array_interface.register_lazy("numpy")
-def register_from_array_interface_numpy():
+def _register_from_array_interface_numpy():
     import numpy as np
 
     @_from_array_interface.register(np.ndarray)
@@ -59,7 +69,7 @@ def register_from_array_interface_numpy():
 
 
 @_from_dlpack_cpu.register_lazy("numpy")
-def register_from_dlpack_cpu_to_numpy():
+def _register_from_dlpack_cpu_to_numpy():
     import numpy as np
 
     @_from_dlpack_cpu.register(np.ndarray)
@@ -74,7 +84,7 @@ def register_from_dlpack_cpu_to_numpy():
 
 
 @_to_dlpack.register_lazy("numpy")
-def register_from_numpy_to_dlpack_cpu():
+def _register_from_numpy_to_dlpack_cpu():
     import numpy as np
 
     @_to_dlpack.register(np.ndarray)

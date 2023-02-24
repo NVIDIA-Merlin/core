@@ -37,19 +37,30 @@ class TensorflowDlpackWrapper:
         return self.capsule
 
     def __dlpack_device__(self):
-        return (self.device[0].value, int(self.device[1]))
+        device = (self.device[0].value, int(self.device[1]))
+        return device
 
 
 class TensorflowColumn(TensorColumn):
+    """
+    A SeriesLike column backed by Tensorflow tensors
+    """
+
     @classmethod
     def array_type(cls):
+        """
+        The type of the arrays backing this column
+        """
         return tf.Tensor
 
     @classmethod
     def supported_devices(cls):
+        """
+        List of device types supported by this column type
+        """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: tf.Tensor, offsets: tf.Tensor = None, dtype=None, _ref=None):
+    def __init__(self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None):
         values_device = self._tf_device(values)
 
         if offsets is not None:
@@ -67,7 +78,7 @@ class TensorflowColumn(TensorColumn):
 
 
 @_to_dlpack.register_lazy("tensorflow")
-def register_to_dlpack_from_tf():
+def _register_to_dlpack_from_tf():
     import tensorflow as tf
 
     eager_tensor_type = type(tf.random.uniform((1,)))
@@ -75,21 +86,17 @@ def register_to_dlpack_from_tf():
     @_to_dlpack.register(tf.Tensor)
     @_to_dlpack.register(eager_tensor_type)
     def _to_dlpack_from_tf_tensor(tensor):
-        if "GPU" in tensor.device:
-            dlpack_device = DlpackDevice.CUDA
-        else:
-            dlpack_device = DlpackDevice.CPU
-
-        device_number = int(tensor.device.split(":")[-1])
-
         capsule = tf.experimental.dlpack.to_dlpack(tensor)
+
+        dlpack_device = DlpackDevice.CUDA if "GPU" in tensor.device else DlpackDevice.CPU
+        device_number = int(tensor.device.split(":")[-1])
         device = (dlpack_device, device_number)
 
         return TensorflowDlpackWrapper(capsule, device)
 
 
 @_from_dlpack_cpu.register_lazy("tensorflow")
-def register_from_dlpack_cpu_to_tf():
+def _register_from_dlpack_cpu_to_tf():
     import tensorflow as tf
 
     eager_tensor_type = type(tf.random.uniform((1,)))
@@ -101,7 +108,7 @@ def register_from_dlpack_cpu_to_tf():
 
 
 @_from_dlpack_gpu.register_lazy("tensorflow")
-def register_from_dlpack_gpu_to_tf():
+def _register_from_dlpack_gpu_to_tf():
     import tensorflow as tf
 
     eager_tensor_type = type(tf.random.uniform((1,)))

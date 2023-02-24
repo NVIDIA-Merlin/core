@@ -19,15 +19,27 @@ from merlin.table.tensor_column import Device, TensorColumn
 
 
 class CupyColumn(TensorColumn):
+    """
+    A SeriesLike column backed by CuPy arrays
+    """
+
     @classmethod
     def array_type(cls):
+        """
+        The type of the arrays backing this column
+        """
         return cp.ndarray
 
     @classmethod
     def supported_devices(cls):
+        """
+        List of device types supported by this column type
+        """
         return [Device.GPU]
 
-    def __init__(self, values: cp.ndarray, offsets: cp.ndarray = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None
+    ):  # pylint:disable=useless-parent-delegation
         super().__init__(values, offsets, dtype, _ref)
 
     @property
@@ -36,7 +48,7 @@ class CupyColumn(TensorColumn):
 
 
 @_to_dlpack.register_lazy("cupy")
-def register_to_dlpack_from_cupy():
+def _register_to_dlpack_from_cupy():
     import cupy as cp
 
     @_to_dlpack.register(cp.ndarray)
@@ -45,10 +57,9 @@ def register_to_dlpack_from_cupy():
 
 
 @_from_dlpack_gpu.register_lazy("cupy")
-def register_from_dlpack_gpu_to_cupy():
+def _register_from_dlpack_gpu_to_cupy():
     import cupy as cp
 
     @_from_dlpack_gpu.register(cp.ndarray)
-    def _from_dlpack_gpu_to_cupy(to, array):
-        breakpoint()
+    def _from_dlpack_gpu_to_cupy(to, array) -> cp.ndarray:
         return cp.from_dlpack(array)

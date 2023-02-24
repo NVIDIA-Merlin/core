@@ -19,15 +19,25 @@ from merlin.table.tensor_column import Device, TensorColumn
 
 
 class TorchColumn(TensorColumn):
+    """
+    A SeriesLike column backed by Torch tensors
+    """
+
     @classmethod
     def array_type(cls):
+        """
+        The type of the arrays backing this column
+        """
         return th.Tensor
 
     @classmethod
     def supported_devices(cls):
+        """
+        List of device types supported by this column type
+        """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: th.Tensor, offsets: th.Tensor = None, dtype=None, _ref=None):
+    def __init__(self, values: "th.Tensor", offsets: "th.Tensor" = None, dtype=None, _ref=None):
         values_device = self._th_device(values)
         if offsets is not None:
             offsets_device = self._th_device(offsets)
@@ -36,6 +46,7 @@ class TorchColumn(TensorColumn):
                     f"Values and offsets were detected on different devices: "
                     f"values ({values_device}) and offsets ({offsets_device})."
                 )
+
         super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
 
     @property
@@ -47,7 +58,7 @@ class TorchColumn(TensorColumn):
 
 
 @_to_dlpack.register_lazy("torch")
-def register_to_dlpack_from_tf():
+def _register_to_dlpack_from_tf():
     import torch as th
 
     @_to_dlpack.register(th.Tensor)
@@ -56,7 +67,7 @@ def register_to_dlpack_from_tf():
 
 
 @_from_dlpack_cpu.register_lazy("torch")
-def register_from_dlpack_cpu_to_tf():
+def _register_from_dlpack_cpu_to_tf():
     import torch as th
 
     @_from_dlpack_cpu.register(th.Tensor)
@@ -65,7 +76,7 @@ def register_from_dlpack_cpu_to_tf():
 
 
 @_from_dlpack_gpu.register_lazy("torch")
-def register_from_dlpack_gpu_to_tf():
+def _register_from_dlpack_gpu_to_tf():
     import torch as th
 
     @_from_dlpack_gpu.register(th.Tensor)
