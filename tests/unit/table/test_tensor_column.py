@@ -13,15 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import pytest
-
 import merlin.dtypes as md
-from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
-from merlin.core.compat import tensorflow as tf
-from merlin.core.compat import torch as th
-from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
-from merlin.table.conversions import convert_col
+from merlin.table import NumpyColumn
 
 
 def test_getitem():
