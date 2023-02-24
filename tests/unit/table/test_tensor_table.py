@@ -21,11 +21,18 @@ from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
+from merlin.core.dispatch import (
+    df_from_dict,
+    df_from_tensor_table,
+    dict_from_df,
+    make_df,
+    tensor_table_from_df,
+)
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
-from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
+from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
 from merlin.table.conversions import convert_col
-from merlin.table.tensor_table import TensorTable
+from tests.conftest import assert_eq
 
 array_constructors: List[Tuple] = []
 cpu_target_packages: List[Tuple] = []
@@ -200,14 +207,7 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     assert np.array_equal(results, cp.asnumpy(expected_output.get()))
 
 
-# TODO: Convert from tensor tables to dictionaries
-# TODO: Convert dictionaries to tensor tables (mostly done)
-
-# TODO: Convert from dataframes to tensor tables
-# TODO: Convert from tensor tables to dataframes
-
-
-def test_to_from_dict():
+def test_as_dict():
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
         "a__offsets": np.array([0, 1, 3]),
@@ -215,4 +215,29 @@ def test_to_from_dict():
 
     table = TensorTable(tensor_dict)
 
-    assert table.as_dict() == tensor_dict
+    assert table.as_dict == tensor_dict
+
+
+@pytest.mark.parametrize("device", [None, "cpu"])
+def test_df_to_tensor_table(device):
+    df = make_df({"a": [[1, 2, 3], [4, 5, 6, 7]], "b": [1, 2]}, device=device)
+
+    table = tensor_table_from_df(df)
+    roundtrip_df = df_from_tensor_table(table)
+
+    assert isinstance(table, TensorTable)
+    expected_device = Device.CPU if device else Device.GPU
+    assert table.device == expected_device
+
+    assert_eq(df, roundtrip_df)
+
+
+@pytest.mark.parametrize("device", [None, "cpu"])
+def test_df_to_dict(device):
+    df = make_df({"a": [[1, 2, 3], [4, 5, 6, 7]], "b": [1, 2]}, device=device)
+
+    df_dict = dict_from_df(df)
+    roundtrip_df = df_from_dict(df_dict)
+
+    assert isinstance(df_dict, dict)
+    assert_eq(df, roundtrip_df)

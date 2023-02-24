@@ -16,7 +16,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Type
 
 import merlin.dtypes as md
 from merlin.core.protocols import SeriesLike
@@ -35,20 +35,26 @@ class TensorColumn(ABC, SeriesLike):
 
     @classmethod
     @abstractmethod
-    def array_type(cls):
+    def array_type(cls) -> Type:
+        """
+        The type of the arrays backing this column
+        """
         return None
 
     @classmethod
     @abstractmethod
     def supported_devices(cls):
+        """
+        List of device types supported by this column type
+        """
         return []
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
-        # if offsets is not None:
-        #     self._validate_offsets(values, offsets)
+        self._validate_values_offsets(values, offsets)
 
         self._values = values
         self._offsets = offsets
+
         # need to do validation on offsets and values. Last value in offsets should be total
         # number of values in values
         self._dtype = md.dtype(dtype or values.dtype)
@@ -83,7 +89,7 @@ class TensorColumn(ABC, SeriesLike):
         return self._values[start:end]
 
     def __eq__(self, other):
-        if type(self) != type(other):
+        if isinstance(other, type(self)):
             return False
         return (
             _arrays_eq(self._values, other._values)
@@ -92,18 +98,33 @@ class TensorColumn(ABC, SeriesLike):
             and self.device == other.device
         )
 
-    def _validate_offsets(self, values, offsets):
-        # The offsets have to be in increasing order
-        # None of the offsets should be greater than the length of the values
-        # The last offset should be the length of the values
+    def _validate_values_offsets(self, values, offsets):
+        self._raise_type_error("values", values)
 
-        if len(values) != offsets[-1]:
-            # error description may need to explain that offsets must include length of values
-            # as last item in offsets.
-            raise ValueError("The last offset must match the length of the values.")
+        if offsets is not None:
+            self._raise_type_error("offsets", offsets)
 
-        if any(offsets[1:] - offsets[:-1] < 0):
-            raise ValueError("Offsets must be in increasing order")
+            # The offsets have to be in increasing order
+            # None of the offsets should be greater than the length of the values
+            # The last offset should be the length of the values
+
+            if len(values) != offsets[-1]:
+                # error description may need to explain that offsets must include length of values
+                # as last item in offsets.
+                raise ValueError("The last offset must match the length of the values.")
+
+            if any(offsets[1:] - offsets[:-1] < 0):
+                raise ValueError("Offsets must be in increasing order")
+
+    def _raise_type_error(self, field_name, array):
+        expected_type = self.__class__.array_type()
+        if not isinstance(  # pylint:disable=isinstance-second-argument-not-valid-type
+            array, expected_type
+        ):
+            raise TypeError(
+                f"{self.__class__} expected arrays of type {expected_type}, "
+                f"but received {field_name} of type {type(array)}"
+            )
 
 
 @dataclass(frozen=True)

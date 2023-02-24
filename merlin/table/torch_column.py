@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Type
+
 from merlin.core.compat import torch as th
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
@@ -24,7 +26,7 @@ class TorchColumn(TensorColumn):
     """
 
     @classmethod
-    def array_type(cls):
+    def array_type(cls) -> Type:
         """
         The type of the arrays backing this column
         """

@@ -17,6 +17,7 @@
 # flake8: noqa
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
-from merlin.table.tensor_column import TensorColumn
+from merlin.table.tensor_column import Device, TensorColumn
+from merlin.table.tensor_table import TensorTable
 from merlin.table.tensorflow_column import TensorflowColumn
 from merlin.table.torch_column import TorchColumn

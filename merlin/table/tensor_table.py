@@ -63,6 +63,10 @@ class TensorTable:
     def __delitem__(self, key):
         del self._columns[key]
 
+    @property
+    def device(self):
+        return list(self.values())[0].device
+
     def keys(self):
         """
         Return the keys (i.e. column names) of the column dictionary
@@ -121,6 +125,7 @@ class TensorTable:
         """
         return [column.dtype for column in self.values()]
 
+    @property
     def as_dict(self):
         """
         Convert to a flat dictionary of arrays or tensors
