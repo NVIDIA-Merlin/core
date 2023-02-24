@@ -717,14 +717,14 @@ def get_random_state():
     return np.random.mtrand.RandomState()
 
 
-def tensor_table_from_df(df: DataFrameLike):
+def tensor_table_from_df(df: DataFrameType):
     from merlin.table import CupyColumn, NumpyColumn, TensorTable
 
     array_cols = {}
     column_type = NumpyColumn if isinstance(df, pd.DataFrame) else CupyColumn
     device = "cpu" if isinstance(df, pd.DataFrame) else None
 
-    for col in df.columns():
+    for col in df.columns:
         if is_list_dtype(df[col]):
             values_series, offsets_series = pull_apart_list(df[col], device=device)
             array_cols[col] = column_type(values_series.values, offsets_series.values)

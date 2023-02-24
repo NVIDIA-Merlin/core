@@ -39,14 +39,8 @@ class CupyColumn(TensorColumn):
         """
         return [Device.GPU]
 
-    def __init__(
-        self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None
-    ):  # pylint:disable=useless-parent-delegation
-        super().__init__(values, offsets, dtype, _ref)
-
-    @property
-    def device(self) -> Device:
-        return Device.GPU
+    def __init__(self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None):
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU)
 
 
 @_to_dlpack.register_lazy("cupy")

@@ -41,11 +41,13 @@ if np:
 
 if tf:
     with tf.device("/CPU"):
-        tf_tensor = tf.random.uniform((10,))
+        tf_tensor = tf.convert_to_tensor(np.array([1, 2, 3, 4]))
+        offsets_tensor = tf.convert_to_tensor(np.array([0, 1, 2, 3, 4]))
         cpu_tf_column = TensorflowColumn(values=tf_tensor, offsets=tf_tensor)
     with tf.device("/GPU:0"):
-        tf_tensor = tf.random.uniform((10,))
-        gpu_tf_column = TensorflowColumn(values=tf_tensor, offsets=tf_tensor)
+        tf_tensor = tf.convert_to_tensor(np.array([1, 2, 3, 4]))
+        offsets_tensor = tf.convert_to_tensor(np.array([0, 1, 2, 3, 4]))
+        gpu_tf_column = TensorflowColumn(values=tf_tensor, offsets=offsets_tensor)
 
     source_cols.extend([cpu_tf_column, gpu_tf_column])
     output_col_types.append(TensorflowColumn)

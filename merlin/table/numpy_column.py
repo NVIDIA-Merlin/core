@@ -45,11 +45,7 @@ class NumpyColumn(TensorColumn):
         return [Device.CPU]
 
     def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
-        super().__init__(values, offsets, dtype, _ref=_ref)
-
-    @property
-    def device(self) -> Device:
-        return Device.CPU
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
 
 
 @_to_array_interface.register_lazy("numpy")

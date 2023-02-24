@@ -87,7 +87,7 @@ class TensorColumn(ABC, SeriesLike):
         return self._values[start:end]
 
     def __eq__(self, other):
-        if isinstance(other, type(self)):
+        if not isinstance(other, type(self)):
             return False
         return (
             _arrays_eq(self._values, other._values)
