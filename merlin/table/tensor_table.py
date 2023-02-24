@@ -121,6 +121,21 @@ class TensorTable:
         """
         return [column.dtype for column in self.values()]
 
+    def as_dict(self):
+        """
+        Convert to a flat dictionary of arrays or tensors
+
+        Ragged columns will be represented as values and offsets
+        """
+        result = {}
+        for col_name, tensor_col in self._columns.items():
+            if tensor_col.offsets is not None:
+                result[f"{col_name}__values"] = tensor_col.values
+                result[f"{col_name}__offsets"] = tensor_col.offsets
+            else:
+                result[col_name] = tensor_col.values
+        return result
+
 
 @lazysingledispatch
 def create_tensor_column(values, offsets=None):

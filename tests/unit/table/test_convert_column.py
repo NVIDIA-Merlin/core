@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import List, Type
+
 import pytest
-from typings import List, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np

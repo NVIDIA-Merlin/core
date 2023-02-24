@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import List, Tuple
+
 import pytest
-from typings import Tuple
 
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
@@ -26,9 +27,9 @@ from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
 from merlin.table.conversions import convert_col
 from merlin.table.tensor_table import TensorTable
 
-array_constructors: Tuple = []
-cpu_target_packages: Tuple = []
-gpu_target_packages: Tuple = []
+array_constructors: List[Tuple] = []
+cpu_target_packages: List[Tuple] = []
+gpu_target_packages: List[Tuple] = []
 if np:
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
@@ -204,3 +205,14 @@ def test_tensor_gpu_table_operator(source_column, target_column):
 
 # TODO: Convert from dataframes to tensor tables
 # TODO: Convert from tensor tables to dataframes
+
+
+def test_to_from_dict():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
+
+    table = TensorTable(tensor_dict)
+
+    assert table.as_dict() == tensor_dict
