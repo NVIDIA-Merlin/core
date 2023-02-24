@@ -22,6 +22,7 @@ from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
 from merlin.core.dispatch import (
+    HAS_GPU,
     df_from_dict,
     df_from_tensor_table,
     dict_from_df,
@@ -37,6 +38,8 @@ from tests.conftest import assert_eq
 array_constructors: List[Tuple] = []
 cpu_target_packages: List[Tuple] = []
 gpu_target_packages: List[Tuple] = []
+gpu_source_col: List[Tuple] = []
+cpu_source_col: List[Tuple] = []
 if np:
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
@@ -44,6 +47,7 @@ if np:
     }
     array_constructors.append((np.array, NumpyColumn))
     cpu_target_packages.append((NumpyColumn, tensor_dict))
+    cpu_source_col.append((NumpyColumn, np.array, np))
 
 if cp:
     tensor_dict = {
@@ -52,6 +56,7 @@ if cp:
     }
     array_constructors.append((cp.asarray, CupyColumn))
     gpu_target_packages.append((CupyColumn, tensor_dict))
+    gpu_source_col.append((CupyColumn, cp.asarray, cp))
 
 if tf:
     with tf.device("/CPU"):
@@ -142,7 +147,7 @@ class PaddingOperator(BaseOperator):
 
 # target input, target column
 # source input, source column
-@pytest.mark.parametrize("source_column", [(NumpyColumn, np.array, np)])
+@pytest.mark.parametrize("source_column", cpu_source_col)
 @pytest.mark.parametrize("target_column", cpu_target_packages)
 def test_tensor_cpu_table_operator(source_column, target_column):
     source_column_type, source_col_constructor, array_lib = source_column
@@ -174,7 +179,8 @@ def test_tensor_cpu_table_operator(source_column, target_column):
     assert np.array_equal(results, expected_output)
 
 
-@pytest.mark.parametrize("source_column", [(CupyColumn, cp.asarray, cp)])
+@pytest.mark.skipif(not cp, reason="cupy not available")
+@pytest.mark.parametrize("source_column", gpu_source_col)
 @pytest.mark.parametrize("target_column", gpu_target_packages)
 def test_tensor_gpu_table_operator(source_column, target_column):
     source_column_type, source_col_constructor, array_lib = source_column
@@ -218,7 +224,7 @@ def test_as_dict():
     assert table.as_dict == tensor_dict
 
 
-@pytest.mark.parametrize("device", [None, "cpu"])
+@pytest.mark.parametrize("device", [None, "cpu"] if HAS_GPU else ["cpu"])
 def test_df_to_tensor_table(device):
     df = make_df({"a": [[1, 2, 3], [4, 5, 6, 7]], "b": [1, 2]}, device=device)
 
@@ -232,7 +238,7 @@ def test_df_to_tensor_table(device):
     assert_eq(df, roundtrip_df)
 
 
-@pytest.mark.parametrize("device", [None, "cpu"])
+@pytest.mark.parametrize("device", [None, "cpu"] if HAS_GPU else ["cpu"])
 def test_df_to_dict(device):
     df = make_df({"a": [[1, 2, 3], [4, 5, 6, 7]], "b": [1, 2]}, device=device)
 
