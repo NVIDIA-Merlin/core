@@ -65,16 +65,6 @@ def convert_col(column: TensorColumn, target_type: Type):
     except NotImplementedError:
         pass
 
-    # try:
-    #     return from_cuda_array_col(to_cuda_array_col(column), target_type)
-    # except NotImplementedError:
-    #     pass
-
-    # try:
-    #     return from_array_col(to_array_col(column), target_type)
-    # except NotImplementedError:
-    #     pass
-
     raise NotImplementedError(
         f"Could not convert from type {type(column)} to "
         f"type {target_type} via a zero-copy cast mechanism."
@@ -121,13 +111,3 @@ def from_dlpack_col(dlpack_col: DlpackColumn, target_col_type: Type) -> TensorCo
         )
 
     return target_col_type(values, offsets, _ref=dlpack_col.ref)
-
-
-# def from_cuda_array_col(array_col: CudaArrayColumn, target_col_type: TensorColumn):
-#     target_array_type = target_col_type.array_type()
-#     if array_col.ref.device == Device.GPU:
-#         values = _from_cuda_array(target_array_type, array_col.values)
-#         offsets = _from_cuda_array(target_array_type, array_col.offsets)
-#     else:
-#         raise NotImplementedError
-#     return target_col_type(values, offsets, _ref=array_col.ref)

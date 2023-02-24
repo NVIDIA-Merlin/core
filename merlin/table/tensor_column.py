@@ -55,8 +55,6 @@ class TensorColumn(ABC, SeriesLike):
         self._values = values
         self._offsets = offsets
 
-        # need to do validation on offsets and values. Last value in offsets should be total
-        # number of values in values
         self._dtype = md.dtype(dtype or values.dtype)
         self._ref = _ref
         self._device = _device
@@ -109,8 +107,6 @@ class TensorColumn(ABC, SeriesLike):
             # The last offset should be the length of the values
 
             if len(values) != offsets[-1]:
-                # error description may need to explain that offsets must include length of values
-                # as last item in offsets.
                 raise ValueError("The last offset must match the length of the values.")
 
             if any(offsets[1:] - offsets[:-1] < 0):

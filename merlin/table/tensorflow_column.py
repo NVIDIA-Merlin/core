@@ -117,20 +117,3 @@ def _register_from_dlpack_gpu_to_tf():
     @_from_dlpack_gpu.register(eager_tensor_type)
     def _from_dlpack_gpu_to_tf(target_type, array):
         return tf.experimental.dlpack.from_dlpack(array.__dlpack__())
-
-
-# @_to_array_interface.register_lazy("tensorflow")
-# def register_to_array_interface_numpy():
-#     import numpy as np
-
-#     @_to_array_interface.register(np.ndarray)
-#     def _to_array_interface_numpy(array):
-#         return array
-
-# @_from_array_interface.register_lazy("tensorflow")
-# def register_from_array_interface_numpy():
-#     import numpy as np
-
-#     @_from_array_interface.register(np.ndarray)
-#     def _from_array_interface_numpy(target_type, array_interface):
-#         return np.asarray(array_interface)
