@@ -16,7 +16,7 @@
 from typing import Any, Dict
 
 from merlin.dag.utils import group_values_offsets
-from merlin.dispatch.lazy import lazysingledispatch
+from merlin.dispatch.lazy import lazy_singledispatch
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
 from merlin.table.tensor_column import TensorColumn
@@ -142,7 +142,7 @@ class TensorTable:
         return result
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def create_tensor_column(values, offsets=None):
     """
     Create the appropriate TensorColumn subclass from the type of the supplied values and offsets

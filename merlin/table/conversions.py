@@ -16,7 +16,7 @@
 from functools import singledispatch
 from typing import Type
 
-from merlin.dispatch.lazy import lazysingledispatch
+from merlin.dispatch.lazy import lazy_singledispatch
 from merlin.table.tensor_column import (  # CudaArrayColumn,
     ArrayColumn,
     Device,
@@ -31,27 +31,27 @@ def from_transfer_col(array_col: TransferColumn):
     raise NotImplementedError
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def _to_dlpack(tensor):
     raise NotImplementedError
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def _to_array_interface(tensor_col: TensorColumn):
     raise NotImplementedError
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def _from_array_interface(to, tensor_col: TransferColumn):
     raise NotImplementedError
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def _from_dlpack_cpu(to, capsule):
     raise NotImplementedError
 
 
-@lazysingledispatch
+@lazy_singledispatch
 def _from_dlpack_gpu(to, capsule):
     raise NotImplementedError
 
