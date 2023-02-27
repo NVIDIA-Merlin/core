@@ -19,7 +19,6 @@ from enum import Enum
 from typing import Any, Type
 
 import merlin.dtypes as md
-from merlin.core.protocols import SeriesLike
 
 
 class Device(Enum):
@@ -27,10 +26,11 @@ class Device(Enum):
     GPU = 1
 
 
-# This should always contains arrays or tensors, not series
-class TensorColumn(ABC, SeriesLike):
+class TensorColumn(ABC):
     """
     A simple wrapper around an array of values and an optional array of offsets
+
+    Should always contain arrays or tensors, not dataframe series
     """
 
     @classmethod

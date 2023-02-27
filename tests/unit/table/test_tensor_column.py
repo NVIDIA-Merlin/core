@@ -13,9 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import pytest
+
 import merlin.dtypes as md
 from merlin.core.compat import numpy as np
+from merlin.core.protocols import SeriesLike
 from merlin.table import NumpyColumn
+
+
+@pytest.mark.parametrize("protocol", [SeriesLike])
+def test_tensor_column_matches_protocols(protocol):
+    obj = NumpyColumn(np.array([]))
+
+    assert isinstance(obj, protocol)
 
 
 def test_getitem():
