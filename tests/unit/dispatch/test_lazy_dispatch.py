@@ -17,7 +17,6 @@ import pytest
 
 from merlin.dispatch.lazy import lazy_singledispatch
 
-
 try:
     import tensorflow as tf
 except ImportError:
