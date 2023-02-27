@@ -15,7 +15,8 @@
 #
 import pytest
 
-from merlin.dispatch.lazy import lazysingledispatch
+from merlin.dispatch.lazy import lazy_singledispatch
+
 
 try:
     import tensorflow as tf
@@ -23,9 +24,7 @@ except ImportError:
     tf = None
 
 
-@lazysingledispatch
-def return_type_name(arg):
-    raise NotImplementedError()
+return_type_name = lazy_singledispatch("return_type_name")
 
 
 @return_type_name.register
