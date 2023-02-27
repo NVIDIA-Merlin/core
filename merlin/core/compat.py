@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# pylint: disable=unused-import
 import os
 
 try:
-    from numba import cuda  # pylint: disable=unused-import
+    from numba import cuda
 except ImportError:
     cuda = None
 
