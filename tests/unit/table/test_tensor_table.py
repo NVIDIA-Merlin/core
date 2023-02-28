@@ -40,6 +40,7 @@ cpu_target_packages: List[Tuple] = []
 gpu_target_packages: List[Tuple] = []
 gpu_source_col: List[Tuple] = []
 cpu_source_col: List[Tuple] = []
+
 if np:
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
@@ -72,6 +73,7 @@ if tf:
     cpu_target_packages.append((TensorflowColumn, tensor_dict_cpu))
     gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
     array_constructors.append((tf.constant, TensorflowColumn))
+
 if th:
     tensor_dict_cpu = {
         "a__values": th.tensor([1, 2, 3], dtype=th.int32),
@@ -105,7 +107,7 @@ def test_tensortable_from_framework_arrays(array_constructor):
 
     table = TensorTable(tensor_dict)
     assert isinstance(table, TensorTable)
-    for column in table.columns():
+    for column in table.columns:
         assert isinstance(table[column], column_type)
 
 
@@ -116,8 +118,47 @@ def test_tensortable_with_ragged_columns():
     }
 
     table = TensorTable(tensor_dict)
-    assert table.columns() == ["a"]
+    assert table.columns == ["a"]
     assert all(table["a"].offsets == tensor_dict["a__offsets"])
+
+
+@pytest.mark.skipif(
+    tf is None, reason="Tensorflow is required for cross-framework validation tests"
+)
+def test_column_type_validation():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+        "b": tf.constant([4, 5, 6]),
+    }
+
+    with pytest.raises(TypeError) as exc_info:
+        TensorTable(tensor_dict)
+
+    assert "from the same framework" in str(exc_info)
+
+
+@pytest.mark.skipif(
+    tf is None, reason="Tensorflow is required for cross-framework validation tests"
+)
+def test_column_device_validation():
+    with tf.device("/CPU"):
+        tensor_dict_cpu = {
+            "a__values": tf.convert_to_tensor(np.array([1, 2, 3])),
+            "a__offsets": tf.convert_to_tensor(np.array([0, 1, 3])),
+        }
+    with tf.device("/GPU:0"):
+        tensor_dict_gpu = {
+            "b__values": tf.convert_to_tensor(np.array([1, 2, 3])),
+            "b__offsets": tf.convert_to_tensor(np.array([0, 1, 3])),
+        }
+
+    tensor_dict = {**tensor_dict_cpu, **tensor_dict_gpu}
+
+    with pytest.raises(ValueError) as exc_info:
+        TensorTable(tensor_dict)
+
+    assert "on the same device" in str(exc_info)
 
 
 class PaddingOperator(BaseOperator):

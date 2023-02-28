@@ -16,10 +16,9 @@
 from typing import Any, Dict
 
 from merlin.dag.utils import group_values_offsets
-from merlin.dispatch.lazy import lazy_singledispatch
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
-from merlin.table.tensor_column import TensorColumn
+from merlin.table.tensor_column import TensorColumn, create_tensor_column
 from merlin.table.tensorflow_column import TensorflowColumn
 from merlin.table.torch_column import TorchColumn
 
@@ -33,17 +32,40 @@ class TensorTable:
     """
 
     def __init__(self, columns: TensorDict = None):
+        cols_dict = self._convert_arrays_to_columns(columns)
+
+        self._validate_columns(cols_dict)
+
+        self._columns = cols_dict
+
+    def _convert_arrays_to_columns(self, columns):
         grouped_columns = group_values_offsets(columns or {})
-        dict_cols = {}
+        cols_dict = {}
         for name, column in grouped_columns.items():
             if isinstance(column, TensorColumn):
-                dict_cols[name] = column
+                cols_dict[name] = column
             elif isinstance(column, tuple):
-                dict_cols[name] = create_tensor_column(column[0], column[1])
+                cols_dict[name] = create_tensor_column(column[0], column[1])
             else:
-                dict_cols[name] = create_tensor_column(column)
+                cols_dict[name] = create_tensor_column(column)
 
-        self._columns = dict_cols
+        return cols_dict
+
+    def _validate_columns(self, cols_dict):
+        col_types = {type(col_obj) for col_obj in cols_dict.values()}
+        if len(col_types) >= 2:
+            raise TypeError(
+                "Columns supplied to TensorTable must be backed by arrays/tensors "
+                "from the same framework. Found arrays/tensors that correspond to "
+                f"types {list(col_types)}."
+            )
+
+        col_devices = {col_obj.device for col_obj in cols_dict.values()}
+        if len(col_devices) >= 2:
+            raise ValueError(
+                "Columns supplied to TensorTable must be backed by arrays/tensors "
+                f" on the same device. Found arrays/tensors on devices {list(col_devices)}."
+            )
 
     def __iter__(self):
         return iter(self._columns)
@@ -108,6 +130,7 @@ class TensorTable:
         """
         return TensorTable(self._columns.copy())
 
+    @property
     def columns(self):
         """
         Return the names of the columns
@@ -140,14 +163,6 @@ class TensorTable:
             else:
                 result[col_name] = tensor_col.values
         return result
-
-
-@lazy_singledispatch
-def create_tensor_column(values, offsets=None):
-    """
-    Create the appropriate TensorColumn subclass from the type of the supplied values and offsets
-    """
-    raise NotImplementedError()
 
 
 @create_tensor_column.register_lazy("tensorflow")

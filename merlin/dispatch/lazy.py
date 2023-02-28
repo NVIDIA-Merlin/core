@@ -114,7 +114,7 @@ class LazyDispatcher:
             _default.__name__ = name
             func = _default
         return func
-        
+
     def _raise_not_impl(self, func, arg):
         arg_type = type(arg)
         funcname = getattr(func, "__name__", "lazysingledispatch function")
