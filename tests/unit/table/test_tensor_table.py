@@ -105,7 +105,7 @@ def test_tensortable_from_framework_arrays(array_constructor):
 
     table = TensorTable(tensor_dict)
     assert isinstance(table, TensorTable)
-    for column in table.columns():
+    for column in table.columns:
         assert isinstance(table[column], column_type)
 
 
@@ -116,7 +116,7 @@ def test_tensortable_with_ragged_columns():
     }
 
     table = TensorTable(tensor_dict)
-    assert table.columns() == ["a"]
+    assert table.columns == ["a"]
     assert all(table["a"].offsets == tensor_dict["a__offsets"])
 
 

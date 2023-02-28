@@ -108,6 +108,7 @@ class TensorTable:
         """
         return TensorTable(self._columns.copy())
 
+    @property
     def columns(self):
         """
         Return the names of the columns
