@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Type
+from typing import Any, List, Type
 
 import merlin.dtypes as md
+from merlin.dispatch.lazy import lazy_singledispatch
 
 
 class Device(Enum):
@@ -26,7 +26,15 @@ class Device(Enum):
     GPU = 1
 
 
-class TensorColumn(ABC):
+@lazy_singledispatch
+def create_tensor_column(values, *args, offsets=None, **kwargs):
+    """
+    Create the appropriate TensorColumn subclass from the type of the supplied values and offsets
+    """
+    raise NotImplementedError
+
+
+class TensorColumn:
     """
     A simple wrapper around an array of values and an optional array of offsets
 
@@ -34,20 +42,24 @@ class TensorColumn(ABC):
     """
 
     @classmethod
-    @abstractmethod
     def array_type(cls) -> Type:
         """
         The type of the arrays backing this column
         """
-        return None
+        raise NotImplementedError
 
     @classmethod
-    @abstractmethod
-    def supported_devices(cls):
+    def supported_devices(cls) -> List[Device]:
         """
         List of device types supported by this column type
         """
-        return []
+        raise NotImplementedError
+
+    def __new__(cls, values, *args, offsets=None, **kwargs):
+        if cls == TensorColumn:
+            return create_tensor_column(values, *args, offsets=offsets, **kwargs)
+        else:
+            return object.__new__(cls)
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
         self._validate_values_offsets(values, offsets)

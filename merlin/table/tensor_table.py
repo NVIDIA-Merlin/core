@@ -16,10 +16,9 @@
 from typing import Any, Dict
 
 from merlin.dag.utils import group_values_offsets
-from merlin.dispatch.lazy import lazy_singledispatch
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
-from merlin.table.tensor_column import TensorColumn
+from merlin.table.tensor_column import TensorColumn, create_tensor_column
 from merlin.table.tensorflow_column import TensorflowColumn
 from merlin.table.torch_column import TorchColumn
 
@@ -141,14 +140,6 @@ class TensorTable:
             else:
                 result[col_name] = tensor_col.values
         return result
-
-
-@lazy_singledispatch
-def create_tensor_column(values, offsets=None):
-    """
-    Create the appropriate TensorColumn subclass from the type of the supplied values and offsets
-    """
-    raise NotImplementedError()
 
 
 @create_tensor_column.register_lazy("tensorflow")
