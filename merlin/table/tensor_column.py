@@ -124,24 +124,14 @@ class TensorColumn(ABC, SeriesLike):
 
 
 @dataclass(frozen=True)
-class TransferColumn:
+class _TransferColumn:
     values: Any
     offsets: Any
     ref: TensorColumn
 
 
 @dataclass(frozen=True)
-class DlpackColumn(TransferColumn):
-    pass
-
-
-@dataclass(frozen=True)
-class CudaArrayColumn(TransferColumn):
-    pass
-
-
-@dataclass(frozen=True)
-class ArrayColumn(TransferColumn):
+class _DlpackColumn(_TransferColumn):
     pass
 
 

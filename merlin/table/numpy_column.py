@@ -16,12 +16,7 @@
 from typing import Type
 
 from merlin.core.compat import numpy as np
-from merlin.table.conversions import (
-    _from_array_interface,
-    _from_dlpack_cpu,
-    _to_array_interface,
-    _to_dlpack,
-)
+from merlin.table.conversions import _from_dlpack_cpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
 
@@ -46,24 +41,6 @@ class NumpyColumn(TensorColumn):
 
     def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
-
-
-@_to_array_interface.register_lazy("numpy")
-def _register_to_array_interface_numpy():
-    import numpy as np
-
-    @_to_array_interface.register(np.ndarray)
-    def _to_array_interface_numpy(array):
-        return array
-
-
-@_from_array_interface.register_lazy("numpy")
-def _register_from_array_interface_numpy():
-    import numpy as np
-
-    @_from_array_interface.register(np.ndarray)
-    def _from_array_interface_numpy(target_type, array_interface):
-        return np.asarray(array_interface)
 
 
 @_from_dlpack_cpu.register_lazy("numpy")
