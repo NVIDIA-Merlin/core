@@ -16,9 +16,13 @@
 import pytest
 
 import merlin.dtypes as md
+from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
+from merlin.core.compat import tensorflow as tf
+from merlin.core.compat import torch as th
 from merlin.core.protocols import SeriesLike
-from merlin.table import NumpyColumn
+from merlin.dtypes.shape import Shape
+from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
 
 
 @pytest.mark.parametrize("protocol", [SeriesLike])
@@ -69,3 +73,40 @@ def test_equality():
 
     np_col_3 = NumpyColumn(values=np.array([1, 2, 3, 4]))
     assert np_col != np_col_3
+
+
+@pytest.mark.parametrize(
+    "col_type, constructor",
+    [
+        (NumpyColumn, np.array),
+        (CupyColumn, cp.array),
+        (TensorflowColumn, tf.constant),
+        (TorchColumn, th.tensor),
+    ],
+)
+def test_shape(col_type, constructor):
+    values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
+    col = col_type(values=values)
+    assert col.shape == Shape((8,))
+    assert col.is_list is False
+    assert col.is_ragged is False
+
+    values = constructor([[1, 2, 3, 4, 5, 6, 7, 8]])
+    col = col_type(values=values)
+    assert col.shape == Shape((1, 8))
+    assert col.is_list is True
+    assert col.is_ragged is False
+
+    values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
+    offsets = constructor([0, 2, 4, 6, 8])
+    col = col_type(values=values, offsets=offsets)
+    assert col.shape == Shape((4, 2))
+    assert col.is_list is True
+    assert col.is_ragged is False
+
+    values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
+    offsets = constructor([0, 1, 3, 5, 8])
+    col = col_type(values=values, offsets=offsets)
+    assert col.shape == Shape((4, None))
+    assert col.is_list is True
+    assert col.is_ragged is True
