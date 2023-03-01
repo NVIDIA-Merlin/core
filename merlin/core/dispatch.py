@@ -715,3 +715,46 @@ def get_random_state():
     if cp:
         return cp.random.get_random_state()
     return np.random.mtrand.RandomState()
+
+
+def tensor_table_from_df(df: DataFrameType):
+    from merlin.table import CupyColumn, NumpyColumn, TensorTable
+
+    array_cols = {}
+    column_type = NumpyColumn if isinstance(df, pd.DataFrame) else CupyColumn
+    device = "cpu" if isinstance(df, pd.DataFrame) else None
+
+    for col in df.columns:
+        if is_list_dtype(df[col]):
+            values_series, offsets_series = pull_apart_list(df[col], device=device)
+            array_cols[col] = column_type(values_series.values, offsets_series.values)
+        else:
+            array_cols[col] = column_type(df[col].values)
+
+    return TensorTable(array_cols)
+
+
+def df_from_tensor_table(table):
+    from merlin.table.tensor_column import Device
+
+    device = "cpu" if table.device == Device.CPU else None
+    df_dict = {}
+    for col_name, col_data in table.items():
+        if col_data.offsets is not None:
+            values = make_series(col_data.values, device=device)
+            offsets = make_series(col_data.offsets, device=device)
+            df_dict[col_name] = create_multihot_col(offsets, values)
+        else:
+            df_dict[col_name] = make_series(col_data.values, device=device)
+
+    return make_df(df_dict, device=device)
+
+
+def df_from_dict(col_dict):
+    from merlin.table import TensorTable
+
+    return df_from_tensor_table(TensorTable(col_dict))
+
+
+def dict_from_df(df: DataFrameLike):
+    return tensor_table_from_df(df).as_dict

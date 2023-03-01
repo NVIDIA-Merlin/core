@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# pylint: disable=unused-import
 import os
 
 try:
-    from numba import cuda  # pylint: disable=unused-import
+    from numba import cuda
 except ImportError:
     cuda = None
 
@@ -47,3 +49,26 @@ def _get_gpu_count():
 
 
 HAS_GPU = _get_gpu_count() > 0
+
+
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
+try:
+    import cupy
+except ImportError:
+    cupy = None
+
+try:
+    import tensorflow
+    from tensorflow.python.framework import ops as tf_ops
+except ImportError:
+    tensorflow = None
+    tf_ops = None
+
+try:
+    import torch
+except ImportError:
+    torch = None
