@@ -116,10 +116,11 @@ class LazyDispatcher:
         return func
 
     def _raise_not_impl(self, func, arg):
+        arg_type = type(arg)
         funcname = getattr(func, "__name__", "lazysingledispatch function")
+        typename = f"{arg_type.__module__}.{arg_type.__name__}"
         raise NotImplementedError(
-            f"{funcname} doesn't have a registered implementation "
-            f"for type of {arg} ({type(arg)})"
+            f"{funcname} doesn't have a registered implementation " f"for type `{typename}`"
         )
 
 
