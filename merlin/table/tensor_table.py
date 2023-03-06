@@ -164,6 +164,14 @@ class TensorTable:
                 result[col_name] = tensor_col.values
         return result
 
+    def cpu(self):
+        columns = {col_name: col_values.cpu() for col_name, col_values in self.items()}
+        return TensorTable(columns)
+
+    def gpu(self):
+        columns = {col_name: col_values.gpu() for col_name, col_values in self.items()}
+        return TensorTable(columns)
+
 
 @create_tensor_column.register_lazy("tensorflow")
 def _register_create_tf_column():

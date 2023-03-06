@@ -51,6 +51,40 @@ class TorchColumn(TensorColumn):
 
         super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
 
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Returns
+        -------
+        TorchColumn
+            A copy of this column backed by Torch CPU tensors
+        """
+        if self.device is Device.CPU:
+            return self
+
+        values = self.values.cpu()
+        offsets = self.offsets.cpu() if self.offsets is not None else None
+
+        return TorchColumn(values, offsets)
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Returns
+        -------
+        TorchColumn
+            A copy of this column backed by Torch GPU tensors
+        """
+        if self.device is Device.GPU:
+            return self
+
+        values = self.values.cuda()
+        offsets = self.offsets.cuda() if self.offsets is not None else None
+
+        return TorchColumn(values, offsets)
+
     @property
     def device(self) -> Device:
         return self._th_device(self.values)

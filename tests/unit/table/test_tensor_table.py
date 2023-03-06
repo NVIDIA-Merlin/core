@@ -288,3 +288,31 @@ def test_df_to_dict(device):
 
     assert isinstance(df_dict, dict)
     assert_eq(df, roundtrip_df)
+
+
+@pytest.mark.skipif(cp is None, reason="requires GPU")
+def test_cpu_transfer():
+    tensor_dict = {
+        "a__values": cp.array([1, 2, 3]),
+        "a__offsets": cp.array([0, 1, 3]),
+    }
+
+    gpu_table = TensorTable(tensor_dict)
+    cpu_table = gpu_table.cpu()
+
+    assert cpu_table.device == Device.CPU
+    assert isinstance(list(cpu_table.values())[0], NumpyColumn)
+
+
+@pytest.mark.skipif(cp is None, reason="requires GPU")
+def test_gpu_transfer():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
+
+    cpu_table = TensorTable(tensor_dict)
+    gpu_table = cpu_table.gpu()
+
+    assert gpu_table.device == Device.GPU
+    assert isinstance(list(cpu_table.values())[0], NumpyColumn)
