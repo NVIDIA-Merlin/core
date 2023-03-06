@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Any, List, Tuple, Type
+
 import pytest
 
 import merlin.dtypes as md
@@ -23,6 +25,20 @@ from merlin.core.compat import torch as th
 from merlin.core.protocols import SeriesLike
 from merlin.dtypes.shape import Shape
 from merlin.table import CupyColumn, NumpyColumn, TensorflowColumn, TorchColumn
+
+col_types_and_constructors: List[Tuple[Type, Any]] = []
+
+if np:
+    col_types_and_constructors.append((NumpyColumn, np.array))
+
+if cp:
+    col_types_and_constructors.append((CupyColumn, cp.array))
+
+if tf:
+    col_types_and_constructors.append((TensorflowColumn, tf.constant))
+
+if th:
+    col_types_and_constructors.append((TorchColumn, th.tensor))
 
 
 @pytest.mark.parametrize("protocol", [SeriesLike])
@@ -73,16 +89,6 @@ def test_equality():
 
     np_col_3 = NumpyColumn(values=np.array([1, 2, 3, 4]))
     assert np_col != np_col_3
-
-
-col_types_and_constructors = [
-    (NumpyColumn, np.array),
-    (TensorflowColumn, tf.constant),
-    (TorchColumn, th.tensor),
-]
-
-if cp:
-    col_types_and_constructors.append((CupyColumn, cp.array))
 
 
 @pytest.mark.parametrize("col_type, constructor", col_types_and_constructors)
