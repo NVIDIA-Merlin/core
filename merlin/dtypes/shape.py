@@ -20,8 +20,8 @@ from typing import Optional, Tuple, Union
 
 
 class DefaultShapes(Enum):
-    LIST = (None, None)
-    SCALAR = (None,)
+    LIST = (-1, None)
+    SCALAR = (-1,)
 
 
 def Dimension(size=None):
@@ -32,7 +32,7 @@ def Dimension(size=None):
       - int     : a fixed dimension of some size (-1 = unknown)
       - 2-tuple : the bounds of a ragged dimension (fixed if min == max)
     """
-    if isinstance(size, BaseDimension):
+    if isinstance(size, (FixedDimension, RaggedDimension)):
         return size
     elif isinstance(size, tuple) and len(size) == 2:
         if size[0] == size[1]:
@@ -64,6 +64,12 @@ class BaseDimension:
         if self.min is None:
             raise ValueError("The minimum size of a dimension cannot be None. ")
 
+        if not isinstance(self.min, int):
+            raise ValueError("The minimmum size must be an integer. " f"Provided min: {self.min}")
+
+        if self.max and not isinstance(self.max, int):
+            raise ValueError("The maximum size must be an integer. " f"Provided max: {self.max}")
+
         if self.min < 0:
             raise ValueError(
                 "The minimum size of a dimension must be non-negative. " f"Provided min: {self.min}"
@@ -82,14 +88,17 @@ class BaseDimension:
 
     @property
     def is_bounded(self):
+        """Is the dimension bounded in size?"""
         return self.max is not None
 
     @property
     def is_uniform(self):
+        """Is the dimension uniform in size?"""
         return self.is_bounded and self.min == self.max
 
     @property
     def is_variable(self):
+        """Can the size of the dimension vary between instances of tensors."""
         return not self.is_uniform
 
     @property
