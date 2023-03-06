@@ -192,11 +192,9 @@ def test_list_column_attributes():
     assert col3_schema.is_list
     assert col3_schema.is_ragged
 
-    # TODO: Re-enable this test case once we've addressed cases
-    #       like this in downstream libraries
-
-    # with pytest.raises(ValueError):
-    #     ColumnSchema("col4", is_list=True, is_ragged=False)
+    col4_schema = ColumnSchema("col4", is_list=True, is_ragged=False)
+    assert col4_schema.is_list
+    assert col4_schema.is_ragged is False
 
     with pytest.raises(ValueError):
         ColumnSchema("col5", is_list=False, is_ragged=True)
@@ -257,18 +255,18 @@ def test_setting_partial_value_count(value_count):
     )
     assert col_schema.is_list
     assert not col_schema.is_ragged
-    assert col_schema.shape == Shape((None, 10))
+    assert col_schema.shape == Shape((-1, 10))
     assert col_schema.properties["value_count"] == {"min": 10, "max": 10}
 
 
 def test_setting_value_counts_updates_shape_and_flags():
-    col_schema = ColumnSchema("col", dims=(None,))
+    col_schema = ColumnSchema("col", dims=(-1,))
 
     counts = {"min": 4, "max": 5}
     updated_schema = col_schema.with_properties({"value_count": counts})
 
     assert updated_schema.properties["value_count"] == counts
-    assert updated_schema.shape == Shape((None, (4, 5)))
+    assert updated_schema.shape == Shape((-1, (4, 5)))
     assert updated_schema.is_list
     assert updated_schema.is_ragged
 
@@ -287,7 +285,7 @@ def test_setting_flags_updates_shape_and_value_counts():
     col_schema = ColumnSchema("col")
     updated_schema = col_schema.with_dtype(md.int64, is_list=True, is_ragged=True)
 
-    assert updated_schema.shape == Shape((None, None))
+    assert updated_schema.shape == Shape((-1, None))
     assert updated_schema.properties["value_count"] == {"min": 0, "max": None}
     assert updated_schema.is_list
     assert updated_schema.is_ragged
