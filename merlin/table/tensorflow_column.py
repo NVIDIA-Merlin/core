@@ -73,6 +73,42 @@ class TensorflowColumn(TensorColumn):
 
         super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
 
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Returns
+        -------
+        TensorflowColumn
+            A copy of this column backed by Tensorflow CPU tensors
+        """
+        if self.device is Device.CPU:
+            return self
+
+        with tf.device("/cpu"):
+            values = tf.identity(self.values)
+            offsets = tf.identity(self.offsets) if self.offsets is not None else None
+
+        return TensorflowColumn(values, offsets)
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Returns
+        -------
+        TensorflowColumn
+            A copy of this column backed by Tensorflow GPU tensors
+        """
+        if self.device is Device.GPU:
+            return self
+
+        with tf.device("/gpu"):
+            values = tf.identity(self.values)
+            offsets = tf.identity(self.offsets) if self.offsets is not None else None
+
+        return TensorflowColumn(values, offsets)
+
     def _tf_device(self, tensor):
         return Device.GPU if "GPU" in tensor.device else Device.CPU
 

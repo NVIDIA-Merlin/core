@@ -74,6 +74,34 @@ class TensorColumn:
         self._ref = _ref
         self._device = _device
 
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Should be overridden by TensorColumn sub-classes with an appropriate implementation
+        for their individual frameworks.
+
+        Raises
+        ------
+        NotImplementedError
+            If a sub-class doesn't provide an implementation
+        """
+        raise NotImplementedError
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Should be overridden by TensorColumn sub-classes with an appropriate implementation
+        for their individual frameworks.
+
+        Raises
+        ------
+        NotImplementedError
+            If a sub-class doesn't provide an implementation
+        """
+        raise NotImplementedError
+
     @property
     def shape(self) -> Shape:
         return self._dtype.shape
