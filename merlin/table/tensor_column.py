@@ -102,11 +102,18 @@ class TensorColumn:
     def dtype(self):
         return self._dtype
 
+    def __len__(self):
+        if self.offsets is not None:
+            return len(self.offsets) - 1
+        else:
+            return len(self.values)
+
     def __getitem__(self, index):
         # get correct indexes if offsets exists
         if self._offsets is None:
             index = len(self._values) + index if index < 0 else index
             return self._values[index]
+
         # There should be a better way to get negative indexing to work
         index = len(self._offsets) - 1 + index if index < 0 else index
         start = self._offsets[index]

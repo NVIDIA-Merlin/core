@@ -90,12 +90,14 @@ def test_shape(col_type, constructor):
     values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
     col = col_type(values=values)
     assert col.shape == Shape((8,))
+    assert len(col) == 8
     assert col.is_list is False
     assert col.is_ragged is False
 
     values = constructor([[1, 2, 3, 4, 5, 6, 7, 8]])
     col = col_type(values=values)
     assert col.shape == Shape((1, 8))
+    assert len(col) == 1
     assert col.is_list is True
     assert col.is_ragged is False
 
@@ -103,6 +105,7 @@ def test_shape(col_type, constructor):
     offsets = constructor([0, 2, 4, 6, 8])
     col = col_type(values=values, offsets=offsets)
     assert col.shape == Shape((4, 2))
+    assert len(col) == 4
     assert col.is_list is True
     assert col.is_ragged is False
 
@@ -110,5 +113,6 @@ def test_shape(col_type, constructor):
     offsets = constructor([0, 1, 3, 5, 8])
     col = col_type(values=values, offsets=offsets)
     assert col.shape == Shape((4, None))
+    assert len(col) == 4
     assert col.is_list is True
     assert col.is_ragged is True
