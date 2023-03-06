@@ -252,7 +252,9 @@ def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["_dims"] = list(list(dim) for dim in column_schema.shape.as_tuple or [])
+    properties["_dims"] = list(
+        list(dim) if isinstance(dim, tuple) else dim for dim in column_schema.shape.as_tuple or []
+    )
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     if column_schema.dtype.element_size:
@@ -377,6 +379,12 @@ float_dtypes_map = {
 }
 
 
+def _coerce_int(v):
+    if isinstance(v, float):
+        return int(v)
+    return v
+
+
 def _merlin_dtype(feature, properties):
     dtype = md.unknown
     item_size = int(properties.get("dtype_item_size", 0)) or None
@@ -396,7 +404,10 @@ def _merlin_dtype(feature, properties):
     dims_list = properties.pop("_dims", None)
 
     if dims_list:
-        dims_tuple = tuple(tuple(dim) for dim in dims_list)
+        dims_tuple = tuple(
+            tuple(_coerce_int(d) for d in dim) if isinstance(dim, list) else _coerce_int(dim)
+            for dim in dims_list
+        )
         dtype = dtype.with_shape(dims_tuple)
 
         # If we found dims, avoid overwriting that shape with one inferred from counts or flags

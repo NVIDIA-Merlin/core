@@ -212,7 +212,11 @@ class Shape:
 
     @property
     def as_tuple(self):
-        return tuple(((dim.min, dim.max) for dim in self.dims)) if self.dims else None
+        return (
+            tuple((dim.size if dim.is_fixed else (dim.min, dim.max) for dim in self.dims))
+            if self.dims
+            else None
+        )
 
     @property
     def is_unknown(self):
