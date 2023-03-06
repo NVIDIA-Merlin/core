@@ -15,6 +15,7 @@
 #
 from typing import Any, Dict
 
+from merlin.core.dispatch import df_from_tensor_table, tensor_table_from_df
 from merlin.dag.utils import group_values_offsets
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
@@ -30,6 +31,10 @@ class TensorTable:
     """
     A DataFrameLike wrapper around a dictionary of arrays or tensors
     """
+
+    @classmethod
+    def from_df(cls, df):
+        return tensor_table_from_df(df)
 
     def __init__(self, columns: TensorDict = None):
         cols_dict = self._convert_arrays_to_columns(columns)
@@ -148,8 +153,7 @@ class TensorTable:
         """
         return [column.dtype for column in self.values()]
 
-    @property
-    def as_dict(self):
+    def to_dict(self):
         """
         Convert to a flat dictionary of arrays or tensors
 
@@ -172,6 +176,11 @@ class TensorTable:
         columns = {col_name: col_values.gpu() for col_name, col_values in self.items()}
         return TensorTable(columns)
 
+    def to_df(self):
+        """
+        Convert to a dataframe
+        """
+        return df_from_tensor_table(self)
 
 @create_tensor_column.register_lazy("tensorflow")
 def _register_create_tf_column():

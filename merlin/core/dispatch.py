@@ -757,4 +757,4 @@ def df_from_dict(col_dict):
 
 
 def dict_from_df(df: DataFrameLike):
-    return tensor_table_from_df(df).as_dict
+    return tensor_table_from_df(df).to_dict()
