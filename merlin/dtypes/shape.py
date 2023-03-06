@@ -164,6 +164,9 @@ class Shape:
 
         return self.dims == other.dims
 
+    def __getitem__(self, idx):
+        return self.dims[idx]
+
     def __iter__(self):
         return self.dims
 
