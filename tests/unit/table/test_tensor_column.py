@@ -75,15 +75,17 @@ def test_equality():
     assert np_col != np_col_3
 
 
-@pytest.mark.parametrize(
-    "col_type, constructor",
-    [
-        (NumpyColumn, np.array),
-        (CupyColumn, cp.array),
-        (TensorflowColumn, tf.constant),
-        (TorchColumn, th.tensor),
-    ],
-)
+col_types_and_constructors = [
+    (NumpyColumn, np.array),
+    (TensorflowColumn, tf.constant),
+    (TorchColumn, th.tensor),
+]
+
+if cp:
+    col_types_and_constructors.append((CupyColumn, cp.array))
+
+
+@pytest.mark.parametrize("col_type, constructor", col_types_and_constructors)
 def test_shape(col_type, constructor):
     values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
     col = col_type(values=values)
