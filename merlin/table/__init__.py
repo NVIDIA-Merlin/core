@@ -15,6 +15,7 @@
 #
 
 # flake8: noqa
+from merlin.table.conversions import df_from_tensor_table, tensor_table_from_df
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
 from merlin.table.tensor_column import Device, TensorColumn
