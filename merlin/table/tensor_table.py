@@ -182,6 +182,7 @@ class TensorTable:
         """
         return df_from_tensor_table(self)
 
+
 @create_tensor_column.register_lazy("tensorflow")
 def _register_create_tf_column():
     import tensorflow as tf
