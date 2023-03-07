@@ -153,6 +153,8 @@ class Shape:
         if self.dims is not None:
             new_dims = []
             for i, dim in enumerate(self.dims):
+                if i == 0 and dim is None:
+                    dim = -1
                 new_dim = Dimension(dim)
                 new_dims.append(new_dim)
 
