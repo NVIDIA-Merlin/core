@@ -90,6 +90,7 @@ def test_equality():
     np_col_3 = NumpyColumn(values=np.array([1, 2, 3, 4]))
     assert np_col != np_col_3
 
+
 @pytest.mark.skipif(cp is None, reason="requires GPU")
 def test_cupy_cpu_transfer():
     values = cp.array([1, 2, 3])
