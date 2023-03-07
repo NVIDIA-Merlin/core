@@ -19,6 +19,7 @@ from typing import Any, List, Type
 
 import merlin.dtypes as md
 from merlin.dispatch.lazy import lazy_singledispatch
+from merlin.dtypes.shape import Shape
 
 
 class Device(Enum):
@@ -67,7 +68,9 @@ class TensorColumn:
         self._values = values
         self._offsets = offsets
 
-        self._dtype = md.dtype(dtype or values.dtype)
+        shape = self._construct_shape(values, offsets)
+        self._dtype = md.dtype(dtype or values.dtype).with_shape(shape)
+
         self._ref = _ref
         self._device = _device
 
@@ -100,6 +103,18 @@ class TensorColumn:
         raise NotImplementedError
 
     @property
+    def shape(self) -> Shape:
+        return self._dtype.shape
+
+    @property
+    def is_list(self) -> Shape:
+        return self.shape.is_list
+
+    @property
+    def is_ragged(self) -> Shape:
+        return self.shape.is_ragged
+
+    @property
     def device(self) -> Device:
         return self._device
 
@@ -115,11 +130,18 @@ class TensorColumn:
     def dtype(self):
         return self._dtype
 
+    def __len__(self):
+        if self.offsets is not None:
+            return len(self.offsets) - 1
+        else:
+            return len(self.values)
+
     def __getitem__(self, index):
         # get correct indexes if offsets exists
         if self._offsets is None:
             index = len(self._values) + index if index < 0 else index
             return self._values[index]
+
         # There should be a better way to get negative indexing to work
         index = len(self._offsets) - 1 + index if index < 0 else index
         start = self._offsets[index]
@@ -135,6 +157,16 @@ class TensorColumn:
             and self.dtype == other.dtype
             and self.device == other.device
         )
+
+    def _construct_shape(self, values, offsets):
+        if offsets is not None:
+            num_rows = len(offsets) - 1
+            row_lengths = offsets[1:] - offsets[:-1]
+            num_cols = int(row_lengths[0]) if all(row_lengths == row_lengths[0]) else None
+            shape = Shape((num_rows, num_cols))
+        else:
+            shape = Shape(values.shape)
+        return shape
 
     def _validate_values_offsets(self, values, offsets):
         self._raise_type_error("values", values)
