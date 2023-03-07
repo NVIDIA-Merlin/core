@@ -15,6 +15,13 @@
 #
 from typing import Type
 
+from merlin.core.dispatch import (
+    create_multihot_col,
+    is_list_dtype,
+    make_df,
+    make_series,
+    pull_apart_list,
+)
 from merlin.dispatch.lazy import lazy_singledispatch
 from merlin.table.tensor_column import Device, TensorColumn, _DlpackColumn
 
@@ -73,3 +80,58 @@ def from_dlpack_col(dlpack_col: _DlpackColumn, target_col_type: Type) -> TensorC
         )
 
     return target_col_type(values, offsets, _ref=dlpack_col.ref)
+
+
+def df_from_tensor_table(table):
+    from merlin.table.tensor_column import Device
+
+    device = "cpu" if table.device == Device.CPU else None
+    df_dict = {}
+    for col_name, col_data in table.items():
+        if col_data.offsets is not None:
+            values = make_series(col_data.values, device=device)
+            offsets = make_series(col_data.offsets, device=device)
+            df_dict[col_name] = create_multihot_col(offsets, values)
+        else:
+            df_dict[col_name] = make_series(col_data.values, device=device)
+
+    return make_df(df_dict, device=device)
+
+
+tensor_table_from_df = lazy_singledispatch("tensor_table_from_df")
+
+
+@tensor_table_from_df.register_lazy("pandas")
+def _register_tensor_table_from_pandas_df():
+    import pandas as pd
+
+    from merlin.table import NumpyColumn
+
+    @tensor_table_from_df.register(pd.DataFrame)
+    def _tensor_table_from_pandas_df(df: pd.DataFrame):
+        return _create_table_from_df(df, NumpyColumn, device="cpu")
+
+
+@tensor_table_from_df.register_lazy("cudf")
+def _register_tensor_table_from_cudf_df():
+    import cudf
+
+    from merlin.table import CupyColumn
+
+    @tensor_table_from_df.register(cudf.DataFrame)
+    def _tensor_table_from_cudf_df(df: cudf.DataFrame):
+        return _create_table_from_df(df, CupyColumn)
+
+
+def _create_table_from_df(df, column_type, device=None):
+    from merlin.table import TensorTable
+
+    array_cols = {}
+    for col in df.columns:
+        if is_list_dtype(df[col]):
+            values_series, offsets_series = pull_apart_list(df[col], device=device)
+            array_cols[col] = column_type(values_series.values, offsets_series.values)
+        else:
+            array_cols[col] = column_type(df[col].values)
+
+    return TensorTable(array_cols)
