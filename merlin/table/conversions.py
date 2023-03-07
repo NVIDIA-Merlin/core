@@ -83,8 +83,6 @@ def from_dlpack_col(dlpack_col: _DlpackColumn, target_col_type: Type) -> TensorC
 
 
 def df_from_tensor_table(table):
-    from merlin.table.tensor_column import Device
-
     device = "cpu" if table.device == Device.CPU else None
     df_dict = {}
     for col_name, col_data in table.items():
