@@ -62,6 +62,15 @@ except ImportError:
     cupy = None
 
 try:
+    import cudf
+except ImportError:
+    cudf = None
+
+if not HAS_GPU:
+    cudf = None
+    cupy = None
+
+try:
     import tensorflow
     from tensorflow.python.framework import ops as tf_ops
 except ImportError:
