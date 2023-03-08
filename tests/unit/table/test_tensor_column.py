@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, List, Tuple, Type
+from typing import List, Type
 
 import pytest
 
@@ -26,19 +26,19 @@ from merlin.core.protocols import SeriesLike
 from merlin.dtypes.shape import Shape
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TorchColumn
 
-col_types_and_constructors: List[Tuple[Type, Any]] = []
+col_types: List[Type] = []
 
 if np:
-    col_types_and_constructors.append((NumpyColumn, np.array))
+    col_types.append(NumpyColumn)
 
 if cp:
-    col_types_and_constructors.append((CupyColumn, cp.array))
+    col_types.append(CupyColumn)
 
 if tf:
-    col_types_and_constructors.append((TensorflowColumn, tf.constant))
+    col_types.append(TensorflowColumn)
 
 if th:
-    col_types_and_constructors.append((TorchColumn, th.tensor))
+    col_types.append(TorchColumn)
 
 
 @pytest.mark.parametrize("protocol", [SeriesLike])
@@ -151,8 +151,10 @@ def test_tf_data_transfer():
     assert cpu_col_again.device == Device.CPU
 
 
-@pytest.mark.parametrize("col_type, constructor", col_types_and_constructors)
-def test_shape(col_type, constructor):
+@pytest.mark.parametrize("col_type", col_types)
+def test_shape(col_type):
+    constructor = col_type.array_constructor()
+
     values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
     col = col_type(values=values)
     assert col.shape == Shape((8,))

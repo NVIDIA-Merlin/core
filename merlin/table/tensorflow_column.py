@@ -15,7 +15,7 @@
 #
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional, Tuple, Type, Union
+from typing import Any, Callable, Optional, Tuple, Type, Union
 
 from merlin.core.compat import tensorflow as tf
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
@@ -52,6 +52,10 @@ class TensorflowColumn(TensorColumn):
         The type of the arrays backing this column
         """
         return tf.Tensor
+
+    @classmethod
+    def array_constructor(cls) -> Callable:
+        return tf.convert_to_tensor
 
     @classmethod
     def supported_devices(cls):

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Type
+from typing import Callable, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
@@ -32,6 +32,10 @@ class NumpyColumn(TensorColumn):
         The type of the arrays backing this column
         """
         return np.ndarray
+
+    @classmethod
+    def array_constructor(cls) -> Callable:
+        return np.array
 
     @classmethod
     def supported_devices(cls):
