@@ -17,11 +17,12 @@ from typing import List, Tuple
 
 import pytest
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
-from merlin.core.dispatch import HAS_GPU, df_from_dict, dict_from_df, make_df
+from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
