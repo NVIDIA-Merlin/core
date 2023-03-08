@@ -187,10 +187,16 @@ class Shape:
         return replace(self, dims=tuple(new_dims))
 
     def with_dim_min(self, index, value):
-        return self.with_dim(index, self.dims[index].with_min(value))
+        new_dim = self.dims[index].with_min(value)
+        if new_dim.is_uniform:
+            new_dim = Dimension(value)
+        return self.with_dim(index, new_dim)
 
     def with_dim_max(self, index, value):
-        return self.with_dim(index, self.dims[index].with_max(value))
+        new_dim = self.dims[index].with_max(value)
+        if new_dim.is_uniform:
+            new_dim = Dimension(value)
+        return self.with_dim(index, new_dim)
 
     @property
     def min(self) -> Tuple:
