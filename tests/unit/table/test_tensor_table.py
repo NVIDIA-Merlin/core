@@ -52,7 +52,7 @@ if cp:
     gpu_target_packages.append((CupyColumn, tensor_dict))
     gpu_source_col.append((CupyColumn, cp.asarray, cp))
 
-if tf:
+if tf and HAS_GPU:
     with tf.device("/CPU"):
         tensor_dict_cpu = {
             "a__values": tf.convert_to_tensor(np.array([1, 2, 3])),
@@ -67,7 +67,7 @@ if tf:
     gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
     array_constructors.append((tf.constant, TensorflowColumn))
 
-if th:
+if th and HAS_GPU:
     tensor_dict_cpu = {
         "a__values": th.tensor([1, 2, 3], dtype=th.int32),
         "a__offsets": th.tensor([0, 1, 3], dtype=th.int32),
@@ -132,7 +132,8 @@ def test_column_type_validation():
 
 
 @pytest.mark.skipif(
-    tf is None, reason="Tensorflow is required for cross-framework validation tests"
+    not (tf and HAS_GPU),
+    reason="both TensorFlow and CUDA GPUs are required for cross-framework validation tests"
 )
 def test_column_device_validation():
     with tf.device("/CPU"):

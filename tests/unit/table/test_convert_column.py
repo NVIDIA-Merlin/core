@@ -17,6 +17,7 @@ from typing import List, Type
 
 import pytest
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
@@ -39,7 +40,7 @@ if np:
     source_cols.append(NumpyColumn(values=np_array, offsets=np_array))
     output_col_types.append(NumpyColumn)
 
-if tf:
+if tf and HAS_GPU:
     with tf.device("/CPU"):
         tf_tensor = tf.convert_to_tensor(np.array([1, 2, 3, 4]))
         offsets_tensor = tf.convert_to_tensor(np.array([0, 1, 2, 3, 4]))
@@ -52,7 +53,7 @@ if tf:
     source_cols.extend([cpu_tf_column, gpu_tf_column])
     output_col_types.append(TensorflowColumn)
 
-if th:
+if th and HAS_GPU:
     th_tensor = th.tensor([1, 2, 3, 4])
     cpu_th_column = TorchColumn(values=th_tensor, offsets=th_tensor)
 

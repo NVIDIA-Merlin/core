@@ -18,6 +18,7 @@ from typing import Any, List, Tuple, Type
 import pytest
 
 import merlin.dtypes as md
+from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
@@ -91,7 +92,7 @@ def test_equality():
     assert np_col != np_col_3
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires GPU")
 def test_cupy_cpu_transfer():
     values = cp.array([1, 2, 3])
     offsets = cp.array([0, 1, 3])
@@ -108,7 +109,7 @@ def test_cupy_cpu_transfer():
     assert isinstance(cpu_col_again, NumpyColumn)
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires GPU")
 def test_numpy_gpu_transfer():
     values = np.array([1, 2, 3])
     offsets = np.array([0, 1, 3])
@@ -125,7 +126,7 @@ def test_numpy_gpu_transfer():
     assert isinstance(gpu_col_again, CupyColumn)
 
 
-@pytest.mark.skipif(th is None, reason="requires Torch")
+@pytest.mark.skipif(not (HAS_GPU and th), reason="requires Torch and GPU")
 def test_torch_data_transfer():
     values = th.tensor([1, 2, 3])
     offsets = th.tensor([0, 1, 3])
@@ -138,7 +139,7 @@ def test_torch_data_transfer():
     assert cpu_col_again.device == Device.CPU
 
 
-@pytest.mark.skipif(tf is None, reason="requires Tensorflow")
+@pytest.mark.skipif(not (tf and HAS_GPU), reason="requires TensorFlow and GPU")
 def test_tf_data_transfer():
     values = tf.constant([1, 2, 3])
     offsets = tf.constant([0, 1, 3])
