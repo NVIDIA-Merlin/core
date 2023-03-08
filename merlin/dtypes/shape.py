@@ -129,6 +129,9 @@ class Shape:
     def __iter__(self):
         return self.dims
 
+    def __getitem__(self, index):
+        return self.dims[index]
+
     def with_dim(self, index, value):
         new_dims = list(self.dims)
         new_dims[index] = value
@@ -173,9 +176,7 @@ class Shape:
         if not self.dims:
             return None
 
-        return tuple(
-            ((dim.min, dim.max) if dim.min != dim.max else dim.max for dim in self.dims)
-        )
+        return tuple(((dim.min, dim.max) if dim.min != dim.max else dim.max for dim in self.dims))
 
     @property
     def is_unknown(self):
