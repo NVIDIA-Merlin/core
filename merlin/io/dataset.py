@@ -36,6 +36,7 @@ from merlin.core.dispatch import (
     is_dataframe_object,
     is_list_dtype,
     list_val_dtype,
+    HAS_GPU,
 )
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
 from merlin.dtypes.shape import DefaultShapes
@@ -244,7 +245,7 @@ class Dataset:
         # Check if we are keeping data in cpu memory
         self.cpu = cpu
         if not self.cpu:
-            self.cpu = cudf is None
+            self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
