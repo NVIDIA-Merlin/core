@@ -133,7 +133,7 @@ def test_column_type_validation():
 
 @pytest.mark.skipif(
     not (tf and HAS_GPU),
-    reason="both TensorFlow and CUDA GPUs are required for cross-framework validation tests"
+    reason="both TensorFlow and CUDA GPUs are required for cross-framework validation tests",
 )
 def test_column_device_validation():
     with tf.device("/CPU"):
