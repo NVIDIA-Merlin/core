@@ -25,7 +25,6 @@ try:
 except ImportError:
     _CPU = [True]
     cudf = None
-_HAS_GPU = cudf is not None
 
 
 @pytest.mark.parametrize("cpu", _CPU)
