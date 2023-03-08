@@ -331,7 +331,7 @@
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">strict_dtypes</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">dynamic_dtypes</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">source_col_schema</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">without_shape</span> <span class="o">!=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">without_shape</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">source_col_schema</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">col_schema</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Mismatched dtypes for column &#39;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&#39; provided to &quot;</span>
                         <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;: &quot;</span>
@@ -849,6 +849,10 @@
       <dd><a href="../../../../v0.8.0/index.html">v0.8.0</a></dd>
       <dd><a href="../../../../v0.9.0/index.html">v0.9.0</a></dd>
       <dd><a href="node.html">v23.02.00</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="../../../../main/index.html">main</a></dd>
     </dl>
   </div>
 </div><script>
