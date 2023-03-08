@@ -16,15 +16,13 @@
 
 import pytest
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.utils import Distributed, Serial, global_dask_client, set_dask_client
 
-try:
-    import cudf
-
+if HAS_GPU:
     _CPU = [True, False]
-except ImportError:
+else:
     _CPU = [True]
-    cudf = None
 
 
 @pytest.mark.parametrize("cpu", _CPU)

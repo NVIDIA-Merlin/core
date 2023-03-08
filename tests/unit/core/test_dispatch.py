@@ -17,13 +17,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from merlin.core.dispatch import HAS_GPU, concat_columns, is_list_dtype, list_val_dtype, make_df
-
-try:
-    import cupy as cp
-except ImportError:
-    cp = None
-
+from merlin.core.compat import HAS_GPU
+from merlin.core.compat import cupy as cp
+from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype, make_df
 
 if HAS_GPU:
     _DEVICES = ["cpu", "gpu"]
