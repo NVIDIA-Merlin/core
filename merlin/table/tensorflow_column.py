@@ -52,7 +52,7 @@ class TensorflowColumn(TensorColumn):
         The type of the arrays backing this column
         """
         return tf.Tensor
-    
+
     @classmethod
     def array_constructor(cls) -> Callable:
         return tf.convert_to_tensor

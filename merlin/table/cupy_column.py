@@ -31,7 +31,7 @@ class CupyColumn(TensorColumn):
         The type of the arrays backing this column
         """
         return cp.ndarray
-    
+
     @classmethod
     def array_constructor(cls) -> Callable:
         return cp.asarray
