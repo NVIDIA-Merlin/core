@@ -29,6 +29,7 @@ class Tags(Enum):
     TEXT = "text"
     TOKENIZED = "tokenized"
     TIME = "time"
+    EMBEDDING = "embedding"
 
     # Feature context
     ID = "id"
