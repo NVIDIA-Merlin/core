@@ -646,3 +646,7 @@ class Schema:
                 result.column_schemas.pop(key, None)
 
         return result
+
+    def copy(self) -> "Schema":
+        """Return a copy of the schema"""
+        return Schema({**self.column_schemas})
