@@ -107,10 +107,13 @@ class ColumnSchema:
         object.__setattr__(self, "is_list", dtype.shape.is_list)
         object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
 
+        properties = {**self.properties}
+
         if new_shape.dims is not None and len(new_shape.dims) > 1:
             value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
-            properties = {**self.properties, **{"value_count": value_counts}}
-            object.__setattr__(self, "properties", properties)
+            properties = {**properties, **{"value_count": value_counts}}
+
+        object.__setattr__(self, "properties", properties)
 
     def _shape_from_flags(self, is_list):
         return Shape(((0, None), (0, None))) if is_list else None
