@@ -639,7 +639,7 @@ class Schema:
         if not isinstance(other, Schema):
             raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
-        result = Schema({**self.column_schemas})
+        result = self.copy()
 
         for key in other.column_schemas.keys():
             if key in self.column_schemas.keys():
