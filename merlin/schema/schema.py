@@ -437,6 +437,7 @@ class Schema:
             tags = [tags]
 
         selected_schemas = {}
+        tags = TagSet(tags)
 
         for _, column_schema in self.column_schemas.items():
             if any(x in column_schema.tags for x in tags):
