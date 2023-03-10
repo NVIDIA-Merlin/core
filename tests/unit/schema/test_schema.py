@@ -62,7 +62,7 @@ def test_select_by_tag():
 
 
 def test_select_by_tag_string():
-    col1_schema = ColumnSchema("col1", tags=[Tags.CATEGORICAL])
+    col1_schema = ColumnSchema("col1", tags=[Tags.CATEGORICAL, Tags.ITEM])
     col2_schema = ColumnSchema("col2", tags=[Tags.ITEM_ID])
 
     schema = Schema([col1_schema, col2_schema])
