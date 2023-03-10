@@ -900,7 +900,7 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
-        schema = Schema({**self.schema.column_schemas})
+        schema = self.schema.copy()
 
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
