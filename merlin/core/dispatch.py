@@ -616,7 +616,7 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
             _x = x if isinstance(x, pd.DataFrame) else x.to_pandas()
             # Output a collection if `to_collection=True`
             return dd.from_pandas(_x, sort=False, npartitions=npartitions) if to_collection else _x
-    else:
+    elif cudf and dask_cudf:
         if isinstance(x, dd.DataFrame):
             # If input is a Dask collection, convert to dask_cudf
             if isinstance(x, dask_cudf.DataFrame):
@@ -639,6 +639,12 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
                 if to_collection
                 else _x
             )
+    else:
+        raise RuntimeError(
+            "Unable to move data to GPU. "
+            "cudf and dask_cudf are not available. "
+            "Make sure these packages are installed and can be imported in this environment. "
+        )
 
 
 def to_host(x):
