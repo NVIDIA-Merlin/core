@@ -13,13 +13,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-HAS_GPU = False
+
+# pylint: disable=unused-import
+import os
+
 try:
     from numba import cuda
-
-    try:
-        HAS_GPU = len(cuda.gpus.lst) > 0
-    except cuda.cudadrv.error.CudaSupportError:
-        pass
 except ImportError:
     cuda = None
+
+from dask.distributed.diagnostics import nvml
+
+
+def _get_gpu_count():
+    """Get Number of GPU devices accounting for CUDA_VISIBLE_DEVICES environment variable"""
+    # Using the `dask.distributed.diagnostics.nvml.device_get_count`
+    # helper function from dask to check device counts with NVML
+    # since this handles some complexity of checking NVML state for us.
+
+    # Note: We can't use `numba.cuda.gpus`, since this has some side effects
+    # that are incompatible with Dask-CUDA. If CUDA runtime functions are
+    # called before Dask-CUDA can spawn worker processes
+    # then Dask-CUDA it will not work correctly (raises an exception)
+    nvml_device_count = nvml.device_get_count()
+    if nvml_device_count == 0:
+        return 0
+    try:
+        cuda_visible_devices = os.environ["CUDA_VISIBLE_DEVICES"]
+        if cuda_visible_devices:
+            return len(cuda_visible_devices.split(","))
+        else:
+            return 0
+    except KeyError:
+        return nvml_device_count
+
+
+HAS_GPU = _get_gpu_count() > 0
+
+
+try:
+    import numpy
+except ImportError:
+    numpy = None
+
+try:
+    import cupy
+except ImportError:
+    cupy = None
+
+try:
+    import tensorflow
+    from tensorflow.python.framework import ops as tf_ops
+except ImportError:
+    tensorflow = None
+    tf_ops = None
+
+try:
+    import torch
+except ImportError:
+    torch = None

@@ -27,6 +27,7 @@ import pytest
 from dask.dataframe import assert_eq
 from packaging.version import Version
 
+import merlin.dtypes as md
 import merlin.io
 from merlin.core import dispatch
 from merlin.io.parquet import GPUParquetWriter
@@ -38,13 +39,20 @@ cudf = pytest.importorskip("cudf")
 dask_cudf = pytest.importorskip("dask_cudf")
 
 
+def _check_partition_lens(ds):
+    # Simple utility to check that the Parquet metadata
+    # is correctly encoding the partition lengths
+    _lens = [len(part) for part in ds.to_ddf().partitions]
+    assert ds.engine._partition_lens == _lens
+
+
 def test_validate_dataset_bad_schema(tmpdir):
     if Version(dask.__version__) <= Version("2.30.0"):
         # Older versions of Dask will not handle schema mismatch
         pytest.skip("Test requires newer version of Dask.")
 
     path = str(tmpdir)
-    for (fn, df) in [
+    for fn, df in [
         ("part.0.parquet", pd.DataFrame({"a": range(10), "b": range(10)})),
         ("part.1.parquet", pd.DataFrame({"a": [None] * 10, "b": range(10)})),
     ]:
@@ -157,6 +165,9 @@ def test_dask_dataset_itr(tmpdir, datasets, engine, gpu_memory_frac):
         size += chunk.shape[0]
         assert chunk["id"].dtype == np.int32
 
+    if engine == "parquet":
+        _check_partition_lens(ds)
+
     assert size == df1.shape[0]
     assert len(my_iter) == size
 
@@ -240,7 +251,6 @@ def test_dask_dataset(datasets, engine, num_files, cpu):
 @pytest.mark.parametrize("origin", ["cudf", "dask_cudf", "pd", "dd"])
 @pytest.mark.parametrize("cpu", [None, True])
 def test_dask_dataset_from_dataframe(tmpdir, origin, cpu):
-
     # Generate a DataFrame-based input
     if origin in ("pd", "dd"):
         df = pd.DataFrame({"a": range(100)})
@@ -330,7 +340,7 @@ def test_dask_dataframe_methods(tmpdir):
 
 @pytest.mark.parametrize("inp_format", ["dask", "dask_cudf", "cudf", "pandas"])
 def test_ddf_dataset_itr(tmpdir, datasets, inp_format):
-    paths = glob.glob(str(datasets["parquet"]) + "/*." + "parquet".split("-")[0])
+    paths = glob.glob(str(datasets["parquet"]) + "/*." + "parquet".split("-", maxsplit=1)[0])
     ddf1 = dask_cudf.read_parquet(paths)[mycols_pq]
     df1 = ddf1.compute()
     if inp_format == "dask":
@@ -446,7 +456,6 @@ def test_validate_dataset(datasets, engine):
 
 
 def test_validate_and_regenerate_dataset(tmpdir):
-
     # Initial timeseries dataset (in cpu memory)
     ddf = dask.datasets.timeseries(
         start="2000-01-01",
@@ -492,7 +501,6 @@ def test_validate_and_regenerate_dataset(tmpdir):
 @pytest.mark.parametrize("preserve_files", [True, False])
 @pytest.mark.parametrize("cpu", [True, False])
 def test_dataset_conversion(tmpdir, cpu, preserve_files):
-
     # Generate toy dataset.
     # Include "hex" strings to mimic Criteo.
     size = 100
@@ -551,7 +559,6 @@ def test_dataset_conversion(tmpdir, cpu, preserve_files):
 @pytest.mark.parametrize("use_file_metadata", [True, None])
 @pytest.mark.parametrize("shuffle", [True, False])
 def test_parquet_iterator_len(tmpdir, shuffle, use_file_metadata):
-
     ddf1 = dask.datasets.timeseries(
         start="2000-01-01",
         end="2000-01-6",
@@ -584,7 +591,6 @@ def test_parquet_iterator_len(tmpdir, shuffle, use_file_metadata):
 
 @pytest.mark.parametrize("cpu", [True, False])
 def test_hive_partitioned_data(tmpdir, cpu):
-
     # Initial timeseries dataset (in cpu memory).
     # Round the full "timestamp" to the hour for partitioning.
     ddf = dask.datasets.timeseries(
@@ -648,7 +654,6 @@ def test_hive_partitioned_data(tmpdir, cpu):
 @pytest.mark.parametrize("keys", [["name"], ["id"], ["name", "id"]])
 @pytest.mark.parametrize("npartitions", [None, 2])
 def test_dataset_shuffle_on_keys(tmpdir, cpu, partition_on, keys, npartitions):
-
     # Initial timeseries dataset
     size = 60
     df1 = pd.DataFrame(
@@ -678,7 +683,7 @@ def test_dataset_shuffle_on_keys(tmpdir, cpu, partition_on, keys, npartitions):
 
     # A successful shuffle will return the same unique-value
     # count for both the full dask algorithm and a partition-wise sum
-    n1 = sum([len(p[keys].drop_duplicates()) for p in ddf2.partitions])
+    n1 = sum(len(p[keys].drop_duplicates()) for p in ddf2.partitions)
     n2 = len(ddf2[keys].drop_duplicates())
     assert n1 == n2
 
@@ -696,7 +701,6 @@ def test_dataset_shuffle_on_keys(tmpdir, cpu, partition_on, keys, npartitions):
 
 @pytest.mark.parametrize("cpu", [True, False])
 def test_parquet_filtered_flat(tmpdir, cpu):
-
     # Initial timeseries dataset (in cpu memory).
     # Round the full "timestamp" to the hour for partitioning.
     path = str(tmpdir)
@@ -716,7 +720,6 @@ def test_parquet_filtered_flat(tmpdir, cpu):
 
 @pytest.mark.parametrize("cpu", [True, False])
 def test_parquet_filtered_hive(tmpdir, cpu):
-
     # Initial timeseries dataset (in cpu memory).
     # Round the full "timestamp" to the hour for partitioning.
     path = str(tmpdir)
@@ -743,7 +746,6 @@ def test_parquet_filtered_hive(tmpdir, cpu):
 )
 @pytest.mark.parametrize("cpu", [True, False])
 def test_parquet_aggregate_files(tmpdir, cpu):
-
     # Initial timeseries dataset (in cpu memory).
     # Round the full "timestamp" to the hour for partitioning.
     path = str(tmpdir)
@@ -768,6 +770,7 @@ def test_parquet_aggregate_files(tmpdir, cpu):
         path, cpu=cpu, engine="parquet", aggregate_files="timestamp", part_size="1GB"
     )
     assert ds.to_ddf().npartitions == len(ddf.timestamp.unique())
+    _check_partition_lens(ds)
 
     # Combining `aggregate_files` and `filters` should work
     ds = merlin.io.Dataset(
@@ -780,3 +783,19 @@ def test_parquet_aggregate_files(tmpdir, cpu):
     )
     assert ds.to_ddf().npartitions == 1
     assert len(ds.to_ddf().timestamp.unique()) == 1
+    _check_partition_lens(ds)
+
+
+def test_to_parquet_dtypes_schema(tmpdir):
+    df = dispatch.make_df({"a": np.array([1, 2, 3], dtype=np.int32)})
+    dataset = merlin.io.Dataset(df)
+
+    # save to parquet with different dtypes and reload
+    dataset.to_parquet(output_path=str(tmpdir), dtypes={"a": np.float32})
+
+    # check that dtypes are unchanged
+    assert dataset.schema["a"].dtype == md.dtype("int32")
+
+    reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
+    # check that data was saved with the requested dtype
+    assert reloaded_dataset.schema["a"].dtype == md.dtype("float32")

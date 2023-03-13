@@ -16,6 +16,7 @@
 
 import logging
 from collections import deque
+from typing import Dict, Optional
 
 from merlin.dag.node import (
     Node,
@@ -30,8 +31,28 @@ LOG = logging.getLogger("merlin")
 
 
 class Graph:
-    def __init__(self, output_node: Node):
+    """
+    Represents an DAG composed of Nodes, each of which contains an operator that
+    transforms dataframes or dataframe-like data
+    """
+
+    def __init__(self, output_node: Node, subgraphs: Optional[Dict[str, Node]] = None):
         self.output_node = output_node
+        self.subgraphs = subgraphs or {}
+
+        parents_with_deps = self.output_node.parents_with_dependencies
+        parents_with_deps.append(output_node)
+
+        for name, sg in self.subgraphs.items():
+            if sg not in parents_with_deps:
+                raise ValueError(
+                    f"The output node of subgraph {name} does not exist in the provided graph."
+                )
+
+    def subgraph(self, name: str) -> "Graph":
+        if name not in self.subgraphs.keys():
+            raise ValueError(f"No subgraph named {name}. Options are: {self.subgraphs.keys()}")
+        return Graph(self.subgraphs[name])
 
     @property
     def input_dtypes(self):
@@ -68,6 +89,21 @@ class Graph:
         return column_mapping
 
     def construct_schema(self, root_schema: Schema, preserve_dtypes=False) -> "Graph":
+        """
+        Given the schema of a dataset to transform, determine the output schema of the graph
+
+        Parameters
+        ----------
+        root_schema : Schema
+            The schema of a dataset to be transformed with this DAG
+        preserve_dtypes : bool, optional
+            Whether to keep any dtypes that may already be present in the schemas, by default False
+
+        Returns
+        -------
+        Graph
+            This DAG after the schemas have been filled in
+        """
         nodes = list(postorder_iter_nodes(self.output_node))
 
         self._compute_node_schemas(root_schema, nodes, preserve_dtypes)

@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from merlin.core.dispatch import DataFrameType
+from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
@@ -34,8 +34,8 @@ class SubtractionOp(BaseOperator):
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: ColumnSelector = None,
+        dependencies_selector: ColumnSelector = None,
     ) -> ColumnSelector:
         """
         Creates selector of all columns from the input schema
@@ -56,7 +56,10 @@ class SubtractionOp(BaseOperator):
         ColumnSelector
             Selector of all columns from the input schema
         """
-        return ColumnSelector(input_schema.column_names)
+        return super().compute_selector(
+            input_schema,
+            ColumnSelector("*"),
+        )
 
     def compute_input_schema(
         self,
@@ -92,7 +95,9 @@ class SubtractionOp(BaseOperator):
             result = parents_schema.excluding(subtraction_selector)
         return result
 
-    def transform(self, col_selector: ColumnSelector, df: DataFrameType) -> DataFrameType:
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
         """Simply returns the selected output columns from the input dataframe
 
         The main functionality of this operator has to do with computing the schemas
@@ -103,7 +108,7 @@ class SubtractionOp(BaseOperator):
         -----------
         columns: list of str or list of list of str
             The columns to apply this operator to
-        df: Dataframe
+        transformable: Transformable
             A pandas or cudf dataframe that this operator will work on
 
         Returns
@@ -112,4 +117,4 @@ class SubtractionOp(BaseOperator):
             Returns a transformed dataframe for this operator
         """
         selector = self.selector or col_selector
-        return super()._get_columns(df, selector)
+        return super()._get_columns(transformable, selector)

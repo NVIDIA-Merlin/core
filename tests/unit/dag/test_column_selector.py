@@ -268,3 +268,43 @@ def test_applying_inverse_selector_to_schema_selects_relevant_columns():
     result = schema.excluding(selector)
 
     assert result == schema
+
+
+def test_wildcard_selection():
+    selector = ColumnSelector("*")
+
+    schema = Schema(["a", "b", "c", "d", "e"])
+    result = schema.select(selector)
+
+    assert result == schema
+
+    result = selector.resolve(schema)
+
+    assert result.names == schema.column_names
+
+
+def test_wildcard_selector_addition():
+    wildcard_selector = ColumnSelector("*")
+    concrete_selector = ColumnSelector(["a", "b", "c", "d", "e"])
+
+    result = wildcard_selector + concrete_selector
+
+    assert result.all
+    assert not result.names
+
+
+def test_wildcard_selector_equality():
+    wildcard_selector1 = ColumnSelector("*")
+    wildcard_selector2 = ColumnSelector("*")
+    concrete_selector = ColumnSelector(["a", "b", "c", "d", "e"])
+
+    assert wildcard_selector1 == wildcard_selector2
+    assert wildcard_selector1 != concrete_selector
+
+
+def test_wildcard_selector_filtering():
+    wildcard_selector = ColumnSelector("*")
+    concrete_selector = ColumnSelector(["a", "b", "c", "d", "e"])
+
+    assert wildcard_selector.filter_columns(concrete_selector) == concrete_selector
+    assert concrete_selector.filter_columns(wildcard_selector) == concrete_selector

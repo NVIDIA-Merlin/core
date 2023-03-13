@@ -16,9 +16,10 @@
 from __future__ import annotations
 
 from enum import Flag, auto
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 import merlin.dag
+from merlin.core.protocols import Transformable
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 
@@ -45,12 +46,34 @@ class BaseOperator:
         self,
         input_schema: Schema,
         selector: ColumnSelector,
-        parents_selector: ColumnSelector,
-        dependencies_selector: ColumnSelector,
+        parents_selector: Optional[ColumnSelector] = None,
+        dependencies_selector: Optional[ColumnSelector] = None,
     ) -> ColumnSelector:
+        """
+        Provides a hook method for sub-classes to override to implement
+        custom column selection logic.
+
+        Parameters
+        ----------
+        input_schema : Schema
+            Schemas of the columns to apply this operator to
+        selector : ColumnSelector
+            Column selector to apply to the input schema
+        parents_selector : ColumnSelector
+            Combined selectors of the upstream parents feeding into this operator
+        dependencies_selector : ColumnSelector
+            Combined selectors of the upstream dependencies feeding into this operator
+
+        Returns
+        -------
+        ColumnSelector
+            Revised column selector to apply to the input schema
+        """
+        selector = selector or ColumnSelector("*")
+
         self._validate_matching_cols(input_schema, selector, self.compute_selector.__name__)
 
-        return selector
+        return selector.resolve(input_schema)
 
     def compute_input_schema(
         self,
@@ -61,6 +84,7 @@ class BaseOperator:
     ) -> Schema:
         """Given the schemas coming from upstream sources and a column selector for the
         input columns, returns a set of schemas for the input columns this operator will use
+
         Parameters
         -----------
         root_schema: Schema
@@ -71,6 +95,7 @@ class BaseOperator:
             The combined schemas of the upstream dependencies feeding into this operator
         col_selector: ColumnSelector
             The column selector to apply to the input schema
+
         Returns
         -------
         Schema
@@ -86,16 +111,19 @@ class BaseOperator:
         self,
         input_schema: Schema,
         col_selector: ColumnSelector,
-        prev_output_schema: Schema = None,
+        prev_output_schema: Optional[Schema] = None,
     ) -> Schema:
-        """Given a set of schemas and a column selector for the input columns,
+        """
+        Given a set of schemas and a column selector for the input columns,
         returns a set of schemas for the transformed columns this operator will produce
+
         Parameters
         -----------
         input_schema: Schema
             The schemas of the columns to apply this operator to
         col_selector: ColumnSelector
             The column selector to apply to the input schema
+
         Returns
         -------
         Schema
@@ -118,10 +146,8 @@ class BaseOperator:
 
         output_schema = Schema()
         for output_col_name, input_col_names in self.column_mapping(col_selector).items():
-            col_schema = ColumnSchema(output_col_name)
-            col_schema = self._compute_dtype(col_schema, input_schema[input_col_names])
-            col_schema = self._compute_tags(col_schema, input_schema[input_col_names])
-            col_schema = self._compute_properties(col_schema, input_schema[input_col_names])
+            input_schema_fragment = input_schema[input_col_names]
+            col_schema = self.compute_column_schema(output_col_name, input_schema_fragment)
             output_schema += Schema([col_schema])
 
         if self.dynamic_dtypes and prev_output_schema:
@@ -131,14 +157,79 @@ class BaseOperator:
 
         return output_schema
 
+    def validate_schemas(
+        self,
+        parents_schema: Schema,
+        deps_schema: Schema,
+        input_schema: Schema,
+        output_schema: Schema,
+        strict_dtypes: bool = False,
+    ):
+        """
+        Provides a hook method that sub-classes can override to implement schema validation logic.
+
+        Sub-class implementations should raise an exception if the schemas are not valid for the
+        operations they implement.
+
+        Parameters
+        ----------
+        parents_schema : Schema
+            The combined schemas of the upstream parents feeding into this operator
+        deps_schema : Schema
+            The combined schemas of the upstream dependencies feeding into this operator
+        input_schema : Schema
+            The schemas of the columns to apply this operator to
+        output_schema : Schema
+            The schemas of the columns produced by this operator
+        strict_dtypes : Boolean, optional
+            Enables strict checking for column dtype matching if True, by default False
+        """
+
+    def transform(
+        self, col_selector: ColumnSelector, transformable: Transformable
+    ) -> Transformable:
+        """Transform the dataframe by applying this operator to the set of input columns
+
+        Parameters
+        -----------
+        col_selector: ColumnSelector
+            The columns to apply this operator to
+        transformable: Transformable
+            A pandas or cudf dataframe that this operator will work on
+
+        Returns
+        -------
+        Transformable
+            Returns a transformed dataframe or dictarray for this operator
+        """
+        return transformable
+
     def column_mapping(self, col_selector):
+        """
+        Compute which output columns depend on which input columns
+
+        Parameters
+        ----------
+        col_selector : ColumnSelector
+            A selector containing a list of column names
+
+        Returns
+        -------
+        Dict[str, List[str]]
+            Mapping from output column names to list of the input columns they rely on
+        """
         column_mapping = {}
         for col_name in col_selector.names:
             column_mapping[col_name] = [col_name]
         return column_mapping
 
     def compute_column_schema(self, col_name, input_schema):
-        methods = [self._compute_dtype, self._compute_tags, self._compute_properties]
+        methods = [
+            self._compute_dtype,
+            self._compute_tags,
+            self._compute_properties,
+            self._compute_shape,
+        ]
         return self._compute_column_schema(col_name, input_schema, methods=methods)
 
     def _compute_column_schema(self, col_name, input_schema, methods=None):
@@ -151,21 +242,24 @@ class BaseOperator:
 
     def _compute_dtype(self, col_schema, input_schema):
         dtype = col_schema.dtype
-        is_list = col_schema.is_list
-        is_ragged = col_schema.is_ragged
 
         if input_schema.column_schemas:
             source_col_name = input_schema.column_names[0]
             dtype = input_schema[source_col_name].dtype
-            is_list = input_schema[source_col_name].is_list
-            is_ragged = input_schema[source_col_name].is_ragged
 
         if self.output_dtype is not None:
             dtype = self.output_dtype
-            is_list = any(cs.is_list for _, cs in input_schema.column_schemas.items())
-            is_ragged = any(cs.is_ragged for _, cs in input_schema.column_schemas.items())
 
-        return col_schema.with_dtype(dtype, is_list=is_list, is_ragged=is_ragged)
+        return col_schema.with_dtype(dtype)
+
+    def _compute_shape(self, col_schema, input_schema):
+        shape = col_schema.shape
+
+        if input_schema.column_schemas:
+            source_col_name = input_schema.column_names[0]
+            shape = input_schema[source_col_name].shape
+
+        return col_schema.with_shape(shape)
 
     @property
     def dynamic_dtypes(self):
@@ -194,7 +288,9 @@ class BaseOperator:
 
     def _validate_matching_cols(self, schema, selector, method_name):
         selector = selector or ColumnSelector()
-        missing_cols = [name for name in selector.names if name not in schema.column_names]
+        resolved_selector = selector.resolve(schema)
+
+        missing_cols = [name for name in selector.names if name not in resolved_selector.names]
         if missing_cols:
             raise ValueError(
                 f"Missing columns {missing_cols} found in operator"
@@ -207,10 +303,12 @@ class BaseOperator:
     def output_column_names(self, col_selector: ColumnSelector) -> ColumnSelector:
         """Given a set of columns names returns the names of the transformed columns this
         operator will produce
+
         Parameters
         -----------
         columns: list of str, or list of list of str
             The columns to apply this operator to
+
         Returns
         -------
         list of str, or list of list of str
@@ -220,8 +318,9 @@ class BaseOperator:
 
     @property
     def dependencies(self) -> List[Union[str, Any]]:
-        """Defines an optional list of column dependencies for this operator. This lets you consume columns
-        that aren't part of the main transformation workflow.
+        """Defines an optional list of column dependencies for this operator.
+        This lets you consume columns that aren't part of the main transformation workflow.
+
         Returns
         -------
         str, list of str or ColumnSelector, optional

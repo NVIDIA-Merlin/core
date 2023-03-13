@@ -110,12 +110,7 @@ def _get_partition_groups(df, partition_cols, fs, output_path, filename):
         keys = tuple(sub_df[col].iloc[0] for col in partition_cols)
         if not isinstance(keys, tuple):
             keys = (keys,)
-        subdir = fs.sep.join(
-            [
-                "{colname}={value}".format(colname=name, value=val)
-                for name, val in zip(partition_cols, keys)
-            ]
-        )
+        subdir = fs.sep.join([f"{name}={val}" for name, val in zip(partition_cols, keys)])
         prefix = fs.sep.join([output_path, subdir])
         fs.mkdirs(prefix, exist_ok=True)
         fns.append(fs.sep.join([subdir, filename]))
@@ -182,7 +177,6 @@ def _write_subgraph(
     cpu,
     suffix,
 ):
-
     fns = fns if isinstance(fns, (tuple, list)) else (fns,)
     writer = writer_factory(
         output_format,
@@ -209,7 +203,6 @@ def _write_subgraph(
 
 
 def _write_metadata_files(md_list, output_path, output_format, cpu, schema):
-
     # Separate and merge metadata
     general_md = []
     special_md = []
@@ -228,7 +221,6 @@ def _write_metadata_files(md_list, output_path, output_format, cpu, schema):
 
 
 def _simple_shuffle(ddf, plan):
-
     # Construct graph for a simple shuffle
     token = tokenize(ddf, plan)
     name = "shuffled-" + token
@@ -261,7 +253,6 @@ def _ddf_to_dataset(
     partition_on=None,
     schema=None,
 ):
-
     # Construct graph for Dask-based dataset write
     token = tokenize(
         ddf, shuffle, out_files_per_proc, cat_names, cont_names, label_names, suffix, partition_on
@@ -382,7 +373,7 @@ def _finish_dataset(client, ddf, output_path, fs, output_format, cpu, schema):
 
         general_md = []
         special_md = []
-        for (gen, spec) in out.values():
+        for gen, spec in out.values():
             general_md.append(gen)
             if spec:
                 special_md.append(spec)

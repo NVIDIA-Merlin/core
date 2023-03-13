@@ -30,9 +30,15 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-import merlin.core.dispatch as dispatch
-from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
+from merlin.core.dispatch import (
+    convert_data,
+    hex_to_int,
+    is_dataframe_object,
+    is_list_dtype,
+    list_val_dtype,
+)
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -203,11 +209,8 @@ class Dataset:
         This overrides the derived schema behavior.
     **kwargs :
         Key-word arguments to pass through to Dask.dataframe IO function.
-        For the Parquet engine(s), notable arguments include `filters`,
-        `aggregate_files`, and `gather_statistics`. Note that users who
-        do not need to know the number of rows in their dataset (and do
-        not plan to preserve a file-partition mapping) may wish to use
-        `gather_statistics=False` for better client-side performance.
+        For the Parquet engine(s), notable arguments include `filters`
+        and `aggregate_files` (the latter is experimental).
     """
 
     def __init__(
@@ -471,7 +474,6 @@ class Dataset:
                             hive_mapping[_key].append(_val)
 
             if set(hive_mapping.keys()) == set(keys):
-
                 # Generate hive-mapping DataFrame summary
                 hive_mapping = type(ddf._meta)(hive_mapping)
                 cols = list(hive_mapping.columns)
@@ -541,7 +543,8 @@ class Dataset:
             .repartition(
                 npartitions=npartitions,
                 partition_size=partition_size,
-            )
+            ),
+            schema=self.schema,
         )
 
     @classmethod
@@ -749,7 +752,6 @@ class Dataset:
         """
 
         if partition_on:
-
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
             if output_files:
@@ -760,7 +762,6 @@ class Dataset:
                 raise ValueError("`preserve_files` not supported when `partition_on` is used.")
 
         else:
-
             # Check that method (algorithm) is valid
             if method not in ("subgraph", "worker"):
                 raise ValueError(f"{method} not a recognized method for `Dataset.to_parquet`")
@@ -797,7 +798,6 @@ class Dataset:
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
         if output_files:
-
             #   NOTES on `output_files`:
             #
             # - If a list of file names is specified, a contiguous range of
@@ -850,6 +850,7 @@ class Dataset:
                 output_files = [f"part_{i}" + suffix for i in range(output_files)]
             if isinstance(output_files, list):
                 new = {}
+                file_count = 0
                 split = math.ceil(ddf.npartitions / len(output_files))
                 for i in range(0, len(output_files), files_per_task):
                     fns = output_files[i : i + files_per_task]
@@ -857,10 +858,11 @@ class Dataset:
                     stop = min(start + split * len(fns), ddf.npartitions)
                     if start < stop:
                         new[tuple(fns)] = np.arange(start, stop)
+                        file_count += len(fns)
                 # let user know they will not have expected number of output files.
-                if len(new.keys()) < len(output_files):
+                if file_count < len(output_files):
                     warnings.warn(
-                        f"Only created {len(new.keys())} files did not have enough "
+                        f"Only creating {file_count} files. Did not have enough "
                         f"partitions to create {len(output_files)} files."
                     )
                 output_files = new
@@ -891,14 +893,18 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = self.schema.copy()
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
         fs.mkdirs(output_path, exist_ok=True)
 
-        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
+        tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
         tf_metadata.to_proto_text_file(output_path)
 
         # Output dask_cudf DataFrame to dataset
@@ -917,7 +923,7 @@ class Dataset:
             self.cpu,
             suffix=suffix,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(
@@ -1129,8 +1135,10 @@ class Dataset:
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
-            is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
+
+            dims = DefaultShapes.LIST if dtype_info["is_list"] else DefaultShapes.SCALAR
+            col_schema = ColumnSchema(column, dtype=dtype_val, dims=dims)
+
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)
@@ -1153,8 +1161,8 @@ class Dataset:
             _real_meta = self._real_meta[n]
             annotated = {
                 col: {
-                    "dtype": dispatch.list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
-                    "is_list": dispatch.is_list_dtype(_real_meta[col]),
+                    "dtype": list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
+                    "is_list": is_list_dtype(_real_meta[col]),
                 }
                 for col in _real_meta.columns
             }
