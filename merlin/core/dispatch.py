@@ -24,16 +24,16 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from merlin.core.compat import HAS_GPU
+# unused HAS_GPU import is here for backwards compatibility
+from merlin.core.compat import HAS_GPU  # pylint: disable=unused-import # noqa: F401
 from merlin.core.compat import cupy as cp
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-rmm = None
 cudf = None
+rmm = None
 
-if HAS_GPU:
+if cudf:
     try:
-        import cudf  # type: ignore[no-redef]
         import dask_cudf
         import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
