@@ -387,7 +387,7 @@ class Schema:
             if selector.names:
                 schema += self.select_by_name(selector.names)
             if selector.tags:
-                schema += self.select_by_any_tags(selector.tags)
+                schema += self.select_by_tag(selector.tags)
             return schema
         return self
 
@@ -422,61 +422,28 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
+    def select_by_tag(
+        self,
+        tags: Union[Union[str, Tags], List[Union[str, Tags]]],
+        pred_fn=None,
+    ) -> "Schema":
         """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
-
+        pred_fn : `any` or `all`
+            Predicate function to decide if the column should be selected.
+            Receives iterable of column tags. Returns True or False.
         Returns
         -------
         Schema
             New object containing only the ColumnSchemas of selected columns
 
         """
-        return self.select_by_any_tags(tags)
+        pred_fn = pred_fn or any
 
-    def select_by_all_tags(self, tags: Union[str, Tags, List[Union[str, Tags]]]) -> "Schema":
-        """Select columns from this Schema that match ALL of the supplied tags.
-
-        Parameters
-        ----------
-        tags : List[Union[str, Tags]] :
-            List of tags that describes which columns match
-
-        Returns
-        -------
-        Schema
-            New object containing only the ColumnSchemas of selected columns
-
-        """
-        if not isinstance(tags, (list, tuple)):
-            tags = [tags]
-
-        selected_schemas = {}
-
-        for _, column_schema in self.column_schemas.items():
-            if all(x in column_schema.tags for x in tags):
-                selected_schemas[column_schema.name] = column_schema
-
-        return Schema(selected_schemas)
-
-    def select_by_any_tags(self, tags: Union[str, Tags, List[Union[str, Tags]]]) -> "Schema":
-        """Select columns from this Schema that match ANY of the supplied tags.
-
-        Parameters
-        ----------
-        tags : List[Union[str, Tags]] :
-            List of tags that describes which columns match
-
-        Returns
-        -------
-        Schema
-            New object containing only the ColumnSchemas of selected columns
-
-        """
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
@@ -487,8 +454,13 @@ class Schema:
             for tag in tags
         ]
 
+        normalized_tags = [
+            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
+            for tag in tags
+        ]
+
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in normalized_tags):
+            if pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
