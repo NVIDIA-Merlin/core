@@ -36,13 +36,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Get Branch name
+        id: get-branch-name
+        uses: NVIDIA-Merlin/.github/actions/branch-name@main
       - name: Run tests
         run: |
           ref_type=${{ github.ref_type }}
-          branch=main
-          if [[ $ref_type == "tag"* ]]
-          then
-            raw=$(git branch -r --contains ${{ github.ref_name }})
-            branch=${raw/origin\/}
-          fi
+          branch="${{ steps.get-branch-name.outputs.branch }}"
           cd ${{ github.workspace }}; tox -e test-gpu-not-visible -- $branch
