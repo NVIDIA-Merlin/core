@@ -30,7 +30,6 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-from merlin.core.compat import HAS_GPU, cudf
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -48,6 +47,11 @@ from merlin.io.parquet import ParquetDatasetEngine
 from merlin.io.shuffle import _check_shuffle_arg
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
+
+try:
+    import cudf
+except ImportError:
+    cudf = None
 
 LOG = logging.getLogger("merlin")
 
@@ -237,17 +241,10 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in host or gpu device memory
+        # Check if we are keeping data in cpu memory
         self.cpu = cpu
-        if self.cpu is False:
-            if not HAS_GPU:
-                raise RuntimeError(
-                    "Cannot initialize Dataset on GPU. No devices detected (using pynvml)."
-                )
-            if cudf is None:
-                raise RuntimeError("Cannot initialize Dataset on GPU. cudf package not found.")
-        if self.cpu is None:
-            self.cpu = cudf is None or not HAS_GPU
+        if not self.cpu:
+            self.cpu = cudf is None
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
