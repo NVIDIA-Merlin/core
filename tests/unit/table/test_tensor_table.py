@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 import pytest
 
@@ -29,7 +29,7 @@ from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, Tens
 from merlin.table.conversions import convert_col
 from tests.conftest import assert_eq
 
-array_constructors: List[Tuple] = []
+col_type: List[Type] = []
 cpu_target_packages: List[Tuple] = []
 gpu_target_packages: List[Tuple] = []
 gpu_source_col: List[Tuple] = []
@@ -40,7 +40,7 @@ if np:
         "a__values": np.array([1, 2, 3]),
         "a__offsets": np.array([0, 1, 3]),
     }
-    array_constructors.append((np.array, NumpyColumn))
+    col_type.append(NumpyColumn)
     cpu_target_packages.append((NumpyColumn, tensor_dict))
     cpu_source_col.append((NumpyColumn, np.array, np))
 
@@ -49,7 +49,7 @@ if cp:
         "a__values": cp.asarray([1, 2, 3]),
         "a__offsets": cp.asarray([0, 1, 3]),
     }
-    array_constructors.append((cp.asarray, CupyColumn))
+    col_type.append(CupyColumn)
     gpu_target_packages.append((CupyColumn, tensor_dict))
     gpu_source_col.append((CupyColumn, cp.asarray, cp))
 
@@ -66,7 +66,7 @@ if tf and HAS_GPU:
         }
     cpu_target_packages.append((TensorflowColumn, tensor_dict_cpu))
     gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
-    array_constructors.append((tf.constant, TensorflowColumn))
+    col_type.append(TensorflowColumn)
 
 if th and HAS_GPU:
     tensor_dict_cpu = {
@@ -79,7 +79,7 @@ if th and HAS_GPU:
     }
     cpu_target_packages.append((TorchColumn, tensor_dict_cpu))
     gpu_target_packages.append((TorchColumn, tensor_dict_gpu))
-    array_constructors.append((th.tensor, TorchColumn))
+    col_type.append(TorchColumn)
 
 
 @pytest.mark.parametrize("protocol", [DictLike, Transformable])
@@ -89,9 +89,9 @@ def test_tensortable_match_protocol(protocol):
     assert isinstance(obj, protocol)
 
 
-@pytest.mark.parametrize("array_constructor", array_constructors)
-def test_tensortable_from_framework_arrays(array_constructor):
-    constructor, column_type = array_constructor
+@pytest.mark.parametrize("col_type", col_type)
+def test_tensortable_from_framework_arrays(col_type):
+    constructor = col_type.array_constructor()
 
     tensor_dict = {
         "a": constructor([1, 2, 3]),
@@ -102,7 +102,7 @@ def test_tensortable_from_framework_arrays(array_constructor):
     table = TensorTable(tensor_dict)
     assert isinstance(table, TensorTable)
     for column in table.columns:
-        assert isinstance(table[column], column_type)
+        assert isinstance(table[column], col_type)
 
 
 def test_tensortable_with_ragged_columns():

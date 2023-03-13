@@ -107,10 +107,13 @@ class ColumnSchema:
         object.__setattr__(self, "is_list", dtype.shape.is_list)
         object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
 
+        properties = {**self.properties}
+
         if new_shape.dims is not None and len(new_shape.dims) > 1:
             value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
-            properties = {**self.properties, **{"value_count": value_counts}}
-            object.__setattr__(self, "properties", properties)
+            properties = {**properties, **{"value_count": value_counts}}
+
+        object.__setattr__(self, "properties", properties)
 
     def _shape_from_flags(self, is_list):
         return Shape(((0, None), (0, None))) if is_list else None
@@ -438,8 +441,13 @@ class Schema:
 
         selected_schemas = {}
 
+        normalized_tags = [
+            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
+            for tag in tags
+        ]
+
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in tags):
+            if any(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
@@ -639,10 +647,14 @@ class Schema:
         if not isinstance(other, Schema):
             raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
-        result = Schema({**self.column_schemas})
+        result = self.copy()
 
         for key in other.column_schemas.keys():
             if key in self.column_schemas.keys():
                 result.column_schemas.pop(key, None)
 
         return result
+
+    def copy(self) -> "Schema":
+        """Return a copy of the schema"""
+        return Schema({**self.column_schemas})
