@@ -247,10 +247,16 @@ class Dataset:
         if self.cpu is False:
             if not HAS_GPU:
                 raise RuntimeError(
-                    "Cannot initialize Dataset on GPU. No devices detected (using pynvml)."
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
                 )
             if cudf is None:
-                raise RuntimeError("Cannot initialize Dataset on GPU. cudf package not found.")
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
         if self.cpu is None:
             self.cpu = cudf is None or not HAS_GPU
 
