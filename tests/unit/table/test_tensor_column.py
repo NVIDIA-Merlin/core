@@ -92,7 +92,7 @@ def test_equality():
     assert np_col != np_col_3
 
 
-@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires GPU")
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires CuPy and GPU")
 def test_cupy_cpu_transfer():
     values = cp.array([1, 2, 3])
     offsets = cp.array([0, 1, 3])
