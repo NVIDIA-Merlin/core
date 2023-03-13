@@ -218,7 +218,7 @@ def random_state(seed, like_df=None):
     elif cudf and isinstance(like_df, (cudf.DataFrame, cudf.Series)):
         return cp.random.RandomState(seed)
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported dataframe type: "
             f"{type(like_df)}"
             " Expected either a pandas or cudf DataFrame or Series."
@@ -232,7 +232,7 @@ def arange(size, like_df=None, dtype=None):
     elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
         return cp.arange(size, dtype=dtype)
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported dataframe type: "
             f"{type(like_df)}"
             " Expected either a pandas or cudf DataFrame or Series."
@@ -246,7 +246,7 @@ def array(x, like_df=None, dtype=None):
     elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
         return cp.array(x, dtype=dtype)
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported dataframe type: "
             f"{type(like_df)}"
             " Expected either a pandas or cudf DataFrame or Series."
@@ -260,7 +260,7 @@ def zeros(size, like_df=None, dtype=None):
     elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
         return cp.zeros(size, dtype=dtype)
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported dataframe type: "
             f"{type(like_df)}"
             " Expected either a pandas or cudf DataFrame or Series."
@@ -282,7 +282,7 @@ def hash_series(ser):
         else:
             return ser.hash_values()
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported series type: " f"{type(ser)}" " Expected either a pandas or cudf Series."
         )
 
@@ -365,7 +365,7 @@ def flatten_list_column_values(s):
     elif cudf and isinstance(s, cudf.Series):
         return s.list.leaves
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported series type: " f"{type(s)}" " Expected either a pandas or cudf Series."
         )
 
@@ -516,7 +516,7 @@ def concat(objs, **kwargs):
     elif cudf and isinstance(objs[0], (cudf.DataFrame, cudf.Series)):
         return cudf.core.reshape.concat(objs, **kwargs)
     else:
-        return ValueError(
+        raise ValueError(
             "Unsupported dataframe type: "
             f"{type(objs[0])}"
             " Expected a pandas, cudf, or dask DataFrame."
