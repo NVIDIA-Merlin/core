@@ -213,15 +213,15 @@ def hex_to_int(s, dtype=None):
 
 def random_state(seed, like_df=None):
     """Dispatch for numpy.random.RandomState"""
-    if isinstance(like_df, (pd.DataFrame, pd.Series)):
+    if isinstance(like_df, (pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.random.RandomState(seed)
-    elif cudf and isinstance(like_df, (cudf.DataFrame, cudf.Series)):
+    elif cudf and isinstance(like_df, (cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.random.RandomState(seed)
     else:
         raise ValueError(
             "Unsupported dataframe type: "
             f"{type(like_df)}"
-            " Expected either a pandas or cudf DataFrame or Series."
+            " Supported types: a DataFrame, Series, or RangeIndex (cudf or pandas)."
         )
 
 
