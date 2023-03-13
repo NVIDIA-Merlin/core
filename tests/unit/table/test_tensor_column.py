@@ -109,7 +109,7 @@ def test_cupy_cpu_transfer():
     assert isinstance(cpu_col_again, NumpyColumn)
 
 
-@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires GPU")
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="requires CuPy and GPU")
 def test_numpy_gpu_transfer():
     values = np.array([1, 2, 3])
     offsets = np.array([0, 1, 3])
