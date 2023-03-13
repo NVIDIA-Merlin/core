@@ -26,10 +26,10 @@ import pyarrow.parquet as pq
 
 # unused HAS_GPU import is here for backwards compatibility
 from merlin.core.compat import HAS_GPU  # pylint: disable=unused-import # noqa: F401
+from merlin.core.compat import cudf
 from merlin.core.compat import cupy as cp
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-cudf = None
 rmm = None
 
 if cudf:
