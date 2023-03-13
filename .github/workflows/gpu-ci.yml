@@ -41,6 +41,5 @@ jobs:
         uses: NVIDIA-Merlin/.github/actions/branch-name@main
       - name: Run tests
         run: |
-          ref_type=${{ github.ref_type }}
           branch="${{ steps.get-branch-name.outputs.branch }}"
           cd ${{ github.workspace }}; tox -e test-gpu-not-visible -- $branch
