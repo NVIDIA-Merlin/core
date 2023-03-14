@@ -44,7 +44,7 @@ class TensorTable:
         self._columns = cols_dict
 
     def _convert_arrays_to_columns(self, columns):
-        grouped_columns = group_values_offsets(columns or {})
+        grouped_columns = group_values_offsets(columns if columns is not None else {})
         cols_dict = {}
         for name, column in grouped_columns.items():
             if isinstance(column, TensorColumn):
@@ -152,6 +152,9 @@ class TensorTable:
         Exists for compatibility with the DataFrameLike protocol
         """
         return [column.dtype for column in self.values()]
+
+    def pop(self, column_name):
+        return self._columns.pop(column_name)
 
     def to_dict(self):
         """

@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
+import itertools
+import operator
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, List, Type
@@ -63,6 +66,7 @@ class TensorColumn:
             return object.__new__(cls)
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
+        values, offsets = self._convert_nested_lists(values, offsets)
         self._validate_values_offsets(values, offsets)
 
         self._values = values
@@ -163,10 +167,31 @@ class TensorColumn:
             num_rows = len(offsets) - 1
             row_lengths = offsets[1:] - offsets[:-1]
             num_cols = int(row_lengths[0]) if all(row_lengths == row_lengths[0]) else None
-            shape = Shape((num_rows, num_cols))
+            shape = [num_rows, num_cols]
+            if len(values.shape) > 1:
+                embedding_shape = values.shape[1:]
+                shape.extend(embedding_shape)
+            shape = Shape(tuple(shape))
         else:
             shape = Shape(values.shape)
         return shape
+
+    def _convert_nested_lists(self, values, offsets):
+        if not isinstance(values, list):
+            return values, offsets
+
+        if offsets is not None:
+            raise ValueError(
+                "Providing nested values is not supported with offsets. "
+                "Either provide flattened values with offsets, or nested "
+                "values without offsets."
+            )
+
+        flat_values = functools.reduce(operator.iconcat, values, [])
+        flat_offsets = list(itertools.accumulate([0] + [len(val) for val in values]))
+
+        constructor = self.__class__.array_constructor()
+        return constructor(flat_values), constructor(flat_offsets)
 
     def _validate_values_offsets(self, values, offsets):
         self._raise_type_error("values", values)
