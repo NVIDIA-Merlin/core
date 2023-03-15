@@ -264,7 +264,15 @@ def _ddf_to_dataset(
 ):
     # Construct graph for Dask-based dataset write
     token = tokenize(
-        ddf, shuffle, out_files_per_proc, cat_names, cont_names, label_names, suffix, partition_on, row_group_size
+        ddf,
+        shuffle,
+        out_files_per_proc,
+        cat_names,
+        cont_names,
+        label_names,
+        suffix,
+        partition_on,
+        row_group_size,
     )
     name = "write-processed-" + token
     write_name = name + "-partition" + token

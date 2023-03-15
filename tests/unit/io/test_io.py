@@ -455,7 +455,7 @@ def test_to_parquet_row_group_size(tmpdir, cpu, row_group_size):
     )
 
     result = dd.read_parquet(outdir, split_row_groups=True)
-    assert all([len(part) <= row_group_size for part in result.partitions])
+    assert all(len(part) <= row_group_size for part in result.partitions)
 
 
 @pytest.mark.parametrize("engine", ["csv", "parquet"])
