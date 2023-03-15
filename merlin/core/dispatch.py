@@ -715,3 +715,15 @@ def get_random_state():
     if cp:
         return cp.random.get_random_state()
     return np.random.mtrand.RandomState()
+
+
+def df_from_dict(col_dict):
+    from merlin.table import TensorTable, df_from_tensor_table
+
+    return df_from_tensor_table(TensorTable(col_dict))
+
+
+def dict_from_df(df: DataFrameLike):
+    from merlin.table import tensor_table_from_df
+
+    return tensor_table_from_df(df).to_dict()
