@@ -273,7 +273,9 @@ def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["_dims"] = list(list(dim) for dim in column_schema.shape.as_tuple or [])
+    properties["_dims"] = list(
+        list(dim) if isinstance(dim, tuple) else dim for dim in column_schema.shape.as_tuple or []
+    )
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     if column_schema.dtype.element_size:
@@ -417,8 +419,15 @@ def _merlin_dtype(feature, properties):
     dims_list = properties.pop("_dims", None)
 
     if dims_list:
-        dims_tuple = tuple(tuple(dim) for dim in dims_list)
-        dtype = dtype.with_shape(dims_tuple)
+        dims = []
+        for dim in dims_list:
+            if isinstance(dim, list):
+                dims.append(tuple(dim))
+            elif dim is not None:
+                dims.append(int(dim))
+            else:
+                dims.append(dim)
+        dtype = dtype.with_shape(tuple(dims))
 
         # If we found dims, avoid overwriting that shape with one inferred from counts or flags
         properties.pop("value_count", None)

@@ -681,6 +681,7 @@ class Dataset:
         preserve_files=False,
         output_files=None,
         out_files_per_proc=None,
+        row_group_size=None,
         num_threads=0,
         dtypes=None,
         cats=None,
@@ -736,6 +737,12 @@ class Dataset:
             argument. If `method="subgraph"`, the total number of files is determined
             by `output_files` (and `out_files_per_proc` must be 1 if a dictionary is
             specified).
+        row_group_size : integer
+            Maximum number of rows to include in each Parquet row-group. By default,
+            the maximum row-group size will be chosen by the backend Parquet engine
+            (cudf or pyarrow). Note that cudf currently prohibits this value from
+            being less than `5000` rows. If smaller row-groups are necessary, try
+            calling `to_cpu()` before writing to disk.
         num_threads : integer
             Number of IO threads to use for writing the output dataset.
             For `0` (default), no dedicated IO threads will be used.
@@ -912,7 +919,7 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
-        schema = Schema({**self.schema.column_schemas})
+        schema = self.schema.copy()
 
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
@@ -943,6 +950,7 @@ class Dataset:
             num_threads,
             self.cpu,
             suffix=suffix,
+            row_group_size=row_group_size,
             partition_on=partition_on,
             schema=schema if write_hugectr_keyset else None,
         )

@@ -30,11 +30,13 @@ def writer_factory(
     cpu=False,
     fns=None,
     suffix=None,
+    fs=None,
+    **kwargs,  # Format-specific arguments
 ):
     if output_format is None:
         return None
 
-    writer_cls, fs = _writer_cls_factory(output_format, output_path, cpu=cpu)
+    writer_cls, fs = _writer_cls_factory(output_format, output_path, cpu=cpu, fs=fs)
     return writer_cls(
         output_path,
         num_out_files=out_files_per_proc,
@@ -46,10 +48,11 @@ def writer_factory(
         cpu=cpu,
         fns=fns,
         suffix=suffix,
+        **kwargs,  # Format-specific arguments
     )
 
 
-def _writer_cls_factory(output_format, output_path, cpu=None):
+def _writer_cls_factory(output_format, output_path, cpu=None, fs=None):
     if output_format == "parquet" and cpu:
         writer_cls = CPUParquetWriter
     elif output_format == "parquet":
@@ -59,5 +62,6 @@ def _writer_cls_factory(output_format, output_path, cpu=None):
     else:
         raise ValueError("Output format not yet supported.")
 
-    fs = get_fs_token_paths(output_path)[0]
+    if fs is None:
+        fs = get_fs_token_paths(output_path)[0]
     return writer_cls, fs
