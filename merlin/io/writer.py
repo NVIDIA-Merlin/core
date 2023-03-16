@@ -30,6 +30,8 @@ from fsspec.core import get_fs_token_paths
 from merlin.core.dispatch import annotate
 from merlin.io.shuffle import shuffle_df
 
+MERLIN_METADATA_DIR_NAME = ".merlin"
+
 
 class Writer:
     def add_data(self, df):
@@ -268,22 +270,25 @@ class ThreadedWriter(Writer):
         data_paths = data.pop("data_paths", [])
         num_out_files = len(data_paths)
 
+        metadata_dir = fs.sep.join([out_dir, MERLIN_METADATA_DIR_NAME])
+        fs.mkdirs(metadata_dir, exist_ok=True)
+
         # Write file_list
-        file_list_writer = fs.open(fs.sep.join([out_dir, "_file_list.txt"]), "w")
+        file_list_writer = fs.open(fs.sep.join([metadata_dir, "_file_list.txt"]), "w")
         file_list_writer.write(str(num_out_files) + "\n")
         for f in data_paths:
             file_list_writer.write(f + "\n")
         file_list_writer.close()
 
         # Write metadata json
-        metadata_writer = fs.open(fs.sep.join([out_dir, "_metadata.json"]), "w")
+        metadata_writer = fs.open(fs.sep.join([metadata_dir, "_metadata.json"]), "w")
         json.dump(data, metadata_writer)
         metadata_writer.close()
 
         # Write keyset file
         if schema:
             fs = get_fs_token_paths(out_dir)[0]
-            with fs.open(fs.sep.join([out_dir, "_hugectr.keyset"]), "wb") as writer:
+            with fs.open(fs.sep.join([metadata_dir, "_hugectr.keyset"]), "wb") as writer:
                 for col in schema:
                     try:
                         for v in range(col.properties["embedding_sizes"]["cardinality"] + 1):

@@ -19,3 +19,4 @@ from merlin.io import dataframe_iter, dataset, shuffle
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.dataset import Dataset
 from merlin.io.shuffle import Shuffle, shuffle_df
+from merlin.io.writer import MERLIN_METADATA_DIR_NAME
