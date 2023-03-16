@@ -434,8 +434,11 @@ class Schema:
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
         pred_fn : `any` or `all`
-            Predicate function to decide if the column should be selected.
-            Receives iterable of column tags. Returns True or False.
+            Predicate function that decides if the column should be selected.
+            Receives iterable of bool values indicating whether each
+            of the provided tags is present on a column schema.
+            Returning True selects this column, False will not return that column.
+
         Returns
         -------
         Schema
