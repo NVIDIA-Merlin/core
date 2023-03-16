@@ -743,6 +743,7 @@
         <span class="n">preserve_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">output_files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">out_files_per_proc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">row_group_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">num_threads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">dtypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -798,6 +799,12 @@
 <span class="sd">            argument. If `method=&quot;subgraph&quot;`, the total number of files is determined</span>
 <span class="sd">            by `output_files` (and `out_files_per_proc` must be 1 if a dictionary is</span>
 <span class="sd">            specified).</span>
+<span class="sd">        row_group_size : integer</span>
+<span class="sd">            Maximum number of rows to include in each Parquet row-group. By default,</span>
+<span class="sd">            the maximum row-group size will be chosen by the backend Parquet engine</span>
+<span class="sd">            (cudf or pyarrow). Note that cudf currently prohibits this value from</span>
+<span class="sd">            being less than `5000` rows. If smaller row-groups are necessary, try</span>
+<span class="sd">            calling `to_cpu()` before writing to disk.</span>
 <span class="sd">        num_threads : integer</span>
 <span class="sd">            Number of IO threads to use for writing the output dataset.</span>
 <span class="sd">            For `0` (default), no dedicated IO threads will be used.</span>
@@ -1003,6 +1010,7 @@
             <span class="n">num_threads</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
             <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
+            <span class="n">row_group_size</span><span class="o">=</span><span class="n">row_group_size</span><span class="p">,</span>
             <span class="n">partition_on</span><span class="o">=</span><span class="n">partition_on</span><span class="p">,</span>
             <span class="n">schema</span><span class="o">=</span><span class="n">schema</span> <span class="k">if</span> <span class="n">write_hugectr_keyset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span></div>
