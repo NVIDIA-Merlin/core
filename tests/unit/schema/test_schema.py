@@ -103,11 +103,13 @@ def test_select_by_all_tags():
 
     schema = Schema([col1_schema, col2_schema, col3_schema])
 
-    select_multi_a = schema.select_by_tag(["a", "c"], all)
-    select_multi_b = schema.select_by_tag(["b", "c"], all)
+    select_multi_a = schema.select_by_tag(["a", "b"], all)
+    select_multi_b = schema.select_by_tag(["c", "d"], all)
+    select_multi_c = schema.select_by_tag(["a", "e"], all)
 
-    assert select_multi_a == Schema([])
+    assert select_multi_a == Schema([col1_schema])
     assert select_multi_b == Schema([col2_schema])
+    assert select_multi_c == Schema([])
 
 
 def test_select():
