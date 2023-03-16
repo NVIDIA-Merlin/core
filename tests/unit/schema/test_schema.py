@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import dataclasses
+
 import pytest
 
 from merlin.dag import ColumnSelector
-from merlin.schema import ColumnSchema, Schema
+from merlin.schema import ColumnSchema, Schema, Tags
 
 
 def test_select_by_name():
@@ -57,6 +59,19 @@ def test_select_by_tag():
     assert select_both == Schema([col1_schema, col2_schema])
     assert select_multi == Schema([col1_schema, col2_schema])
     assert select_neither == Schema([])
+
+
+def test_select_by_tag_string():
+    col1_schema = ColumnSchema("col1", tags=[Tags.CATEGORICAL, Tags.ITEM])
+    col2_schema = ColumnSchema("col2", tags=[Tags.ITEM_ID])
+
+    schema = Schema([col1_schema, col2_schema])
+
+    col1_selection = schema.select_by_tag("categorical")
+    col2_selection = schema.select_by_tag("item_id")
+
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
 
 
 def test_select():
@@ -157,8 +172,11 @@ def test_schema_to_pandas():
     schema_set = Schema(["a", "b", "c"])
     df = schema_set.to_pandas()
 
+    expected_columns = [field.name for field in dataclasses.fields(ColumnSchema)]
+    expected_columns.remove("properties")
+
     assert isinstance(df, pd.DataFrame)
-    assert list(df.columns) == ["name", "tags", "dtype", "is_list", "is_ragged"]
+    assert list(df.columns) == expected_columns
 
 
 def test_construct_schema_with_column_names():

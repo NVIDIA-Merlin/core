@@ -14,11 +14,12 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 from merlin.dtypes.registry import _dtype_registry
+from merlin.dtypes.shape import Shape
 
 
 class ElementType(Enum):
@@ -69,6 +70,11 @@ class DType:
     element_size: Optional[int] = None
     element_unit: Optional[ElementUnit] = None
     signed: Optional[bool] = None
+    shape: Optional[Shape] = None
+
+    def __post_init__(self):
+        if not self.shape:
+            object.__setattr__(self, "shape", Shape())
 
     def to(self, mapping_name: str):
         """
@@ -103,7 +109,7 @@ class DType:
             ) from exc
 
         try:
-            return mapping.from_merlin(self)
+            return mapping.from_merlin(self.without_shape)
         except KeyError as exc:
             raise ValueError(
                 f"The registered dtype mapping for {mapping_name} doesn't contain type {self.name}."
@@ -125,3 +131,48 @@ class DType:
     @property
     def is_float(self):
         return self.element_type.value == "float"
+
+    def with_shape(self, shape: Union[Tuple, Shape]):
+        """
+        Create a copy of this dtype with a new shape
+
+        Parameters
+        ----------
+        shape : Union[Tuple, Shape]
+            Object to set as shape of dtype, must be either a tuple or Shape.
+
+        Returns
+        -------
+        DType
+            A copy of this dtype containing the provided shape value
+
+        Raises
+        ------
+        TypeError
+            If value is not either a tuple or a Shape
+        """
+        if isinstance(shape, tuple):
+            shape = Shape(shape)
+
+        if not isinstance(shape, Shape):
+            raise TypeError(
+                f"Provided value {shape} (of type {type(shape)}) for DType.shape property "
+                "is not of type Shape."
+            )
+
+        return replace(self, shape=shape)
+
+    @property
+    def without_shape(self):
+        """
+        Create a copy of this object without the shape
+
+        Returns
+        -------
+        DType
+            A copy of this object with the shape removed
+        """
+        if self.shape.dims is None:
+            return self
+
+        return replace(self, shape=Shape())

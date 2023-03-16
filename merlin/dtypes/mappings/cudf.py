@@ -21,6 +21,19 @@ from merlin.dtypes.registry import _dtype_registry
 
 
 def cudf_translator(raw_dtype) -> np.dtype:
+    """
+    Translate cudf dtypes to Numpy dtypes
+
+    Parameters
+    ----------
+    raw_dtype : cudf dtype
+        The dtype to be translated
+
+    Returns
+    -------
+    np.dtype
+        The result of translating raw_dtype to Numpy
+    """
     category_type = raw_dtype._categories.dtype
     if is_string_dtype(category_type):
         return np.dtype("str")

@@ -252,6 +252,9 @@ def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
+    properties["_dims"] = list(
+        list(dim) if isinstance(dim, tuple) else dim for dim in column_schema.shape.as_tuple or []
+    )
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     if column_schema.dtype.element_size:
@@ -270,8 +273,8 @@ def _pb_feature(column_schema):
 
     value_count = column_schema.properties.get("value_count", {})
     if value_count:
-        min_length = value_count.get("min", 0)
-        max_length = value_count.get("max", 0)
+        min_length = value_count.get("min", 0) or 0
+        max_length = value_count.get("max", 0) or 0
         feature.value_count = ValueCount(min=min_length, max=max_length)
 
     feature.annotation.tag = _pb_tag(column_schema)
@@ -323,9 +326,9 @@ def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
         value_count_dict = {}
-        if value_count.min > 0:
+        if value_count.min and value_count.min > 0:
             value_count_dict["min"] = value_count.min
-        if value_count.max > 0:
+        if value_count.max and value_count.max > 0:
             value_count_dict["max"] = value_count.max
         return value_count_dict
 
@@ -377,7 +380,7 @@ float_dtypes_map = {
 
 
 def _merlin_dtype(feature, properties):
-    dtype = None
+    dtype = md.unknown
     item_size = int(properties.get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
         if item_size and item_size in int_dtypes_map:
@@ -391,6 +394,25 @@ def _merlin_dtype(feature, properties):
             dtype = md.float64
     elif feature.type == FeatureType.BYTES:
         dtype = md.string
+
+    dims_list = properties.pop("_dims", None)
+
+    if dims_list:
+        dims = []
+        for dim in dims_list:
+            if isinstance(dim, list):
+                dims.append(tuple(dim))
+            elif dim is not None:
+                dims.append(int(dim))
+            else:
+                dims.append(dim)
+        dtype = dtype.with_shape(tuple(dims))
+
+        # If we found dims, avoid overwriting that shape with one inferred from counts or flags
+        properties.pop("value_count", None)
+        properties.pop("is_list", None)
+        properties.pop("is_ragged", None)
+
     return dtype
 
 
@@ -409,7 +431,12 @@ def _merlin_column(feature):
         if Tags.CATEGORICAL not in tags:
             tags.append(Tags.CATEGORICAL)
 
-    return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
+    dims = dtype.shape.as_tuple
+
+    if dims:
+        return ColumnSchema(name, tags, properties, dtype, dims=dims)
+    else:
+        return ColumnSchema(name, tags, properties, dtype, is_list=is_list, is_ragged=is_ragged)
 
 
 def _read_file(path: os.PathLike):

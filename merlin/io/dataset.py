@@ -38,6 +38,7 @@ from merlin.core.dispatch import (
     list_val_dtype,
 )
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -473,7 +474,6 @@ class Dataset:
                             hive_mapping[_key].append(_val)
 
             if set(hive_mapping.keys()) == set(keys):
-
                 # Generate hive-mapping DataFrame summary
                 hive_mapping = type(ddf._meta)(hive_mapping)
                 cols = list(hive_mapping.columns)
@@ -752,7 +752,6 @@ class Dataset:
         """
 
         if partition_on:
-
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
             if output_files:
@@ -763,7 +762,6 @@ class Dataset:
                 raise ValueError("`preserve_files` not supported when `partition_on` is used.")
 
         else:
-
             # Check that method (algorithm) is valid
             if method not in ("subgraph", "worker"):
                 raise ValueError(f"{method} not a recognized method for `Dataset.to_parquet`")
@@ -800,7 +798,6 @@ class Dataset:
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
         if output_files:
-
             #   NOTES on `output_files`:
             #
             # - If a list of file names is specified, a contiguous range of
@@ -896,14 +893,18 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = self.schema.copy()
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
         fs.mkdirs(output_path, exist_ok=True)
 
-        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
+        tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
         tf_metadata.to_proto_text_file(output_path)
 
         # Output dask_cudf DataFrame to dataset
@@ -922,7 +923,7 @@ class Dataset:
             self.cpu,
             suffix=suffix,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(
@@ -1134,8 +1135,10 @@ class Dataset:
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
-            is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
+
+            dims = DefaultShapes.LIST if dtype_info["is_list"] else DefaultShapes.SCALAR
+            col_schema = ColumnSchema(column, dtype=dtype_val, dims=dims)
+
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)

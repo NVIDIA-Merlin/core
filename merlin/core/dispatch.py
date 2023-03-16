@@ -34,7 +34,6 @@ rmm = None
 if HAS_GPU:
     try:
         import cudf  # type: ignore[no-redef]
-        import cupy as cp  # type: ignore[no-redef]
         import dask_cudf
         import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
@@ -47,10 +46,12 @@ if HAS_GPU:
             # cudf < 21.08
             from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
-
     except ImportError:
-        HAS_GPU = False
-
+        pass
+    try:
+        import cupy as cp  # type: ignore[no-redef]
+    except ImportError:
+        pass
 
 try:
     # Dask >= 2021.5.1
@@ -76,7 +77,7 @@ except ImportError:
         return inner1
 
 
-if HAS_GPU:
+if HAS_GPU and cudf:
     DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
     SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
@@ -415,7 +416,10 @@ def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     elif cudf is not None:
         _cls = cudf.io.parquet.ParquetWriter
     else:
-        ValueError("Unable to load cudf. Please check your environment GPU and cudf available.")
+        raise ValueError(
+            "Unable to load cudf. "
+            "Please check that your environment has GPU(s) and cudf available."
+        )
 
     if not path:
         return _cls
@@ -489,16 +493,21 @@ def concat(objs, **kwargs):
 
 def make_df(_like_df=None, device=None):
     """Return a DataFrame with the same dtype as `_like_df`"""
-    if not cudf or isinstance(_like_df, (pd.DataFrame, pd.Series)):
-        return pd.DataFrame(_like_df)
-    elif isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+    if not cudf or device == "cpu" or isinstance(_like_df, (pd.DataFrame, pd.Series)):
+        # move to pandas need it on CPU (host memory)
+        # can be a cudf, cupy or numpy Series
+        if cudf and isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+            # move to cpu
+            return _like_df.to_pandas()
+        if cp and isinstance(_like_df, cp.ndarray):
+            return pd.DataFrame(_like_df.get())
+        else:
+            return pd.DataFrame(_like_df)
+    else:
+        if isinstance(_like_df, dict) and len(_like_df) > 0:
+            if all(isinstance(v, pd.Series) for v in _like_df.values()):
+                return pd.DataFrame(_like_df)
         return cudf.DataFrame(_like_df)
-    elif device is None and isinstance(_like_df, dict) and len(_like_df) > 0:
-        is_pandas = all(isinstance(v, pd.Series) for v in _like_df.values())
-        return pd.DataFrame(_like_df) if is_pandas else cudf.DataFrame(_like_df)
-    if device == "cpu":
-        return pd.DataFrame(_like_df)
-    return cudf.DataFrame(_like_df)
 
 
 def make_series(_like_ser=None, device=None):
@@ -706,3 +715,15 @@ def get_random_state():
     if cp:
         return cp.random.get_random_state()
     return np.random.mtrand.RandomState()
+
+
+def df_from_dict(col_dict):
+    from merlin.table import TensorTable, df_from_tensor_table
+
+    return df_from_tensor_table(TensorTable(col_dict))
+
+
+def dict_from_df(df: DataFrameLike):
+    from merlin.table import tensor_table_from_df
+
+    return tensor_table_from_df(df).to_dict()
