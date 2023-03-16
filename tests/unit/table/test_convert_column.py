@@ -28,7 +28,7 @@ from merlin.table.conversions import convert_col
 source_cols: List[TensorColumn] = []
 output_col_types: List[Type] = []
 
-if cp:
+if cp and HAS_GPU:
     cp_array = cp.asarray([1, 2, 3, 4])
 
     source_cols.append(CupyColumn(values=cp_array, offsets=cp_array))

@@ -32,7 +32,7 @@ col_types: List[Type] = []
 if np:
     col_types.append(NumpyColumn)
 
-if cp:
+if cp and HAS_GPU:
     col_types.append(CupyColumn)
 
 if tf:

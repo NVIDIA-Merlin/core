@@ -44,7 +44,7 @@ if np:
     cpu_target_packages.append((NumpyColumn, tensor_dict))
     cpu_source_col.append((NumpyColumn, np.array, np))
 
-if cp:
+if cp and HAS_GPU:
     tensor_dict = {
         "a__values": cp.asarray([1, 2, 3]),
         "a__offsets": cp.asarray([0, 1, 3]),
@@ -285,7 +285,7 @@ def test_df_to_dict(device):
     assert_eq(df, roundtrip_df)
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(cp is None or not HAS_GPU, reason="requires GPU and CuPy")
 def test_cpu_transfer():
     tensor_dict = {
         "a__values": cp.array([1, 2, 3]),
@@ -299,7 +299,7 @@ def test_cpu_transfer():
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(cp is None or not HAS_GPU, reason="requires GPU and CuPy")
 def test_gpu_transfer():
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
