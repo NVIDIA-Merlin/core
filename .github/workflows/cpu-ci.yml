@@ -11,6 +11,11 @@ on:
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-latest]
     uses: ./.github/workflows/tox.yml
     with:
       env: test-cpu
