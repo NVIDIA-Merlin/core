@@ -91,7 +91,8 @@ def test_dataset_infer_schema(dataset, engine):
 
 @pytest.mark.parametrize("engine", ["csv", "parquet", "csv-no-header"])
 @pytest.mark.parametrize("cpu", [None, True])
-def test_string_datatypes(tmpdir, engine, cpu):
+@pytest.mark.parametrize("file_format", ["pbtxt", "json"])
+def test_string_datatypes(tmpdir, engine, cpu, file_format):
     df_lib = dispatch.get_lib()
     df = df_lib.DataFrame({"column": [[0.1, 0.2]]})
     dataset = merlin.io.Dataset(df)
@@ -100,10 +101,15 @@ def test_string_datatypes(tmpdir, engine, cpu):
     assert not isinstance(column_schema.dtype, str)
 
     tf_metadata = TensorflowMetadata.from_merlin_schema(dataset.schema)
-    tf_metadata.to_proto_text_file(tmpdir)
 
-    pb_schema = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = pb_schema.to_merlin_schema()
+    if file_format == "pbtxt":
+        tf_metadata.to_proto_text_file(tmpdir)
+        schema = TensorflowMetadata.from_proto_text_file(str(tmpdir))
+    elif file_format == "json":
+        tf_metadata.to_json_file(tmpdir)
+        schema = TensorflowMetadata.from_json_file(str(tmpdir))
+
+    loaded_schema = schema.to_merlin_schema()
 
     column_schema = loaded_schema.column_schemas["column"]
     assert not isinstance(column_schema.dtype, str)
@@ -647,9 +653,6 @@ def test_hive_partitioned_data(tmpdir, cpu):
     )
     assert result_paths
     assert all(p.endswith(".parquet") for p in result_paths)
-
-    # reading into dask dastaframe cannot have schema in same directory
-    os.remove(os.path.join(path, "schema.pbtxt"))
 
     # Read back with dask.dataframe and check the data
     df_check = dd.read_parquet(path, engine="pyarrow").compute()
