@@ -17,5 +17,5 @@
 # flake8: noqa
 from merlin.io import dataframe_iter, dataset, shuffle
 from merlin.io.dataframe_iter import DataFrameIter
-from merlin.io.dataset import Dataset
+from merlin.io.dataset import MERLIN_METADATA_DIR_NAME, Dataset
 from merlin.io.shuffle import Shuffle, shuffle_df
