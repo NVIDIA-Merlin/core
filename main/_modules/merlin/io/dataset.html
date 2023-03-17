@@ -134,6 +134,8 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">cudf</span> <span class="o">=</span> <span class="kc">None</span>
 
+
+<span class="n">MERLIN_METADATA_DIR_NAME</span> <span class="o">=</span> <span class="s2">&quot;.merlin&quot;</span>
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;merlin&quot;</span><span class="p">)</span>
 
 
@@ -420,10 +422,28 @@
                 <span class="k">if</span> <span class="n">schema_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
                     <span class="n">schema_path</span> <span class="o">=</span> <span class="n">schema_path</span><span class="o">.</span><span class="n">parent</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="n">schema_path</span> <span class="o">/</span> <span class="s2">&quot;schema.pbtxt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">pbtxt_deprecated_warning</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Found schema.pbtxt. Loading schema automatically from &quot;</span>
+                    <span class="s2">&quot;schema.pbtxt is deprecated and will be removed in the &quot;</span>
+                    <span class="s2">&quot;future. Re-run workflow to generate .merlin/schema.json.&quot;</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">schema_path</span> <span class="o">/</span> <span class="n">MERLIN_METADATA_DIR_NAME</span> <span class="o">/</span> <span class="s2">&quot;schema.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">schema</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_json_file</span><span class="p">(</span>
+                        <span class="n">schema_path</span> <span class="o">/</span> <span class="n">MERLIN_METADATA_DIR_NAME</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">to_merlin_schema</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">schema_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">MERLIN_METADATA_DIR_NAME</span> <span class="o">/</span> <span class="s2">&quot;schema.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">schema</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_json_file</span><span class="p">(</span>
+                        <span class="n">schema_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">MERLIN_METADATA_DIR_NAME</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">to_merlin_schema</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">schema_path</span> <span class="o">/</span> <span class="s2">&quot;schema.pbtxt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">pbtxt_deprecated_warning</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
                     <span class="n">schema</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_proto_text_file</span><span class="p">(</span><span class="n">schema_path</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">to_merlin_schema</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">schema_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;schema.pbtxt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">pbtxt_deprecated_warning</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
                     <span class="n">schema</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_proto_text_file</span><span class="p">(</span><span class="n">schema_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">to_merlin_schema</span><span class="p">()</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -990,10 +1010,12 @@
                 <span class="n">schema</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">with_dtype</span><span class="p">(</span><span class="n">col_dtype</span><span class="p">)</span>
 
         <span class="n">fs</span> <span class="o">=</span> <span class="n">get_fs_token_paths</span><span class="p">(</span><span class="n">output_path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">tf_metadata</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_merlin_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
-        <span class="n">tf_metadata</span><span class="o">.</span><span class="n">to_proto_text_file</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+        <span class="n">metadata_path</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">MERLIN_METADATA_DIR_NAME</span><span class="p">])</span>
+        <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">metadata_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tf_metadata</span><span class="o">.</span><span class="n">to_json_file</span><span class="p">(</span><span class="n">metadata_path</span><span class="p">)</span>
 
         <span class="c1"># Output dask_cudf DataFrame to dataset</span>
         <span class="n">_ddf_to_dataset</span><span class="p">(</span>
