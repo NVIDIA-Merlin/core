@@ -500,13 +500,11 @@ def test_validate_and_regenerate_dataset(tmpdir):
     # Check that the regenerated dataset makes sense.
     # Dataset is ~544KiB - Expect 4 data files
     N = math.ceil(ddf.compute().memory_usage(deep=True).sum() / 150000)
-    data_file_list = glob.glob(os.path.join(path, "*"))
-    assert len(data_file_list) == N + 1  # N data files + '_metadata'
-    assert os.path.join(path, "_metadata") in data_file_list
-    metadata_file_list = glob.glob(os.path.join(path, ".merlin", "*"))
-    assert os.path.join(path, ".merlin", "_file_list.txt") in metadata_file_list
-    assert os.path.join(path, ".merlin", "_metadata.json") in metadata_file_list
-    assert len(metadata_file_list) == 2  # 2 .merlin metadata files
+    file_list = glob.glob(os.path.join(path, "*"))
+    assert os.path.join(path, "_metadata") in file_list
+    assert os.path.join(path, "_file_list.txt") in file_list
+    assert os.path.join(path, "_metadata.json") in file_list
+    assert len(file_list) == N + 3  # N data files + 3 metadata files
 
     # Check new dataset validation
     ds2 = merlin.io.Dataset(path, engine="parquet", part_size="64KiB")

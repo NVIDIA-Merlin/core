@@ -45,7 +45,6 @@ from merlin.io.dataframe_engine import DataFrameDatasetEngine
 from merlin.io.dataframe_iter import DataFrameIter
 from merlin.io.parquet import ParquetDatasetEngine
 from merlin.io.shuffle import _check_shuffle_arg
-from merlin.io.writer import MERLIN_METADATA_DIR_NAME
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
@@ -54,6 +53,8 @@ try:
 except ImportError:
     cudf = None
 
+
+MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
 
 
