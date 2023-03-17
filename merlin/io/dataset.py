@@ -53,6 +53,8 @@ try:
 except ImportError:
     cudf = None
 
+
+MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
 
 
@@ -339,10 +341,28 @@ class Dataset:
                 if schema_path.is_file():
                     schema_path = schema_path.parent
 
-                if (schema_path / "schema.pbtxt").exists():
+                pbtxt_deprecated_warning = (
+                    "Found schema.pbtxt. Loading schema automatically from "
+                    "schema.pbtxt is deprecated and will be removed in the "
+                    "future. Re-run workflow to generate .merlin/schema.json."
+                )
+
+                if (schema_path / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path.parent / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path.parent / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path)
                     self.schema = schema.to_merlin_schema()
                 elif (schema_path.parent / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path.parent)
                     self.schema = schema.to_merlin_schema()
                 else:
@@ -909,10 +929,12 @@ class Dataset:
                 schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
-        fs.mkdirs(output_path, exist_ok=True)
+        fs.mkdirs(str(output_path), exist_ok=True)
 
         tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
-        tf_metadata.to_proto_text_file(output_path)
+        metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
+        fs.mkdirs(metadata_path, exist_ok=True)
+        tf_metadata.to_json_file(metadata_path)
 
         # Output dask_cudf DataFrame to dataset
         _ddf_to_dataset(
