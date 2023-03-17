@@ -213,7 +213,9 @@ def hex_to_int(s, dtype=None):
 
 def random_state(seed, like_df=None):
     """Dispatch for numpy.random.RandomState"""
-    if isinstance(like_df, (pd.DataFrame, pd.Series, pd.RangeIndex)):
+    if like_df is None:
+        return cp.random.RandomState(seed) if cp else np.random.RandomState(seed)
+    elif isinstance(like_df, (pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.random.RandomState(seed)
     elif cudf and isinstance(like_df, (cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.random.RandomState(seed)
@@ -227,9 +229,11 @@ def random_state(seed, like_df=None):
 
 def arange(size, like_df=None, dtype=None):
     """Dispatch for numpy.arange"""
-    if isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.arange(size, dtype=dtype) if cp else np.arange(size, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.arange(size, dtype=dtype)
-    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.arange(size, dtype=dtype)
     else:
         raise ValueError(
@@ -241,9 +245,11 @@ def arange(size, like_df=None, dtype=None):
 
 def array(x, like_df=None, dtype=None):
     """Dispatch for numpy.array"""
-    if isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.array(x, dtype=dtype) if cp else np.array(x, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.array(x, dtype=dtype)
-    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.array(x, dtype=dtype)
     else:
         raise ValueError(
@@ -255,9 +261,11 @@ def array(x, like_df=None, dtype=None):
 
 def zeros(size, like_df=None, dtype=None):
     """Dispatch for numpy.array"""
-    if isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.zeros(size, dtype=dtype) if cp else np.zeros(size, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, cudf.RangeIndex)):
         return np.zeros(size, dtype=dtype)
-    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series)):
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.zeros(size, dtype=dtype)
     else:
         raise ValueError(
