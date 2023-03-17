@@ -414,21 +414,21 @@ def read_parquet_dispatch(df: DataFrameLike) -> Callable:
     return read_dispatch(df=df, fmt="parquet")
 
 
-def read_dispatch(df: DataFrameLike = None, cpu=None, collection=False, fmt="parquet") -> Callable:
+def read_dispatch(
+    df: Union[DataFrameLike, str] = None, cpu=None, collection=False, fmt="parquet"
+) -> Callable:
     """Return the necessary read_parquet function to generate
     data of a specified type.
     """
     if cpu or isinstance(df, pd.DataFrame):
         _mod = dd if collection else pd
+    elif cudf and isinstance(df, cudf.DataFrame):
+        _mod = dask_cudf if collection else cudf.io
     else:
         if collection:
-            _mod = dask_cudf
-        elif cudf is not None:
-            _mod = cudf.io
+            _mod = dask_cudf if cudf else dd
         else:
-            raise ValueError(
-                "Unable to load cudf. Please check your environment GPU and cudf available."
-            )
+            _mod = cudf.io if cudf else pd
     _attr = "read_csv" if fmt == "csv" else "read_parquet"
     return getattr(_mod, _attr)
 
