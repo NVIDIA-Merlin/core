@@ -344,7 +344,7 @@ def is_list_dtype(ser):
     elif cudf and isinstance(ser, (cudf.Series, cudf.ListDtype)):
         return cudf_is_list_dtype(ser)
     elif cudf and isinstance(ser, cp.ndarray):
-        return cudf.api.types.is_list_like(ser[0])
+        return pd.api.types.is_list_like(ser[0])
     elif isinstance(ser, np.ndarray):
         return pd.api.types.is_list_like(ser[0])
     return pd.api.types.is_list_like(ser)
