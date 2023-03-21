@@ -1042,11 +1042,13 @@ class BaseParquetWriter(ThreadedWriter):
 
 
 class GPUParquetWriter(BaseParquetWriter):
-    def __init__(self, out_dir, **kwargs):
+    def __init__(self, out_dir, row_group_size=None, **kwargs):
         super().__init__(out_dir, **kwargs)
         # Passing index=False when creating ParquetWriter
         # to avoid bug: https://github.com/rapidsai/cudf/issues/7011
         self.pwriter_kwargs = {"compression": None, "index": False}
+        if row_group_size:
+            self.pwriter_kwargs.update({"row_group_size_rows": row_group_size})
 
     @property
     def _pwriter(self):
@@ -1083,10 +1085,11 @@ class GPUParquetWriter(BaseParquetWriter):
 
 
 class CPUParquetWriter(BaseParquetWriter):
-    def __init__(self, out_dir, **kwargs):
+    def __init__(self, out_dir, row_group_size=None, **kwargs):
         super().__init__(out_dir, **kwargs)
         self.md_collectors = {}
         self.pwriter_kwargs = {"compression": None}
+        self._row_group_size = row_group_size
 
     @property
     def _pwriter(self):
@@ -1099,7 +1102,7 @@ class CPUParquetWriter(BaseParquetWriter):
         # Make sure our `row_group_size` argument (which corresponds
         # to the number of rows in each row-group) will produce
         # row-groups ~128MB in size.
-        if not hasattr(self, "_row_group_size"):
+        if self._row_group_size is None:
             row_size = df.memory_usage(deep=True).sum() / max(len(df), 1)
             self._row_group_size = math.ceil(128_000_000 / row_size)
         return self._row_group_size
