@@ -333,7 +333,7 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
 
 
 def is_list_dtype(ser):
-    """Check if Series contains list elements"""
+    """Check if Series, dtype, or array contains or represents list elements"""
     # adds detection for merlin column
     if hasattr(ser, "is_list"):
         return ser.is_list
@@ -341,10 +341,10 @@ def is_list_dtype(ser):
         if not len(ser):  # pylint: disable=len-as-condition
             return False
         return pd.api.types.is_list_like(ser.values[0])
-    elif cudf and isinstance(ser, cudf.Series):
+    elif cudf and isinstance(ser, (cudf.Series, cudf.ListDtype)):
         return cudf_is_list_dtype(ser)
-    elif isinstance(ser, np.ndarray):
-        return pd.api.types.is_list_like(ser[0])
+    elif isinstance(ser, np.ndarray) or (cp and isinstance(ser, cp.ndarray)):
+        return len(ser.shape) > 1
     return pd.api.types.is_list_like(ser)
 
 
@@ -372,9 +372,16 @@ def flatten_list_column_values(s):
         return pd.Series(itertools.chain(*s))
     elif cudf and isinstance(s, cudf.Series):
         return s.list.leaves
+    elif cp and isinstance(s, cp.ndarray):
+        return s.flatten()
+    elif isinstance(s, np.ndarray):
+        return s.flatten()
     else:
         raise ValueError(
-            "Unsupported series type: " f"{type(s)}" " Expected either a pandas or cudf Series."
+            "Unsupported series type: "
+            f"{type(s)} "
+            "Expected either a pandas or cuDF Series. "
+            "Or a NumPy or CuPy array"
         )
 
 
