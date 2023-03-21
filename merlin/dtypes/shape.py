@@ -53,6 +53,12 @@ class Dimension:
                 f"Provided min: {self.min} max: {self.max}"
             )
 
+    def __int__(self):
+        if self.min == self.max:
+            return self.max
+        else:
+            raise ValueError(f"Can't convert {self} without a fixed size to an integer.")
+
     @property
     def is_bounded(self):
         return self.max is not None
