@@ -325,9 +325,22 @@
         <span class="c1"># Cache for &quot;real&quot; (sampled) metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_real_meta</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Check if we are keeping data in cpu memory</span>
+        <span class="c1"># Check if we are keeping data in host or gpu device memory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">cpu</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_GPU</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot initialize Dataset on GPU. &quot;</span>
+                    <span class="s2">&quot;No devices detected (with pynvml). &quot;</span>
+                    <span class="s2">&quot;Check that pynvml can be initialized. &quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">cudf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot initialize Dataset on GPU. &quot;</span>
+                    <span class="s2">&quot;cudf package not found. &quot;</span>
+                    <span class="s2">&quot;Check that cudf is installed in this environment and can be imported.  &quot;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">cudf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">HAS_GPU</span>
 
         <span class="c1"># Keep track of base dataset (optional)</span>
