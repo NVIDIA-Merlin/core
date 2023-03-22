@@ -33,6 +33,8 @@ FEATURE_TYPES = {
     "uint": FeatureType.INT,
     "float": FeatureType.FLOAT,
 }
+SCHEMA_PBTXT_FILE_NAME = "schema.pbtxt"
+SCHEMA_JSON_FILE_NAME = "schema.json"
 
 
 class TensorflowMetadata:
@@ -64,13 +66,17 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_json_file(cls, path: os.PathLike) -> "TensorflowMetadata":
+    def from_json_file(
+        cls, path: os.PathLike, file_name=SCHEMA_JSON_FILE_NAME
+    ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON file
 
         Parameters
         ----------
         path : str
             Path to the JSON file to parse
+        file_name : str
+            Name of the schema file. Defaults to "schema.json".
 
         Returns
         -------
@@ -78,6 +84,9 @@ class TensorflowMetadata:
             Schema object parsed from JSON file
 
         """
+        path = pathlib.Path(path)
+        if path.is_dir():
+            path = path / file_name
         return cls.from_json(_read_file(path))
 
     @classmethod
@@ -105,7 +114,7 @@ class TensorflowMetadata:
 
     @classmethod
     def from_proto_text_file(
-        cls, path: os.PathLike, file_name="schema.pbtxt"
+        cls, path: os.PathLike, file_name=SCHEMA_PBTXT_FILE_NAME
     ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text file
 
@@ -138,7 +147,7 @@ class TensorflowMetadata:
 
         return proto_utils.better_proto_to_proto_text(self.proto_schema, schema_pb2.Schema())
 
-    def to_proto_text_file(self, path: str, file_name="schema.pbtxt"):
+    def to_proto_text_file(self, path: str, file_name=SCHEMA_PBTXT_FILE_NAME):
         """Write this TensorflowMetadata schema object to a file as a Proto text string
 
         Parameters
@@ -147,7 +156,6 @@ class TensorflowMetadata:
             Path to the directory containing the Protobuf text file
         file_name : str
             Name of the output file. Defaults to "schema.pbtxt".
-        path: str :
 
         """
         _write_file(self.to_proto_text(), path, file_name)
@@ -220,6 +228,19 @@ class TensorflowMetadata:
 
         """
         return self.proto_schema.to_json()
+
+    def to_json_file(self, path: str, file_name=SCHEMA_JSON_FILE_NAME):
+        """Write this TensorflowMetadata schema object to a file as a JSON
+
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the JSON text file
+        file_name : str
+            Name of the output file. Defaults to "schema.json".
+
+        """
+        _write_file(self.to_json(), path, file_name)
 
 
 def _pb_int_domain(column_schema):
@@ -404,11 +425,15 @@ def _merlin_dtype(feature, properties):
     dims_list = properties.pop("_dims", None)
 
     if dims_list:
-        dims_tuple = tuple(
-            tuple(_coerce_int(d) for d in dim) if isinstance(dim, list) else _coerce_int(dim)
-            for dim in dims_list
-        )
-        dtype = dtype.with_shape(dims_tuple)
+        dims = []
+        for dim in dims_list:
+            if isinstance(dim, list):
+                dims.append(tuple(_coerce_int(d) for d in dim))
+            elif dim is not None:
+                dims.append(int(dim))
+            else:
+                dims.append(dim)
+        dtype = dtype.with_shape(tuple(dims))
 
         # If we found dims, avoid overwriting that shape with one inferred from counts or flags
         properties.pop("value_count", None)

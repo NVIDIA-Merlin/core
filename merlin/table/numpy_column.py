@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Type
+from typing import Callable, Type
 
+from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.table.conversions import _from_dlpack_cpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
@@ -33,6 +34,10 @@ class NumpyColumn(TensorColumn):
         return np.ndarray
 
     @classmethod
+    def array_constructor(cls) -> Callable:
+        return np.array
+
+    @classmethod
     def supported_devices(cls):
         """
         List of device types supported by this column type
@@ -41,6 +46,34 @@ class NumpyColumn(TensorColumn):
 
     def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
+
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Returns
+        -------
+        NumpyColumn
+            This column, unchanged and backed by NumPy arrays
+        """
+        return self
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Returns
+        -------
+        CupyColumn
+            A copy of this column backed by CuPy arrays
+        """
+
+        from merlin.table import CupyColumn
+
+        values = cp.asarray(self.values)
+        offsets = cp.asarray(self.offsets)
+
+        return CupyColumn(values, offsets)
 
 
 @_from_dlpack_cpu.register_lazy("numpy")

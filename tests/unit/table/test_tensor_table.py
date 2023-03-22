@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 import pytest
 
@@ -21,21 +21,14 @@ from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
-from merlin.core.dispatch import (
-    HAS_GPU,
-    df_from_dict,
-    df_from_tensor_table,
-    dict_from_df,
-    make_df,
-    tensor_table_from_df,
-)
+from merlin.core.dispatch import HAS_GPU, df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
 from merlin.table.conversions import convert_col
 from tests.conftest import assert_eq
 
-array_constructors: List[Tuple] = []
+col_type: List[Type] = []
 cpu_target_packages: List[Tuple] = []
 gpu_target_packages: List[Tuple] = []
 gpu_source_col: List[Tuple] = []
@@ -46,7 +39,7 @@ if np:
         "a__values": np.array([1, 2, 3]),
         "a__offsets": np.array([0, 1, 3]),
     }
-    array_constructors.append((np.array, NumpyColumn))
+    col_type.append(NumpyColumn)
     cpu_target_packages.append((NumpyColumn, tensor_dict))
     cpu_source_col.append((NumpyColumn, np.array, np))
 
@@ -55,7 +48,7 @@ if cp:
         "a__values": cp.asarray([1, 2, 3]),
         "a__offsets": cp.asarray([0, 1, 3]),
     }
-    array_constructors.append((cp.asarray, CupyColumn))
+    col_type.append(CupyColumn)
     gpu_target_packages.append((CupyColumn, tensor_dict))
     gpu_source_col.append((CupyColumn, cp.asarray, cp))
 
@@ -72,7 +65,7 @@ if tf:
         }
     cpu_target_packages.append((TensorflowColumn, tensor_dict_cpu))
     gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
-    array_constructors.append((tf.constant, TensorflowColumn))
+    col_type.append(TensorflowColumn)
 
 if th:
     tensor_dict_cpu = {
@@ -85,7 +78,7 @@ if th:
     }
     cpu_target_packages.append((TorchColumn, tensor_dict_cpu))
     gpu_target_packages.append((TorchColumn, tensor_dict_gpu))
-    array_constructors.append((th.tensor, TorchColumn))
+    col_type.append(TorchColumn)
 
 
 @pytest.mark.parametrize("protocol", [DictLike, Transformable])
@@ -95,9 +88,9 @@ def test_tensortable_match_protocol(protocol):
     assert isinstance(obj, protocol)
 
 
-@pytest.mark.parametrize("array_constructor", array_constructors)
-def test_tensortable_from_framework_arrays(array_constructor):
-    constructor, column_type = array_constructor
+@pytest.mark.parametrize("col_type", col_type)
+def test_tensortable_from_framework_arrays(col_type):
+    constructor = col_type.array_constructor()
 
     tensor_dict = {
         "a": constructor([1, 2, 3]),
@@ -108,7 +101,7 @@ def test_tensortable_from_framework_arrays(array_constructor):
     table = TensorTable(tensor_dict)
     assert isinstance(table, TensorTable)
     for column in table.columns:
-        assert isinstance(table[column], column_type)
+        assert isinstance(table[column], col_type)
 
 
 def test_tensortable_with_ragged_columns():
@@ -254,7 +247,7 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     assert np.array_equal(results, cp.asnumpy(expected_output.get()))
 
 
-def test_as_dict():
+def test_to_dict():
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),
         "a__offsets": np.array([0, 1, 3]),
@@ -262,15 +255,15 @@ def test_as_dict():
 
     table = TensorTable(tensor_dict)
 
-    assert table.as_dict == tensor_dict
+    assert table.to_dict() == tensor_dict
 
 
 @pytest.mark.parametrize("device", [None, "cpu"] if HAS_GPU else ["cpu"])
 def test_df_to_tensor_table(device):
     df = make_df({"a": [[1, 2, 3], [4, 5, 6, 7]], "b": [1, 2]}, device=device)
 
-    table = tensor_table_from_df(df)
-    roundtrip_df = df_from_tensor_table(table)
+    table = TensorTable.from_df(df)
+    roundtrip_df = table.to_df()
 
     assert isinstance(table, TensorTable)
     expected_device = Device.CPU if device else Device.GPU
@@ -288,3 +281,31 @@ def test_df_to_dict(device):
 
     assert isinstance(df_dict, dict)
     assert_eq(df, roundtrip_df)
+
+
+@pytest.mark.skipif(cp is None, reason="requires GPU")
+def test_cpu_transfer():
+    tensor_dict = {
+        "a__values": cp.array([1, 2, 3]),
+        "a__offsets": cp.array([0, 1, 3]),
+    }
+
+    gpu_table = TensorTable(tensor_dict)
+    cpu_table = gpu_table.cpu()
+
+    assert cpu_table.device == Device.CPU
+    assert isinstance(list(cpu_table.values())[0], NumpyColumn)
+
+
+@pytest.mark.skipif(cp is None, reason="requires GPU")
+def test_gpu_transfer():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
+
+    cpu_table = TensorTable(tensor_dict)
+    gpu_table = cpu_table.gpu()
+
+    assert gpu_table.device == Device.GPU
+    assert isinstance(list(cpu_table.values())[0], NumpyColumn)

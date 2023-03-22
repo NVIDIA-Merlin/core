@@ -62,6 +62,11 @@ except ImportError:
     cupy = None
 
 try:
+    import cudf
+except ImportError:
+    cudf = None
+
+try:
     import tensorflow
     from tensorflow.python.framework import ops as tf_ops
 except ImportError:

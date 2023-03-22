@@ -109,10 +109,13 @@ class ColumnSchema:
         object.__setattr__(self, "is_list", dtype.shape.is_list)
         object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
 
+        properties = {**self.properties}
+
         if new_shape.dims is not None and len(new_shape.dims) > 1:
             value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
-            properties = {**self.properties, **{"value_count": value_counts}}
-            object.__setattr__(self, "properties", properties)
+            properties = {**properties, **{"value_count": value_counts}}
+
+        object.__setattr__(self, "properties", properties)
 
     def _shape_from_counts(self, value_count):
         return Shape((-1, (value_count.min or 0, value_count.max)))
@@ -418,13 +421,22 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
-        """Select matching columns from this Schema object using a list of tags
+    def select_by_tag(
+        self,
+        tags: Union[Union[str, Tags], List[Union[str, Tags]]],
+        pred_fn=None,
+    ) -> "Schema":
+        """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
+        pred_fn : `any` or `all`
+            Predicate function that decides if the column should be selected.
+            Receives iterable of bool values indicating whether each
+            of the provided tags is present on a column schema.
+            Returning True selects this column, False will not return that column.
 
         Returns
         -------
@@ -432,13 +444,20 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
+        pred_fn = pred_fn or any
+
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
         selected_schemas = {}
 
+        normalized_tags = [
+            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
+            for tag in tags
+        ]
+
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in tags):
+            if pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
@@ -638,10 +657,14 @@ class Schema:
         if not isinstance(other, Schema):
             raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
-        result = Schema({**self.column_schemas})
+        result = self.copy()
 
         for key in other.column_schemas.keys():
             if key in self.column_schemas.keys():
                 result.column_schemas.pop(key, None)
 
         return result
+
+    def copy(self) -> "Schema":
+        """Return a copy of the schema"""
+        return Schema({**self.column_schemas})
