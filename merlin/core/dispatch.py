@@ -540,7 +540,12 @@ def concat(objs, **kwargs):
 
 def make_df(_like_df=None, device=None):
     """Return a DataFrame with the same dtype as `_like_df`"""
-    if not cudf or device == "cpu" or isinstance(_like_df, (pd.DataFrame, pd.Series)):
+    if (
+        not cudf
+        or device == "cpu"
+        or not HAS_GPU
+        or isinstance(_like_df, (pd.DataFrame, pd.Series))
+    ):
         # move to pandas need it on CPU (host memory)
         # can be a cudf, cupy or numpy Series
         if cudf and isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
