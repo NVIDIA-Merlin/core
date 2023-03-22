@@ -17,11 +17,12 @@ from typing import List, Tuple, Type
 
 import pytest
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat import tensorflow as tf
 from merlin.core.compat import torch as th
-from merlin.core.dispatch import HAS_GPU, df_from_dict, dict_from_df, make_df
+from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
@@ -43,7 +44,7 @@ if np:
     cpu_target_packages.append((NumpyColumn, tensor_dict))
     cpu_source_col.append((NumpyColumn, np.array, np))
 
-if cp:
+if cp and HAS_GPU:
     tensor_dict = {
         "a__values": cp.asarray([1, 2, 3]),
         "a__offsets": cp.asarray([0, 1, 3]),
@@ -52,7 +53,7 @@ if cp:
     gpu_target_packages.append((CupyColumn, tensor_dict))
     gpu_source_col.append((CupyColumn, cp.asarray, cp))
 
-if tf:
+if tf and HAS_GPU:
     with tf.device("/CPU"):
         tensor_dict_cpu = {
             "a__values": tf.convert_to_tensor(np.array([1, 2, 3])),
@@ -67,7 +68,7 @@ if tf:
     gpu_target_packages.append((TensorflowColumn, tensor_dict_gpu))
     col_type.append(TensorflowColumn)
 
-if th:
+if th and HAS_GPU:
     tensor_dict_cpu = {
         "a__values": th.tensor([1, 2, 3], dtype=th.int32),
         "a__offsets": th.tensor([0, 1, 3], dtype=th.int32),
@@ -132,7 +133,8 @@ def test_column_type_validation():
 
 
 @pytest.mark.skipif(
-    tf is None, reason="Tensorflow is required for cross-framework validation tests"
+    not (tf and HAS_GPU),
+    reason="both TensorFlow and CUDA GPUs are required for cross-framework validation tests",
 )
 def test_column_device_validation():
     with tf.device("/CPU"):
@@ -283,7 +285,7 @@ def test_df_to_dict(device):
     assert_eq(df, roundtrip_df)
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(cp is None or not HAS_GPU, reason="requires GPU and CuPy")
 def test_cpu_transfer():
     tensor_dict = {
         "a__values": cp.array([1, 2, 3]),
@@ -297,7 +299,7 @@ def test_cpu_transfer():
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
 
 
-@pytest.mark.skipif(cp is None, reason="requires GPU")
+@pytest.mark.skipif(cp is None or not HAS_GPU, reason="requires GPU and CuPy")
 def test_gpu_transfer():
     tensor_dict = {
         "a__values": np.array([1, 2, 3]),

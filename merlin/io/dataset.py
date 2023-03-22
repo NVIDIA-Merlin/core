@@ -30,6 +30,7 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -243,10 +244,23 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in cpu memory
+        # Check if we are keeping data in host or gpu device memory
         self.cpu = cpu
-        if not self.cpu:
-            self.cpu = cudf is None
+        if self.cpu is False:
+            if not HAS_GPU:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
+                )
+            if cudf is None:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
+        if self.cpu is None:
+            self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
