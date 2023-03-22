@@ -41,8 +41,8 @@ def test_serial_context(client, cpu):
     assert global_dask_client() == client
 
 
-@pytest.mark.parametrize("cpu", [True, False])
-@pytest.mark.parametrize("nested_serial", _CPU)
+@pytest.mark.parametrize("cpu", _CPU)
+@pytest.mark.parametrize("nested_serial", [True, False])
 def test_nvt_distributed(cpu, nested_serial):
     if cpu:
         distributed = pytest.importorskip("distributed")

@@ -49,7 +49,7 @@ def test_concat_columns(device):
     assert res.columns.to_list() == ["a", "b", "c"]
 
 
-@pytest.mark.skipif(not cp, reason="Cupy not available")
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="Cupy not available")
 def test_pandas_cupy_combo():
     rand_cp_nd_arr = cp.random.uniform(0.0, 1.0, size=100)
     with pytest.raises(TypeError) as exc_info:
