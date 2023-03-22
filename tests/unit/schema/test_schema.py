@@ -18,7 +18,7 @@ import dataclasses
 import pytest
 
 from merlin.dag import ColumnSelector
-from merlin.schema import ColumnSchema, Schema
+from merlin.schema import ColumnSchema, Schema, Tags
 
 
 def test_select_by_name():
@@ -59,6 +59,57 @@ def test_select_by_tag():
     assert select_both == Schema([col1_schema, col2_schema])
     assert select_multi == Schema([col1_schema, col2_schema])
     assert select_neither == Schema([])
+
+
+def test_select_by_tag_string():
+    col1_schema = ColumnSchema("col1", tags=[Tags.CATEGORICAL, Tags.ITEM])
+    col2_schema = ColumnSchema("col2", tags=[Tags.ITEM_ID])
+
+    schema = Schema([col1_schema, col2_schema])
+
+    col1_selection = schema.select_by_tag("categorical")
+    col2_selection = schema.select_by_tag("item_id")
+
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
+
+
+def test_select_by_any_tags():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
+
+    schema = Schema([col1_schema, col2_schema, col3_schema])
+
+    col1_selection = schema.select_by_tag("a", any)
+    col2_selection = schema.select_by_tag("d", any)
+
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
+
+    select_both = schema.select_by_tag("c", any)
+    select_multi = schema.select_by_tag(["b", "c"], any)
+    select_neither = schema.select_by_tag("unknown", any)
+
+    assert select_both == Schema([col1_schema, col2_schema])
+    assert select_multi == Schema([col1_schema, col2_schema, col3_schema])
+    assert select_neither == Schema([])
+
+
+def test_select_by_all_tags():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
+
+    schema = Schema([col1_schema, col2_schema, col3_schema])
+
+    select_multi_a = schema.select_by_tag(["a", "b"], all)
+    select_multi_b = schema.select_by_tag(["c", "d"], all)
+    select_multi_c = schema.select_by_tag(["a", "e"], all)
+
+    assert select_multi_a == Schema([col1_schema])
+    assert select_multi_b == Schema([col2_schema])
+    assert select_multi_c == Schema([])
 
 
 def test_select():

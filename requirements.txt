@@ -9,3 +9,6 @@ tqdm>=4.0
 tensorflow-metadata>=1.2.0
 betterproto<2.0.0
 packaging
+
+# pynvml==11.5.0 is incompatible with distributed<2023.2.1
+pynvml>=11.0.0,<11.5

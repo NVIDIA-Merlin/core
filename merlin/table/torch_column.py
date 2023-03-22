@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Type
+from typing import Callable, Type
 
 from merlin.core.compat import torch as th
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
@@ -33,6 +33,10 @@ class TorchColumn(TensorColumn):
         return th.Tensor
 
     @classmethod
+    def array_constructor(cls) -> Callable:
+        return th.tensor
+
+    @classmethod
     def supported_devices(cls):
         """
         List of device types supported by this column type
@@ -50,6 +54,40 @@ class TorchColumn(TensorColumn):
                 )
 
         super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
+
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Returns
+        -------
+        TorchColumn
+            A copy of this column backed by Torch CPU tensors
+        """
+        if self.device is Device.CPU:
+            return self
+
+        values = self.values.cpu()
+        offsets = self.offsets.cpu() if self.offsets is not None else None
+
+        return TorchColumn(values, offsets)
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Returns
+        -------
+        TorchColumn
+            A copy of this column backed by Torch GPU tensors
+        """
+        if self.device is Device.GPU:
+            return self
+
+        values = self.values.cuda()
+        offsets = self.offsets.cuda() if self.offsets is not None else None
+
+        return TorchColumn(values, offsets)
 
     @property
     def device(self) -> Device:

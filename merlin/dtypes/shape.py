@@ -53,6 +53,12 @@ class Dimension:
                 f"Provided min: {self.min} max: {self.max}"
             )
 
+    def __int__(self):
+        if self.min == self.max:
+            return self.max
+        else:
+            raise ValueError(f"Can't convert {self} without a fixed size to an integer.")
+
     @property
     def is_bounded(self):
         return self.max is not None
@@ -129,6 +135,9 @@ class Shape:
     def __iter__(self):
         return self.dims
 
+    def __getitem__(self, index):
+        return self.dims[index]
+
     def with_dim(self, index, value):
         new_dims = list(self.dims)
         new_dims[index] = value
@@ -170,7 +179,10 @@ class Shape:
 
     @property
     def as_tuple(self):
-        return tuple(((dim.min, dim.max) for dim in self.dims)) if self.dims else None
+        if not self.dims:
+            return None
+
+        return tuple(((dim.min, dim.max) if dim.min != dim.max else dim.max for dim in self.dims))
 
     @property
     def is_unknown(self):

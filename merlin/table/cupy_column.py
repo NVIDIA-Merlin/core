@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Type
+from typing import Callable, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.table.conversions import _from_dlpack_gpu, _to_dlpack
@@ -33,6 +33,10 @@ class CupyColumn(TensorColumn):
         return cp.ndarray
 
     @classmethod
+    def array_constructor(cls) -> Callable:
+        return cp.asarray
+
+    @classmethod
     def supported_devices(cls):
         """
         List of device types supported by this column type
@@ -41,6 +45,33 @@ class CupyColumn(TensorColumn):
 
     def __init__(self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None):
         super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU)
+
+    def cpu(self):
+        """
+        Move this column's data to host (i.e. CPU) memory
+
+        Returns
+        -------
+        NumpyColumn
+            A copy of this column backed by NumPy arrays
+        """
+        from merlin.table import NumpyColumn
+
+        values = cp.asnumpy(self.values)
+        offsets = cp.asnumpy(self.offsets) if self.offsets is not None else None
+
+        return NumpyColumn(values, offsets)
+
+    def gpu(self):
+        """
+        Move this column's data to device (i.e. GPU) memory
+
+        Returns
+        -------
+        CupyColumn
+            This column, unchanged and backed by CuPy arrays
+        """
+        return self
 
 
 @_to_dlpack.register_lazy("cupy")
