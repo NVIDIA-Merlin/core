@@ -244,9 +244,22 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in cpu memory
+        # Check if we are keeping data in host or gpu device memory
         self.cpu = cpu
-        if not self.cpu:
+        if self.cpu is False:
+            if not HAS_GPU:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
+                )
+            if cudf is None:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
+        if self.cpu is None:
             self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
