@@ -15,8 +15,14 @@
 #
 import pytest
 
+from merlin.core.compat import HAS_GPU, cudf
 from merlin.core.dispatch import make_df, make_series
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike, Transformable
+
+if HAS_GPU and cudf:
+    _DEVICES = ["cpu", None]
+else:
+    _DEVICES = ["cpu"]
 
 
 @pytest.mark.parametrize("protocol", [DictLike])
@@ -26,7 +32,7 @@ def test_dictionary_is_dictlike(protocol):
     assert isinstance(obj, protocol)
 
 
-@pytest.mark.parametrize("device", [None, "cpu"])
+@pytest.mark.parametrize("device", _DEVICES)
 @pytest.mark.parametrize("protocol", [DictLike, DataFrameLike, Transformable])
 def test_dataframes_match_protocols(protocol, device):
     obj = make_df({}, device=device)
@@ -34,7 +40,7 @@ def test_dataframes_match_protocols(protocol, device):
     assert isinstance(obj, protocol)
 
 
-@pytest.mark.parametrize("device", [None, "cpu"])
+@pytest.mark.parametrize("device", _DEVICES)
 def test_series_are_serieslike(device):
     obj = make_series([], device=device)
 
