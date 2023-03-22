@@ -111,6 +111,7 @@
 <span class="kn">from</span> <span class="nn">fsspec.core</span> <span class="kn">import</span> <span class="n">get_fs_token_paths</span>
 <span class="kn">from</span> <span class="nn">fsspec.utils</span> <span class="kn">import</span> <span class="n">stringify_path</span>
 
+<span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span>
 <span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">convert_data</span><span class="p">,</span>
     <span class="n">hex_to_int</span><span class="p">,</span>
@@ -327,7 +328,7 @@
         <span class="c1"># Check if we are keeping data in cpu memory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">cpu</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">cudf</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="n">cudf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">HAS_GPU</span>
 
         <span class="c1"># Keep track of base dataset (optional)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_dataset</span> <span class="o">=</span> <span class="n">base_dataset</span> <span class="ow">or</span> <span class="bp">self</span>
