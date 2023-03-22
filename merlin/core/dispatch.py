@@ -129,7 +129,7 @@ def read_parquet_metadata(path):
 
 def get_lib():
     """Dispatch to the appropriate library (cudf or pandas) for the current environment"""
-    return cudf or pd
+    return cudf if (cudf and HAS_GPU) else pd
 
 
 def reinitialize(managed_memory=False):
