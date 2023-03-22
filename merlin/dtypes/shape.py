@@ -14,8 +14,14 @@
 # limitations under the License.
 #
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from enum import Enum
 from typing import Optional, Tuple, Union
+
+
+class DefaultShapes(Enum):
+    LIST = (None, None)
+    SCALAR = (None,)
 
 
 @dataclass(frozen=True)
@@ -47,6 +53,12 @@ class Dimension:
                 f"Provided min: {self.min} max: {self.max}"
             )
 
+    def __int__(self):
+        if self.min == self.max:
+            return self.max
+        else:
+            raise ValueError(f"Can't convert {self} without a fixed size to an integer.")
+
     @property
     def is_bounded(self):
         return self.max is not None
@@ -59,6 +71,16 @@ class Dimension:
     def is_variable(self):
         return not self.is_fixed
 
+    @property
+    def is_unknown(self):
+        return self.min == 0 and self.max is None
+
+    def with_min(self, value):
+        return replace(self, min=value)
+
+    def with_max(self, value):
+        return replace(self, max=value)
+
 
 @dataclass(frozen=True)
 class Shape:
@@ -69,6 +91,9 @@ class Shape:
     dims: Optional[Union[Tuple, "Shape"]] = None
 
     def __post_init__(self):
+        if isinstance(self.dims, DefaultShapes):
+            object.__setattr__(self, "dims", self.dims.value)
+
         if isinstance(self.dims, Shape):
             object.__setattr__(self, "dims", self.dims.dims)
 
@@ -110,6 +135,20 @@ class Shape:
     def __iter__(self):
         return self.dims
 
+    def __getitem__(self, index):
+        return self.dims[index]
+
+    def with_dim(self, index, value):
+        new_dims = list(self.dims)
+        new_dims[index] = value
+        return replace(self, dims=tuple(new_dims))
+
+    def with_dim_min(self, index, value):
+        return self.with_dim(index, self.dims[index].with_min(value))
+
+    def with_dim_max(self, index, value):
+        return self.with_dim(index, self.dims[index].with_max(value))
+
     @property
     def min(self) -> Tuple:
         return tuple(dim.min for dim in self.dims)
@@ -140,4 +179,11 @@ class Shape:
 
     @property
     def as_tuple(self):
-        return tuple(((dim.min, dim.max) for dim in self.dims)) if self.dims else None
+        if not self.dims:
+            return None
+
+        return tuple(((dim.min, dim.max) if dim.min != dim.max else dim.max for dim in self.dims))
+
+    @property
+    def is_unknown(self):
+        return self.dims is None

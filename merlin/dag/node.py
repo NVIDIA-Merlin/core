@@ -250,7 +250,7 @@ class Node:
                 )
 
             if strict_dtypes or not self.op.dynamic_dtypes:
-                if source_col_schema.dtype != col_schema.dtype:
+                if source_col_schema.dtype.without_shape != col_schema.dtype.without_shape:
                     raise ValueError(
                         f"Mismatched dtypes for column '{col_name}' provided to "
                         f"'{self.op.__class__.__name__}': "

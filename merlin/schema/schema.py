@@ -15,7 +15,6 @@
 #
 
 from dataclasses import InitVar, dataclass, field, replace
-from enum import Enum
 from typing import Dict, List, Optional, Text, Tuple, Union
 
 import pandas as pd
@@ -24,14 +23,6 @@ import merlin.dtypes as md
 from merlin.dtypes import DType
 from merlin.dtypes.shape import Shape
 from merlin.schema.tags import Tags, TagSet
-
-
-class ColumnQuantity(Enum):
-    """Describes the number of elements in each row of a column"""
-
-    SCALAR = "scalar"
-    FIXED_LIST = "fixed_list"
-    RAGGED_LIST = "ragged_list"
 
 
 @dataclass(frozen=True)
@@ -116,10 +107,13 @@ class ColumnSchema:
         object.__setattr__(self, "is_list", dtype.shape.is_list)
         object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
 
+        properties = {**self.properties}
+
         if new_shape.dims is not None and len(new_shape.dims) > 1:
             value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
-            properties = {**self.properties, **{"value_count": value_counts}}
-            object.__setattr__(self, "properties", properties)
+            properties = {**properties, **{"value_count": value_counts}}
+
+        object.__setattr__(self, "properties", properties)
 
     def _shape_from_flags(self, is_list):
         return Shape(((0, None), (0, None))) if is_list else None
@@ -130,25 +124,6 @@ class ColumnSchema:
     @property
     def shape(self):
         return self.dtype.shape
-
-    @property
-    def quantity(self):
-        """
-        Describes the number of elements in each row of this column
-
-        Returns
-        -------
-        ColumnQuantity
-            SCALAR when one element per row
-            FIXED_LIST when the same number of elements per row
-            RAGGED_LIST when different numbers of elements per row
-        """
-        if self.is_list and self.is_ragged:
-            return ColumnQuantity.RAGGED_LIST
-        elif self.is_list:
-            return ColumnQuantity.FIXED_LIST
-        else:
-            return ColumnQuantity.SCALAR
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
@@ -451,13 +426,22 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
-        """Select matching columns from this Schema object using a list of tags
+    def select_by_tag(
+        self,
+        tags: Union[Union[str, Tags], List[Union[str, Tags]]],
+        pred_fn=None,
+    ) -> "Schema":
+        """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
+        pred_fn : `any` or `all`
+            Predicate function that decides if the column should be selected.
+            Receives iterable of bool values indicating whether each
+            of the provided tags is present on a column schema.
+            Returning True selects this column, False will not return that column.
 
         Returns
         -------
@@ -465,13 +449,20 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
+        pred_fn = pred_fn or any
+
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
         selected_schemas = {}
 
+        normalized_tags = [
+            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
+            for tag in tags
+        ]
+
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in tags):
+            if pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
@@ -671,10 +662,14 @@ class Schema:
         if not isinstance(other, Schema):
             raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
-        result = Schema({**self.column_schemas})
+        result = self.copy()
 
         for key in other.column_schemas.keys():
             if key in self.column_schemas.keys():
                 result.column_schemas.pop(key, None)
 
         return result
+
+    def copy(self) -> "Schema":
+        """Return a copy of the schema"""
+        return Schema({**self.column_schemas})

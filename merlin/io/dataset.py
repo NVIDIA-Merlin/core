@@ -38,6 +38,7 @@ from merlin.core.dispatch import (
     list_val_dtype,
 )
 from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -52,6 +53,8 @@ try:
 except ImportError:
     cudf = None
 
+
+MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
 
 
@@ -338,10 +341,28 @@ class Dataset:
                 if schema_path.is_file():
                     schema_path = schema_path.parent
 
-                if (schema_path / "schema.pbtxt").exists():
+                pbtxt_deprecated_warning = (
+                    "Found schema.pbtxt. Loading schema automatically from "
+                    "schema.pbtxt is deprecated and will be removed in the "
+                    "future. Re-run workflow to generate .merlin/schema.json."
+                )
+
+                if (schema_path / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path.parent / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path.parent / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path)
                     self.schema = schema.to_merlin_schema()
                 elif (schema_path.parent / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path.parent)
                     self.schema = schema.to_merlin_schema()
                 else:
@@ -661,6 +682,7 @@ class Dataset:
         preserve_files=False,
         output_files=None,
         out_files_per_proc=None,
+        row_group_size=None,
         num_threads=0,
         dtypes=None,
         cats=None,
@@ -716,6 +738,12 @@ class Dataset:
             argument. If `method="subgraph"`, the total number of files is determined
             by `output_files` (and `out_files_per_proc` must be 1 if a dictionary is
             specified).
+        row_group_size : integer
+            Maximum number of rows to include in each Parquet row-group. By default,
+            the maximum row-group size will be chosen by the backend Parquet engine
+            (cudf or pyarrow). Note that cudf currently prohibits this value from
+            being less than `5000` rows. If smaller row-groups are necessary, try
+            calling `to_cpu()` before writing to disk.
         num_threads : integer
             Number of IO threads to use for writing the output dataset.
             For `0` (default), no dedicated IO threads will be used.
@@ -892,15 +920,21 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = self.schema.copy()
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
-        fs.mkdirs(output_path, exist_ok=True)
+        fs.mkdirs(str(output_path), exist_ok=True)
 
-        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
-        tf_metadata.to_proto_text_file(output_path)
+        tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+        metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
+        fs.mkdirs(metadata_path, exist_ok=True)
+        tf_metadata.to_json_file(metadata_path)
 
         # Output dask_cudf DataFrame to dataset
         _ddf_to_dataset(
@@ -917,8 +951,9 @@ class Dataset:
             num_threads,
             self.cpu,
             suffix=suffix,
+            row_group_size=row_group_size,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(
@@ -1130,8 +1165,10 @@ class Dataset:
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
-            is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
+
+            dims = DefaultShapes.LIST if dtype_info["is_list"] else DefaultShapes.SCALAR
+            col_schema = ColumnSchema(column, dtype=dtype_val, dims=dims)
+
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)

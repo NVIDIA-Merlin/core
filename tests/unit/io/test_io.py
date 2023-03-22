@@ -27,6 +27,7 @@ import pytest
 from dask.dataframe import assert_eq
 from packaging.version import Version
 
+import merlin.dtypes as md
 import merlin.io
 from merlin.core import dispatch
 from merlin.io.parquet import GPUParquetWriter
@@ -90,7 +91,8 @@ def test_dataset_infer_schema(dataset, engine):
 
 @pytest.mark.parametrize("engine", ["csv", "parquet", "csv-no-header"])
 @pytest.mark.parametrize("cpu", [None, True])
-def test_string_datatypes(tmpdir, engine, cpu):
+@pytest.mark.parametrize("file_format", ["pbtxt", "json"])
+def test_string_datatypes(tmpdir, engine, cpu, file_format):
     df_lib = dispatch.get_lib()
     df = df_lib.DataFrame({"column": [[0.1, 0.2]]})
     dataset = merlin.io.Dataset(df)
@@ -99,10 +101,15 @@ def test_string_datatypes(tmpdir, engine, cpu):
     assert not isinstance(column_schema.dtype, str)
 
     tf_metadata = TensorflowMetadata.from_merlin_schema(dataset.schema)
-    tf_metadata.to_proto_text_file(tmpdir)
 
-    pb_schema = TensorflowMetadata.from_proto_text_file(str(tmpdir))
-    loaded_schema = pb_schema.to_merlin_schema()
+    if file_format == "pbtxt":
+        tf_metadata.to_proto_text_file(tmpdir)
+        schema = TensorflowMetadata.from_proto_text_file(str(tmpdir))
+    elif file_format == "json":
+        tf_metadata.to_json_file(tmpdir)
+        schema = TensorflowMetadata.from_json_file(str(tmpdir))
+
+    loaded_schema = schema.to_merlin_schema()
 
     column_schema = loaded_schema.column_schemas["column"]
     assert not isinstance(column_schema.dtype, str)
@@ -436,6 +443,27 @@ def test_to_parquet_output_files(tmpdir, datasets, output_files, out_files_per_p
         assert len(ddf0) == len(ddf1)
 
 
+@pytest.mark.parametrize("row_group_size", [5000, 10000])
+@pytest.mark.parametrize("cpu", [True, False])
+def test_to_parquet_row_group_size(tmpdir, cpu, row_group_size):
+    # Test that row_group_size argument is satisfied.
+    # NOTE: cuDF prohibits row_group_size_rows<5000
+    outdir = str(tmpdir)
+    ddf0 = dd.from_pandas(
+        (pd if cpu else cudf).DataFrame({"a": range(50_000)}),
+        npartitions=2,
+    )
+    dataset = merlin.io.Dataset(ddf0)
+    dataset.to_parquet(
+        outdir,
+        output_files=1,
+        row_group_size=row_group_size,
+    )
+
+    result = dd.read_parquet(outdir, split_row_groups=True)
+    assert all(len(part) <= row_group_size for part in result.partitions)
+
+
 @pytest.mark.parametrize("engine", ["csv", "parquet"])
 def test_validate_dataset(datasets, engine):
     with warnings.catch_warnings():
@@ -626,9 +654,6 @@ def test_hive_partitioned_data(tmpdir, cpu):
     assert result_paths
     assert all(p.endswith(".parquet") for p in result_paths)
 
-    # reading into dask dastaframe cannot have schema in same directory
-    os.remove(os.path.join(path, "schema.pbtxt"))
-
     # Read back with dask.dataframe and check the data
     df_check = dd.read_parquet(path, engine="pyarrow").compute()
     df_check["name"] = df_check["name"].astype("object")
@@ -783,3 +808,18 @@ def test_parquet_aggregate_files(tmpdir, cpu):
     assert ds.to_ddf().npartitions == 1
     assert len(ds.to_ddf().timestamp.unique()) == 1
     _check_partition_lens(ds)
+
+
+def test_to_parquet_dtypes_schema(tmpdir):
+    df = dispatch.make_df({"a": np.array([1, 2, 3], dtype=np.int32)})
+    dataset = merlin.io.Dataset(df)
+
+    # save to parquet with different dtypes and reload
+    dataset.to_parquet(output_path=str(tmpdir), dtypes={"a": np.float32})
+
+    # check that dtypes are unchanged
+    assert dataset.schema["a"].dtype == md.dtype("int32")
+
+    reloaded_dataset = merlin.io.Dataset(str(tmpdir), engine="parquet")
+    # check that data was saved with the requested dtype
+    assert reloaded_dataset.schema["a"].dtype == md.dtype("float32")
