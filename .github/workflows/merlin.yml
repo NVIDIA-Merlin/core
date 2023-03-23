@@ -1,0 +1,35 @@
+name: "Test Merlin"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags:
+      - v*
+  pull_request:
+    branches: [main]
+
+jobs:
+  dataloader:
+    name: "Dataloader (CPU)"
+    uses: ./.github/workflows/tox.yml
+    with:
+      env: test-dataloader-cpu
+
+  systems:
+    name: "Systems (CPU)"
+    uses: ./.github/workflows/tox.yml
+    with:
+      env: test-systems-cpu
+
+  models:
+    name: "Models (CPU)"
+    uses: ./.github/workflows/tox.yml
+    with:
+      env: test-models-cpu
+
+  nvtabular:
+    name: "NVTabular (CPU)"
+    uses: ./.github/workflows/tox.yml
+    with:
+      env: test-nvtabular-cpu
