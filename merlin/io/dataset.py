@@ -726,8 +726,10 @@ class Dataset:
             will be ignored. Default is False.
         output_files : dict, list or int
             The total number of desired output files. This option requires
-            `method="subgraph"`, and the default value will be the number of Dask
-            workers, multiplied by `out_files_per_proc`. For further output-file
+            `method="subgraph"`. When `out_files_per_proc=None`, the default
+            is the number of underlying Dask partitions. When `out_files_per_proc`
+            is set to an integer, the default is the product of that integer and
+            the total number of workers in the Dask cluster. For further output-file
             control, this argument may also be used to pass a dictionary mapping
             the output file names to partition indices, or a list of desired
             output-file names.
@@ -778,6 +780,7 @@ class Dataset:
             are planning to ingest the output data with HugeCTR. Default is False.
         """
 
+        preserve_partitions = False
         if partition_on:
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
@@ -801,13 +804,18 @@ class Dataset:
             elif preserve_files and output_files:
                 raise ValueError("Cannot specify both preserve_files and output_files.")
             elif not (output_files or preserve_files):
-                # Default "subgraph" behavior - Set output_files to the
-                # total umber of workers, multiplied by out_files_per_proc
-                try:
-                    nworkers = len(global_dask_client().cluster.workers)
-                except AttributeError:
-                    nworkers = 1
-                output_files = nworkers * (out_files_per_proc or 1)
+                if out_files_per_proc:
+                    # Default "subgraph" behavior - Set output_files to the
+                    # total umber of workers, multiplied by out_files_per_proc
+                    try:
+                        nworkers = len(global_dask_client().cluster.workers)
+                    except AttributeError:
+                        nworkers = 1
+                    output_files = nworkers * out_files_per_proc
+                else:
+                    # Preserve original Dask partitions if output_files,
+                    # preserve_files AND out_files_per_proc are all None
+                    preserve_partitions = True
 
         # Replace None/False suffix argument with ""
         suffix = suffix or ""
@@ -821,6 +829,10 @@ class Dataset:
             ddf = self.to_ddf()
         else:
             ddf = self.to_ddf(shuffle=shuffle)
+
+        # Check if partitions should be preserved
+        if preserve_partitions:
+            output_files = ddf.npartitions
 
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
