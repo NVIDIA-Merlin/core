@@ -67,6 +67,8 @@ class TensorColumn:
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
         values, offsets = self._convert_nested_lists(values, offsets)
+        if _ref and _ref.values.shape != values.shape:
+            values = self._reshape_values(values, _ref.values.shape)
         self._validate_values_offsets(values, offsets)
 
         self._values = values
@@ -119,6 +121,10 @@ class TensorColumn:
         return self.shape.is_ragged
 
     @property
+    def is_fixed(self):
+        return self.shape.is_fixed
+
+    @property
     def device(self) -> Device:
         return self._device
 
@@ -133,6 +139,13 @@ class TensorColumn:
     @property
     def dtype(self):
         return self._dtype
+
+    @property
+    def _flatten_values(self):
+        raise NotImplementedError
+
+    def _reshape_values(self, values, shape):
+        raise NotImplementedError
 
     def __len__(self):
         if self.offsets is not None:

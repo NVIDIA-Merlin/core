@@ -57,7 +57,8 @@ def convert_col(column: TensorColumn, target_type: Type):
 
 
 def to_dlpack_col(column: TensorColumn) -> _DlpackColumn:
-    vals_cap = _to_dlpack(column.values)
+    multi_dim_values = len(column.values.shape) > 1
+    vals_cap = _to_dlpack(column._flatten_values if multi_dim_values else column.values)
     offs_cap = _to_dlpack(column.offsets) if column.offsets is not None else None
     return _DlpackColumn(vals_cap, offs_cap, column)
 
@@ -78,7 +79,6 @@ def from_dlpack_col(dlpack_col: _DlpackColumn, target_col_type: Type) -> TensorC
             if dlpack_col.offsets is not None
             else None
         )
-
     return target_col_type(values, offsets, _ref=dlpack_col.ref)
 
 

@@ -93,6 +93,13 @@ class TorchColumn(TensorColumn):
     def device(self) -> Device:
         return self._th_device(self.values)
 
+    @property
+    def _flatten_values(self):
+        return th.flatten(self.values)
+
+    def _reshape_values(self, values, shape):
+        return th.reshape(values, shape)
+
     def _th_device(self, tensor):
         return Device.GPU if tensor.is_cuda else Device.CPU
 

@@ -74,3 +74,89 @@ def test_convert_col(source_cols, output_col):
     else:
         converted_col = convert_col(source_cols, output_col)
         assert isinstance(converted_col, output_col)
+
+
+@pytest.mark.parametrize("output_col", output_col_types)
+def test_3d_convert_np(output_col):
+    import random
+
+    arr = []
+    row_lengths = []
+    batch_size = 3
+    embedding_size = 20
+    for x in range(batch_size):
+        # simulate raggedness
+        row_length = random.randint(1, 5)
+        arr.append(np.random.rand(row_length, embedding_size).tolist())
+        row_lengths.append(row_length)
+    num_embeddings = sum(row_lengths)
+    column = NumpyColumn(arr)
+
+    assert isinstance(column, NumpyColumn)
+    assert column.shape.as_tuple == (batch_size, (0, None), embedding_size)
+    assert column.values.shape[0] == num_embeddings
+    assert column.values.shape[1] == embedding_size
+    if column.device not in output_col.supported_devices():
+        with pytest.raises(NotImplementedError) as exc:
+            converted_col = convert_col(column, output_col)
+        assert "Could not convert from type" in str(exc.value)
+    else:
+        converted_col = convert_col(column, output_col)
+        assert isinstance(converted_col, output_col)
+        assert converted_col.shape.as_tuple == (batch_size, (0, None), embedding_size)
+        assert converted_col.values.shape[0] == num_embeddings
+        assert converted_col.values.shape[1] == embedding_size
+
+
+@pytest.mark.parametrize("output_col", output_col_types)
+def test_3d_convert_cp(output_col):
+    import random
+
+    arr = []
+    row_lengths = []
+    batch_size = 3
+    embedding_size = 20
+    for x in range(batch_size):
+        # simulate raggedness
+        row_length = random.randint(1, 5)
+        arr.append(np.random.rand(row_length, embedding_size).tolist())
+        row_lengths.append(row_length)
+    num_embeddings = sum(row_lengths)
+    column = CupyColumn(arr)
+
+    assert isinstance(column, CupyColumn)
+    assert column.shape.as_tuple == (batch_size, (0, None), embedding_size)
+    assert column.values.shape[0] == num_embeddings
+    assert column.values.shape[1] == embedding_size
+    if column.device not in output_col.supported_devices():
+        with pytest.raises(NotImplementedError) as exc:
+            converted_col = convert_col(column, output_col)
+        assert "Could not convert from type" in str(exc.value)
+    else:
+        converted_col = convert_col(column, output_col)
+        assert isinstance(converted_col, output_col)
+        assert converted_col.shape.as_tuple == (batch_size, (0, None), embedding_size)
+        assert converted_col.values.shape[0] == num_embeddings
+        assert converted_col.values.shape[1] == embedding_size
+
+
+@pytest.mark.parametrize("output_col", output_col_types)
+def test_3d_convert_cp_nd(output_col):
+    batch_size = 1
+
+    embedding_size = 1
+    data = cp.asarray([[1]])
+    column = CupyColumn(data)
+
+    assert isinstance(column, CupyColumn)
+    assert column.shape.as_tuple == (batch_size, embedding_size)
+    assert column.values.shape[1] == embedding_size
+    if column.device not in output_col.supported_devices():
+        with pytest.raises(NotImplementedError) as exc:
+            converted_col = convert_col(column, output_col)
+        assert "Could not convert from type" in str(exc.value)
+    else:
+        converted_col = convert_col(column, output_col)
+        assert isinstance(converted_col, output_col)
+        assert converted_col.shape.as_tuple == (batch_size, embedding_size)
+        assert converted_col.values.shape[1] == embedding_size
