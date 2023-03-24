@@ -30,6 +30,7 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -53,6 +54,8 @@ try:
 except ImportError:
     cudf = None
 
+
+MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
 
 
@@ -241,10 +244,23 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in cpu memory
+        # Check if we are keeping data in host or gpu device memory
         self.cpu = cpu
-        if not self.cpu:
-            self.cpu = cudf is None
+        if self.cpu is False:
+            if not HAS_GPU:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
+                )
+            if cudf is None:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
+        if self.cpu is None:
+            self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
@@ -339,10 +355,28 @@ class Dataset:
                 if schema_path.is_file():
                     schema_path = schema_path.parent
 
-                if (schema_path / "schema.pbtxt").exists():
+                pbtxt_deprecated_warning = (
+                    "Found schema.pbtxt. Loading schema automatically from "
+                    "schema.pbtxt is deprecated and will be removed in the "
+                    "future. Re-run workflow to generate .merlin/schema.json."
+                )
+
+                if (schema_path / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path.parent / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path.parent / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path)
                     self.schema = schema.to_merlin_schema()
                 elif (schema_path.parent / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path.parent)
                     self.schema = schema.to_merlin_schema()
                 else:
@@ -662,6 +696,7 @@ class Dataset:
         preserve_files=False,
         output_files=None,
         out_files_per_proc=None,
+        row_group_size=None,
         num_threads=0,
         dtypes=None,
         cats=None,
@@ -717,6 +752,12 @@ class Dataset:
             argument. If `method="subgraph"`, the total number of files is determined
             by `output_files` (and `out_files_per_proc` must be 1 if a dictionary is
             specified).
+        row_group_size : integer
+            Maximum number of rows to include in each Parquet row-group. By default,
+            the maximum row-group size will be chosen by the backend Parquet engine
+            (cudf or pyarrow). Note that cudf currently prohibits this value from
+            being less than `5000` rows. If smaller row-groups are necessary, try
+            calling `to_cpu()` before writing to disk.
         num_threads : integer
             Number of IO threads to use for writing the output dataset.
             For `0` (default), no dedicated IO threads will be used.
@@ -902,10 +943,12 @@ class Dataset:
                 schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
-        fs.mkdirs(output_path, exist_ok=True)
+        fs.mkdirs(str(output_path), exist_ok=True)
 
         tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
-        tf_metadata.to_proto_text_file(output_path)
+        metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
+        fs.mkdirs(metadata_path, exist_ok=True)
+        tf_metadata.to_json_file(metadata_path)
 
         # Output dask_cudf DataFrame to dataset
         _ddf_to_dataset(
@@ -922,6 +965,7 @@ class Dataset:
             num_threads,
             self.cpu,
             suffix=suffix,
+            row_group_size=row_group_size,
             partition_on=partition_on,
             schema=schema if write_hugectr_keyset else None,
         )
