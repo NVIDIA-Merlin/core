@@ -14,10 +14,12 @@
 # limitations under the License.
 #
 import collections
+import warnings
 
 import dask
 import pandas as pd
 from dask.base import tokenize
+from dask.blockwise import Blockwise
 from dask.dataframe.core import _concat, new_dd_object
 from dask.delayed import Delayed
 from dask.highlevelgraph import HighLevelGraph
@@ -46,6 +48,9 @@ class DaskSubgraph:
         self.name = name
         self.parts = parts
         self.subgraph = full_graph.cull({(self.name, part) for part in self.parts})
+
+    def __iter__(self):
+        return iter(self.parts)
 
     def __getitem__(self, part):
         key = (self.name, part)
@@ -200,8 +205,13 @@ def _write_subgraph(
 
     # Add data
     num_rows = 0
-    for part in subgraph.parts:
-        table = subgraph[part]
+    for part in subgraph:
+        if isinstance(subgraph, list):
+            # Partition is already a DataFrame object
+            table = part
+        else:
+            # Extract partition from the DaskSubgraph
+            table = subgraph[part]
         writer.add_data(table)
         num_rows += len(table)
         del table
@@ -315,9 +325,39 @@ def _ddf_to_dataset(
         # Use specified mapping of data to output files
         cached_writers = False
         full_graph = ddf.dask
+
+        # Check if we need to use conventional task scheduling,
+        # or if the partition-file mapping is dangerous
+        use_tasks = False
+        all_blockwise = all(isinstance(layer, Blockwise) for layer in full_graph.layers.values())
+        if not all_blockwise:
+            if all(len(v) == 1 for v in file_partition_map.values()):
+                # Use conventional task scheduling if we have a 1:1
+                # mapping between partitions and output files
+                use_tasks = True
+            else:
+                # We don't have all Blockwise layers, so this
+                # write operation may cause pain
+                warnings.warn(
+                    "Using the 'subgraph' approach to execute a graph "
+                    "with non-trivial dependencies. This may cause memory "
+                    "errors if there is not a 1:1 mapping between Dask "
+                    "partitions and output files. Please consider using "
+                    "defaults for `output_files` and `out_files_per_proc`."
+                )
+
         for fns, parts in file_partition_map.items():
             # Isolate subgraph for this output file
-            subgraph = DaskSubgraph(full_graph, ddf._name, parts)
+            if use_tasks and len(parts) == 1:
+                # If there is only one input partition for this
+                # file, then we don't need to create a subgraph.
+                # We can just use conventional task scheduling
+                subgraph = [(ddf._name, parts[0])]
+            else:
+                # Otherwise, we need a subgraph to avoid
+                # materializing multiple input partitions on the
+                # same worker at once (likely to cause OOM errors)
+                subgraph = DaskSubgraph(full_graph, ddf._name, parts)
             task_list.append((write_name, str(fns)))
             dsk[task_list[-1]] = (
                 _write_subgraph,
