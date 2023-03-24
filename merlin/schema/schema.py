@@ -422,13 +422,22 @@ class Schema:
     def apply_inverse(self, selector) -> "Schema":
         return self.excluding(selector)
 
-    def select_by_tag(self, tags: Union[Union[str, Tags], List[Union[str, Tags]]]) -> "Schema":
-        """Select matching columns from this Schema object using a list of tags
+    def select_by_tag(
+        self,
+        tags: Union[Union[str, Tags], List[Union[str, Tags]]],
+        pred_fn=None,
+    ) -> "Schema":
+        """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
+        pred_fn : `any` or `all`
+            Predicate function that decides if the column should be selected.
+            Receives iterable of bool values indicating whether each
+            of the provided tags is present on a column schema.
+            Returning True selects this column, False will not return that column.
 
         Returns
         -------
@@ -436,6 +445,8 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
+        pred_fn = pred_fn or any
+
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
@@ -447,7 +458,7 @@ class Schema:
         ]
 
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in normalized_tags):
+            if pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
