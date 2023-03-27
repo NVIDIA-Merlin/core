@@ -402,8 +402,10 @@ only available if the base dataset is known, and if it corresponds
 to csv or parquet format. If True, the <cite>out_files_per_proc</cite> option
 will be ignored. Default is False.</p></li>
 <li><p><strong>output_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The total number of desired output files. This option requires
-<cite>method=”subgraph”</cite>, and the default value will be the number of Dask
-workers, multiplied by <cite>out_files_per_proc</cite>. For further output-file
+<cite>method=”subgraph”</cite>. When <cite>out_files_per_proc=None</cite>, the default
+is the number of underlying Dask partitions. When <cite>out_files_per_proc</cite>
+is set to an integer, the default is the product of that integer and
+the total number of workers in the Dask cluster. For further output-file
 control, this argument may also be used to pass a dictionary mapping
 the output file names to partition indices, or a list of desired
 output-file names.</p></li>

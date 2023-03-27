@@ -821,8 +821,10 @@
 <span class="sd">            will be ignored. Default is False.</span>
 <span class="sd">        output_files : dict, list or int</span>
 <span class="sd">            The total number of desired output files. This option requires</span>
-<span class="sd">            `method=&quot;subgraph&quot;`, and the default value will be the number of Dask</span>
-<span class="sd">            workers, multiplied by `out_files_per_proc`. For further output-file</span>
+<span class="sd">            `method=&quot;subgraph&quot;`. When `out_files_per_proc=None`, the default</span>
+<span class="sd">            is the number of underlying Dask partitions. When `out_files_per_proc`</span>
+<span class="sd">            is set to an integer, the default is the product of that integer and</span>
+<span class="sd">            the total number of workers in the Dask cluster. For further output-file</span>
 <span class="sd">            control, this argument may also be used to pass a dictionary mapping</span>
 <span class="sd">            the output file names to partition indices, or a list of desired</span>
 <span class="sd">            output-file names.</span>
@@ -873,6 +875,7 @@
 <span class="sd">            are planning to ingest the output data with HugeCTR. Default is False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">preserve_partitions</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">partition_on</span><span class="p">:</span>
             <span class="c1"># Check that the user is not expecting a specific output-file</span>
             <span class="c1"># count/structure that is not supported</span>
@@ -896,13 +899,18 @@
             <span class="k">elif</span> <span class="n">preserve_files</span> <span class="ow">and</span> <span class="n">output_files</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot specify both preserve_files and output_files.&quot;</span><span class="p">)</span>
             <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="n">output_files</span> <span class="ow">or</span> <span class="n">preserve_files</span><span class="p">):</span>
-                <span class="c1"># Default &quot;subgraph&quot; behavior - Set output_files to the</span>
-                <span class="c1"># total umber of workers, multiplied by out_files_per_proc</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">nworkers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_dask_client</span><span class="p">()</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">workers</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                    <span class="n">nworkers</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="n">output_files</span> <span class="o">=</span> <span class="n">nworkers</span> <span class="o">*</span> <span class="p">(</span><span class="n">out_files_per_proc</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">out_files_per_proc</span><span class="p">:</span>
+                    <span class="c1"># Default &quot;subgraph&quot; behavior - Set output_files to the</span>
+                    <span class="c1"># total umber of workers, multiplied by out_files_per_proc</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">nworkers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_dask_client</span><span class="p">()</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">workers</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="n">nworkers</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">output_files</span> <span class="o">=</span> <span class="n">nworkers</span> <span class="o">*</span> <span class="n">out_files_per_proc</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Preserve original Dask partitions if output_files,</span>
+                    <span class="c1"># preserve_files AND out_files_per_proc are all None</span>
+                    <span class="n">preserve_partitions</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Replace None/False suffix argument with &quot;&quot;</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="n">suffix</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
@@ -916,6 +924,10 @@
             <span class="n">ddf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ddf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">)</span>
+
+        <span class="c1"># Check if partitions should be preserved</span>
+        <span class="k">if</span> <span class="n">preserve_partitions</span><span class="p">:</span>
+            <span class="n">output_files</span> <span class="o">=</span> <span class="n">ddf</span><span class="o">.</span><span class="n">npartitions</span>
 
         <span class="c1"># Deal with `method==&quot;subgraph&quot;`.</span>
         <span class="c1"># Convert `output_files` argument to a dict mapping</span>
