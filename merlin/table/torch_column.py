@@ -121,4 +121,4 @@ def _register_from_dlpack_gpu_to_torch():
 
     @_from_dlpack_gpu.register(th.Tensor)
     def _from_dlpack_gpu_to_torch(target_type, array):
-        return th.utils.dlpack.from_dlpack(array)
+        return th.utils.dlpack.from_dlpack(array.__dlpack__())
