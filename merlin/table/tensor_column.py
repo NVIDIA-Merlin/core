@@ -63,13 +63,14 @@ class TensorColumn:
             return object.__new__(cls)
 
     def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
-        self._validate_values_offsets(values, offsets)
+        # self._validate_values_offsets(values, offsets)
 
         self._values = values
         self._offsets = offsets
 
-        shape = self._construct_shape(values, offsets)
-        self._dtype = md.dtype(dtype or values.dtype).with_shape(shape)
+        # shape = self._construct_shape(values, offsets)
+        # self._dtype = md.dtype(dtype or values.dtype).with_shape(shape)
+        self._dtype = None
 
         self._ref = _ref
         self._device = _device

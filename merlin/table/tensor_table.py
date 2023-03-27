@@ -39,7 +39,7 @@ class TensorTable:
     def __init__(self, columns: TensorDict = None):
         cols_dict = self._convert_arrays_to_columns(columns)
 
-        self._validate_columns(cols_dict)
+        # self._validate_columns(cols_dict)
 
         self._columns = cols_dict
 
