@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Type
+from typing import Callable, Type
 
 from merlin.core.dispatch import (
     create_multihot_col,
@@ -41,12 +41,35 @@ def _from_dlpack_gpu(to, capsule):
     raise NotImplementedError
 
 
-def convert_col(column: TensorColumn, target_type: Type):
-    if isinstance(column, target_type):
-        return column
+def to_dlpack_col(column: TensorColumn, to_dlpack_fn: Callable) -> _DlpackColumn:
+    vals_cap = to_dlpack_fn(column.values)
+    offs_cap = to_dlpack_fn(column.offsets) if column.offsets is not None else None
+    return _DlpackColumn(vals_cap, offs_cap, column)
+
+
+def from_dlpack_col(
+    dlpack_col: _DlpackColumn, from_dlpack_fn: Callable, target_col_type: Type
+) -> TensorColumn:
+    target_array_type = target_col_type.array_type()
+
+    values = from_dlpack_fn(target_array_type, dlpack_col.values)
+    offsets = (
+        from_dlpack_fn(target_array_type, dlpack_col.offsets)
+        if dlpack_col.offsets is not None
+        else None
+    )
+
+    return target_col_type(values, offsets, _ref=dlpack_col.ref)
+
+
+def _dispatch_dlpack_fns(column: TensorColumn, target_type: Type):
+    from_dlpack_fn = _from_dlpack_gpu if column.device == Device.GPU else _from_dlpack_cpu
+    to_dlpack_fn = _to_dlpack
 
     try:
-        return from_dlpack_col(to_dlpack_col(column), target_type)
+        to_dlpack_fn = to_dlpack_fn.dispatch(column.values)
+        from_dlpack_fn = from_dlpack_fn.dispatch(target_type.array_type())
+        return (to_dlpack_fn, from_dlpack_fn)
     except NotImplementedError:
         pass
 
@@ -56,30 +79,26 @@ def convert_col(column: TensorColumn, target_type: Type):
     )
 
 
-def to_dlpack_col(column: TensorColumn) -> _DlpackColumn:
-    vals_cap = _to_dlpack(column.values)
-    offs_cap = _to_dlpack(column.offsets) if column.offsets is not None else None
-    return _DlpackColumn(vals_cap, offs_cap, column)
+def convert_col(
+    column: TensorColumn,
+    target_type: Type,
+    _to_dlpack_fn: Callable = None,
+    _from_dlpack_fn: Callable = None,
+):
+    # If there's nothing to do, take a shortcut
+    if isinstance(column, target_type):
+        return column
 
+    # Decide how to convert
+    if _to_dlpack_fn is None or _from_dlpack_fn is None:
+        _to_dlpack_fn, _from_dlpack_fn = _dispatch_dlpack_fns(column, target_type)
 
-def from_dlpack_col(dlpack_col: _DlpackColumn, target_col_type: Type) -> TensorColumn:
-    target_array_type = target_col_type.array_type()
-    if dlpack_col.ref.device == Device.GPU:
-        values = _from_dlpack_gpu(target_array_type, dlpack_col.values)
-        offsets = (
-            _from_dlpack_gpu(target_array_type, dlpack_col.offsets)
-            if dlpack_col.offsets is not None
-            else None
-        )
-    else:
-        values = _from_dlpack_cpu(target_array_type, dlpack_col.values)
-        offsets = (
-            _from_dlpack_cpu(target_array_type, dlpack_col.offsets)
-            if dlpack_col.offsets is not None
-            else None
-        )
+    # Do the conversion
+    dlpack_col = to_dlpack_col(column, _to_dlpack_fn)
+    converted_col = from_dlpack_col(dlpack_col, _from_dlpack_fn, target_type)
 
-    return target_col_type(values, offsets, _ref=dlpack_col.ref)
+    # Return the result
+    return converted_col
 
 
 def df_from_tensor_table(table):
