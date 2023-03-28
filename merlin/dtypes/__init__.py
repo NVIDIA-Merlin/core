@@ -19,6 +19,7 @@ from merlin.dtypes import mappings
 from merlin.dtypes.aliases import *
 from merlin.dtypes.base import DType
 from merlin.dtypes.registry import _dtype_registry
+from merlin.dtypes.shape import Dimension, Shape
 
 # Convenience alias for registering dtypes
 register = _dtype_registry.register
