@@ -28,7 +28,7 @@ class Device(Enum):
 
 
 @lazy_singledispatch
-def create_tensor_column(values, *args, offsets=None, **kwargs):
+def create_tensor_column(values, *args, offsets=None, _unsafe=False, **kwargs):
     """
     Create the appropriate TensorColumn subclass from the type of the supplied values and offsets
     """

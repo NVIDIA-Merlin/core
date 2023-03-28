@@ -44,7 +44,14 @@ class NumpyColumn(TensorColumn):
         """
         return [Device.CPU]
 
-    def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
+    def __init__(
+        self,
+        values: "np.ndarray",
+        offsets: "np.ndarray" = None,
+        dtype=None,
+        _ref=None,
+        _unsafe=False,
+    ):
         super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
 
     def cpu(self):
