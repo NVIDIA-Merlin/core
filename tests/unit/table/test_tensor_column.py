@@ -220,9 +220,9 @@ def test_3d_shapes_np():
     embedding_size = 20
     for x in range(batch_size):
         # simulate raggedness
-        num_sections = np.random.choice([1, 2, 3, 4])
-        arr.append(np.random.rand(num_sections, embedding_size))
-        row_lengths.append(num_sections)
+        row_sizes = np.random.choice([1, 2, 3, 4])
+        arr.append(np.random.rand(row_sizes, embedding_size))
+        row_lengths.append(row_sizes)
     total_rows = sum(row_lengths)
 
     num_col = NumpyColumn(arr)

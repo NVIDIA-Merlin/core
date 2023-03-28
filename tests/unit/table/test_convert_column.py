@@ -108,17 +108,17 @@ def test_3d_convert_np(output_col):
         assert converted_col.values.shape[1] == embedding_size
 
 
+@pytest.mark.skipif(not cp, reason="cupy not available")
 @pytest.mark.parametrize("output_col", output_col_types)
 def test_3d_convert_cp(output_col):
-    import random
-
     arr = []
     row_lengths = []
     batch_size = 3
     embedding_size = 20
-    for x in range(batch_size):
+    row_length_indexes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
         # simulate raggedness
-        row_length = random.randint(1, 5)
+        row_length = row_length_indexes[idx]
         arr.append(np.random.rand(row_length, embedding_size).tolist())
         row_lengths.append(row_length)
     num_embeddings = sum(row_lengths)
@@ -140,6 +140,7 @@ def test_3d_convert_cp(output_col):
         assert converted_col.values.shape[1] == embedding_size
 
 
+@pytest.mark.skipif(not cp, reason="cupy not available")
 @pytest.mark.parametrize("output_col", output_col_types)
 def test_3d_convert_cp_nd(output_col):
     batch_size = 1
