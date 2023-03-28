@@ -62,8 +62,11 @@ class TensorColumn:
         else:
             return object.__new__(cls)
 
-    def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
-        self._validate_values_offsets(values, offsets)
+    def __init__(
+        self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None, _unsafe=False
+    ):
+        if not _unsafe:
+            self._validate_values_offsets(values, offsets)
 
         self._values = values
         self._offsets = offsets
