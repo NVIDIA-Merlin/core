@@ -36,10 +36,11 @@ class TensorTable:
     def from_df(cls, df):
         return tensor_table_from_df(df)
 
-    def __init__(self, columns: TensorDict = None):
+    def __init__(self, columns: TensorDict = None, _unsafe=False):
         cols_dict = self._convert_arrays_to_columns(columns)
 
-        self._validate_columns(cols_dict)
+        if not _unsafe:
+            self._validate_columns(cols_dict)
 
         self._columns = cols_dict
 
