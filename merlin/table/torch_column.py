@@ -98,27 +98,27 @@ class TorchColumn(TensorColumn):
 
 
 @_to_dlpack.register_lazy("torch")
-def _register_to_dlpack_from_tf():
+def _register_to_dlpack_from_torch():
     import torch as th
 
     @_to_dlpack.register(th.Tensor)
-    def _to_dlpack_from_tf_tensor(tensor):
+    def _to_dlpack_from_torch_tensor(tensor):
         return tensor
 
 
 @_from_dlpack_cpu.register_lazy("torch")
-def _register_from_dlpack_cpu_to_tf():
+def _register_from_dlpack_cpu_to_torch():
     import torch as th
 
     @_from_dlpack_cpu.register(th.Tensor)
-    def _from_dlpack_cpu_to_tf(target_type, array):
+    def _from_dlpack_cpu_to_torch(target_type, array):
         return th.utils.dlpack.from_dlpack(array)
 
 
 @_from_dlpack_gpu.register_lazy("torch")
-def _register_from_dlpack_gpu_to_tf():
+def _register_from_dlpack_gpu_to_torch():
     import torch as th
 
     @_from_dlpack_gpu.register(th.Tensor)
-    def _from_dlpack_gpu_to_tf(target_type, array):
-        return th.utils.dlpack.from_dlpack(array)
+    def _from_dlpack_gpu_to_torch(target_type, array):
+        return th.utils.dlpack.from_dlpack(array.__dlpack__())
