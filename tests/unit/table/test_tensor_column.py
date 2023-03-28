@@ -188,15 +188,14 @@ def test_shape(col_type):
 
 
 def test_3d_shapes_python():
-    import random
-
     arr = []
     row_lengths = []
     batch_size = 3
     embedding_size = 20
-    for x in range(batch_size):
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
         # simulate raggedness
-        row_length = random.randint(1, 5)
+        row_length = row_sizes[idx]
         arr.append(np.random.rand(row_length, embedding_size).tolist())
         row_lengths.append(row_length)
     num_embeddings = sum(row_lengths)
@@ -218,11 +217,12 @@ def test_3d_shapes_np():
     row_lengths = []
     batch_size = 3
     embedding_size = 20
-    for x in range(batch_size):
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
         # simulate raggedness
-        row_sizes = np.random.choice([1, 2, 3, 4])
-        arr.append(np.random.rand(row_sizes, embedding_size))
-        row_lengths.append(row_sizes)
+        row_length = row_sizes[idx]
+        arr.append(np.random.rand(row_length, embedding_size))
+        row_lengths.append(row_length)
     total_rows = sum(row_lengths)
 
     num_col = NumpyColumn(arr)
@@ -242,9 +242,10 @@ def test_3d_shapes_cp():
     row_lengths = []
     batch_size = 3
     embedding_size = 20
-    for x in range(batch_size):
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
         # simulate raggedness
-        row_length = cp.random.choice([1, 2, 3, 4], size=1)[0].item()
+        row_length = row_sizes[idx]
         arr.append(cp.random.rand(row_length, embedding_size))
         row_lengths.append(row_length)
     total_rows = sum(row_lengths)
