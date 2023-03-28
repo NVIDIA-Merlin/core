@@ -68,6 +68,10 @@ class TensorColumn:
     def __init__(
         self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None, _unsafe=False
     ):
+        values, offsets = self._convert_nested_lists(values, offsets)
+        if _ref and _ref.values.shape != values.shape:
+            values = self._reshape_values(values, _ref.values.shape)
+    
         if not _unsafe:
             self._validate_values_offsets(values, offsets)
 
