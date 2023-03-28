@@ -37,23 +37,23 @@ class TensorTable:
         return tensor_table_from_df(df)
 
     def __init__(self, columns: TensorDict = None, _unsafe=False):
-        cols_dict = self._convert_arrays_to_columns(columns)
+        cols_dict = self._convert_arrays_to_columns(columns, _unsafe=_unsafe)
 
         if not _unsafe:
             self._validate_columns(cols_dict)
 
         self._columns = cols_dict
 
-    def _convert_arrays_to_columns(self, columns):
-        grouped_columns = group_values_offsets(columns if columns is not None else {})
+    def _convert_arrays_to_columns(self, columns, _unsafe=False):
+        grouped_columns = group_values_offsets(columns or {})
         cols_dict = {}
         for name, column in grouped_columns.items():
             if isinstance(column, TensorColumn):
                 cols_dict[name] = column
             elif isinstance(column, tuple):
-                cols_dict[name] = create_tensor_column(column[0], column[1])
+                cols_dict[name] = create_tensor_column(column[0], column[1], _unsafe=False)
             else:
-                cols_dict[name] = create_tensor_column(column)
+                cols_dict[name] = create_tensor_column(column, _unsafe=False)
 
         return cols_dict
 
@@ -195,8 +195,8 @@ def _register_create_tf_column():
 
     @create_tensor_column.register(tf.Tensor)
     @create_tensor_column.register(eager_tensor_type)
-    def _create_tensor_column_tf(values, offsets=None):
-        return TensorflowColumn(values, offsets)
+    def _create_tensor_column_tf(values, offsets=None, _unsafe=False):
+        return TensorflowColumn(values, offsets, _unsafe=_unsafe)
 
 
 @create_tensor_column.register_lazy("torch")
@@ -204,8 +204,8 @@ def _register_create_torch_column():
     import torch as th
 
     @create_tensor_column.register(th.Tensor)
-    def _create_tensor_column_torch(values, offsets=None):
-        return TorchColumn(values, offsets)
+    def _create_tensor_column_torch(values, offsets=None, _unsafe=False):
+        return TorchColumn(values, offsets, _unsafe=_unsafe)
 
 
 @create_tensor_column.register_lazy("numpy")
@@ -213,8 +213,8 @@ def _register_create_numpy_column():
     import numpy as np
 
     @create_tensor_column.register(np.ndarray)
-    def _create_tensor_column_numpy(values, offsets=None):
-        return NumpyColumn(values, offsets)
+    def _create_tensor_column_numpy(values, offsets=None, _unsafe=False):
+        return NumpyColumn(values, offsets, _unsafe=_unsafe)
 
 
 @create_tensor_column.register_lazy("cupy")
@@ -222,5 +222,5 @@ def _register_create_cupy_column():
     import cupy as cp
 
     @create_tensor_column.register(cp.ndarray)
-    def _create_tensor_column_cupy(values, offsets=None):
-        return CupyColumn(values, offsets)
+    def _create_tensor_column_cupy(values, offsets=None, _unsafe=False):
+        return CupyColumn(values, offsets, _unsafe=_unsafe)

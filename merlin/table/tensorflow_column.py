@@ -68,7 +68,9 @@ class TensorflowColumn(TensorColumn):
         """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None, _unsafe=False
+    ):
         values_device = self._tf_device(values)
 
         if offsets is not None:

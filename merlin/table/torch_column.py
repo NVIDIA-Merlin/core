@@ -43,7 +43,9 @@ class TorchColumn(TensorColumn):
         """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: "th.Tensor", offsets: "th.Tensor" = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "th.Tensor", offsets: "th.Tensor" = None, dtype=None, _ref=None, _unsafe=False
+    ):
         values_device = self._th_device(values)
         if offsets is not None:
             offsets_device = self._th_device(offsets)

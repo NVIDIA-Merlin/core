@@ -31,7 +31,7 @@ class Device(Enum):
 
 
 @lazy_singledispatch
-def create_tensor_column(values, *args, offsets=None, **kwargs):
+def create_tensor_column(values, *args, offsets=None, _unsafe=False, **kwargs):
     """
     Create the appropriate TensorColumn subclass from the type of the supplied values and offsets
     """
@@ -71,7 +71,7 @@ class TensorColumn:
         values, offsets = self._convert_nested_lists(values, offsets)
         if _ref and _ref.values.shape != values.shape:
             values = self._reshape_values(values, _ref.values.shape)
-    
+
         if not _unsafe:
             self._validate_values_offsets(values, offsets)
 
