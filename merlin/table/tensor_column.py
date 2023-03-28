@@ -22,7 +22,7 @@ from typing import Any, List, Type
 
 import merlin.dtypes as md
 from merlin.dispatch.lazy import lazy_singledispatch
-from merlin.dtypes.shape import Shape
+from merlin.dtypes import DType, Shape
 
 
 class Device(Enum):
@@ -65,20 +65,22 @@ class TensorColumn:
         else:
             return object.__new__(cls)
 
-    def __init__(self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None):
+    def __init__(
+        self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None, _unsafe=False
+    ):
         values, offsets = self._convert_nested_lists(values, offsets)
         if _ref and _ref.values.shape != values.shape:
             values = self._reshape_values(values, _ref.values.shape)
-        self._validate_values_offsets(values, offsets)
+    
+        if not _unsafe:
+            self._validate_values_offsets(values, offsets)
 
         self._values = values
         self._offsets = offsets
-
-        shape = self._construct_shape(values, offsets)
-        self._dtype = md.dtype(dtype or values.dtype).with_shape(shape)
-
+        self._dtype = dtype or values.dtype
         self._ref = _ref
         self._device = _device
+        self._shape = None
 
     def cpu(self):
         """
@@ -110,7 +112,9 @@ class TensorColumn:
 
     @property
     def shape(self) -> Shape:
-        return self._dtype.shape
+        if not self._shape:
+            self._shape = self._construct_shape(self.values, self.offsets)
+        return self._shape
 
     @property
     def is_list(self) -> Shape:
@@ -138,6 +142,8 @@ class TensorColumn:
 
     @property
     def dtype(self):
+        if not isinstance(self._dtype, DType):
+            self._dtype = md.dtype(self._dtype).with_shape(self.shape)
         return self._dtype
 
     @property
