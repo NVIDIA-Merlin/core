@@ -78,15 +78,14 @@ def test_convert_col(source_cols, output_col):
 
 @pytest.mark.parametrize("output_col", output_col_types)
 def test_3d_convert_np(output_col):
-    import random
-
     arr = []
     row_lengths = []
     batch_size = 3
     embedding_size = 20
-    for x in range(batch_size):
+    row_length_indexes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
         # simulate raggedness
-        row_length = random.randint(1, 5)
+        row_length = row_length_indexes[idx]
         arr.append(np.random.rand(row_length, embedding_size).tolist())
         row_lengths.append(row_length)
     num_embeddings = sum(row_lengths)
