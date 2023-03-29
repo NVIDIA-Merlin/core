@@ -15,11 +15,11 @@
 #
 import warnings
 
-import cudf
 import uavro as ua
 from dask.base import tokenize
 from dask.dataframe.core import new_dd_object
 
+from merlin.core.compat import cudf
 from merlin.io.dataset_engine import DatasetEngine
 
 
