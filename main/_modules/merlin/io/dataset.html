@@ -111,7 +111,7 @@
 <span class="kn">from</span> <span class="nn">fsspec.core</span> <span class="kn">import</span> <span class="n">get_fs_token_paths</span>
 <span class="kn">from</span> <span class="nn">fsspec.utils</span> <span class="kn">import</span> <span class="n">stringify_path</span>
 
-<span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span><span class="p">,</span> <span class="n">cudf</span>
+<span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span>
 <span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">convert_data</span><span class="p">,</span>
     <span class="n">hex_to_int</span><span class="p">,</span>
@@ -129,6 +129,12 @@
 <span class="kn">from</span> <span class="nn">merlin.io.shuffle</span> <span class="kn">import</span> <span class="n">_check_shuffle_arg</span>
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">ColumnSchema</span><span class="p">,</span> <span class="n">Schema</span>
 <span class="kn">from</span> <span class="nn">merlin.schema.io.tensorflow_metadata</span> <span class="kn">import</span> <span class="n">TensorflowMetadata</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cudf</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">cudf</span> <span class="o">=</span> <span class="kc">None</span>
+
 
 <span class="n">MERLIN_METADATA_DIR_NAME</span> <span class="o">=</span> <span class="s2">&quot;.merlin&quot;</span>
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;merlin&quot;</span><span class="p">)</span>
