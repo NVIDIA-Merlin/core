@@ -13,16 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.core.compat import cudf
-
-if cudf:
-    try:
-        import dask_cudf
-    except ImportError:
-        dask_cudf = None
 from dask.dataframe.core import new_dd_object
 from dask.highlevelgraph import HighLevelGraph
 
+from merlin.core.compat import cudf, dask_cudf
 from merlin.io.dataset_engine import DatasetEngine
 
 
