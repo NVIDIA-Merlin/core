@@ -17,11 +17,6 @@
 # pylint: disable=unused-import
 import os
 
-try:
-    from numba import cuda
-except ImportError:
-    cuda = None
-
 from dask.distributed.diagnostics import nvml
 
 
@@ -50,34 +45,37 @@ def _get_gpu_count():
 
 HAS_GPU = _get_gpu_count() > 0
 
-try:
-    import numpy
-except ImportError:
-    numpy = None
-
 if HAS_GPU:
     try:
-        import cupy
+        from numba import cuda
     except ImportError:
-        cupy = None
-else:
-    cupy = None
+        cuda = None
 
-if HAS_GPU:
     try:
         import cudf
     except ImportError:
         cudf = None
-else:
-    cudf = None
 
-if HAS_GPU:
+    try:
+        import cupy
+    except ImportError:
+        cupy = None
+
     try:
         import dask_cudf
     except ImportError:
         dask_cudf = None
+
 else:
+    cuda = None
+    cudf = None
+    cupy = None
     dask_cudf = None
+
+try:
+    import numpy
+except ImportError:
+    numpy = None
 
 try:
     import pandas
