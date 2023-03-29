@@ -17,10 +17,13 @@ import functools
 
 import dask.dataframe as dd
 
-try:
-    import dask_cudf
-except ImportError:
-    dask_cudf = None
+from merlin.core.compat import cudf
+
+if cudf:
+    try:
+        import dask_cudf
+    except ImportError:
+        dask_cudf = None
 import numpy as np
 from dask.bytes import read_bytes
 from dask.utils import parse_bytes

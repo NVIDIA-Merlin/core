@@ -50,21 +50,39 @@ def _get_gpu_count():
 
 HAS_GPU = _get_gpu_count() > 0
 
-
 try:
     import numpy
 except ImportError:
     numpy = None
 
-try:
-    import cupy
-except ImportError:
+if HAS_GPU:
+    try:
+        import cupy
+    except ImportError:
+        cupy = None
+else:
     cupy = None
 
-try:
-    import cudf
-except ImportError:
+if HAS_GPU:
+    try:
+        import cudf
+    except ImportError:
+        cudf = None
+else:
     cudf = None
+
+if HAS_GPU:
+    try:
+        import dask_cudf
+    except ImportError:
+        dask_cudf = None
+else:
+    dask_cudf = None
+
+try:
+    import pandas
+except ImportError:
+    pandas = None
 
 try:
     import tensorflow
