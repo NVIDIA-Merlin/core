@@ -237,6 +237,7 @@ def test_3d_shapes_np():
 
 
 @pytest.mark.skipif(cp is None, reason="Cupy is not available")
+@pytest.mark.skipif(not HAS_GPU, reason="no gpus detected")
 def test_3d_shapes_cp():
     arr = []
     row_lengths = []

@@ -108,6 +108,7 @@ def test_3d_convert_np(output_col):
 
 
 @pytest.mark.skipif(not cp, reason="cupy not available")
+@pytest.mark.skipif(not HAS_GPU, reason="no gpus detected")
 @pytest.mark.parametrize("output_col", output_col_types)
 def test_3d_convert_cp(output_col):
     arr = []
@@ -140,6 +141,7 @@ def test_3d_convert_cp(output_col):
 
 
 @pytest.mark.skipif(not cp, reason="cupy not available")
+@pytest.mark.skipif(not HAS_GPU, reason="no gpus detected")
 @pytest.mark.parametrize("output_col", output_col_types)
 def test_3d_convert_cp_nd(output_col):
     batch_size = 1
