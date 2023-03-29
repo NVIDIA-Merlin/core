@@ -185,3 +185,78 @@ def test_shape(col_type):
     assert len(col) == 4
     assert col.is_list is True
     assert col.is_ragged is True
+
+
+def test_3d_shapes_python():
+    arr = []
+    row_lengths = []
+    batch_size = 3
+    embedding_size = 20
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
+        # simulate raggedness
+        row_length = row_sizes[idx]
+        arr.append(np.random.rand(row_length, embedding_size).tolist())
+        row_lengths.append(row_length)
+    num_embeddings = sum(row_lengths)
+    column = NumpyColumn(arr)
+
+    assert isinstance(column, NumpyColumn)
+    assert column.shape.as_tuple == (batch_size, (0, None), embedding_size)
+    assert column.values.shape[0] == num_embeddings
+    assert column.values.shape[1] == embedding_size
+
+    for idx1, vals1 in enumerate(column):
+        for idx2, vals2 in enumerate(vals1):
+            assert all(vals2 == arr[idx1][idx2])
+
+
+@pytest.mark.skipif(np is None, reason="Numpy is not available")
+def test_3d_shapes_np():
+    arr = []
+    row_lengths = []
+    batch_size = 3
+    embedding_size = 20
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
+        # simulate raggedness
+        row_length = row_sizes[idx]
+        arr.append(np.random.rand(row_length, embedding_size))
+        row_lengths.append(row_length)
+    total_rows = sum(row_lengths)
+
+    num_col = NumpyColumn(arr)
+
+    assert isinstance(num_col, NumpyColumn)
+    assert num_col.shape.as_tuple == (batch_size, (0, None), embedding_size)
+    assert num_col.values.shape[0] == total_rows
+    assert num_col.values.shape[1] == embedding_size
+
+    for idx, vals in enumerate(num_col):
+        assert np.all(vals == arr[idx])
+
+
+@pytest.mark.skipif(cp is None, reason="Cupy is not available")
+@pytest.mark.skipif(not HAS_GPU, reason="no gpus detected")
+def test_3d_shapes_cp():
+    arr = []
+    row_lengths = []
+    batch_size = 3
+    embedding_size = 20
+    row_sizes = [1, 2, 3]
+    for idx, x in enumerate(range(batch_size)):
+        # simulate raggedness
+        row_length = row_sizes[idx]
+        arr.append(cp.random.rand(row_length, embedding_size))
+        row_lengths.append(row_length)
+    total_rows = sum(row_lengths)
+
+    num_col = CupyColumn(arr)
+
+    assert isinstance(num_col, CupyColumn)
+    assert num_col.shape.as_tuple == (batch_size, (0, None), embedding_size)
+    assert num_col.values.shape[0] == total_rows
+    assert num_col.values.shape[1] == embedding_size
+
+    for idx, vals in enumerate(num_col):
+        assert cp.all(vals == arr[idx])

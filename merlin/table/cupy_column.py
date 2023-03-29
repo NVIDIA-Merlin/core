@@ -80,6 +80,13 @@ class CupyColumn(TensorColumn):
         """
         return self
 
+    @property
+    def _flatten_values(self):
+        return self.values.flatten()
+
+    def _reshape_values(self, values, shape):
+        return cp.reshape(values, shape)
+
 
 @_to_dlpack.register_lazy("cupy")
 def _register_to_dlpack_from_cupy():

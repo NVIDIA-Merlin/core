@@ -82,6 +82,13 @@ class NumpyColumn(TensorColumn):
 
         return CupyColumn(values, offsets)
 
+    @property
+    def _flatten_values(self):
+        return self.values.flatten()
+
+    def _reshape_values(self, values, shape):
+        return np.reshape(values, shape)
+
 
 @_from_dlpack_cpu.register_lazy("numpy")
 def _register_from_dlpack_cpu_to_numpy():

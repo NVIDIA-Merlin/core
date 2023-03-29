@@ -154,6 +154,9 @@ class TensorTable:
         """
         return [column.dtype for column in self.values()]
 
+    def pop(self, column_name):
+        return self._columns.pop(column_name)
+
     def to_dict(self):
         """
         Convert to a flat dictionary of arrays or tensors
