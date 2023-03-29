@@ -28,9 +28,8 @@ if Version(fsspec.__version__) > Version("2021.11.0"):
 else:
     fsspec_parquet = None
 
-from merlin.core.compat import cudf
-
-if cudf:
+try:
+    import cudf
     from cudf.core.column import as_column, build_categorical_column
 
     if fsspec_parquet and (Version(cudf.__version__) < Version("21.12.0")):
@@ -38,7 +37,8 @@ if cudf:
         # reads from python-file objects. Avoid
         # using the `fsspec.parquet` module
         fsspec_parquet = None
-
+except ImportError:
+    cudf = None
 
 #
 # Parquet-Specific Utilities

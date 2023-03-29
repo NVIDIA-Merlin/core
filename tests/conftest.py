@@ -19,12 +19,14 @@ import os
 import random
 
 import dask
+import numpy as np
+import pandas as pd
 
-from merlin.core.compat import HAS_GPU, cudf
-from merlin.core.compat import numpy as np
-from merlin.core.compat import pandas as pd
+from merlin.core.compat import HAS_GPU
 
-if cudf:
+try:
+    import cudf
+
     try:
         import cudf.testing._utils
 
@@ -33,7 +35,8 @@ if cudf:
         import cudf.tests.utils
 
         assert_eq = cudf.tests.utils.assert_eq
-else:
+except ImportError:
+    cudf = None
 
     def assert_eq(a, b, *args, **kwargs):
         if isinstance(a, pd.DataFrame):
