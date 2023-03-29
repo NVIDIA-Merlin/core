@@ -96,12 +96,12 @@ def device_mem_size(kind="total", cpu=False):
         When kind is provided with an unsupported value.
     """
     # Use psutil (if available) for cpu mode
-    if (cpu or not cuda) and psutil:
+    if cpu and psutil:
         if kind == "total":
             return psutil.virtual_memory().total
         elif kind == "free":
             return psutil.virtual_memory().free
-    elif cpu or not cuda:
+    elif cpu:
         warnings.warn("Please install psutil for full cpu=True support.")
         # Assume 1GB of memory
         return int(1e9)

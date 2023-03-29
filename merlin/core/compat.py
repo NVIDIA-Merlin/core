@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023, NVIDIA CORPORATION.
+# Copyright (c) 2022, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 # pylint: disable=unused-import
 import os
+
+try:
+    from numba import cuda
+except ImportError:
+    cuda = None
 
 from dask.distributed.diagnostics import nvml
 
@@ -45,32 +50,6 @@ def _get_gpu_count():
 
 HAS_GPU = _get_gpu_count() > 0
 
-if HAS_GPU:
-    try:
-        from numba import cuda
-    except ImportError:
-        cuda = None
-
-    try:
-        import cudf
-    except ImportError:
-        cudf = None
-
-    try:
-        import cupy
-    except ImportError:
-        cupy = None
-
-    try:
-        import dask_cudf
-    except ImportError:
-        dask_cudf = None
-
-else:
-    cuda = None
-    cudf = None
-    cupy = None
-    dask_cudf = None
 
 try:
     import numpy
@@ -78,9 +57,14 @@ except ImportError:
     numpy = None
 
 try:
-    import pandas
+    import cupy
 except ImportError:
-    pandas = None
+    cupy = None
+
+try:
+    import cudf
+except ImportError:
+    cudf = None
 
 try:
     import tensorflow

@@ -18,10 +18,13 @@ import contextlib
 import threading
 
 import pandas as pd
+
+try:
+    import cudf
+except ImportError:
+    cudf = None
 import pyarrow as pa
 from dask.distributed import get_worker
-
-from merlin.core.compat import cudf
 
 # Use global variable as the default
 # cache when there are no distributed workers.

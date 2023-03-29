@@ -27,13 +27,13 @@ from uuid import uuid4
 
 from packaging.version import Version
 
-from merlin.core.compat import cudf
-
-if cudf:
+try:
+    import cudf
     import dask_cudf
     from cudf.io.parquet import ParquetWriter as pwriter_cudf
     from dask_cudf.io.parquet import CudfEngine
-
+except ImportError:
+    cudf = None
 import dask
 import dask.dataframe as dd
 import fsspec

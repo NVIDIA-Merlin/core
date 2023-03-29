@@ -42,20 +42,6 @@ def _from_dlpack_gpu(to, capsule):
 
 
 def to_dlpack_col(column: TensorColumn, to_dlpack_fn: Callable) -> _DlpackColumn:
-    """Creates  dlpack representation of the TensorColumn supplied.
-
-    Parameters
-    ----------
-    column : TensorColumn
-        Original data to be put in dlpack capsule(s)
-    to_dlpack_fn : Callable
-        The logic to use to create dlpack representation
-
-    Returns
-    -------
-    _DlpackColumn
-        A TensorColumn with values and offsets represented as dlpack capsules
-    """
     vals_cap = to_dlpack_fn(column.values)
     offs_cap = to_dlpack_fn(column.offsets) if column.offsets is not None else None
     return _DlpackColumn(vals_cap, offs_cap, column)
@@ -64,24 +50,6 @@ def to_dlpack_col(column: TensorColumn, to_dlpack_fn: Callable) -> _DlpackColumn
 def from_dlpack_col(
     dlpack_col: _DlpackColumn, from_dlpack_fn: Callable, target_col_type: Type
 ) -> TensorColumn:
-    """Unwraps a DLpack representation of a TensorColumn and creates a
-    TensorColumn of the target_col_type. This function is used in conjunction
-    with to_dlpack_col.
-
-    Parameters
-    ----------
-    dlpack_col : _DlpackColumn
-        The dlpack representation of the original TensorColum
-    from_dlpack_fn : Callable
-        Function containing logic to unwrap dlpack capsule
-    target_col_type : Type
-        Desired TensorColumn return type from unwrap of dlpack representation.
-
-    Returns
-    -------
-    TensorColumn
-        A TensorColumn of type target_col_type.
-    """
     target_array_type = target_col_type.array_type()
 
     values = from_dlpack_fn(target_array_type, dlpack_col.values)
@@ -117,25 +85,6 @@ def convert_col(
     _to_dlpack_fn: Callable = None,
     _from_dlpack_fn: Callable = None,
 ):
-    """Convert a TensorColumn to a Different TensorColumn,
-    uses DLPack (zero copy) to transfer between TensorColumns
-
-    Parameters
-    ----------
-    column : TensorColumn
-        The Column to be transformed
-    target_type : Type
-        The desired TensorColumn, to be produced
-    _to_dlpack_fn : Callable, optional
-        cached to_dlpack function, by default None
-    _from_dlpack_fn : Callable, optional
-        cached from_dlpack function, by default None
-
-    Returns
-    -------
-    TensorColumn
-        A TensorColumn of the type identified in target_type parameter.
-    """
     # If there's nothing to do, take a shortcut
     if isinstance(column, target_type):
         return column
@@ -153,9 +102,6 @@ def convert_col(
 
 
 def df_from_tensor_table(table):
-    """
-    Create a dataframe from a TensorTable
-    """
     device = "cpu" if table.device == Device.CPU else None
     df_dict = {}
     for col_name, col_data in table.items():
@@ -185,7 +131,8 @@ def _register_tensor_table_from_pandas_df():
 
 @tensor_table_from_df.register_lazy("cudf")
 def _register_tensor_table_from_cudf_df():
-    from merlin.core.compat import cudf
+    import cudf
+
     from merlin.table import CupyColumn
 
     @tensor_table_from_df.register(cudf.DataFrame)
