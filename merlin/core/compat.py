@@ -144,35 +144,34 @@ try:
         memory_allocation = int(memory_allocation)
         assert memory_allocation < total_gpu_mem_mb
 
-        # TODO: what will this look like in any sort
-        # of distributed set up?
-        if device is None:
-            device = int(os.environ.get("TF_VISIBLE_DEVICE", 0))
-        tf_devices = tf.config.list_physical_devices("GPU")
-        if HAS_GPU and len(tf_devices) == 0:
-            raise ImportError("TensorFlow is not configured for GPU")
         if HAS_GPU:
-            try:
-                tf.config.set_logical_device_configuration(
-                    tf_devices[device],
-                    [tf.config.LogicalDeviceConfiguration(memory_limit=memory_allocation)],
-                )
-            except RuntimeError:
-                warnings.warn(
-                    "TensorFlow runtime already initialized, may not be enough memory for cudf"
-                )
-            try:
-                tf.config.experimental.set_virtual_device_configuration(
-                    tf_devices[device],
-                    [
-                        tf.config.experimental.VirtualDeviceConfiguration(
-                            memory_limit=memory_allocation
-                        )
-                    ],
-                )
-            except RuntimeError as e:
-                # Virtual devices must be set before GPUs have been initialized
-                warnings.warn(str(e))
+            tf_devices = tf.config.list_physical_devices("GPU")
+
+            if len(tf_devices) == 0:
+                raise ImportError("TensorFlow is not configured for GPU")
+
+            for tf_device in tf_devices:
+                try:
+                    tf.config.set_logical_device_configuration(
+                        tf_device,
+                        [tf.config.LogicalDeviceConfiguration(memory_limit=memory_allocation)],
+                    )
+                except RuntimeError:
+                    warnings.warn(
+                        "TensorFlow runtime already initialized, may not be enough memory for cudf"
+                    )
+                try:
+                    tf.config.experimental.set_virtual_device_configuration(
+                        tf_device,
+                        [
+                            tf.config.experimental.VirtualDeviceConfiguration(
+                                memory_limit=memory_allocation
+                            )
+                        ],
+                    )
+                except RuntimeError as e:
+                    # Virtual devices must be set before GPUs have been initialized
+                    warnings.warn(str(e))
 
         # versions using TF earlier than 2.3.0 need to use extension
         # library for dlpack support to avoid memory leak issue
