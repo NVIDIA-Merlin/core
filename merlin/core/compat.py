@@ -16,40 +16,17 @@
 
 # pylint: disable=unused-import
 import os
+import warnings
+
+from packaging import version
 
 try:
     from numba import cuda
 except ImportError:
     cuda = None
 
-from dask.distributed.diagnostics import nvml
-
-
-def _get_gpu_count():
-    """Get Number of GPU devices accounting for CUDA_VISIBLE_DEVICES environment variable"""
-    # Using the `dask.distributed.diagnostics.nvml.device_get_count`
-    # helper function from dask to check device counts with NVML
-    # since this handles some complexity of checking NVML state for us.
-
-    # Note: We can't use `numba.cuda.gpus`, since this has some side effects
-    # that are incompatible with Dask-CUDA. If CUDA runtime functions are
-    # called before Dask-CUDA can spawn worker processes
-    # then Dask-CUDA it will not work correctly (raises an exception)
-    nvml_device_count = nvml.device_get_count()
-    if nvml_device_count == 0:
-        return 0
-    try:
-        cuda_visible_devices = os.environ["CUDA_VISIBLE_DEVICES"]
-        if cuda_visible_devices:
-            return len(cuda_visible_devices.split(","))
-        else:
-            return 0
-    except KeyError:
-        return nvml_device_count
-
-
-HAS_GPU = _get_gpu_count() > 0
-
+from merlin.core.has_gpu import HAS_GPU
+from merlin.core.utils import device_mem_size
 
 try:
     import numpy
@@ -68,6 +45,69 @@ except ImportError:
 
 try:
     import tensorflow
+
+    def configure_tensorflow(memory_allocation=None, device=None):
+        """Utility to help configure tensorflow to not use 100% of gpu memory as buffer"""
+        tf = tensorflow
+        total_gpu_mem_mb = device_mem_size(kind="total", cpu=(not HAS_GPU)) / (1024**2)
+
+        if memory_allocation is None:
+            memory_allocation = os.environ.get("TF_MEMORY_ALLOCATION", 0.5)
+
+        if float(memory_allocation) < 1:
+            memory_allocation = total_gpu_mem_mb * float(memory_allocation)
+        memory_allocation = int(memory_allocation)
+        assert memory_allocation < total_gpu_mem_mb
+
+        # TODO: what will this look like in any sort
+        # of distributed set up?
+        if device is None:
+            device = int(os.environ.get("TF_VISIBLE_DEVICE", 0))
+        tf_devices = tf.config.list_physical_devices("GPU")
+        if HAS_GPU and len(tf_devices) == 0:
+            raise ImportError("TensorFlow is not configured for GPU")
+        if HAS_GPU:
+            try:
+                tf.config.set_logical_device_configuration(
+                    tf_devices[device],
+                    [tf.config.LogicalDeviceConfiguration(memory_limit=memory_allocation)],
+                )
+            except RuntimeError:
+                warnings.warn(
+                    "TensorFlow runtime already initialized, may not be enough memory for cudf"
+                )
+            try:
+                tf.config.experimental.set_virtual_device_configuration(
+                    tf_devices[device],
+                    [
+                        tf.config.experimental.VirtualDeviceConfiguration(
+                            memory_limit=memory_allocation
+                        )
+                    ],
+                )
+            except RuntimeError as e:
+                # Virtual devices must be set before GPUs have been initialized
+                warnings.warn(str(e))
+
+        # versions using TF earlier than 2.3.0 need to use extension
+        # library for dlpack support to avoid memory leak issue
+        __TF_DLPACK_STABLE_VERSION = "2.3.0"
+        if version.parse(tf.__version__) < version.parse(__TF_DLPACK_STABLE_VERSION):
+            try:
+                from tfdlpack import from_dlpack
+            except ModuleNotFoundError as e:
+                message = (
+                    "If using TensorFlow < 2.3.0, you must install tfdlpack-gpu extension library"
+                )
+                raise ModuleNotFoundError(message) from e
+
+        else:
+            from tensorflow.experimental.dlpack import from_dlpack
+
+        return from_dlpack
+
+    configure_tensorflow()
+
     from tensorflow.python.framework import ops as tf_ops
 except ImportError:
     tensorflow = None

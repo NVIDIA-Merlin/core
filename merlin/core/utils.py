@@ -30,7 +30,8 @@ from dask.dataframe.optimize import optimize as dd_optimize
 from dask.distributed import Client, get_client
 from tqdm import tqdm
 
-from merlin.core.compat import HAS_GPU, cuda
+from merlin.core.compat import cuda
+from merlin.core.has_gpu import HAS_GPU
 
 _merlin_dask_client = ContextVar("_merlin_dask_client", default="auto")
 
