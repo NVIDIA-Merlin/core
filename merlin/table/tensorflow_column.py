@@ -81,7 +81,7 @@ class TensorflowColumn(TensorColumn):
                     f"values ({values_device}) and offsets ({offsets_device})."
                 )
 
-        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
+        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref, _unsafe=_unsafe)
 
     def cpu(self):
         """

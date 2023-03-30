@@ -51,7 +51,7 @@ class CupyColumn(TensorColumn):
         _ref=None,
         _unsafe=False,
     ):
-        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU)
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU, _unsafe=_unsafe)
 
     def cpu(self):
         """

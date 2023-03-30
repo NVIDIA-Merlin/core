@@ -48,7 +48,7 @@ def to_dlpack_col(column: TensorColumn, to_dlpack_fn: Callable) -> _DlpackColumn
 
 
 def from_dlpack_col(
-    dlpack_col: _DlpackColumn, from_dlpack_fn: Callable, target_col_type: Type
+    dlpack_col: _DlpackColumn, from_dlpack_fn: Callable, target_col_type: Type, _unsafe: bool
 ) -> TensorColumn:
     target_array_type = target_col_type.array_type()
 
@@ -59,7 +59,7 @@ def from_dlpack_col(
         else None
     )
 
-    return target_col_type(values, offsets, _ref=dlpack_col.ref)
+    return target_col_type(values, offsets, _ref=dlpack_col.ref, _unsafe=_unsafe)
 
 
 def _dispatch_dlpack_fns(column: TensorColumn, target_type: Type):
@@ -84,6 +84,7 @@ def convert_col(
     target_type: Type,
     _to_dlpack_fn: Callable = None,
     _from_dlpack_fn: Callable = None,
+    _unsafe: bool = False,
 ):
     # If there's nothing to do, take a shortcut
     if isinstance(column, target_type):
@@ -95,7 +96,7 @@ def convert_col(
 
     # Do the conversion
     dlpack_col = to_dlpack_col(column, _to_dlpack_fn)
-    converted_col = from_dlpack_col(dlpack_col, _from_dlpack_fn, target_type)
+    converted_col = from_dlpack_col(dlpack_col, _from_dlpack_fn, target_type, _unsafe=_unsafe)
 
     # Return the result
     return converted_col
