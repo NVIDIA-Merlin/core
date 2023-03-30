@@ -52,7 +52,7 @@ class NumpyColumn(TensorColumn):
         _ref=None,
         _unsafe=False,
     ):
-        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU, _unsafe=_unsafe)
 
     def cpu(self):
         """

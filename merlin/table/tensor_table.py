@@ -51,9 +51,9 @@ class TensorTable:
             if isinstance(column, TensorColumn):
                 cols_dict[name] = column
             elif isinstance(column, tuple):
-                cols_dict[name] = create_tensor_column(column[0], column[1], _unsafe=False)
+                cols_dict[name] = create_tensor_column(column[0], column[1], _unsafe=_unsafe)
             else:
-                cols_dict[name] = create_tensor_column(column, _unsafe=False)
+                cols_dict[name] = create_tensor_column(column, _unsafe=_unsafe)
 
         return cols_dict
 
