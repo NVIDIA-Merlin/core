@@ -45,7 +45,7 @@ class LocalExecutor:
         output_dtypes=None,
         additional_columns=None,
         capture_dtypes=False,
-        validate_dtypes=True,
+        strict=False,
     ):
         """
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
@@ -70,12 +70,12 @@ class LocalExecutor:
 
         for node in nodes:
             input_data = self._build_input_data(
-                node, transformable, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
+                node, transformable, capture_dtypes=capture_dtypes, strict=strict
             )
 
             if node.op:
                 transformed_data = self._transform_data(
-                    node, input_data, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
+                    node, input_data, capture_dtypes=capture_dtypes, strict=strict
                 )
             else:
                 transformed_data = input_data
@@ -89,7 +89,7 @@ class LocalExecutor:
 
         return output_data
 
-    def _build_input_data(self, node, transformable, capture_dtypes=False, validate_dtypes=True):
+    def _build_input_data(self, node, transformable, capture_dtypes=False, strict=False):
         """
         Recurse through the graph executing parent and dependency operators
         to form the input dataframe for each output node
@@ -122,7 +122,7 @@ class LocalExecutor:
                     transformable,
                     [parent],
                     capture_dtypes=capture_dtypes,
-                    validate_dtypes=validate_dtypes,
+                    strict=strict,
                 )
                 if input_data is None or not len(input_data):
                     input_data = parent_data[parent_output_cols]
@@ -151,7 +151,7 @@ class LocalExecutor:
 
         return input_data
 
-    def _transform_data(self, node, input_data, capture_dtypes=False, validate_dtypes=True):
+    def _transform_data(self, node, input_data, capture_dtypes=False, strict=False):
         """
         Run the transform represented by the final node in the graph
         and check output dtypes against the output schema
@@ -163,8 +163,8 @@ class LocalExecutor:
             Dataframe to run the graph ending with node on
         capture_dtypes : bool, optional
             Overrides the schema dtypes with the actual dtypes when True, by default False
-        validate_dtypes : bool, optional
-            Checks the dtype of returned data against the schema, by default True
+        strict : bool, optional
+            Raises error if the dtype of returned data doesn't match the schema, by default False
         Returns
         -------
         Transformable
@@ -173,7 +173,7 @@ class LocalExecutor:
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
-            as the output schema columns when validate_dtypes is True
+            as the output schema columns when `strict` is True
         RuntimeError
             If no DataFrame or DictArray is returned from the operator
         """
@@ -183,7 +183,7 @@ class LocalExecutor:
             output_data = node.op.transform(selection, input_data)
 
             # Update or validate output_data dtypes
-            if capture_dtypes or validate_dtypes:
+            if capture_dtypes or strict:
                 for col_name, output_col_schema in node.output_schema.column_schemas.items():
                     col_series = output_data[col_name]
                     output_data_dtype = col_series.dtype
@@ -210,7 +210,7 @@ class LocalExecutor:
 
                     if capture_dtypes:
                         node.output_schema.column_schemas[col_name] = output_data_schema
-                    elif validate_dtypes and len(output_data):
+                    elif strict and len(output_data):
                         # Validate that the dtypes match but only if they both exist
                         # (since schemas may not have all dtypes specified, especially
                         # in the tests)
@@ -267,7 +267,13 @@ class DaskExecutor:
         return {k: v for k, v in self.__dict__.items() if k != "client"}
 
     def transform(
-        self, ddf, graph, output_dtypes=None, additional_columns=None, capture_dtypes=False
+        self,
+        ddf,
+        graph,
+        output_dtypes=None,
+        additional_columns=None,
+        capture_dtypes=False,
+        strict=False,
     ):
         """
         Transforms all partitions of a Dask Dataframe by applying the operators
@@ -328,12 +334,13 @@ class DaskExecutor:
                 nodes,
                 additional_columns=additional_columns,
                 capture_dtypes=capture_dtypes,
+                strict=strict,
                 meta=output_dtypes,
                 enforce_metadata=False,
             )
         )
 
-    def fit(self, ddf, nodes):
+    def fit(self, ddf, nodes, strict=False):
         """Calculates statistics for a set of nodes on the input dataframe
 
         Parameters
@@ -360,6 +367,7 @@ class DaskExecutor:
                 node.parents_with_dependencies,
                 additional_columns=addl_input_cols,
                 capture_dtypes=True,
+                strict=strict,
             )
 
             try:
