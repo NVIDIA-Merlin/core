@@ -47,6 +47,10 @@ class TensorflowColumn(TensorColumn):
     """
 
     @classmethod
+    def _transpose(cls, values):
+        return tf.transpose(values)
+
+    @classmethod
     def array_type(cls) -> Type:
         """
         The type of the arrays backing this column
@@ -64,7 +68,9 @@ class TensorflowColumn(TensorColumn):
         """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None, _unsafe=False
+    ):
         values_device = self._tf_device(values)
 
         if offsets is not None:
@@ -75,7 +81,7 @@ class TensorflowColumn(TensorColumn):
                     f"values ({values_device}) and offsets ({offsets_device})."
                 )
 
-        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
+        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -112,6 +118,14 @@ class TensorflowColumn(TensorColumn):
             offsets = tf.identity(self.offsets) if self.offsets is not None else None
 
         return TensorflowColumn(values, offsets)
+
+    @property
+    def _flatten_values(self):
+        return tf.reshape(self.values, [-1])
+
+    def _reshape_values(self, values, shape):
+        with tf.device(values.device):
+            return tf.reshape(values, shape)
 
     def _tf_device(self, tensor):
         return Device.GPU if "GPU" in tensor.device else Device.CPU

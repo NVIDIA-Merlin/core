@@ -44,8 +44,15 @@ class NumpyColumn(TensorColumn):
         """
         return [Device.CPU]
 
-    def __init__(self, values: "np.ndarray", offsets: "np.ndarray" = None, dtype=None, _ref=None):
-        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU)
+    def __init__(
+        self,
+        values: "np.ndarray",
+        offsets: "np.ndarray" = None,
+        dtype=None,
+        _ref=None,
+        _unsafe=False,
+    ):
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.CPU, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -74,6 +81,13 @@ class NumpyColumn(TensorColumn):
         offsets = cp.asarray(self.offsets)
 
         return CupyColumn(values, offsets)
+
+    @property
+    def _flatten_values(self):
+        return self.values.flatten()
+
+    def _reshape_values(self, values, shape):
+        return np.reshape(values, shape)
 
 
 @_from_dlpack_cpu.register_lazy("numpy")

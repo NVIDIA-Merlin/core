@@ -43,8 +43,15 @@ class CupyColumn(TensorColumn):
         """
         return [Device.GPU]
 
-    def __init__(self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None):
-        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU)
+    def __init__(
+        self,
+        values: "cp.ndarray",
+        offsets: "cp.ndarray" = None,
+        dtype=None,
+        _ref=None,
+        _unsafe=False,
+    ):
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -72,6 +79,13 @@ class CupyColumn(TensorColumn):
             This column, unchanged and backed by CuPy arrays
         """
         return self
+
+    @property
+    def _flatten_values(self):
+        return self.values.flatten()
+
+    def _reshape_values(self, values, shape):
+        return cp.reshape(values, shape)
 
 
 @_to_dlpack.register_lazy("cupy")

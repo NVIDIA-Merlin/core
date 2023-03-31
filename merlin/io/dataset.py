@@ -30,7 +30,7 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-from merlin.core.compat import HAS_GPU
+from merlin.core.compat import HAS_GPU, device_mem_size
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -38,7 +38,7 @@ from merlin.core.dispatch import (
     is_list_dtype,
     list_val_dtype,
 )
-from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.core.utils import global_dask_client, set_client_deprecated
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle

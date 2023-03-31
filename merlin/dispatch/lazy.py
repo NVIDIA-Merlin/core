@@ -75,22 +75,26 @@ class LazyDispatcher:
 
         return wrapper(func) if func is not None else wrapper
 
-    def __call__(self, *args_, **kwargs_):
-        try:
-            dispatch_type = self._dispatch_type(args_[0])
-            return self._singledispatch(dispatch_type, *args_, **kwargs_)
-        except NotImplementedError:
+    def dispatch(self, obj_or_type):
+        dispatch_type = self._dispatch_type(obj_or_type)
+        dispatch_fn = self._singledispatch(dispatch_type)
+        if dispatch_fn == self.func:
             try:
                 module_name = dispatch_type.__module__.partition(".")[0]
                 self._lazy[module_name]()
                 self._lazy.pop(module_name, None)
             except (AttributeError, KeyError):
-                self._raise_not_impl(self.func, args_[0])
+                self._raise_not_impl(self.func, obj_or_type)
             else:
-                return self._singledispatch(dispatch_type, *args_, **kwargs_)
+                dispatch_fn = self._singledispatch(dispatch_type)
+        return dispatch_fn
 
-    def _singledispatch(self, obj_type, *args, **kwargs):
-        return self.dispatcher.dispatch(obj_type)(*args, **kwargs)
+    def __call__(self, *args_, **kwargs_):
+        fn = self.dispatch(args_[0])
+        return fn(*args_, **kwargs_)
+
+    def _singledispatch(self, obj_type):
+        return self.dispatcher.dispatch(obj_type)
 
     def _dispatch_type(self, arg):
         return arg if isclass(arg) else type(arg)
