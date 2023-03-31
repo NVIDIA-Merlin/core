@@ -78,7 +78,7 @@ class NumpyColumn(TensorColumn):
         from merlin.table import CupyColumn
 
         values = cp.asarray(self.values)
-        offsets = cp.asarray(self.offsets)
+        offsets = cp.asarray(self.offsets) if self.offsets is not None else None
 
         return CupyColumn(values, offsets)
 
