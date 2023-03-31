@@ -367,7 +367,7 @@ class DaskExecutor:
                 node.parents_with_dependencies,
                 additional_columns=addl_input_cols,
                 capture_dtypes=True,
-                validates_dtypes=strict,
+                strict=strict,
             )
 
             try:
