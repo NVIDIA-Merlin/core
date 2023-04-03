@@ -119,6 +119,11 @@ except ImportError:
     numpy = None
 
 try:
+    import pandas
+except ImportError:
+    pandas = None
+
+try:
     import cupy
 except ImportError:
     cupy = None
@@ -127,6 +132,11 @@ try:
     import cudf
 except ImportError:
     cudf = None
+
+try:
+    import dask_cudf
+except ImportError:
+    dask_cudf = None
 
 try:
     import tensorflow
