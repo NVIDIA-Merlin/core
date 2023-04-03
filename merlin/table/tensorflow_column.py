@@ -158,7 +158,7 @@ def _register_from_dlpack_cpu_to_tf():
     @_from_dlpack_cpu.register(tf.Tensor)
     @_from_dlpack_cpu.register(eager_tensor_type)
     def _from_dlpack_cpu_to_tf(target_type, array):
-        return tf.experimental.dlpack.from_dlpack(array.__dlpack__())
+        return tf.convert_to_tensor(array)
 
 
 @_from_dlpack_gpu.register_lazy("tensorflow")
