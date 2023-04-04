@@ -1,6 +1,8 @@
-dask>=2021.11.2
-distributed>=2021.11.2
-pandas>=1.2.0,<1.4.0dev0
+dask>=2022.11.1
+dask-cuda>=22.12.0
+distributed>=2022.11.1
+fsspec>=2022.7.1
+pandas>=1.2.0,<1.6.0dev0
 numba>=0.54
 pyarrow>=5.0.0
 protobuf>=3.0.0
@@ -8,4 +10,6 @@ tqdm>=4.0
 tensorflow-metadata>=1.2.0
 betterproto<2.0.0
 packaging
-fsspec==2022.5.0
+
+# pynvml==11.5.0 is incompatible with distributed<2023.2.1
+pynvml>=11.0.0,<11.5

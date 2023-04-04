@@ -14,22 +14,48 @@
 # limitations under the License.
 #
 import numpy as np
+import pandas as pd
 import pytest
 
-from merlin.core.dispatch import HAS_GPU, is_list_dtype, list_val_dtype, make_df
+from merlin.core.compat import HAS_GPU
+from merlin.core.compat import cupy as cp
+from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype, make_df
 
 if HAS_GPU:
-    _CPU = [True, False]
+    _DEVICES = ["cpu", "gpu"]
 else:
-    _CPU = [True]
+    _DEVICES = ["cpu"]
 
 
-@pytest.mark.parametrize("cpu", _CPU)
-def test_list_dtypes(tmpdir, cpu):
-    df = make_df(device="cpu" if cpu else "gpu")
+@pytest.mark.parametrize("device", _DEVICES)
+def test_list_dtypes(tmpdir, device):
+    df = make_df(device=device)
     df["vals"] = [
         [[0, 1, 2], [3, 4], [5]],
     ]
+    # Check that the index can be arbitrary
+    df.set_index(np.array([2]), drop=True, inplace=True)
 
     assert is_list_dtype(df["vals"])
     assert list_val_dtype(df["vals"]) == np.dtype(np.int64)
+
+
+@pytest.mark.parametrize("device", _DEVICES)
+def test_concat_columns(device):
+    df1 = make_df({"a": [1, 2], "b": [[3], [4, 5]]}, device=device)
+    df2 = make_df({"c": [3, 4, 5]}, device=device)
+    data_frames = [df1, df2]
+    res = concat_columns(data_frames)
+    assert res.columns.to_list() == ["a", "b", "c"]
+
+
+@pytest.mark.skipif(not (cp and HAS_GPU), reason="Cupy not available")
+def test_pandas_cupy_combo():
+    rand_cp_nd_arr = cp.random.uniform(0.0, 1.0, size=100)
+    with pytest.raises(TypeError) as exc_info:
+        pd.DataFrame(rand_cp_nd_arr)
+
+    assert "Implicit conversion to a NumPy array is not allowed" in str(exc_info)
+    pd_df = pd.DataFrame(rand_cp_nd_arr.get())[0]
+    mk_df = make_df(rand_cp_nd_arr)[0]
+    assert all(pd_df.to_numpy() == mk_df.to_numpy())

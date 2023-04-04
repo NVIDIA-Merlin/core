@@ -104,7 +104,6 @@ if cudf is not None:
             if (cudf_version.major == 21 and cudf_version.minor == 10) or (
                 cudf_version.major == 0 and cudf_version.minor == 0
             ):
-
                 # We only need this work-around for cudf-21.10
                 return _override_read_metadata(_cudf_read_metadata, *args, **kwargs)
             return _override_read_metadata(CudfEngine.read_metadata, *args, **kwargs)
@@ -184,6 +183,34 @@ if cudf is not None:
                     df._data[col_name] = col.astype(typ)
 
 
+def _read_partition_lens(part, fs):
+    # Manually read row-count statistics from the Parquet
+    # metadata for a single `read_parquet` `part`. Return
+    # the result in the same format that `read_metadata`
+    # returns statistics
+
+    if not isinstance(part, list):
+        part = [part]
+
+    num_rows = 0
+    for p in part:
+        piece = p["piece"]
+        path = piece[0]
+        row_groups = piece[1]
+        if row_groups == [None]:
+            row_groups = None
+        with fs.open(path, default_cache="none") as f:
+            md = pq.ParquetFile(f).metadata
+        if row_groups is None:
+            row_groups = list(range(md.num_row_groups))
+        for rg in row_groups:
+            row_group = md.row_group(rg)
+            num_rows += row_group.num_rows
+
+    # Ignore column-statistics (for now)
+    return {"num-rows": num_rows, "columns": []}
+
+
 def _override_read_metadata(
     parent_read_metadata,
     fs,
@@ -205,29 +232,25 @@ def _override_read_metadata(
     # For now, disallow the user from setting `chunksize`
     if chunksize:
         raise ValueError(
-            "NVTabular does not yet support the explicit use " "of Dask's `chunksize` argument."
+            "NVTabular does not yet support the explicit use of Dask's `chunksize` argument."
         )
 
     # Extract metadata_collector from the dataset "container"
     dataset = dataset or {}
     metadata_collector = dataset.pop("metadata_collector", None)
 
-    # Gather statistics by default.
-    # This enables optimized length calculations
-    if gather_statistics is None:
-        gather_statistics = True
+    # gather_statistics is deprecated in `dask.dataframe`
+    if gather_statistics:
+        warnings.warn(
+            "`gather_statistics` is now deprecated and will be ignored.",
+            FutureWarning,
+        )
 
     # Use a local_kwarg dictionary to make it easier to exclude
     # `aggregate_files` for older Dask versions
     local_kwargs = {
         "index": index,
         "filters": filters,
-        # Use chunksize=1 to "ensure" statistics are gathered
-        # if `gather_statistics=True`.  Note that Dask will bail
-        # from statistics gathering if it does not expect statistics
-        # to be "used" after `read_metadata` returns.
-        "chunksize": 1 if gather_statistics else None,
-        "gather_statistics": gather_statistics,
         "split_row_groups": split_row_groups,
     }
     if aggregate_row_groups is not None:
@@ -247,7 +270,7 @@ def _override_read_metadata(
     statistics = read_metadata_result[1].copy()
 
     # Process the statistics.
-    # Note that these steps are usaually performed after
+    # Note that these steps are usually performed after
     # `engine.read_metadata` returns (in Dask), but we are doing
     # it ourselves in NVTabular (to capture the expected output
     # partitioning plan)
@@ -263,7 +286,6 @@ def _override_read_metadata(
 
         # Apply file aggregation
         if aggregate_row_groups is not None:
-
             # Convert `aggregate_files` to an integer `aggregation_depth`
             aggregation_depth = False
             if len(parts) and aggregate_files:
@@ -400,6 +422,10 @@ class ParquetDatasetEngine(DatasetEngine):
         # in parts and stats
         parts = self._pp_metadata["parts"]
         stats = self._pp_metadata["stats"]
+        if not stats:
+            # Update stats if `dd.read_parquet` didn't populate it
+            stats = [_read_partition_lens(part, self.fs) for part in parts]
+            self._pp_metadata["stats"] = stats
         _pp_map = {}
         _pp_nrows = []
         distinct_files = True
@@ -420,7 +446,6 @@ class ParquetDatasetEngine(DatasetEngine):
         self._pp_map = _pp_map
 
     def to_ddf(self, columns=None, cpu=None):
-
         # Check if we are using cpu or gpu backend
         cpu = self.cpu if cpu is None else cpu
         backend_engine = CPUParquetEngine if cpu else GPUParquetEngine
@@ -797,7 +822,6 @@ class ParquetDatasetEngine(DatasetEngine):
         out_parts = 0
         remaining_out_part_rows = rows_per_part
         for i, in_part_size in enumerate(size_list):
-
             # The `split` dictionary will be passed to this input
             # partition to dictate how that partition will be split
             # into different output partitions/files.  The "key" of
@@ -806,7 +830,6 @@ class ParquetDatasetEngine(DatasetEngine):
             split = {}
             last = 0
             while in_part_size >= remaining_out_part_rows:
-
                 gets[out_parts].append(i)
                 split[out_parts] = (last, last + remaining_out_part_rows)
                 last += remaining_out_part_rows
@@ -883,7 +906,6 @@ class ParquetDatasetEngine(DatasetEngine):
 
 
 def _write_metadata_file(md_list, fs, output_path, gmd_base):
-
     # Prepare both "general" and parquet metadata
     gmd = gmd_base.copy()
     pmd = {}
@@ -911,7 +933,6 @@ def _write_metadata_file(md_list, fs, output_path, gmd_base):
 
 
 def _write_data(data_list, output_path, fs, fn):
-
     # Initialize chunked writer
     path = fs.sep.join([output_path, fn])
     writer = pwriter_cudf(path, compression=None)
@@ -1001,7 +1022,7 @@ class BaseParquetWriter(ThreadedWriter):
                 self.queue.task_done()
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         """Write global _metadata file"""
         raise (NotImplementedError)
 
@@ -1021,11 +1042,13 @@ class BaseParquetWriter(ThreadedWriter):
 
 
 class GPUParquetWriter(BaseParquetWriter):
-    def __init__(self, out_dir, **kwargs):
+    def __init__(self, out_dir, row_group_size=None, **kwargs):
         super().__init__(out_dir, **kwargs)
         # Passing index=False when creating ParquetWriter
         # to avoid bug: https://github.com/rapidsai/cudf/issues/7011
         self.pwriter_kwargs = {"compression": None, "index": False}
+        if row_group_size:
+            self.pwriter_kwargs.update({"row_group_size_rows": row_group_size})
 
     @property
     def _pwriter(self):
@@ -1043,10 +1066,10 @@ class GPUParquetWriter(BaseParquetWriter):
         writer.write_table(data)
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         # Sort metadata by file name and convert list of
         # tuples to a list of metadata byte-blobs
-        md_list = [m[1] for m in sorted(list(md.items()), key=lambda x: natural_sort_key(x[0]))]
+        md_list = [m[1] for m in sorted(list(data.items()), key=lambda x: natural_sort_key(x[0]))]
 
         # Aggregate metadata and write _metadata file
         _write_pq_metadata_file_cudf(md_list, fs, out_dir)
@@ -1062,10 +1085,11 @@ class GPUParquetWriter(BaseParquetWriter):
 
 
 class CPUParquetWriter(BaseParquetWriter):
-    def __init__(self, out_dir, **kwargs):
+    def __init__(self, out_dir, row_group_size=None, **kwargs):
         super().__init__(out_dir, **kwargs)
         self.md_collectors = {}
         self.pwriter_kwargs = {"compression": None}
+        self._row_group_size = row_group_size
 
     @property
     def _pwriter(self):
@@ -1078,7 +1102,7 @@ class CPUParquetWriter(BaseParquetWriter):
         # Make sure our `row_group_size` argument (which corresponds
         # to the number of rows in each row-group) will produce
         # row-groups ~128MB in size.
-        if not hasattr(self, "_row_group_size"):
+        if self._row_group_size is None:
             row_size = df.memory_usage(deep=True).sum() / max(len(df), 1)
             self._row_group_size = math.ceil(128_000_000 / row_size)
         return self._row_group_size
@@ -1097,7 +1121,6 @@ class CPUParquetWriter(BaseParquetWriter):
         return md
 
     def _append_writer(self, path, schema=None):
-
         # Define "metadata collector" for pyarrow
         _md_collector = []
         _args = [schema]
@@ -1115,10 +1138,10 @@ class CPUParquetWriter(BaseParquetWriter):
         writer.write_table(table, row_group_size=self._get_row_group_size(data))
 
     @classmethod
-    def write_special_metadata(cls, md, fs, out_dir):
+    def write_special_metadata(cls, data, fs, out_dir):
         # Sort metadata by file name and convert list of
         # tuples to a list of metadata byte-blobs
-        md_list = [m[1] for m in sorted(list(md.items()), key=lambda x: natural_sort_key(x[0]))]
+        md_list = [m[1] for m in sorted(list(data.items()), key=lambda x: natural_sort_key(x[0]))]
 
         # Aggregate metadata and write _metadata file
         _write_pq_metadata_file_pyarrow(md_list, fs, out_dir)

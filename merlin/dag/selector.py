@@ -34,17 +34,26 @@ class ColumnSelector:
     subgroups, optional: list of ColumnSelector objects
         This provides an alternate syntax for grouping column names together (instead
         of nesting tuples inside the list of names)
+    tags : list of Tags
+        The columns to select from the input dataset based on Tags. Any column with
+        at-least-one of the tags provided will be considered.
     """
 
     def __init__(
         self,
-        names: List[str] = None,
+        names: Union[str, List[str]] = None,
         subgroups: List["ColumnSelector"] = None,
         tags: List[Union[Tags, str]] = None,
     ):
         self._names = names if names is not None else []
         self._tags = tags if tags is not None else []
         self.subgroups = subgroups if subgroups is not None else []
+
+        self.all = isinstance(names, str) and names == "*"
+        if self.all:
+            self._names = []
+            self._tags = []
+            self.subgroups = []
 
         if isinstance(self._names, merlin.dag.Node):
             raise TypeError("ColumnSelectors can not contain Nodes")
@@ -103,7 +112,13 @@ class ColumnSelector:
             return self
         elif isinstance(other, merlin.dag.Node):
             return other + self
-        elif isinstance(other, ColumnSelector):
+
+        if self.all:
+            return self
+
+        if isinstance(other, ColumnSelector):
+            if other.all:
+                return other
 
             return ColumnSelector(
                 self._names + other._names,
@@ -130,14 +145,20 @@ class ColumnSelector:
     def __eq__(self, other):
         if not isinstance(other, ColumnSelector):
             return False
-        return other._names == self._names and other.subgroups == self.subgroups
+
+        return (other.all and self.all) or (
+            other._names == self._names and other.subgroups == self.subgroups
+        )
 
     def __bool__(self):
-        return bool(self._names or self.subgroups or self.tags)
+        return bool(self.all or self._names or self.subgroups or self.tags)
 
     def resolve(self, schema):
         """Takes a schema and produces a new selector with selected column names
         how selection occurs (tags, name) does not matter."""
+        if self.all:
+            return ColumnSelector(schema.column_names)
+
         # get names from tags or names
         root_selector = ColumnSelector(names=self._names, tags=self.tags)
         new_schema = schema.apply(root_selector)
@@ -146,9 +167,25 @@ class ColumnSelector:
             new_selector.subgroups.append(group.resolve(schema))
         return new_selector
 
-    def filter_columns(self, other_selector):
+    def filter_columns(self, other_selector: "ColumnSelector"):
+        """
+        Narrow the content of this selector to the columns that would be selected by another
+
+        Parameters
+        ----------
+        other_selector : ColumnSelector
+            Other selector to apply as the filter
+
+        Returns
+        -------
+        ColumnSelector
+            This selector filtered by the other selector
+        """
         remaining_names = []
         remaining_groups = []
+
+        if self.all:
+            return other_selector
 
         for col in self._names:
             if col not in other_selector._names:

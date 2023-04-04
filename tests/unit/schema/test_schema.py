@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import dataclasses
+
+import pytest
 
 from merlin.dag import ColumnSelector
-from merlin.schema import ColumnSchema, Schema
+from merlin.schema import ColumnSchema, Schema, Tags
 
 
 def test_select_by_name():
@@ -58,6 +61,57 @@ def test_select_by_tag():
     assert select_neither == Schema([])
 
 
+def test_select_by_tag_string():
+    col1_schema = ColumnSchema("col1", tags=[Tags.CATEGORICAL, Tags.ITEM])
+    col2_schema = ColumnSchema("col2", tags=[Tags.ITEM_ID])
+
+    schema = Schema([col1_schema, col2_schema])
+
+    col1_selection = schema.select_by_tag("categorical")
+    col2_selection = schema.select_by_tag("item_id")
+
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
+
+
+def test_select_by_any_tags():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
+
+    schema = Schema([col1_schema, col2_schema, col3_schema])
+
+    col1_selection = schema.select_by_tag("a", any)
+    col2_selection = schema.select_by_tag("d", any)
+
+    assert col1_selection == Schema([col1_schema])
+    assert col2_selection == Schema([col2_schema])
+
+    select_both = schema.select_by_tag("c", any)
+    select_multi = schema.select_by_tag(["b", "c"], any)
+    select_neither = schema.select_by_tag("unknown", any)
+
+    assert select_both == Schema([col1_schema, col2_schema])
+    assert select_multi == Schema([col1_schema, col2_schema, col3_schema])
+    assert select_neither == Schema([])
+
+
+def test_select_by_all_tags():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    col3_schema = ColumnSchema("col3", tags=["b", "e", "f"])
+
+    schema = Schema([col1_schema, col2_schema, col3_schema])
+
+    select_multi_a = schema.select_by_tag(["a", "b"], all)
+    select_multi_b = schema.select_by_tag(["c", "d"], all)
+    select_multi_c = schema.select_by_tag(["a", "e"], all)
+
+    assert select_multi_a == Schema([col1_schema])
+    assert select_multi_b == Schema([col2_schema])
+    assert select_multi_c == Schema([])
+
+
 def test_select():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
@@ -74,6 +128,16 @@ def test_select():
 
     assert col1_selection == Schema([col1_schema])
     assert col2_selection == Schema([col2_schema])
+
+
+def test_select_all():
+    col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
+    col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
+    schema = Schema([col1_schema, col2_schema])
+
+    selector = ColumnSelector("*")
+    selection = schema.select(selector)
+    assert selection == schema
 
 
 def test_excluding_by_name():
@@ -131,3 +195,72 @@ def test_excluding():
 
     assert col1_exclusion == Schema([col1_schema])
     assert col2_exclusion == Schema([col2_schema])
+
+
+def test_schema_can_be_added_to_none():
+    schema_set = Schema(["a", "b", "c"])
+
+    assert (schema_set + None) == schema_set
+    assert (None + schema_set) == schema_set
+
+
+def test_schema_to_pandas():
+    import pandas as pd
+
+    schema_set = Schema(["a", "b", "c"])
+    df = schema_set.to_pandas()
+
+    expected_columns = [field.name for field in dataclasses.fields(ColumnSchema)]
+    expected_columns.remove("properties")
+
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == expected_columns
+
+
+def test_construct_schema_with_column_names():
+    schema = Schema(["x", "y", "z"])
+    expected = Schema([ColumnSchema("x"), ColumnSchema("y"), ColumnSchema("z")])
+
+    assert schema == expected
+
+
+def test_dataset_schema_column_names():
+    ds_schema = Schema(["x", "y", "z"])
+
+    assert ds_schema.column_names == ["x", "y", "z"]
+
+
+def test_dataset_schema_constructor():
+    schema1 = ColumnSchema("col1", tags=["a", "b", "c"])
+    schema2 = ColumnSchema("col2", tags=["c", "d", "e"])
+
+    expected = {schema1.name: schema1, schema2.name: schema2}
+
+    ds_schema_dict = Schema(expected)
+    ds_schema_list = Schema([schema1, schema2])
+
+    assert ds_schema_dict.column_schemas == expected
+    assert ds_schema_list.column_schemas == expected
+
+    with pytest.raises(TypeError) as exception_info:
+        Schema(12345)
+
+    assert "column_schemas" in str(exception_info.value)
+
+
+def test_dataset_schemas_can_be_added():
+    ds1_schema = Schema([ColumnSchema("col1"), ColumnSchema("col2")])
+    ds2_schema = Schema([ColumnSchema("col3"), ColumnSchema("col4")])
+
+    result = ds1_schema + ds2_schema
+
+    expected = Schema(
+        [
+            ColumnSchema("col1"),
+            ColumnSchema("col2"),
+            ColumnSchema("col3"),
+            ColumnSchema("col4"),
+        ]
+    )
+
+    assert result == expected

@@ -17,10 +17,10 @@ import pathlib
 from typing import Union
 
 import fsspec
-import numpy
 
+import merlin.dtypes as md
 from merlin.schema.io import proto_utils, schema_bp
-from merlin.schema.io.schema_bp import Feature, FeatureType, FixedShape, FloatDomain, IntDomain
+from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
 from merlin.schema.io.schema_bp import ValueCount
 from merlin.schema.schema import ColumnSchema
@@ -33,6 +33,8 @@ FEATURE_TYPES = {
     "uint": FeatureType.INT,
     "float": FeatureType.FLOAT,
 }
+SCHEMA_PBTXT_FILE_NAME = "schema.pbtxt"
+SCHEMA_JSON_FILE_NAME = "schema.json"
 
 
 class TensorflowMetadata:
@@ -64,13 +66,17 @@ class TensorflowMetadata:
         return TensorflowMetadata(schema)
 
     @classmethod
-    def from_json_file(cls, path: os.PathLike) -> "TensorflowMetadata":
+    def from_json_file(
+        cls, path: os.PathLike, file_name=SCHEMA_JSON_FILE_NAME
+    ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a JSON file
 
         Parameters
         ----------
         path : str
             Path to the JSON file to parse
+        file_name : str
+            Name of the schema file. Defaults to "schema.json".
 
         Returns
         -------
@@ -78,6 +84,9 @@ class TensorflowMetadata:
             Schema object parsed from JSON file
 
         """
+        path = pathlib.Path(path)
+        if path.is_dir():
+            path = path / file_name
         return cls.from_json(_read_file(path))
 
     @classmethod
@@ -105,7 +114,7 @@ class TensorflowMetadata:
 
     @classmethod
     def from_proto_text_file(
-        cls, path: os.PathLike, file_name="schema.pbtxt"
+        cls, path: os.PathLike, file_name=SCHEMA_PBTXT_FILE_NAME
     ) -> "TensorflowMetadata":
         """Create a TensorflowMetadata schema object from a Protobuf text file
 
@@ -138,7 +147,7 @@ class TensorflowMetadata:
 
         return proto_utils.better_proto_to_proto_text(self.proto_schema, schema_pb2.Schema())
 
-    def to_proto_text_file(self, path: str, file_name="schema.pbtxt"):
+    def to_proto_text_file(self, path: str, file_name=SCHEMA_PBTXT_FILE_NAME):
         """Write this TensorflowMetadata schema object to a file as a Proto text string
 
         Parameters
@@ -147,7 +156,6 @@ class TensorflowMetadata:
             Path to the directory containing the Protobuf text file
         file_name : str
             Name of the output file. Defaults to "schema.pbtxt".
-        path: str :
 
         """
         _write_file(self.to_proto_text(), path, file_name)
@@ -181,6 +189,12 @@ class TensorflowMetadata:
         """
         features = []
         for col_name, col_schema in schema.column_schemas.items():
+            if col_schema.dtype is None:
+                raise ValueError(
+                    f"Schema for column `{col_name}` does not have a dtype. "
+                    "ColumnSchema objects must have dtypes in order to be serializable."
+                )
+
             features.append(_pb_feature(col_schema))
 
         proto_schema = ProtoSchema(feature=features)
@@ -215,6 +229,19 @@ class TensorflowMetadata:
         """
         return self.proto_schema.to_json()
 
+    def to_json_file(self, path: str, file_name=SCHEMA_JSON_FILE_NAME):
+        """Write this TensorflowMetadata schema object to a file as a JSON
+
+        Parameters
+        ----------
+        path : str
+            Path to the directory containing the JSON text file
+        file_name : str
+            Name of the output file. Defaults to "schema.json".
+
+        """
+        _write_file(self.to_json(), path, file_name)
+
 
 def _pb_int_domain(column_schema):
     domain = column_schema.properties.get("domain")
@@ -222,7 +249,7 @@ def _pb_int_domain(column_schema):
         return None
 
     return IntDomain(
-        name=domain.get("name", column_schema.name),
+        name=domain.get("name", None),
         min=domain.get("min", None),
         max=domain.get("max", None),
         is_categorical=(
@@ -236,33 +263,23 @@ def _pb_float_domain(column_schema):
     if domain is None:
         return None
     return FloatDomain(
-        name=column_schema.name,
+        name=domain.get("name", None),
         min=domain.get("min", None),
         max=domain.get("max", None),
     )
-
-
-def _dtype_name(column_schema):
-    # TODO: Decide if we need this since we've standardized on numpy types
-    if hasattr(column_schema.dtype, "kind"):
-        return numpy.core._dtype._kind_name(column_schema.dtype)
-    elif hasattr(column_schema.dtype, "item"):
-        return type(column_schema.dtype(1).item()).__name__
-    elif isinstance(column_schema.dtype, str):
-        return column_schema.dtype
-    elif hasattr(column_schema.dtype, "__name__"):
-        return column_schema.dtype.__name__
-    else:
-        raise TypeError(f"unsupported dtype for column schema: {column_schema.dtype}")
 
 
 def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["dtype_item_size"] = numpy.dtype(column_schema.dtype).itemsize * 8
+    properties["_dims"] = list(
+        list(dim) if isinstance(dim, tuple) else dim for dim in column_schema.shape.as_tuple or []
+    )
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
+    if column_schema.dtype.element_size:
+        properties["dtype_item_size"] = column_schema.dtype.element_size
     return schema_bp.Any().from_dict(properties)
 
 
@@ -275,17 +292,11 @@ def _pb_feature(column_schema):
 
     feature = _set_feature_domain(feature, column_schema)
 
-    if column_schema.is_list:
-        value_count = column_schema.properties.get("value_count", {})
-        min_length = value_count.get("min")
-        max_length = value_count.get("max")
-
-        if min_length and max_length and min_length == max_length:
-            feature.shape = FixedShape(min_length)
-        elif min_length and max_length and min_length < max_length:
-            feature.value_count = ValueCount(min=min_length, max=max_length)
-        else:
-            feature.value_count = ValueCount(min=0, max=0)
+    value_count = column_schema.properties.get("value_count", {})
+    if value_count:
+        min_length = value_count.get("min", 0) or 0
+        max_length = value_count.get("max", 0) or 0
+        feature.value_count = ValueCount(min=min_length, max=max_length)
 
     feature.annotation.tag = _pb_tag(column_schema)
     feature.annotation.extra_metadata.append(_pb_extra_metadata(column_schema))
@@ -298,7 +309,7 @@ def _set_feature_domain(feature, column_schema):
         FeatureType.FLOAT: _pb_float_domain,
     }
 
-    pb_type = FEATURE_TYPES.get(_dtype_name(column_schema))
+    pb_type = FEATURE_TYPES.get(column_schema.dtype.element_type.value)
     if pb_type:
         feature.type = pb_type
 
@@ -326,8 +337,7 @@ def _merlin_domain(feature):
             domain["is_categorical"] = domain_value.is_categorical
 
         if hasattr(domain_value, "name"):
-            name = domain_value.name
-            if name != feature.name:
+            if domain_value.name:
                 domain["name"] = domain_value.name
 
     return domain
@@ -336,8 +346,12 @@ def _merlin_domain(feature):
 def _merlin_value_count(feature):
     if proto_utils.has_field(feature, "value_count"):
         value_count = feature.value_count
-        if value_count.min != value_count.max != 0:
-            return {"min": value_count.min, "max": value_count.max}
+        value_count_dict = {}
+        if value_count.min and value_count.min > 0:
+            value_count_dict["min"] = value_count.min
+        if value_count.max and value_count.max > 0:
+            value_count_dict["max"] = value_count.max
+        return value_count_dict
 
 
 def _merlin_properties(feature):
@@ -357,45 +371,69 @@ def _merlin_properties(feature):
         properties = {}
 
     domain = _merlin_domain(feature)
+
     if domain:
         properties["domain"] = domain
 
     value_count = _merlin_value_count(feature)
+
     if value_count:
         properties["value_count"] = value_count
-        properties["is_list"] = True
+        properties["is_list"] = value_count.get("min", 0) > 0 or value_count.get("max", 0) > 0
         properties["is_ragged"] = value_count.get("min") != value_count.get("max")
+
     return properties
 
 
 int_dtypes_map = {
-    8: numpy.int8,
-    16: numpy.int16,
-    32: numpy.int32,
-    64: numpy.int64,
+    8: md.int8,
+    16: md.int16,
+    32: md.int32,
+    64: md.int64,
 }
 
 
 float_dtypes_map = {
-    16: numpy.float16,
-    32: numpy.float32,
-    64: numpy.float64,
+    16: md.float16,
+    32: md.float32,
+    64: md.float64,
 }
 
 
 def _merlin_dtype(feature, properties):
-    dtype = None
+    dtype = md.unknown
     item_size = int(properties.get("dtype_item_size", 0)) or None
     if feature.type == FeatureType.INT:
         if item_size and item_size in int_dtypes_map:
             dtype = int_dtypes_map[item_size]
         else:
-            dtype = numpy.int
+            dtype = md.int64
     elif feature.type == FeatureType.FLOAT:
         if item_size and item_size in float_dtypes_map:
             dtype = float_dtypes_map[item_size]
         else:
-            dtype = numpy.float
+            dtype = md.float64
+    elif feature.type == FeatureType.BYTES:
+        dtype = md.string
+
+    dims_list = properties.pop("_dims", None)
+
+    if dims_list:
+        dims = []
+        for dim in dims_list:
+            if isinstance(dim, list):
+                dims.append(tuple(dim))
+            elif dim is not None:
+                dims.append(int(dim))
+            else:
+                dims.append(dim)
+        dtype = dtype.with_shape(tuple(dims))
+
+        # If we found dims, avoid overwriting that shape with one inferred from counts or flags
+        properties.pop("value_count", None)
+        properties.pop("is_list", None)
+        properties.pop("is_ragged", None)
+
     return dtype
 
 
@@ -414,7 +452,12 @@ def _merlin_column(feature):
         if Tags.CATEGORICAL not in tags:
             tags.append(Tags.CATEGORICAL)
 
-    return ColumnSchema(name, tags, properties, dtype, is_list, is_ragged=is_ragged)
+    dims = dtype.shape.as_tuple
+
+    if dims:
+        return ColumnSchema(name, tags, properties, dtype, dims=dims)
+    else:
+        return ColumnSchema(name, tags, properties, dtype, is_list=is_list, is_ragged=is_ragged)
 
 
 def _read_file(path: os.PathLike):

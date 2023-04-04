@@ -24,18 +24,18 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from merlin.core.compat import HAS_GPU
+# unused HAS_GPU import is here for backwards compatibility
+from merlin.core.compat import HAS_GPU  # pylint: disable=unused-import # noqa: F401
+from merlin.core.compat import cudf
+from merlin.core.compat import cupy as cp
+from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
-cp = None
-cudf = None
 rmm = None
 
-if HAS_GPU:
+if cudf:
     try:
-        import cudf
-        import cupy as cp
         import dask_cudf
-        import rmm
+        import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
         try:
@@ -46,10 +46,8 @@ if HAS_GPU:
             # cudf < 21.08
             from cudf.utils.dtypes import is_list_dtype as cudf_is_list_dtype
             from cudf.utils.dtypes import is_string_dtype as cudf_is_string_dtype
-
     except ImportError:
-        HAS_GPU = False
-
+        pass
 
 try:
     # Dask >= 2021.5.1
@@ -75,7 +73,7 @@ except ImportError:
         return inner1
 
 
-if HAS_GPU:
+if cudf:
     DataFrameType = Union[pd.DataFrame, cudf.DataFrame]  # type: ignore
     SeriesType = Union[pd.Series, cudf.Series]  # type: ignore
 else:
@@ -122,7 +120,7 @@ def create_merlin_dataset(df):
 
 def read_parquet_metadata(path):
     """Read parquet metadata from path"""
-    if HAS_GPU:
+    if cudf:
         return cudf.io.read_parquet_metadata(path)
     full_meta = pq.read_metadata(path)
     pf = pq.ParquetFile(path)
@@ -131,7 +129,7 @@ def read_parquet_metadata(path):
 
 def get_lib():
     """Dispatch to the appropriate library (cudf or pandas) for the current environment"""
-    return cudf if HAS_GPU else pd
+    return cudf if (cudf and HAS_GPU) else pd
 
 
 def reinitialize(managed_memory=False):
@@ -142,7 +140,7 @@ def reinitialize(managed_memory=False):
 
 def random_uniform(size):
     """Dispatch for numpy.random.RandomState"""
-    if HAS_GPU:
+    if cp:
         return cp.random.uniform(size=size)
     else:
         return np.random.uniform(size=size)
@@ -150,7 +148,7 @@ def random_uniform(size):
 
 def coo_matrix(data, row, col):
     """Dispatch for scipy.sparse.coo_matrix"""
-    if HAS_GPU:
+    if cp:
         return cp.sparse.coo_matrix((data, row, col))
     else:
         import scipy
@@ -161,9 +159,9 @@ def coo_matrix(data, row, col):
 def is_dataframe_object(x):
     # Simple check if object is a cudf or pandas
     # DataFrame object
-    if not HAS_GPU:
-        return isinstance(x, pd.DataFrame)
-    return isinstance(x, (cudf.DataFrame, pd.DataFrame))
+    if cudf:
+        return isinstance(x, (cudf.DataFrame, pd.DataFrame))
+    return isinstance(x, pd.DataFrame)
 
 
 def nullable_series(data, like_df, dtype):
@@ -180,9 +178,9 @@ def nullable_series(data, like_df, dtype):
 def is_series_object(x):
     # Simple check if object is a cudf or pandas
     # Series object
-    if not HAS_GPU:
-        return isinstance(x, pd.Series)
-    return isinstance(x, (cudf.Series, pd.Series))
+    if cudf:
+        return isinstance(x, (cudf.Series, pd.Series))
+    return isinstance(x, pd.Series)
 
 
 def is_cpu_object(x):
@@ -215,50 +213,86 @@ def hex_to_int(s, dtype=None):
 
 def random_state(seed, like_df=None):
     """Dispatch for numpy.random.RandomState"""
-    if not HAS_GPU or isinstance(like_df, (pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.random.RandomState(seed) if cp else np.random.RandomState(seed)
+    elif isinstance(like_df, (pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.random.RandomState(seed)
-    else:
+    elif cudf and isinstance(like_df, (cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.random.RandomState(seed)
+    else:
+        raise ValueError(
+            "Unsupported dataframe type: "
+            f"{type(like_df)}"
+            " Supported types: a DataFrame, Series, or RangeIndex (cudf or pandas)."
+        )
 
 
 def arange(size, like_df=None, dtype=None):
     """Dispatch for numpy.arange"""
-    if not HAS_GPU or isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.arange(size, dtype=dtype) if cp else np.arange(size, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.arange(size, dtype=dtype)
-    else:
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.arange(size, dtype=dtype)
+    else:
+        raise ValueError(
+            "Unsupported dataframe type: "
+            f"{type(like_df)}"
+            " Expected either a pandas or cudf DataFrame or Series."
+        )
 
 
 def array(x, like_df=None, dtype=None):
     """Dispatch for numpy.array"""
-    if not HAS_GPU or isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.array(x, dtype=dtype) if cp else np.array(x, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, pd.RangeIndex)):
         return np.array(x, dtype=dtype)
-    else:
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.array(x, dtype=dtype)
+    else:
+        raise ValueError(
+            "Unsupported dataframe type: "
+            f"{type(like_df)}"
+            " Expected either a pandas or cudf DataFrame or Series."
+        )
 
 
 def zeros(size, like_df=None, dtype=None):
     """Dispatch for numpy.array"""
-    if not HAS_GPU or isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series)):
+    if like_df is None:
+        return cp.zeros(size, dtype=dtype) if cp else np.zeros(size, dtype=dtype)
+    elif isinstance(like_df, (np.ndarray, pd.DataFrame, pd.Series, cudf.RangeIndex)):
         return np.zeros(size, dtype=dtype)
-    else:
+    elif cudf and isinstance(like_df, (cp.ndarray, cudf.DataFrame, cudf.Series, cudf.RangeIndex)):
         return cp.zeros(size, dtype=dtype)
+    else:
+        raise ValueError(
+            "Unsupported dataframe type: "
+            f"{type(like_df)}"
+            " Expected either a pandas or cudf DataFrame or Series."
+        )
 
 
 def hash_series(ser):
     """Row-wise Series hash"""
-    if not HAS_GPU or isinstance(ser, pd.Series):
+    if isinstance(ser, pd.Series):
         # Using pandas hashing, which does not produce the
         # same result as cudf.Series.hash_values().  Do not
         # expect hash-based data transformations to be the
         # same on CPU and CPU.  TODO: Fix this (maybe use
         # murmurhash3 manually on CPU).
         return hash_object_dispatch(ser).values
-    else:
+    elif cudf and isinstance(ser, cudf.Series):
         if is_list_dtype(ser):
             return ser.list.leaves.hash_values()
         else:
             return ser.hash_values()
+    else:
+        raise ValueError(
+            "Unsupported series type: " f"{type(ser)}" " Expected either a pandas or cudf Series."
+        )
 
 
 def series_has_nulls(s):
@@ -269,13 +303,13 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesType) -> np.dtype:
+def list_val_dtype(ser: SeriesLike) -> np.dtype:
     """
     Return the dtype of the leaves from a list or nested list
 
     Parameters
     ----------
-    ser : SeriesType
+    ser : SeriesLike
         A series where the rows contain lists or nested lists
 
     Returns
@@ -284,27 +318,34 @@ def list_val_dtype(ser: SeriesType) -> np.dtype:
         The dtype of the innermost elements
     """
     if is_list_dtype(ser):
-        if HAS_GPU and isinstance(ser, cudf.Series):
+        if cudf is not None and isinstance(ser, cudf.Series):
             if is_list_dtype(ser):
                 ser = ser.list.leaves
             return ser.dtype
         elif isinstance(ser, pd.Series):
-            return pd.core.dtypes.cast.infer_dtype_from(ser[0][0])[0]
+            return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
+    if isinstance(ser, np.ndarray):
+        return ser.dtype
+    # adds detection when in merlin column
+    if hasattr(ser, "is_list"):
+        return ser[0].dtype
     return None
 
 
 def is_list_dtype(ser):
-    """Check if Series contains list elements"""
+    """Check if Series, dtype, or array contains or represents list elements"""
+    # adds detection for merlin column
+    if hasattr(ser, "is_list"):
+        return ser.is_list
     if isinstance(ser, pd.Series):
         if not len(ser):  # pylint: disable=len-as-condition
             return False
         return pd.api.types.is_list_like(ser.values[0])
-    elif not HAS_GPU:
-        # either np.ndarray or a dtype
-        if isinstance(ser, np.ndarray):
-            ser = ser[0]
-        return pd.api.types.is_list_like(np.dtype(ser))
-    return cudf_is_list_dtype(ser)
+    elif cudf and isinstance(ser, (cudf.Series, cudf.ListDtype)):
+        return cudf_is_list_dtype(ser)
+    elif isinstance(ser, np.ndarray) or (cp and isinstance(ser, cp.ndarray)):
+        return len(ser.shape) > 1
+    return pd.api.types.is_list_like(ser)
 
 
 def is_string_dtype(dtype: np.dtype) -> bool:
@@ -320,18 +361,28 @@ def is_string_dtype(dtype: np.dtype) -> bool:
     bool
         `True` if the dtype of `obj` is a string type
     """
-    if not HAS_GPU:
-        return pd.api.types.is_string_dtype(dtype)
-    else:
+    if cudf:
         return cudf_is_string_dtype(dtype)
+    return pd.api.types.is_string_dtype(dtype)
 
 
 def flatten_list_column_values(s):
     """returns a flattened list from a list column"""
-    if isinstance(s, pd.Series) or not cudf:
+    if isinstance(s, pd.Series):
         return pd.Series(itertools.chain(*s))
-    else:
+    elif cudf and isinstance(s, cudf.Series):
         return s.list.leaves
+    elif cp and isinstance(s, cp.ndarray):
+        return s.flatten()
+    elif isinstance(s, np.ndarray):
+        return s.flatten()
+    else:
+        raise ValueError(
+            "Unsupported series type: "
+            f"{type(s)} "
+            "Expected either a pandas or cuDF Series. "
+            "Or a NumPy or CuPy array"
+        )
 
 
 def flatten_list_column(s):
@@ -347,33 +398,49 @@ def concat_columns(args: list):
     """Dispatch function to concatenate DataFrames with axis=1"""
     if len(args) == 1:
         return args[0]
-    else:
-        _lib = cudf if HAS_GPU and isinstance(args[0], cudf.DataFrame) else pd
-        return _lib.concat(
+    elif cudf is not None and isinstance(args[0], cudf.DataFrame):
+        return cudf.concat(
             [a.reset_index(drop=True) for a in args],
             axis=1,
         )
+    elif isinstance(args[0], pd.DataFrame):
+        return pd.concat(
+            [a.reset_index(drop=True) for a in args],
+            axis=1,
+        )
+    elif isinstance(args[0], DictLike):
+        result = type(args[0])()
+        for arg in args:
+            result.update(arg)
+        return result
     return None
 
 
-def read_parquet_dispatch(df: DataFrameType) -> Callable:
+def read_parquet_dispatch(df: DataFrameLike) -> Callable:
     """Dispatch function for reading parquet files"""
     return read_dispatch(df=df, fmt="parquet")
 
 
-def read_dispatch(df: DataFrameType = None, cpu=None, collection=False, fmt="parquet") -> Callable:
+def read_dispatch(
+    df: Union[DataFrameLike, str] = None, cpu=None, collection=False, fmt="parquet"
+) -> Callable:
     """Return the necessary read_parquet function to generate
     data of a specified type.
     """
-    if cpu or isinstance(df, pd.DataFrame) or not HAS_GPU:
+    if cpu or isinstance(df, pd.DataFrame):
         _mod = dd if collection else pd
-    else:
+    elif cudf and isinstance(df, cudf.DataFrame):
         _mod = dask_cudf if collection else cudf.io
+    else:
+        if collection:
+            _mod = dask_cudf if cudf else dd
+        else:
+            _mod = cudf.io if cudf else pd
     _attr = "read_csv" if fmt == "csv" else "read_parquet"
     return getattr(_mod, _attr)
 
 
-def parquet_writer_dispatch(df: DataFrameType, path=None, **kwargs):
+def parquet_writer_dispatch(df: DataFrameLike, path=None, **kwargs):
     """Return the necessary ParquetWriter class to write
     data of a specified type.
 
@@ -387,8 +454,13 @@ def parquet_writer_dispatch(df: DataFrameType, path=None, **kwargs):
         _cls = pq.ParquetWriter
         if path:
             _args.append(pa.Table.from_pandas(df, preserve_index=False).schema)
-    else:
+    elif cudf is not None:
         _cls = cudf.io.parquet.ParquetWriter
+    else:
+        raise ValueError(
+            "Unable to load cudf. "
+            "Please check that your environment has GPU(s) and cudf available."
+        )
 
     if not path:
         return _cls
@@ -438,7 +510,7 @@ def pull_apart_list(original, device=None):
         offsets = original._column.offsets
         elements = original._column.elements
         if isinstance(elements, cudf.core.column.lists.ListColumn):
-            offsets = elements.offsets[offsets]
+            offsets = make_series(elements.offsets)[offsets]
     return make_series(values, device), make_series(offsets, device)
 
 
@@ -454,24 +526,40 @@ def concat(objs, **kwargs):
     """dispatch function for concat"""
     if isinstance(objs[0], dd.DataFrame):
         return dd.multi.concat(objs)
-    elif isinstance(objs[0], (pd.DataFrame, pd.Series)) or not HAS_GPU:
+    elif isinstance(objs[0], (pd.DataFrame, pd.Series)):
         return pd.concat(objs, **kwargs)
-    else:
+    elif cudf and isinstance(objs[0], (cudf.DataFrame, cudf.Series)):
         return cudf.core.reshape.concat(objs, **kwargs)
+    else:
+        raise ValueError(
+            "Unsupported dataframe type: "
+            f"{type(objs[0])}"
+            " Expected a pandas, cudf, or dask DataFrame."
+        )
 
 
 def make_df(_like_df=None, device=None):
     """Return a DataFrame with the same dtype as `_like_df`"""
-    if not cudf or isinstance(_like_df, (pd.DataFrame, pd.Series)):
-        return pd.DataFrame(_like_df)
-    elif isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+    if (
+        not cudf
+        or device == "cpu"
+        or not HAS_GPU
+        or isinstance(_like_df, (pd.DataFrame, pd.Series))
+    ):
+        # move to pandas need it on CPU (host memory)
+        # can be a cudf, cupy or numpy Series
+        if cudf and isinstance(_like_df, (cudf.DataFrame, cudf.Series)):
+            # move to cpu
+            return _like_df.to_pandas()
+        if cp and isinstance(_like_df, cp.ndarray):
+            return pd.DataFrame(_like_df.get())
+        else:
+            return pd.DataFrame(_like_df)
+    else:
+        if isinstance(_like_df, dict) and len(_like_df) > 0:
+            if all(isinstance(v, pd.Series) for v in _like_df.values()):
+                return pd.DataFrame(_like_df)
         return cudf.DataFrame(_like_df)
-    elif device is None and isinstance(_like_df, dict) and len(_like_df) > 0:
-        is_pandas = all(isinstance(v, pd.Series) for v in _like_df.values())
-        return pd.DataFrame(_like_df) if is_pandas else cudf.DataFrame(_like_df)
-    if device == "cpu":
-        return pd.DataFrame(_like_df)
-    return cudf.DataFrame(_like_df)
 
 
 def make_series(_like_ser=None, device=None):
@@ -517,9 +605,9 @@ def detect_format(data):
             "csv": ExtData.CSV,
         }
         if isinstance(data, list) and data:
-            file_type = mapping.get(str(data[0]).split(".")[-1], None)
+            file_type = mapping.get(str(data[0]).rsplit(".", maxsplit=1)[-1], None)
         else:
-            file_type = mapping.get(str(data).split(".")[-1], None)
+            file_type = mapping.get(str(data).rsplit(".", maxsplit=1)[-1], None)
         if file_type is None:
             raise ValueError("Data format not recognized.")
         return file_type
@@ -548,7 +636,7 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
             _x = x if isinstance(x, pd.DataFrame) else x.to_pandas()
             # Output a collection if `to_collection=True`
             return dd.from_pandas(_x, sort=False, npartitions=npartitions) if to_collection else _x
-    else:
+    elif cudf and dask_cudf:
         if isinstance(x, dd.DataFrame):
             # If input is a Dask collection, convert to dask_cudf
             if isinstance(x, dask_cudf.DataFrame):
@@ -571,6 +659,12 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
                 if to_collection
                 else _x
             )
+    else:
+        raise RuntimeError(
+            "Unable to move data to GPU. "
+            "cudf and dask_cudf are not available. "
+            "Make sure these packages are installed and can be imported in this environment. "
+        )
 
 
 def to_host(x):
@@ -578,30 +672,69 @@ def to_host(x):
 
     All other data will pass through unchanged.
     """
-    if not HAS_GPU or isinstance(x, (pd.DataFrame, dd.DataFrame)):
-        return x
-    else:
+    if cudf and isinstance(x, cudf.DataFrame):
         return x.to_arrow()
+    return x
 
 
 def from_host(x):
-    if not HAS_GPU:
-        return x
-    elif isinstance(x, cudf.DataFrame):
-        return x
-    else:
+    if isinstance(x, pd.DataFrame):
+        return cudf.DataFrame.from_pandas(x)
+    elif isinstance(x, pa.Table):
         return cudf.DataFrame.from_arrow(x)
+    return x
 
 
 def build_cudf_list_column(new_elements, new_offsets):
-    if not HAS_GPU:
-        return []
-    return build_column(
-        None,
-        dtype=cudf.core.dtypes.ListDtype(new_elements.dtype),
-        size=new_offsets.size - 1,
-        children=(as_column(new_offsets), as_column(new_elements)),
-    )
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : cudf.Series
+        The elements of a pandas series
+    row_lengths : cudf.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    cudf.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
+    if cudf:
+        return build_column(
+            None,
+            dtype=cudf.core.dtypes.ListDtype(new_elements.dtype),
+            size=new_offsets.size - 1,
+            children=(as_column(new_offsets), as_column(new_elements)),
+        )
+    return []
+
+
+def build_pandas_list_column(elements, row_lengths):
+    """Method creates a List series from the corresponding elements and
+    row_lengths
+
+    Parameters
+    ----------
+    elements : pd.Series
+        The elements of a pandas series
+    row_lengths : pd.Series
+        The corresponding row lengths of the elements
+
+    Returns
+    -------
+    pd.Series
+        The list column with corresponding elements and row_lengths as a series.
+    """
+    offset = 0
+    rows = []
+    for row_length in row_lengths:
+        row_length = int(row_length)
+        row = elements[offset : offset + row_length]
+        offset += row_length
+        rows.append(row.values)
+    return pd.Series(rows)
 
 
 def create_multihot_col(offsets, elements):
@@ -610,21 +743,11 @@ def create_multihot_col(offsets, elements):
     data = cudf series with the list data flattened to 1-d
     """
     if isinstance(elements, pd.Series):
-        col = pd.Series()
-        lh, rh = pd.Series(offsets[1:]).reset_index(drop=True), pd.Series(offsets[:-1]).reset_index(
-            drop=True
-        )
-        vals_per_entry = lh - rh
-        vals_used = 0
-        entries = []
-        for vals_count in vals_per_entry:
-            vals_count = int(vals_count)
-            entry = elements[vals_used : vals_used + vals_count]
-            if len(entry) == 1:
-                entry = entry[0]
-            vals_used += vals_count
-            entries.append(entry.values)
-        col = col.append(pd.Series(entries))
+        lh = pd.Series(offsets[1:]).reset_index(drop=True)
+        rh = pd.Series(offsets[:-1]).reset_index(drop=True)
+        row_lengths = lh - rh
+
+        col = build_pandas_list_column(elements, row_lengths)
     else:
         offsets = as_column(offsets, dtype="int32")
         elements = as_column(elements)
@@ -648,3 +771,15 @@ def get_random_state():
     if cp:
         return cp.random.get_random_state()
     return np.random.mtrand.RandomState()
+
+
+def df_from_dict(col_dict):
+    from merlin.table import TensorTable, df_from_tensor_table
+
+    return df_from_tensor_table(TensorTable(col_dict))
+
+
+def dict_from_df(df: DataFrameLike):
+    from merlin.table import tensor_table_from_df
+
+    return tensor_table_from_df(df).to_dict()

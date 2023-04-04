@@ -22,64 +22,18 @@ import urllib.request
 import warnings
 import zipfile
 from contextvars import ContextVar
+from typing import Any, Callable, Optional
 
 import dask
+import distributed
 from dask.dataframe.optimize import optimize as dd_optimize
 from dask.distributed import Client, get_client
 from tqdm import tqdm
 
-from merlin.core.compat import HAS_GPU, cuda
+from merlin.core.compat import device_mem_size  # noqa pylint: disable=unused-import
+from merlin.core.has_gpu import HAS_GPU
 
 _merlin_dask_client = ContextVar("_merlin_dask_client", default="auto")
-
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
-
-
-def pynvml_mem_size(kind="total", index=0):
-    import pynvml
-
-    pynvml.nvmlInit()
-    size = None
-    if kind == "free":
-        size = int(pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(index)).free)
-    elif kind == "total":
-        size = int(pynvml.nvmlDeviceGetMemoryInfo(pynvml.nvmlDeviceGetHandleByIndex(index)).total)
-    else:
-        raise ValueError("{0} not a supported option for device_mem_size.".format(kind))
-    pynvml.nvmlShutdown()
-    return size
-
-
-def device_mem_size(kind="total", cpu=False):
-
-    # Use psutil (if available) for cpu mode
-    if cpu and psutil:
-        if kind == "total":
-            return psutil.virtual_memory().total
-        elif kind == "free":
-            return psutil.virtual_memory().free
-    elif cpu:
-        warnings.warn("Please install psutil for full cpu=True support.")
-        # Assume 1GB of memory
-        return int(1e9)
-
-    if kind not in ["free", "total"]:
-        raise ValueError("{0} not a supported option for device_mem_size.".format(kind))
-    try:
-        if kind == "free":
-            return int(cuda.current_context().get_memory_info()[0])
-        else:
-            return int(cuda.current_context().get_memory_info()[1])
-    except NotImplementedError:
-        if kind == "free":
-            # Not using NVML "free" memory, because it will not include RMM-managed memory
-            warnings.warn("get_memory_info is not supported. Using total device memory from NVML.")
-        size = pynvml_mem_size(kind="total", index=0)
-    return size
 
 
 def get_rmm_size(size):
@@ -129,18 +83,39 @@ def download_file(url, local_filename, unzip_files=True, redownload=True):
 
 
 def ensure_optimize_dataframe_graph(ddf=None, dsk=None, keys=None):
-    # Perform HLG DataFrame optimizations
-    #
-    # If `ddf` is specified, an optimized Dataframe
-    # collection will be returned. If `dsk` and `keys`
-    # are specified, an optimized graph will be returned.
-    #
-    # These optimizations are performed automatically
-    # when a DataFrame collection is computed/persisted,
-    # but they are NOT always performed when statistics
-    # are computed. The purpose of this utility is to
-    # ensure that the Dataframe-based optimizations are
-    # always applied.
+    """Perform HLG DataFrame optimizations
+
+    If `ddf` is specified, an optimized Dataframe
+    collection will be returned. If `dsk` and `keys`
+    are specified, an optimized graph will be returned.
+
+    These optimizations are performed automatically
+    when a DataFrame collection is computed/persisted,
+    but they are NOT always performed when statistics
+    are computed. The purpose of this utility is to
+    ensure that the Dataframe-based optimizations are
+    always applied.
+
+    Parameters
+    ----------
+    ddf : dask_cudf.DataFrame, optional
+        The dataframe to optimize, by default None
+    dsk : dask.highlevelgraph.HighLevelGraph, optional
+        Dask high level graph, by default None
+    keys : List[str], optional
+        The keys to optimize, by default None
+
+    Returns
+    -------
+    Union[dask_cudf.DataFrame, dask.highlevelgraph.HighLevelGraph]
+        A dask_cudf DataFrame or dask HighLevelGraph depending
+        on the parameters provided.
+
+    Raises
+    ------
+    ValueError
+        If ddf is not provided and one of dsk or keys are None.
+    """
 
     if ddf is None:
         if dsk is None or keys is None:
@@ -394,7 +369,8 @@ def set_client_deprecated(client, caller_str):
 
 
 def set_dask_client(client="auto", new_cluster=None, force_new=False, **cluster_options):
-    """Set the Dask-Distributed client
+    """Set the Dask-Distributed client.
+
     Parameters
     -----------
     client : {"auto", None} or `dask.distributed.Client`
@@ -454,11 +430,18 @@ def set_dask_client(client="auto", new_cluster=None, force_new=False, **cluster_
     return None if active == "auto" else active
 
 
-def global_dask_client():
+def global_dask_client() -> Optional[distributed.Client]:
+    """Get Global Dask client if it's been set.
+
+    Returns
+    -------
+    Optional[distributed.Client]
+        The global client.
+    """
     # First, check _merlin_dask_client
     merlin_client = _merlin_dask_client.get()
     if merlin_client and merlin_client != "auto":
-        if merlin_client.cluster and merlin_client.cluster.workers:
+        if merlin_client.cluster and merlin_client.cluster.workers:  # type: ignore
             # Active Dask client already known
             return merlin_client
         else:
@@ -471,14 +454,27 @@ def global_dask_client():
             set_dask_client(get_client())
             return _merlin_dask_client.get()
         except ValueError:
+            # no global client found
             pass
     # Catch-all
     return None
 
 
-def run_on_worker(func, *args, **kwargs):
-    # Run a function on a Dask worker using `delayed`
-    # execution (if a Dask client is detected)
+def run_on_worker(func: Callable, *args, **kwargs) -> Any:
+    """Run a function on a Dask worker using `delayed`
+    execution (if a Dask client is detected)
+
+    Parameters
+    ----------
+    func : Callable
+        The function to run
+
+    Returns
+    -------
+    Any
+        The result of the function call with supplied arguments
+    """
+
     if global_dask_client():
         # There is a specified or global Dask client. Use it
         return dask.delayed(func)(*args, **kwargs).compute()

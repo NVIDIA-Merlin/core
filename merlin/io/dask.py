@@ -14,10 +14,12 @@
 # limitations under the License.
 #
 import collections
+import warnings
 
 import dask
 import pandas as pd
 from dask.base import tokenize
+from dask.blockwise import Blockwise
 from dask.dataframe.core import _concat, new_dd_object
 from dask.delayed import Delayed
 from dask.highlevelgraph import HighLevelGraph
@@ -47,6 +49,9 @@ class DaskSubgraph:
         self.parts = parts
         self.subgraph = full_graph.cull({(self.name, part) for part in self.parts})
 
+    def __iter__(self):
+        return iter(self.parts)
+
     def __getitem__(self, part):
         key = (self.name, part)
         dsk = self.subgraph.cull({key})
@@ -67,6 +72,7 @@ def _write_output_partition(
     num_threads,
     cpu,
     suffix,
+    row_group_size,
 ):
     df_size = len(df)
     out_files_per_proc = out_files_per_proc or 1
@@ -85,6 +91,8 @@ def _write_output_partition(
                 num_threads=num_threads,
                 cpu=cpu,
                 suffix=suffix,
+                fs=fs,
+                row_group_size=row_group_size,
             )
             writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
             writer_cache[processed_path] = writer
@@ -110,12 +118,7 @@ def _get_partition_groups(df, partition_cols, fs, output_path, filename):
         keys = tuple(sub_df[col].iloc[0] for col in partition_cols)
         if not isinstance(keys, tuple):
             keys = (keys,)
-        subdir = fs.sep.join(
-            [
-                "{colname}={value}".format(colname=name, value=val)
-                for name, val in zip(partition_cols, keys)
-            ]
-        )
+        subdir = fs.sep.join([f"{name}={val}" for name, val in zip(partition_cols, keys)])
         prefix = fs.sep.join([output_path, subdir])
         fs.mkdirs(prefix, exist_ok=True)
         fns.append(fs.sep.join([subdir, filename]))
@@ -141,6 +144,7 @@ def _write_partitioned(
     output_format,
     num_threads,
     cpu,
+    row_group_size,
 ):
     # Logic copied from cudf/cudf/io/parquet.py
     data_cols = df.columns.drop(partition_cols)
@@ -157,6 +161,7 @@ def _write_partitioned(
         num_threads=num_threads,
         cpu=cpu,
         fns=fns,
+        row_group_size=row_group_size,
     )
     writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
 
@@ -181,8 +186,8 @@ def _write_subgraph(
     num_threads,
     cpu,
     suffix,
+    row_group_size,
 ):
-
     fns = fns if isinstance(fns, (tuple, list)) else (fns,)
     writer = writer_factory(
         output_format,
@@ -193,13 +198,20 @@ def _write_subgraph(
         num_threads=num_threads,
         cpu=cpu,
         fns=[fn + suffix for fn in fns],
+        fs=fs,
+        row_group_size=row_group_size,
     )
     writer.set_col_names(labels=label_names, cats=cat_names, conts=cont_names)
 
     # Add data
     num_rows = 0
-    for part in subgraph.parts:
-        table = subgraph[part]
+    for part in subgraph:
+        if isinstance(subgraph, list):
+            # Partition is already a DataFrame object
+            table = part
+        else:
+            # Extract partition from the DaskSubgraph
+            table = subgraph[part]
         writer.add_data(table)
         num_rows += len(table)
         del table
@@ -209,7 +221,6 @@ def _write_subgraph(
 
 
 def _write_metadata_files(md_list, output_path, output_format, cpu, schema):
-
     # Separate and merge metadata
     general_md = []
     special_md = []
@@ -228,7 +239,6 @@ def _write_metadata_files(md_list, output_path, output_format, cpu, schema):
 
 
 def _simple_shuffle(ddf, plan):
-
     # Construct graph for a simple shuffle
     token = tokenize(ddf, plan)
     name = "shuffled-" + token
@@ -258,13 +268,21 @@ def _ddf_to_dataset(
     num_threads,
     cpu,
     suffix="",
+    row_group_size=None,
     partition_on=None,
     schema=None,
 ):
-
     # Construct graph for Dask-based dataset write
     token = tokenize(
-        ddf, shuffle, out_files_per_proc, cat_names, cont_names, label_names, suffix, partition_on
+        ddf,
+        shuffle,
+        out_files_per_proc,
+        cat_names,
+        cont_names,
+        label_names,
+        suffix,
+        partition_on,
+        row_group_size,
     )
     name = "write-processed-" + token
     write_name = name + "-partition" + token
@@ -293,6 +311,7 @@ def _ddf_to_dataset(
                 output_format,
                 num_threads,
                 cpu,
+                row_group_size,
             )
         dsk[name] = (
             _write_metadata_files,
@@ -306,9 +325,39 @@ def _ddf_to_dataset(
         # Use specified mapping of data to output files
         cached_writers = False
         full_graph = ddf.dask
+
+        # Check if we need to use conventional task scheduling,
+        # or if the partition-file mapping is dangerous
+        use_tasks = False
+        all_blockwise = all(isinstance(layer, Blockwise) for layer in full_graph.layers.values())
+        if not all_blockwise:
+            if all(len(v) == 1 for v in file_partition_map.values()):
+                # Use conventional task scheduling if we have a 1:1
+                # mapping between partitions and output files
+                use_tasks = True
+            else:
+                # We don't have all Blockwise layers, so this
+                # write operation may cause pain
+                warnings.warn(
+                    "Using the 'subgraph' approach to execute a graph "
+                    "with non-trivial dependencies. This may cause memory "
+                    "errors if there is not a 1:1 mapping between Dask "
+                    "partitions and output files. Please consider using "
+                    "defaults for `output_files` and `out_files_per_proc`."
+                )
+
         for fns, parts in file_partition_map.items():
             # Isolate subgraph for this output file
-            subgraph = DaskSubgraph(full_graph, ddf._name, parts)
+            if use_tasks and len(parts) == 1:
+                # If there is only one input partition for this
+                # file, then we don't need to create a subgraph.
+                # We can just use conventional task scheduling
+                subgraph = [(ddf._name, parts[0])]
+            else:
+                # Otherwise, we need a subgraph to avoid
+                # materializing multiple input partitions on the
+                # same worker at once (likely to cause OOM errors)
+                subgraph = DaskSubgraph(full_graph, ddf._name, parts)
             task_list.append((write_name, str(fns)))
             dsk[task_list[-1]] = (
                 _write_subgraph,
@@ -324,6 +373,7 @@ def _ddf_to_dataset(
                 num_threads,
                 cpu,
                 suffix,
+                row_group_size,
             )
         dsk[name] = (
             _write_metadata_files,
@@ -351,6 +401,7 @@ def _ddf_to_dataset(
                 num_threads,
                 cpu,
                 suffix,
+                row_group_size,
             )
             task_list.append(key)
         dsk[name] = (lambda x: x, task_list)
@@ -382,7 +433,7 @@ def _finish_dataset(client, ddf, output_path, fs, output_format, cpu, schema):
 
         general_md = []
         special_md = []
-        for (gen, spec) in out.values():
+        for gen, spec in out.values():
             general_md.append(gen)
             if spec:
                 special_md.append(spec)

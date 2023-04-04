@@ -13,20 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Text, Union
 
-import numpy as np
+from dataclasses import InitVar, dataclass, field, replace
+from typing import Dict, List, Optional, Text, Tuple, Union
+
 import pandas as pd
 
+import merlin.dtypes as md
+from merlin.dtypes import DType
+from merlin.dtypes.shape import Shape
 from merlin.schema.tags import Tags, TagSet
 
 
 @dataclass(frozen=True)
 class Domain:
-    min: Union[int, float]
-    max: Union[int, float]
+    """Describes an integer or float domain.
+
+    Can be partially specified. With any of name, min, max.
+    """
+
+    min: Optional[Union[int, float]] = None
+    max: Optional[Union[int, float]] = None
     name: Optional[str] = None
+
+    @property
+    def is_bounded(self):
+        """Returns True of domain has both a lower and upper bound.
+
+        Returns
+        -------
+        bool
+            True if domain has both min and max defined.
+        """
+        return self.max and self.min
 
 
 @dataclass(frozen=True)
@@ -34,36 +53,77 @@ class ColumnSchema:
     """A schema containing metadata of a dataframe column."""
 
     name: Text
-    tags: Optional[TagSet] = field(default_factory=TagSet)
+    tags: Optional[Union[TagSet, List[Union[str, Tags]]]] = field(default_factory=TagSet)
     properties: Optional[Dict] = field(default_factory=dict)
-    dtype: Optional[object] = None
-    is_list: bool = False
-    is_ragged: bool = False
+    dtype: Optional[DType] = None
+    is_list: Optional[bool] = None
+    is_ragged: Optional[bool] = None
+    dims: InitVar[Union[Tuple, Shape]] = None
 
-    def __post_init__(self):
+    def __post_init__(self, dims):
         """Standardize tags and dtypes on initialization
+
+        This method works around the inability to set attributes on frozen dataclass
+        objects by using object.__setattr__, which bypasses the methods that frozen
+        dataclasses lock down. That approach allows to do some normalization on the
+        object's attribute values in the post init hook that we otherwise wouldn't
+        have a way to implement.
 
         Raises:
             TypeError: If the provided dtype cannot be cast to a numpy dtype
+            ValueError: If the provided shape, value counts, and/or flags are inconsistent
         """
-        tags = TagSet(self.tags)
-        object.__setattr__(self, "tags", tags)
+        # Provide defaults and minor conversions for convenience
+        object.__setattr__(self, "tags", TagSet(self.tags))
 
-        try:
-            if hasattr(self.dtype, "numpy_dtype"):
-                dtype = np.dtype(self.dtype.numpy_dtype)
-            elif hasattr(self.dtype, "_categories"):
-                dtype = self.dtype._categories.dtype
-            elif isinstance(self.dtype, pd.StringDtype):
-                dtype = np.dtype("O")
-            else:
-                dtype = np.dtype(self.dtype)
-        except TypeError as err:
-            raise TypeError(
-                f"Unsupported dtype {self.dtype}, unable to cast {self.dtype} to a numpy dtype."
-            ) from err
-
+        dtype = md.dtype(self.dtype or md.unknown).without_shape
         object.__setattr__(self, "dtype", dtype)
+
+        # Validate that everything provided is consistent
+        value_counts = self.properties.get("value_count", {})
+        if self.is_list and self.is_ragged is False:
+            if "max" in value_counts and "min" not in value_counts:
+                value_counts["min"] = value_counts["max"]
+            if "max" not in value_counts and "min" in value_counts:
+                value_counts["max"] = value_counts["min"]
+
+        self._validate_shape_info(self.shape, value_counts, self.is_list, self.is_ragged)
+
+        # Pick which source to pull shape info from
+        if dims:
+            new_shape = Shape(dims)
+        elif dtype.shape.dims:
+            new_shape = dtype.shape
+        elif value_counts:
+            new_shape = self._shape_from_counts(Domain(**value_counts))
+        elif self.is_list:
+            new_shape = self._shape_from_flags(self.is_list)
+        else:
+            new_shape = Shape()
+
+        # Update the shape and propagate out to flags and value counts
+        dtype = dtype.with_shape(new_shape)
+        object.__setattr__(self, "dtype", dtype)
+        object.__setattr__(self, "is_list", dtype.shape.is_list)
+        object.__setattr__(self, "is_ragged", dtype.shape.is_ragged)
+
+        properties = {**self.properties}
+
+        if new_shape.dims is not None and len(new_shape.dims) > 1:
+            value_counts = {"min": new_shape.dims[1].min, "max": new_shape.dims[1].max}
+            properties = {**properties, **{"value_count": value_counts}}
+
+        object.__setattr__(self, "properties", properties)
+
+    def _shape_from_flags(self, is_list):
+        return Shape(((0, None), (0, None))) if is_list else None
+
+    def _shape_from_counts(self, value_count):
+        return Shape(((0, None), (value_count.min or 0, value_count.max)))
+
+    @property
+    def shape(self):
+        return self.dtype.shape
 
     def with_name(self, name: str) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with a different column name
@@ -79,14 +139,7 @@ class ColumnSchema:
             Copied object with new column name
 
         """
-        return ColumnSchema(
-            name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, name=name)
 
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
@@ -102,14 +155,7 @@ class ColumnSchema:
             Copied object with new column tags
 
         """
-        return ColumnSchema(
-            self.name,
-            tags=self.tags.override(tags),
-            properties=self.properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        return replace(self, tags=self.tags.override(tags))  # type: ignore
 
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
@@ -131,19 +177,26 @@ class ColumnSchema:
 
         """
         if not isinstance(properties, dict):
-            raise TypeError("properties must be in dict format, key: value")
+            raise TypeError("ColumnSchema properties must be a dictionary")
 
         # Using new dictionary to avoid passing old ref to new schema
-        properties.update(self.properties)
+        new_properties = {**self.properties, **properties}
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=properties,
-            dtype=self.dtype,
-            is_list=self.is_list,
-            is_ragged=self.is_ragged,
-        )
+        value_counts = properties.get("value_count", {})
+
+        if value_counts:
+            return replace(
+                self,
+                properties=new_properties,
+                dtype=self.dtype.without_shape,
+                is_list=None,
+                is_ragged=None,
+            )
+        else:
+            return replace(
+                self,
+                properties=new_properties,
+            )
 
     def with_dtype(self, dtype, is_list: bool = None, is_ragged: bool = None) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column dtype
@@ -165,29 +218,54 @@ class ColumnSchema:
             Copied object with new column dtype
 
         """
-        is_list = is_list if is_list is not None else self.is_list
+        new_dtype = md.dtype(dtype).with_shape(self.shape)
 
-        if is_list:
-            is_ragged = is_ragged if is_ragged is not None else self.is_ragged
-        else:
-            is_ragged = False
+        properties = self.properties.copy()
+        if is_list is not None or is_ragged is not None:
+            properties.pop("value_count", None)
+            new_dtype = new_dtype.without_shape
 
-        return ColumnSchema(
-            self.name,
-            tags=self.tags,
-            properties=self.properties,
-            dtype=dtype,
-            is_list=is_list,
-            is_ragged=is_ragged,
+        return replace(
+            self, dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
+        )
+
+    def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
+        """
+        Create a copy of this object with a new shape
+
+        Parameters
+        ----------
+        shape : Union[Tuple, Shape]
+            Object to set as shape, must be either a tuple or Shape.
+
+        Returns
+        -------
+        ColumnSchema
+            A copy of this object containing the provided shape value
+
+        Raises
+        ------
+        TypeError
+            If value is not either a tuple or a Shape
+        """
+        dims = Shape(shape).as_tuple
+        properties = self.properties.copy()
+        properties.pop("value_count", None)
+        return replace(
+            self,
+            dims=dims,
+            properties=properties,
+            is_list=None,
+            is_ragged=None,
         )
 
     @property
     def int_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.integer) else None
+        return self._domain() if self.dtype.is_integer else None
 
     @property
     def float_domain(self) -> Optional[Domain]:
-        return self._domain() if np.issubdtype(self.dtype, np.floating) else None
+        return self._domain() if self.dtype.is_float else None
 
     @property
     def value_count(self) -> Optional[Domain]:
@@ -195,12 +273,13 @@ class ColumnSchema:
         return Domain(**value_count) if value_count else None
 
     def __merge__(self, other):
-        col_schema = self.with_tags(other.tags)
-        col_schema = col_schema.with_properties(other.properties)
-        col_schema = col_schema.with_dtype(
-            other.dtype, is_list=other.is_list, is_ragged=other.is_ragged
+        col_schema = (
+            self.with_name(other.name)
+            .with_dtype(other.dtype)
+            .with_tags(other.tags)
+            .with_properties(other.properties)
+            .with_shape(other.shape)
         )
-        col_schema = col_schema.with_name(other.name)
         return col_schema
 
     def __str__(self) -> str:
@@ -210,6 +289,59 @@ class ColumnSchema:
         """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
+
+    def _validate_shape_info(self, shape, value_counts, is_list, is_ragged):
+        value_counts = value_counts or {}
+
+        min_count = value_counts.get("min", None)
+        max_count = value_counts.get("max", None)
+        ragged_counts = min_count != max_count
+
+        if shape and shape.dims is not None:
+            if is_ragged is not None and shape.is_ragged != is_ragged:
+                raise ValueError(
+                    f"Provided value of `is_ragged={is_ragged}` "
+                    f"is inconsistent with shape `{shape}`."
+                )
+            elif is_list is not None and shape.is_list != is_list:
+                raise ValueError(
+                    f"Provided value of `is_list={is_list}` "
+                    f"is inconsistent with shape `{shape}`."
+                )
+
+        if value_counts and shape and shape.dims is not None:
+            if (min_count and min_count != shape.dims[1].min) or (
+                max_count and max_count != shape.dims[1].max
+            ):
+                raise ValueError(
+                    f"Provided value counts `{value_counts}` "
+                    f"are inconsistent with shape `{shape}`."
+                )
+
+        if is_list is False and is_ragged is True:
+            raise ValueError(
+                "Columns with `is_list=False` can't set `is_ragged=True`, "
+                "since non-list columns can't be ragged."
+            )
+
+        if value_counts and is_ragged is not None and is_ragged != ragged_counts:
+            raise ValueError(
+                f"Provided value of `is_ragged={is_ragged}` "
+                f"is inconsistent with value counts `{value_counts}`."
+            )
+
+        # TODO: Enable this validation once we've removed these cases
+        #       from downstream Merlin libraries
+        # if (
+        #     not value_counts
+        #     and not (shape and shape.dims)
+        #     and is_list is True
+        #     and is_ragged is False
+        # ):
+        #     raise ValueError(
+        #         "Can't determine a shape for this column from "
+        #         "`is_list=True` and `is_ragged=False` without value counts. "
+        #     )
 
 
 class Schema:
@@ -248,6 +380,9 @@ class Schema:
 
         """
         if selector is not None:
+            if selector.all:
+                return self
+
             schema = Schema()
             if selector.names:
                 schema += self.select_by_name(selector.names)
@@ -275,6 +410,8 @@ class Schema:
         """
         schema = self
         if selector is not None:
+            if selector.all:
+                return Schema()
             if selector.names:
                 schema = schema.excluding_by_name(selector.names)
             if selector.tags:
@@ -286,14 +423,21 @@ class Schema:
         return self.excluding(selector)
 
     def select_by_tag(
-        self, tags: Union[Union[str, Tags], List[Union[str, Tags]], TagSet]
+        self,
+        tags: Union[Union[str, Tags], List[Union[str, Tags]], TagSet],
+        pred_fn=None,
     ) -> "Schema":
-        """Select matching columns from this Schema object using a list of tags
+        """Select columns from this Schema that match ANY of the supplied tags.
 
         Parameters
         ----------
         tags : List[Union[str, Tags]] :
             List of tags that describes which columns match
+        pred_fn : `any` or `all`
+            Predicate function that decides if the column should be selected.
+            Receives iterable of bool values indicating whether each
+            of the provided tags is present on a column schema.
+            Returning True selects this column, False will not return that column.
 
         Returns
         -------
@@ -301,16 +445,21 @@ class Schema:
             New object containing only the ColumnSchemas of selected columns
 
         """
-        if isinstance(tags, tuple):
-            tags = list(tags)
-        if not isinstance(tags, list):
+        pred_fn = pred_fn or any
+
+        if not isinstance(tags, (list, tuple)):
             tags = [tags]
         tags = TagSet(tags)
 
         selected_schemas = {}
 
+        normalized_tags = [
+            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
+            for tag in tags
+        ]
+
         for _, column_schema in self.column_schemas.items():
-            if any(x in column_schema.tags for x in tags):
+            if pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
@@ -510,10 +659,14 @@ class Schema:
         if not isinstance(other, Schema):
             raise TypeError(f"unsupported operand type(s) for -: 'Schema' and {type(other)}")
 
-        result = Schema({**self.column_schemas})
+        result = self.copy()
 
         for key in other.column_schemas.keys():
             if key in self.column_schemas.keys():
                 result.column_schemas.pop(key, None)
 
         return result
+
+    def copy(self) -> "Schema":
+        """Return a copy of the schema"""
+        return Schema({**self.column_schemas})

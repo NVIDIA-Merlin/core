@@ -30,9 +30,16 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-import merlin.core.dispatch as dispatch
-from merlin.core.dispatch import convert_data, hex_to_int, is_dataframe_object
-from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.core.compat import HAS_GPU, device_mem_size
+from merlin.core.dispatch import (
+    convert_data,
+    hex_to_int,
+    is_dataframe_object,
+    is_list_dtype,
+    list_val_dtype,
+)
+from merlin.core.utils import global_dask_client, set_client_deprecated
+from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
 from merlin.io.dataframe_engine import DataFrameDatasetEngine
@@ -47,6 +54,8 @@ try:
 except ImportError:
     cudf = None
 
+
+MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
 
 
@@ -203,11 +212,8 @@ class Dataset:
         This overrides the derived schema behavior.
     **kwargs :
         Key-word arguments to pass through to Dask.dataframe IO function.
-        For the Parquet engine(s), notable arguments include `filters`,
-        `aggregate_files`, and `gather_statistics`. Note that users who
-        do not need to know the number of rows in their dataset (and do
-        not plan to preserve a file-partition mapping) may wish to use
-        `gather_statistics=False` for better client-side performance.
+        For the Parquet engine(s), notable arguments include `filters`
+        and `aggregate_files` (the latter is experimental).
     """
 
     def __init__(
@@ -238,10 +244,23 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in cpu memory
+        # Check if we are keeping data in host or gpu device memory
         self.cpu = cpu
-        if not self.cpu:
-            self.cpu = cudf is None
+        if self.cpu is False:
+            if not HAS_GPU:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
+                )
+            if cudf is None:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
+        if self.cpu is None:
+            self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
@@ -336,10 +355,28 @@ class Dataset:
                 if schema_path.is_file():
                     schema_path = schema_path.parent
 
-                if (schema_path / "schema.pbtxt").exists():
+                pbtxt_deprecated_warning = (
+                    "Found schema.pbtxt. Loading schema automatically from "
+                    "schema.pbtxt is deprecated and will be removed in the "
+                    "future. Re-run workflow to generate .merlin/schema.json."
+                )
+
+                if (schema_path / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path.parent / MERLIN_METADATA_DIR_NAME / "schema.json").exists():
+                    schema = TensorflowMetadata.from_json_file(
+                        schema_path.parent / MERLIN_METADATA_DIR_NAME
+                    )
+                    self.schema = schema.to_merlin_schema()
+                elif (schema_path / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path)
                     self.schema = schema.to_merlin_schema()
                 elif (schema_path.parent / "schema.pbtxt").exists():
+                    warnings.warn(pbtxt_deprecated_warning, DeprecationWarning)
                     schema = TensorflowMetadata.from_proto_text_file(schema_path.parent)
                     self.schema = schema.to_merlin_schema()
                 else:
@@ -471,7 +508,6 @@ class Dataset:
                             hive_mapping[_key].append(_val)
 
             if set(hive_mapping.keys()) == set(keys):
-
                 # Generate hive-mapping DataFrame summary
                 hive_mapping = type(ddf._meta)(hive_mapping)
                 cols = list(hive_mapping.columns)
@@ -541,7 +577,8 @@ class Dataset:
             .repartition(
                 npartitions=npartitions,
                 partition_size=partition_size,
-            )
+            ),
+            schema=self.schema,
         )
 
     @classmethod
@@ -659,6 +696,7 @@ class Dataset:
         preserve_files=False,
         output_files=None,
         out_files_per_proc=None,
+        row_group_size=None,
         num_threads=0,
         dtypes=None,
         cats=None,
@@ -702,8 +740,10 @@ class Dataset:
             will be ignored. Default is False.
         output_files : dict, list or int
             The total number of desired output files. This option requires
-            `method="subgraph"`, and the default value will be the number of Dask
-            workers, multiplied by `out_files_per_proc`. For further output-file
+            `method="subgraph"`. When `out_files_per_proc=None`, the default
+            is the number of underlying Dask partitions. When `out_files_per_proc`
+            is set to an integer, the default is the product of that integer and
+            the total number of workers in the Dask cluster. For further output-file
             control, this argument may also be used to pass a dictionary mapping
             the output file names to partition indices, or a list of desired
             output-file names.
@@ -714,6 +754,12 @@ class Dataset:
             argument. If `method="subgraph"`, the total number of files is determined
             by `output_files` (and `out_files_per_proc` must be 1 if a dictionary is
             specified).
+        row_group_size : integer
+            Maximum number of rows to include in each Parquet row-group. By default,
+            the maximum row-group size will be chosen by the backend Parquet engine
+            (cudf or pyarrow). Note that cudf currently prohibits this value from
+            being less than `5000` rows. If smaller row-groups are necessary, try
+            calling `to_cpu()` before writing to disk.
         num_threads : integer
             Number of IO threads to use for writing the output dataset.
             For `0` (default), no dedicated IO threads will be used.
@@ -748,8 +794,8 @@ class Dataset:
             are planning to ingest the output data with HugeCTR. Default is False.
         """
 
+        preserve_partitions = False
         if partition_on:
-
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
             if output_files:
@@ -760,7 +806,6 @@ class Dataset:
                 raise ValueError("`preserve_files` not supported when `partition_on` is used.")
 
         else:
-
             # Check that method (algorithm) is valid
             if method not in ("subgraph", "worker"):
                 raise ValueError(f"{method} not a recognized method for `Dataset.to_parquet`")
@@ -773,13 +818,18 @@ class Dataset:
             elif preserve_files and output_files:
                 raise ValueError("Cannot specify both preserve_files and output_files.")
             elif not (output_files or preserve_files):
-                # Default "subgraph" behavior - Set output_files to the
-                # total umber of workers, multiplied by out_files_per_proc
-                try:
-                    nworkers = len(global_dask_client().cluster.workers)
-                except AttributeError:
-                    nworkers = 1
-                output_files = nworkers * (out_files_per_proc or 1)
+                if out_files_per_proc:
+                    # Default "subgraph" behavior - Set output_files to the
+                    # total umber of workers, multiplied by out_files_per_proc
+                    try:
+                        nworkers = len(global_dask_client().cluster.workers)
+                    except AttributeError:
+                        nworkers = 1
+                    output_files = nworkers * out_files_per_proc
+                else:
+                    # Preserve original Dask partitions if output_files,
+                    # preserve_files AND out_files_per_proc are all None
+                    preserve_partitions = True
 
         # Replace None/False suffix argument with ""
         suffix = suffix or ""
@@ -794,10 +844,13 @@ class Dataset:
         else:
             ddf = self.to_ddf(shuffle=shuffle)
 
+        # Check if partitions should be preserved
+        if preserve_partitions:
+            output_files = ddf.npartitions
+
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
         if output_files:
-
             #   NOTES on `output_files`:
             #
             # - If a list of file names is specified, a contiguous range of
@@ -850,6 +903,7 @@ class Dataset:
                 output_files = [f"part_{i}" + suffix for i in range(output_files)]
             if isinstance(output_files, list):
                 new = {}
+                file_count = 0
                 split = math.ceil(ddf.npartitions / len(output_files))
                 for i in range(0, len(output_files), files_per_task):
                     fns = output_files[i : i + files_per_task]
@@ -857,10 +911,11 @@ class Dataset:
                     stop = min(start + split * len(fns), ddf.npartitions)
                     if start < stop:
                         new[tuple(fns)] = np.arange(start, stop)
+                        file_count += len(fns)
                 # let user know they will not have expected number of output files.
-                if len(new.keys()) < len(output_files):
+                if file_count < len(output_files):
                     warnings.warn(
-                        f"Only created {len(new.keys())} files did not have enough "
+                        f"Only creating {file_count} files. Did not have enough "
                         f"partitions to create {len(output_files)} files."
                     )
                 output_files = new
@@ -891,15 +946,21 @@ class Dataset:
                         output_files[fn + suffix] = rgs
             suffix = ""  # Don't add a suffix later - Names already include it
 
+        schema = self.schema.copy()
+
         if dtypes:
             _meta = _set_dtypes(ddf._meta, dtypes)
             ddf = ddf.map_partitions(_set_dtypes, dtypes, meta=_meta)
+            for col_name, col_dtype in dtypes.items():
+                schema[col_name] = schema[col_name].with_dtype(col_dtype)
 
         fs = get_fs_token_paths(output_path)[0]
-        fs.mkdirs(output_path, exist_ok=True)
+        fs.mkdirs(str(output_path), exist_ok=True)
 
-        tf_metadata = TensorflowMetadata.from_merlin_schema(self.schema)
-        tf_metadata.to_proto_text_file(output_path)
+        tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+        metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
+        fs.mkdirs(metadata_path, exist_ok=True)
+        tf_metadata.to_json_file(metadata_path)
 
         # Output dask_cudf DataFrame to dataset
         _ddf_to_dataset(
@@ -916,8 +977,9 @@ class Dataset:
             num_threads,
             self.cpu,
             suffix=suffix,
+            row_group_size=row_group_size,
             partition_on=partition_on,
-            schema=self.schema if write_hugectr_keyset else None,
+            schema=schema if write_hugectr_keyset else None,
         )
 
     def to_hugectr(
@@ -1129,8 +1191,10 @@ class Dataset:
         column_schemas = []
         for column, dtype_info in dtypes.items():
             dtype_val = dtype_info["dtype"]
-            is_list = dtype_info["is_list"]
-            col_schema = ColumnSchema(column, dtype=dtype_val, is_list=is_list, is_ragged=is_list)
+
+            dims = DefaultShapes.LIST if dtype_info["is_list"] else DefaultShapes.SCALAR
+            col_schema = ColumnSchema(column, dtype=dtype_val, dims=dims)
+
             column_schemas.append(col_schema)
 
         self.schema = Schema(column_schemas)
@@ -1153,8 +1217,8 @@ class Dataset:
             _real_meta = self._real_meta[n]
             annotated = {
                 col: {
-                    "dtype": dispatch.list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
-                    "is_list": dispatch.is_list_dtype(_real_meta[col]),
+                    "dtype": list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
+                    "is_list": is_list_dtype(_real_meta[col]),
                 }
                 for col in _real_meta.columns
             }

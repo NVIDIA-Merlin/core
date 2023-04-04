@@ -33,7 +33,7 @@ class AvroDatasetEngine(DatasetEngine):
     def __init__(self, paths, part_size, storage_options=None, cpu=False, **kwargs):
         # pylint: disable=access-member-before-definition
         super().__init__(paths, part_size, storage_options=storage_options, cpu=cpu)
-        if kwargs != {}:
+        if kwargs:
             raise ValueError("Unexpected AvroDatasetEngine argument(s).")
         self.blocksize = part_size
 
@@ -46,7 +46,6 @@ class AvroDatasetEngine(DatasetEngine):
             raise ValueError("cpu=True not supported for AvroDatasetEngine.")
 
     def to_ddf(self, columns=None, cpu=None):
-
         # Check if we are using cpu
         cpu = self.cpu if cpu is None else cpu
         if cpu:
@@ -80,7 +79,6 @@ class AvroDatasetEngine(DatasetEngine):
         self.cpu = False
 
     def process_metadata(self, columns=None):
-
         with open(self.paths[0], "rb") as fo:
             header = ua.core.read_header(fo)
 
@@ -149,10 +147,8 @@ class AvroDatasetEngine(DatasetEngine):
 
     @classmethod
     def read_partition(cls, fs, piece, columns):
-
         path = piece["path"]
         if "rows" in piece:
-
             # See: (https://github.com/rapidsai/cudf/issues/6529)
             # Using `uavro` library for now. This means we must convert
             # data to pandas, and then to cudf (which is much slower
