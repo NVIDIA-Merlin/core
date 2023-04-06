@@ -91,7 +91,7 @@ def device_mem_size(kind="total", cpu=False):
             return psutil.virtual_memory().total
         elif kind == "free":
             return psutil.virtual_memory().free
-    elif cpu or not cuda:
+    elif cpu:
         warnings.warn("Please install psutil for full cpu=True support.")
         # Assume 1GB of memory
         return int(1e9)
