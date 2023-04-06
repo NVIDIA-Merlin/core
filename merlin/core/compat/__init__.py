@@ -17,6 +17,8 @@
 # pylint: disable=unused-import
 import warnings
 
+from numba import cuda
+
 from merlin.core.has_gpu import HAS_GPU  # noqa pylint: disable=unused-import
 
 try:
@@ -24,9 +26,7 @@ try:
 except ImportError:
     psutil = None
 
-try:
-    from numba import cuda
-except ImportError:
+if not cuda.is_available():
     cuda = None
 
 
@@ -85,6 +85,7 @@ def device_mem_size(kind="total", cpu=False):
         When kind is provided with an unsupported value.
     """
     # Use psutil (if available) for cpu mode
+    cpu = cpu or not cuda
     if cpu and psutil:
         if kind == "total":
             return psutil.virtual_memory().total
