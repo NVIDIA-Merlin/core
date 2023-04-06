@@ -25,7 +25,14 @@ from merlin.core.compat.tensorflow import tensorflow as tf
 from merlin.core.compat.torch import torch as th
 from merlin.core.protocols import SeriesLike
 from merlin.dtypes.shape import Shape
-from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TorchColumn
+from merlin.table import (
+    CupyColumn,
+    Device,
+    NumpyColumn,
+    TensorColumn,
+    TensorflowColumn,
+    TorchColumn,
+)
 
 col_types: List[Type] = []
 
@@ -173,10 +180,10 @@ def test_shape(col_type):
     values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
     offsets = constructor([0, 2, 4, 6, 8])
     col = col_type(values=values, offsets=offsets)
-    assert col.shape == Shape((4, 2))
+    assert col.shape == Shape((4, None))
     assert len(col) == 4
     assert col.is_list is True
-    assert col.is_ragged is False
+    assert col.is_ragged is True
 
     values = constructor([1, 2, 3, 4, 5, 6, 7, 8])
     offsets = constructor([0, 1, 3, 5, 8])
@@ -185,6 +192,19 @@ def test_shape(col_type):
     assert len(col) == 4
     assert col.is_list is True
     assert col.is_ragged is True
+
+
+@pytest.mark.parametrize(
+    ["values", "offsets", "expected_dims"],
+    [
+        [np.array([1, 2, 3]), np.array([0, 3]), (1, None)],
+        [np.array([[1], [2], [3]]), np.array([0, 3]), (1, None, 1)],
+    ],
+)
+def test_ragged_shape(values, offsets, expected_dims):
+    column = TensorColumn(values, offsets=offsets)
+    assert column.is_ragged
+    assert column.shape == Shape(expected_dims)
 
 
 def test_3d_shapes_python():

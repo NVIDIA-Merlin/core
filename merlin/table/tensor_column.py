@@ -184,13 +184,8 @@ class TensorColumn:
     def _construct_shape(self, values, offsets):
         if offsets is not None:
             num_rows = len(offsets) - 1
-            row_lengths = offsets[1:] - offsets[:-1]
-            num_cols = int(row_lengths[0]) if all(row_lengths == row_lengths[0]) else None
-            shape = [num_rows, num_cols]
-            if len(values.shape) > 1:
-                embedding_shape = values.shape[1:]
-                shape.extend(embedding_shape)
-            shape = Shape(tuple(shape))
+            dims = [num_rows, None] + list(values.shape)[1:]
+            shape = Shape(dims)
         else:
             shape = Shape(values.shape)
         return shape
