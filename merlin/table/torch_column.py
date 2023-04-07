@@ -15,7 +15,7 @@
 #
 from typing import Callable, Type
 
-from merlin.core.compat import torch as th
+from merlin.core.compat.torch import torch as th
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 

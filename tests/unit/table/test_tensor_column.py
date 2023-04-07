@@ -21,8 +21,8 @@ import merlin.dtypes as md
 from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
-from merlin.core.compat import tensorflow as tf
-from merlin.core.compat import torch as th
+from merlin.core.compat.tensorflow import tensorflow as tf
+from merlin.core.compat.torch import torch as th
 from merlin.core.protocols import SeriesLike
 from merlin.dtypes.shape import Shape
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TorchColumn

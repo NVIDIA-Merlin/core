@@ -78,7 +78,7 @@ class NumpyColumn(TensorColumn):
         from merlin.table import CupyColumn
 
         values = cp.asarray(self.values)
-        offsets = cp.asarray(self.offsets)
+        offsets = cp.asarray(self.offsets) if self.offsets is not None else None
 
         return CupyColumn(values, offsets)
 
@@ -111,4 +111,6 @@ def _register_from_numpy_to_dlpack_cpu():
 
     @_to_dlpack.register(np.ndarray)
     def _to_dlpack_cpu_from_numpy(array):
+        if array.dtype == np.dtype("bool"):
+            array = array.astype(np.dtype("int8"))
         return array
