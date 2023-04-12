@@ -88,7 +88,7 @@ class LocalExecutor:
             node, transformable, capture_dtypes, strict
         )
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
-        transform_input = self._merge_upstream_outputs(upstream_columns)
+        transform_input = self._merge_upstream_columns(upstream_columns)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
         return transform_output
 
@@ -124,7 +124,7 @@ class LocalExecutor:
 
         return upstream_outputs
 
-    def _merge_upstream_outputs(self, upstream_outputs):
+    def _merge_upstream_columns(self, upstream_outputs, merge_fn=concat_columns):
         combined_outputs = None
         seen_columns = set()
         for upstream_output in upstream_outputs:
@@ -134,7 +134,7 @@ class LocalExecutor:
             else:
                 new_columns = set(upstream_output.columns) - seen_columns
                 if new_columns:
-                    combined_outputs = concat_columns(
+                    combined_outputs = merge_fn(
                         [combined_outputs, upstream_output[list(new_columns)]]
                     )
                     seen_columns.update(new_columns)
