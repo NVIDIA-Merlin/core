@@ -22,10 +22,12 @@ from dask.dataframe import assert_eq
 from dask.dataframe.io.demo import names as name_list
 
 import merlin.io
+from merlin.core.compat import cudf
 
-cudf = pytest.importorskip("cudf")
-dask_cudf = pytest.importorskip("dask_cudf")
-
+if cudf:
+    dask_cudf = pytest.importorskip("dask_cudf")
+else:
+    pytest.mark.skip(reason="cudf did not import successfully")
 # Require uavro and fastavro library.
 # Note that fastavro is only required to write
 # avro files for testing, while uavro is actually
