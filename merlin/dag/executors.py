@@ -117,11 +117,10 @@ class LocalExecutor:
                 if col in upstream_tensors:
                     already_present.add(col)
 
-        root_columns = set(node.input_schema.column_names) - already_present
-        columns_to_merge = addl_input_cols.union(root_columns)
+        root_columns = set(node.input_schema.column_names).union(addl_input_cols) - already_present
 
-        if columns_to_merge:
-            upstream_outputs.append(transformable[list(columns_to_merge)])
+        if root_columns:
+            upstream_outputs.append(transformable[list(root_columns)])
 
         return upstream_outputs
 
