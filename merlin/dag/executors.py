@@ -194,14 +194,14 @@ class LocalExecutor:
         Returns
         -------
         Transformable
-            The output DataFrame or DictArray formed by executing the final node's transform
+            The output DataFrame or TensorTable formed by executing the final node's transform
         Raises
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
             as the output schema columns when `strict` is True
         RuntimeError
-            If no DataFrame or DictArray is returned from the operator
+            If no DataFrame or TensorTable is returned from the operator
         """
         if not node.op:
             return input_data

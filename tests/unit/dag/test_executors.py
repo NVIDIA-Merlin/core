@@ -18,10 +18,11 @@ import numpy as np
 import pandas as pd
 
 from merlin.core.dispatch import make_df
-from merlin.dag import DictArray, Graph
+from merlin.dag import Graph
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import LocalExecutor
 from merlin.schema.schema import ColumnSchema, Schema
+from merlin.table import TensorTable
 
 
 def test_local_executor_with_dataframe():
@@ -42,8 +43,8 @@ def test_local_executor_with_dataframe():
 
 
 def test_local_executor_with_dataframe_like():
-    df = DictArray(
-        {"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])}, dtypes={"a": np.int64, "b": np.int64}
+    df = TensorTable(
+        {"a": np.array([1, 2, 3], dtype=np.int64), "b": np.array([4, 5, 6], dtype=np.int64)}
     )
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
@@ -53,5 +54,5 @@ def test_local_executor_with_dataframe_like():
     executor = LocalExecutor()
     result = executor.transform(df, [graph.output_node])
 
-    assert all(result["a"] == df["a"])
+    assert result["a"] == df["a"]
     assert "b" not in result.columns
