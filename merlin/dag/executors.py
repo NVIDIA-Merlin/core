@@ -108,7 +108,7 @@ class LocalExecutor:
         return upstream_outputs
 
     def _append_addl_root_columns(self, node, transformable, upstream_outputs):
-        node_input_cols = _get_unique(node.input_schema.column_names)
+        node_input_cols = set(node.input_schema.column_names)
         addl_input_cols = set(node.dependency_columns.names)
 
         already_present = set()
@@ -117,7 +117,7 @@ class LocalExecutor:
                 if col in upstream_tensors:
                     already_present.add(col)
 
-        root_columns = set(node.input_schema.column_names).union(addl_input_cols) - already_present
+        root_columns = node_input_cols.union(addl_input_cols) - already_present
 
         if root_columns:
             upstream_outputs.append(transformable[list(root_columns)])
