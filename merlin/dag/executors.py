@@ -102,7 +102,7 @@ class LocalExecutor:
                 capture_dtypes=capture_dtypes,
                 strict=strict,
             )
-            if node_output is not None and len(node_output.columns) > 0:
+            if node_output is not None and len(node_output) > 0:
                 upstream_outputs.append(node_output)
 
         return upstream_outputs
@@ -195,6 +195,7 @@ class LocalExecutor:
             )
             node.output_schema.column_schemas[col_name] = output_data_schema
 
+    # TODO: Turn this into a function
     def _build_schema_from_data(self, output_data, col_name, output_col_schema):
         column = output_data[col_name]
         column_dtype = column.dtype
@@ -209,6 +210,7 @@ class LocalExecutor:
 
         return output_col_schema.with_dtype(column_dtype).with_shape(col_shape)
 
+    # TODO: Turn this into a function
     def _validate_dtypes(self, node, output_data):
         for col_name, output_col_schema in node.output_schema.column_schemas.items():
             # Validate that the dtypes match but only if they both exist
@@ -229,6 +231,7 @@ class LocalExecutor:
                     f"`{output_data_dtype}`."
                 )
 
+    # TODO: Turn this into a function
     def _combine_node_outputs(self, node, transformed, output):
         node_output_cols = _get_unique(node.output_schema.column_names)
 
