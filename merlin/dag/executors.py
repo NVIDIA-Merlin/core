@@ -434,7 +434,11 @@ def _get_unique(cols):
 def _mask_cpu_only(supported):
     return functools.reduce(
         lambda a, b: a | b,
-        (v for v in list(DataFormats) if v & supported and "CPU" in str(v)),
+        (
+            v
+            for v in list(DataFormats)
+            if v & supported and ("NUMPY" in str(v) or "PANDAS" in str(v))
+        ),
     )
 
 
