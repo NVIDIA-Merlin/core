@@ -9,7 +9,7 @@ on:
         type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.action_ref }}-${{ inputs.env }}
   cancel-in-progress: true
 
 jobs:
