@@ -26,7 +26,6 @@ from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
-from merlin.table.conversions import convert_col
 from tests.conftest import assert_eq
 
 col_type: List[Type] = []
@@ -203,15 +202,12 @@ def test_tensor_cpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.to(source_column_type.framework_name)
 
-    # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.to(target_column_type.framework_name)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -236,15 +232,13 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.to(source_column_type.framework_name)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.to(target_column_type.framework_name)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -320,3 +314,10 @@ def test_gpu_transfer():
 
     assert gpu_table.device == Device.GPU
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
+
+
+def test_to_unknown_framework():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.to("unknown_framework")
+    assert "Unsupported framework name 'unknown_framework'" in str(exc_info.value)

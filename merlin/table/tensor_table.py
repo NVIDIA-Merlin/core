@@ -16,7 +16,7 @@
 from typing import Any, Dict
 
 from merlin.dag.utils import group_values_offsets
-from merlin.table.conversions import df_from_tensor_table, tensor_table_from_df
+from merlin.table.conversions import convert_col, df_from_tensor_table, tensor_table_from_df
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
 from merlin.table.tensor_column import TensorColumn, create_tensor_column
@@ -43,6 +43,52 @@ class TensorTable:
             self._validate_columns(cols_dict)
 
         self._columns = cols_dict
+
+    def to(self, framework_name: str) -> "TensorTable":
+        """Returns new TensorTable with columns cast to tensors of target framework.
+
+        Parameters
+        ----------
+        framework_name : str
+            Name of tensor Framework to convert columns to
+
+        Returns
+        -------
+        TensorTable
+            A new TensorTable with columns cast to framework tensors
+
+        Raises
+        ------
+        ValueError
+            If framework name provided does not match known formats
+        """
+        framework_columns = {
+            "tensorflow": TensorflowColumn,
+            "numpy": NumpyColumn,
+            "torch": TorchColumn,
+            "cupy": CupyColumn,
+        }
+        try:
+            target_col_type = framework_columns[framework_name]
+        except KeyError as exc:
+            framework_names = ", ".join(f"'{name}'" for name in framework_columns)
+            raise ValueError(
+                f"Unsupported framework name '{framework_name}'. "
+                f"Supported values are: {framework_names}"
+            ) from exc
+
+        # if the current table already contains columns of the target type
+        # no conversion required
+        if self.column_type == target_col_type:
+            return self
+
+        # construct new table with columns cast to target framework type
+        columns = {}
+        for column in self.columns:
+            columns[column] = convert_col(self[column], target_col_type)
+        table = TensorTable(columns)
+
+        return table
 
     def _convert_arrays_to_columns(self, columns, _unsafe=False):
         grouped_columns = group_values_offsets(columns or {})

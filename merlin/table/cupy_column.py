@@ -25,6 +25,8 @@ class CupyColumn(TensorColumn):
     A SeriesLike column backed by CuPy arrays
     """
 
+    framework_name = "cupy"
+
     @classmethod
     def array_type(cls) -> Type:
         """

@@ -26,6 +26,8 @@ class NumpyColumn(TensorColumn):
     A SeriesLike column backed by NumPy arrays
     """
 
+    framework_name = "numpy"
+
     @classmethod
     def array_type(cls) -> Type:
         """
@@ -97,7 +99,7 @@ def _register_from_dlpack_cpu_to_numpy():
     @_from_dlpack_cpu.register(np.ndarray)
     def _from_dlpack_cpu_to_numpy(to, array):
         try:
-            return np._from_dlpack(array)
+            return np.from_dlpack(array)
         except AttributeError as exc:
             raise NotImplementedError(
                 "NumPy does not implement the DLPack Standard until version 1.22.0, "

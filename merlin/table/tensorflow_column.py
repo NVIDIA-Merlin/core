@@ -46,6 +46,8 @@ class TensorflowColumn(TensorColumn):
     A SeriesLike column backed by Tensorflow tensors
     """
 
+    framework_name = "tensorflow"
+
     @classmethod
     def _transpose(cls, values):
         return tf.transpose(values)

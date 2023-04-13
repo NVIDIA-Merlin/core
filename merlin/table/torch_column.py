@@ -25,6 +25,8 @@ class TorchColumn(TensorColumn):
     A SeriesLike column backed by Torch tensors
     """
 
+    framework_name = "torch"
+
     @classmethod
     def array_type(cls) -> Type:
         """
