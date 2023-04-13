@@ -33,8 +33,8 @@ class TensorTable:
     """
 
     @classmethod
-    def from_df(cls, df):
-        return tensor_table_from_df(df)
+    def from_df(cls, df, schema=None):
+        return tensor_table_from_df(df, schema=schema)
 
     def __init__(self, columns: TensorDict = None, _unsafe=False):
         cols_dict = self._convert_arrays_to_columns(columns, _unsafe=_unsafe)
