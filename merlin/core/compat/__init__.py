@@ -21,13 +21,13 @@ from numba import cuda
 
 from merlin.core.has_gpu import HAS_GPU  # noqa pylint: disable=unused-import
 
+if not cuda.is_available():
+    cuda = None
+
 try:
     import psutil
 except ImportError:
     psutil = None
-
-if not cuda.is_available():
-    cuda = None
 
 
 def pynvml_mem_size(kind="total", index=0):
@@ -121,17 +121,23 @@ try:
 except ImportError:
     pandas = None
 
-try:
-    import cupy
-except ImportError:
+if HAS_GPU:
+    try:
+        import cupy
+    except ImportError:
+        cupy = None
+
+    try:
+        import cudf
+    except ImportError:
+        cudf = None
+
+    try:
+        import dask_cudf
+    except ImportError:
+        dask_cudf = None
+else:
+    # Without a GPU available none of these packages should be used
     cupy = None
-
-try:
-    import cudf
-except ImportError:
     cudf = None
-
-try:
-    import dask_cudf
-except ImportError:
     dask_cudf = None

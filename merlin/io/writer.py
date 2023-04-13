@@ -19,14 +19,10 @@ import queue
 import threading
 from typing import Optional
 
-try:
-    import cupy as cp
-except ImportError:
-    cp = None
-
 import numpy as np
 from fsspec.core import get_fs_token_paths
 
+from merlin.core.compat import cupy as cp
 from merlin.core.dispatch import annotate
 from merlin.io.shuffle import shuffle_df
 
