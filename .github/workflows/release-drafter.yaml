@@ -8,6 +8,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update_release_draft:
     uses: nvidia-merlin/.github/.github/workflows/release-drafter-common.yaml@main
