@@ -20,8 +20,8 @@ import pytest
 from merlin.core.compat import HAS_GPU
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
-from merlin.core.compat import tensorflow as tf
-from merlin.core.compat import torch as th
+from merlin.core.compat.tensorflow import tensorflow as tf
+from merlin.core.compat.torch import torch as th
 from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
@@ -130,6 +130,15 @@ def test_column_type_validation():
         TensorTable(tensor_dict)
 
     assert "from the same framework" in str(exc_info)
+
+
+def test_column_type_property():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
+
+    assert TensorTable(tensor_dict).column_type == NumpyColumn
 
 
 @pytest.mark.skipif(

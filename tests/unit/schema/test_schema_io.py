@@ -19,7 +19,7 @@ import numpy
 import pytest
 
 import merlin.dtypes as md
-from merlin.dtypes.shape import Shape
+from merlin.dtypes.shape import Dimension, Shape
 from merlin.schema import ColumnSchema, Schema, Tags
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 
@@ -178,7 +178,14 @@ def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_typ
     assert schema == loaded_schema
 
 
-@pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
+@pytest.mark.parametrize(
+    "properties",
+    [
+        {},
+        {"domain": {"min": 0, "max": 10}},
+        {"value_count": {"min": 1, "max": 5}},
+    ],
+)
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
 @pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
 @pytest.mark.parametrize("list_type", [True, False])
@@ -189,6 +196,16 @@ def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, lis
     tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
     loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
     assert schema == loaded_schema
+
+
+def test_schema_with_shape_to_tensorflow_metadata_json():
+    schema = Schema([ColumnSchema("col", dims=[None, (1, 5)])])
+    tf_metadata_json = TensorflowMetadata.from_merlin_schema(schema).to_json()
+    loaded_schema = TensorflowMetadata.from_json(tf_metadata_json).to_merlin_schema()
+    ragged_dim = loaded_schema["col"].shape[1]
+    assert isinstance(ragged_dim.max, int)
+    assert isinstance(ragged_dim.min, int)
+    assert ragged_dim == Dimension(min=1, max=5)
 
 
 def test_tensorflow_metadata_from_json():

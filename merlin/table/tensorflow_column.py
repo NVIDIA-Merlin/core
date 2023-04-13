@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Optional, Tuple, Type, Union
 
-from merlin.core.compat import tensorflow as tf
+from merlin.core.compat.tensorflow import tensorflow as tf
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
@@ -158,7 +158,7 @@ def _register_from_dlpack_cpu_to_tf():
     @_from_dlpack_cpu.register(tf.Tensor)
     @_from_dlpack_cpu.register(eager_tensor_type)
     def _from_dlpack_cpu_to_tf(target_type, array):
-        return tf.experimental.dlpack.from_dlpack(array.__dlpack__())
+        return tf.convert_to_tensor(array)
 
 
 @_from_dlpack_gpu.register_lazy("tensorflow")

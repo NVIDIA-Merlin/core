@@ -111,4 +111,6 @@ def _register_from_numpy_to_dlpack_cpu():
 
     @_to_dlpack.register(np.ndarray)
     def _to_dlpack_cpu_from_numpy(array):
+        if array.dtype == np.dtype("bool"):
+            array = array.astype(np.dtype("int8"))
         return array

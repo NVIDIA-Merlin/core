@@ -84,8 +84,16 @@ else:
 # Define mapping between non-nullable,
 # and nullable types in Pandas
 _PD_NULLABLE_MAP = {
+    "float32": "Float32",
+    "float64": "Float64",
+    "int8": "Int8",
+    "int16": "Int16",
     "int32": "Int32",
     "int64": "Int64",
+    "uint8": "UInt8",
+    "uint16": "UInt16",
+    "uint32": "UInt32",
+    "uint64": "UInt64",
 }
 
 

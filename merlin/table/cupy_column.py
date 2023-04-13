@@ -93,7 +93,9 @@ def _register_to_dlpack_from_cupy():
     import cupy as cp
 
     @_to_dlpack.register(cp.ndarray)
-    def _to_dlpack_from_tf_tensor(tensor):
+    def _to_dlpack_from_cp_tensor(tensor):
+        if tensor.dtype == cp.dtype("bool"):
+            tensor = tensor.astype(cp.dtype("int8"))
         return tensor
 
 
