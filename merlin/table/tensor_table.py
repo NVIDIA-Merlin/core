@@ -145,6 +145,10 @@ class TensorTable:
         """
         return list(self.keys())
 
+    @property
+    def column_type(self):
+        return type(list(self.values())[0])
+
     def dtypes(self):
         """
         Returns a list of the dtypes of all columns in the Tensor Table column

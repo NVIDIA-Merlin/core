@@ -132,6 +132,15 @@ def test_column_type_validation():
     assert "from the same framework" in str(exc_info)
 
 
+def test_column_type_property():
+    tensor_dict = {
+        "a__values": np.array([1, 2, 3]),
+        "a__offsets": np.array([0, 1, 3]),
+    }
+
+    assert TensorTable(tensor_dict).column_type == NumpyColumn
+
+
 @pytest.mark.skipif(
     not (tf and HAS_GPU),
     reason="both TensorFlow and CUDA GPUs are required for cross-framework validation tests",
