@@ -1033,6 +1033,8 @@
         <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">tf_metadata</span> <span class="o">=</span> <span class="n">TensorflowMetadata</span><span class="o">.</span><span class="n">from_merlin_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+        <span class="n">tf_metadata</span><span class="o">.</span><span class="n">to_proto_text_file</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+
         <span class="n">metadata_path</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">output_path</span><span class="p">),</span> <span class="n">MERLIN_METADATA_DIR_NAME</span><span class="p">])</span>
         <span class="n">fs</span><span class="o">.</span><span class="n">mkdirs</span><span class="p">(</span><span class="n">metadata_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">tf_metadata</span><span class="o">.</span><span class="n">to_json_file</span><span class="p">(</span><span class="n">metadata_path</span><span class="p">)</span>
