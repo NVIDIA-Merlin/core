@@ -952,6 +952,8 @@ class Dataset:
         fs.mkdirs(str(output_path), exist_ok=True)
 
         tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+        tf_metadata.to_proto_text_file(output_path)
+
         metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
         fs.mkdirs(metadata_path, exist_ok=True)
         tf_metadata.to_json_file(metadata_path)
