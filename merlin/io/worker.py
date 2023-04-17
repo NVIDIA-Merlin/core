@@ -68,6 +68,7 @@ def fetch_table_data(
     """
     _lib = cudf if cudf else pd
     reader = reader or _lib.read_parquet
+    load_cudf = cudf and reader == cudf.read_parquet
     table = table_cache.get(path, None)
     cache_df = cache == "device"
     if table is None:
@@ -97,7 +98,7 @@ def fetch_table_data(
         if cache_df:
             table_cache[path] = table.copy(deep=False)
     elif isinstance(table, pa.Table):
-        if cudf:
+        if cudf and load_cudf:
             df = cudf.DataFrame.from_arrow(table)
         else:
             df = table.to_pandas()
