@@ -60,7 +60,7 @@ jobs:
       - name: Copy HTML directories
         run: |
           ls -asl
-x          for i in */
+          for i in */
           do
             echo "Git adding ${i}"
             git add "${i}"
