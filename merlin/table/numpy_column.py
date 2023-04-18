@@ -97,7 +97,13 @@ def _register_from_dlpack_cpu_to_numpy():
     @_from_dlpack_cpu.register(np.ndarray)
     def _from_dlpack_cpu_to_numpy(to, array):
         try:
+            # private `_from_dlpack` method added in 1.22.0
             return np._from_dlpack(array)
+        except AttributeError:
+            pass
+        try:
+            # public `from_dlpack` method added in 1.23.0
+            return np.from_dlpack(array)
         except AttributeError as exc:
             raise NotImplementedError(
                 "NumPy does not implement the DLPack Standard until version 1.22.0, "
