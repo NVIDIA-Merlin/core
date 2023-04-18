@@ -30,7 +30,7 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
-from merlin.core.compat import HAS_GPU, device_mem_size
+from merlin.core.compat import HAS_GPU, cudf, device_mem_size
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -48,12 +48,6 @@ from merlin.io.parquet import ParquetDatasetEngine
 from merlin.io.shuffle import _check_shuffle_arg
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
-
-try:
-    import cudf
-except ImportError:
-    cudf = None
-
 
 MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
@@ -958,6 +952,8 @@ class Dataset:
         fs.mkdirs(str(output_path), exist_ok=True)
 
         tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+        tf_metadata.to_proto_text_file(output_path)
+
         metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
         fs.mkdirs(metadata_path, exist_ok=True)
         tf_metadata.to_json_file(metadata_path)

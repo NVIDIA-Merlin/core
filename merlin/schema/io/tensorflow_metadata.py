@@ -422,7 +422,7 @@ def _merlin_dtype(feature, properties):
         dims = []
         for dim in dims_list:
             if isinstance(dim, list):
-                dims.append(tuple(dim))
+                dims.append(tuple(int(d) if isinstance(d, float) else d for d in dim))
             elif dim is not None:
                 dims.append(int(dim))
             else:

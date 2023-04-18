@@ -19,14 +19,15 @@ import warnings
 import pandas as pd
 from packaging.version import Version
 
+from merlin.core.compat import cudf
+
 _IGNORE_INDEX_SUPPORTED = Version(pd.__version__) >= Version("1.3.0")
 
-try:
-    import cudf
-
-    _CUDF_IGNORE_INDEX_SUPPORTED = Version(cudf.__version__) >= Version("22.04.0")
-except ImportError:
-    _CUDF_IGNORE_INDEX_SUPPORTED = None
+if cudf:
+    try:
+        _CUDF_IGNORE_INDEX_SUPPORTED = Version(cudf.__version__) >= Version("22.04.0")
+    except ImportError:
+        _CUDF_IGNORE_INDEX_SUPPORTED = None
 
 
 class Shuffle(enum.Enum):

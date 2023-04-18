@@ -306,6 +306,9 @@ class Node:
         -------
         Node
         """
+        if not other:
+            return self
+
         if isinstance(self.op, ConcatColumns):
             child = self
         else:

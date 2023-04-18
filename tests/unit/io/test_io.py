@@ -30,14 +30,16 @@ from packaging.version import Version
 import merlin.dtypes as md
 import merlin.io
 from merlin.core import dispatch
-from merlin.core.compat import HAS_GPU
+from merlin.core.compat import HAS_GPU, cudf
 from merlin.io.parquet import GPUParquetWriter
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 from merlin.schema.tags import Tags, TagSet
 from tests.conftest import allcols_csv, mycols_csv, mycols_pq
 
-cudf = pytest.importorskip("cudf")
-dask_cudf = pytest.importorskip("dask_cudf")
+if cudf:
+    dask_cudf = pytest.importorskip("dask_cudf")
+else:
+    pytest.mark.skip(reason="cudf did not import successfully")
 
 if not HAS_GPU:
     pytestmark = pytest.mark.skip(reason="at least one visible CUDA GPU required.")
@@ -680,6 +682,9 @@ def test_hive_partitioned_data(tmpdir, cpu):
     )
     assert result_paths
     assert all(p.endswith(".parquet") for p in result_paths)
+
+    # reading into dask dastaframe cannot have schema in same directory
+    os.remove(os.path.join(path, "schema.pbtxt"))
 
     # Read back with dask.dataframe and check the data
     df_check = dd.read_parquet(path, engine="pyarrow").compute()
