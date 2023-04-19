@@ -139,7 +139,7 @@ class ColumnSchema:
             Copied object with new column name
 
         """
-        return replace(self, name=name)
+        return self._replace(name=name)
 
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
@@ -155,7 +155,7 @@ class ColumnSchema:
             Copied object with new column tags
 
         """
-        return replace(self, tags=self.tags.override(tags))  # type: ignore
+        return self._replace(tags=self.tags.override(tags))  # type: ignore
 
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
@@ -185,16 +185,14 @@ class ColumnSchema:
         value_counts = properties.get("value_count", {})
 
         if value_counts:
-            return replace(
-                self,
+            return self._replace(
                 properties=new_properties,
                 dtype=self.dtype.without_shape,
                 is_list=None,
                 is_ragged=None,
             )
         else:
-            return replace(
-                self,
+            return self._replace(
                 properties=new_properties,
             )
 
@@ -225,8 +223,8 @@ class ColumnSchema:
             properties.pop("value_count", None)
             new_dtype = new_dtype.without_shape
 
-        return replace(
-            self, dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
+        return self._replace(
+            dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
         )
 
     def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
@@ -251,8 +249,7 @@ class ColumnSchema:
         dims = Shape(shape).as_tuple
         properties = self.properties.copy()
         properties.pop("value_count", None)
-        return replace(
-            self,
+        return self._replace(
             dims=dims,
             properties=properties,
             is_list=None,
@@ -289,6 +286,11 @@ class ColumnSchema:
         """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
+
+    def _replace(self, *args, **kwargs):
+        if "dims" not in kwargs:
+            kwargs["dims"] = self.shape.as_tuple
+        return replace(self, *args, **kwargs)
 
     def _validate_shape_info(self, shape, value_counts, is_list, is_ragged):
         value_counts = value_counts or {}
