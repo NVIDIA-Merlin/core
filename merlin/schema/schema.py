@@ -288,7 +288,9 @@ class ColumnSchema:
         return Domain(**domain) if domain else None
 
     def _replace(self, *args, **kwargs):
-        if "dims" not in kwargs:
+        if "dims" not in kwargs and not (
+            "properties" in kwargs and "value_count" in kwargs["properties"]
+        ):
             kwargs["dims"] = self.shape.as_tuple
         return replace(self, *args, **kwargs)
 
