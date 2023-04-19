@@ -573,6 +573,7 @@ class Dataset:
                 partition_size=partition_size,
             ),
             schema=self.schema,
+            cpu=self.cpu,
         )
 
     @classmethod
