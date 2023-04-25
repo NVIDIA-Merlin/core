@@ -96,6 +96,7 @@ jobs:
         uses: fnkr/github-action-ghr@v1.3
         env:
           GHR_PATH: ./dist
+          GHR_REPLACE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
