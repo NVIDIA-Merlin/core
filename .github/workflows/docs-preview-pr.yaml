@@ -2,7 +2,7 @@ name: docs-preview-pr
 
 on:
   workflow_run:
-    workflows: [Build Core Packages (CPU)]
+    workflows: ["Build Core Packages (CPU)"]
     types: [completed]
 
 env:
