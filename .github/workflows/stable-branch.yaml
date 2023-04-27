@@ -1,0 +1,42 @@
+name: Set Stable Branch
+
+on:
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+jobs:
+  set-stable-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Latest Release Tag Ref
+        id: get_latest_tag_ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest_tag_name=$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              /repos/${{ github.repository }}/releases/latest \
+              | jq .tag_name
+          )
+          latest_tag_ref=$(
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              /repos/${{ github.repository }}/tags \
+              | jq --raw-output ".[] | select(.name == ${latest_tag_name}) | .commit.sha"
+          )
+          echo "latest_tag_name: $latest_tag_name"
+          echo "latest_tag_ref: $latest_tag_ref"
+          echo "latest_tag_ref=$latest_tag_ref" >> "$GITHUB_OUTPUT"
+      - name: Set Stable Branch Ref
+        run: |
+          latest_tag_ref=${{ steps.get_latest_tag_ref.outputs.latest_tag_ref }}
+          git fetch origin "$latest_tag_ref"
+          git update-ref refs/heads/stable "$latest_tag_ref"
+          git push -f origin refs/heads/stable
