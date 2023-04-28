@@ -44,3 +44,5 @@ jobs:
   preview:
     needs: [build-docs]
     uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr-common.yaml@docs-preview-remove-workflow-run-condition
+    with:
+      workflow-id: "${{ github.event.pull_request.id }}"
