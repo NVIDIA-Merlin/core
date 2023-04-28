@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import Callable
+
 from merlin.core.protocols import Transformable
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
@@ -29,11 +31,14 @@ class Subgraph(StatOperator):
     Operator that executes a Merlin Graph as a sub-graph of another Graph
     """
 
-    def __init__(self, name, output_node):
+    def __init__(self, name, output_node, loop_until: Callable = None):
         self.name = name
         self.graph = output_node
+        self.loop_until = loop_until
+
         if not isinstance(output_node, Graph):
             self.graph = Graph(output_node)
+
         super().__init__()
 
     def transform(
@@ -58,7 +63,10 @@ class Subgraph(StatOperator):
             Returns a transformed dataframe for this operator
         """
         executor = LocalExecutor()
-        return executor.transform(transformable, self.graph)
+        transformable = executor.transform(transformable, self.graph)
+        while self.loop_until and not self.loop_until(transformable):
+            transformable = executor.transform(transformable, self.graph)
+        return transformable
 
     def fit(self, col_selector: ColumnSelector, dataset: Dataset):
         DaskExecutor().fit(dataset, self.graph)

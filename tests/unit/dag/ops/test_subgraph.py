@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import pytest
 
+from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
@@ -65,3 +67,32 @@ def test_subgraph_fit(dataset):
 
     assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
     assert main_graph.subgraph("subgraph").output_node.op.stats["fit"] is True
+
+
+@pytest.mark.parametrize("engine", ["parquet"])
+def test_subgraph_looping(dataset):
+    class LoopingTestOp(BaseOperator):
+        def transform(
+            self, col_selector: ColumnSelector, transformable: Transformable
+        ) -> Transformable:
+            return transformable[col_selector.names] + 1.0
+
+    subgraph = ["x"] >> LoopingTestOp()
+    subgraph_op = Subgraph(
+        "subgraph", subgraph, loop_until=lambda transformable: (transformable["x"] > 5.0).all()
+    )
+    main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
+
+    main_graph = Graph(main_graph_ops)
+    main_graph.construct_schema(dataset.schema)
+
+    df = dataset.to_ddf().compute()
+    df["x"] = df["x"] * 0.0
+    dataset = Dataset(df)
+
+    executor = DaskExecutor()
+    executor.fit(dataset, main_graph)
+    result_df = executor.transform(dataset, main_graph)
+
+    assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
+    assert (result_df.to_ddf().compute()[["x"]] > 5.0).all()[0]
