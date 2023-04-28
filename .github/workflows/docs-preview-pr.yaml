@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  WF_ID: ${{ github.event.pull_request.id }}
-
 jobs:
   build-docs:
     runs-on: ubuntu-latest
@@ -45,4 +42,4 @@ jobs:
     needs: [build-docs]
     uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr-common.yaml@docs-preview-remove-workflow-run-condition
     with:
-      workflow-id: "${{ github.event.pull_request.id }}"
+      workflow-id: "${{ github.run_id }}"
