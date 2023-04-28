@@ -10,6 +10,44 @@ on:
     branches: [main]
 
 jobs:
+  build-docs:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.9]
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          # Build docs, treat warnings as errors
+      - name: Building docs
+        run: |
+          pip install tox
+          tox -e docs
+      - name: Upload HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-build-artifact
+          path: docs/build/html
+          if-no-files-found: error
+          retention-days: 1
+      - name: Store PR information
+        run: |
+          mkdir ./pr
+          echo ${{ github.event.number }}              > ./pr/pr.txt
+          echo ${{ github.event.pull_request.merged }} > ./pr/merged.txt
+          echo ${{ github.event.action }}              > ./pr/action.txt
+      - name: Upload PR information
+        uses: actions/upload-artifact@v2
+        with:
+          name: pr
+          path: pr/
+
   build-packages:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -59,28 +97,7 @@ jobs:
           name: conda
           path: ${{ steps.conda_build.outputs.conda_package }}
 
-      # Build docs, treat warnings as errors
-      - name: Building docs
-        run: |
-          tox -e docs
-      - name: Upload HTML
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-build-artifact
-          path: docs/build/html
-          if-no-files-found: error
-          retention-days: 1
-      - name: Store PR information
-        run: |
-          mkdir ./pr
-          echo ${{ github.event.number }}              > ./pr/pr.txt
-          echo ${{ github.event.pull_request.merged }} > ./pr/merged.txt
-          echo ${{ github.event.action }}              > ./pr/action.txt
-      - name: Upload PR information
-        uses: actions/upload-artifact@v2
-        with:
-          name: pr
-          path: pr/
+
 
   release:
     name: Release
