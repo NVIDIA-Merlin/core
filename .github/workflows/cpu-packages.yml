@@ -3,7 +3,9 @@ name: Build Core Packages (CPU)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - release*
     tags:
       - v*
   pull_request:
