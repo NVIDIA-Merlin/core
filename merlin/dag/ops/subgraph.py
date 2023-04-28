@@ -137,6 +137,9 @@ class Subgraph(StatOperator):
         for stat in Graph.get_nodes_by_op_type([self.graph.output_node], StatOperator):
             stat.op.clear()
 
+    def column_mapping(self, col_selector):
+        return self.graph.column_mapping
+
     def fit_finalize(self, dask_stats):
         return dask_stats
 

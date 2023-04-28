@@ -194,6 +194,7 @@ class Node:
         """
         parents_schema = _combine_schemas(self.parents)
         deps_schema = _combine_schemas(self.dependencies)
+
         parents_selector = _combine_selectors(self.parents)
         dependencies_selector = _combine_selectors(self.dependencies)
 

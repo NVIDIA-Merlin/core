@@ -14,10 +14,8 @@
 # limitations under the License.
 #
 import logging
-from typing import Union
 
 import dask
-import dask.dataframe as dd
 import pandas as pd
 from dask.core import flatten
 
@@ -336,9 +334,7 @@ class DaskExecutor:
             )
         )
 
-    def fit(
-        self, dataset: Union[Dataset, dd.DataFrame], graph: Graph, schema: Schema = None
-    ) -> "Graph":
+    def fit(self, dataset: Dataset, graph: Graph, schema: Schema = None) -> "Graph":
         """Calculates statistics on a dataset for an operator graph
 
         Parameters
