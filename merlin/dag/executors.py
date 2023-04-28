@@ -14,8 +14,10 @@
 # limitations under the License.
 #
 import logging
+from typing import Union
 
 import dask
+import dask.dataframe as dd
 import pandas as pd
 from dask.core import flatten
 
@@ -27,9 +29,11 @@ from merlin.core.utils import (
     set_client_deprecated,
 )
 from merlin.dag import ColumnSelector, Graph, Node
+from merlin.dag.stat_operator import StatOperator
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io import Dataset
 from merlin.io.worker import clean_worker_cache
+from merlin.schema import Schema
 
 LOG = logging.getLogger("merlin")
 
@@ -332,8 +336,66 @@ class DaskExecutor:
             )
         )
 
-    def fit(self, dataset: Dataset, graph, strict=False):
-        """Calculates statistics for a set of nodes on the input dataset
+    def fit(
+        self, dataset: Union[Dataset, dd.DataFrame], graph: Graph, schema: Schema = None
+    ) -> "Graph":
+        """Calculates statistics on a dataset for an operator graph
+
+        Parameters
+        -----------
+        dataset: Dataset
+            The input dataset to calculate statistics for. If there is a train/test split this
+            data should be the training dataset only.
+
+        Returns
+        -------
+        Graph
+            This Graph with statistics calculated on it
+        """
+        graph.clear_stats()
+
+        if isinstance(dataset, Dataset):
+            schema = dataset.schema
+
+        if not graph.output_schema:
+            graph.construct_schema(schema)
+
+        # Get a dictionary mapping all StatOperators we need to fit to a set of any dependent
+        # StatOperators (having StatOperators that depend on the output of other StatOperators
+        # means that will have multiple phases in the fit cycle here)
+        stat_op_nodes = {
+            node: Graph.get_nodes_by_op_type(node.parents_with_dependencies, StatOperator)
+            for node in Graph.get_nodes_by_op_type([graph.output_node], StatOperator)
+        }
+
+        while stat_op_nodes:
+            # get all the StatOperators that we can currently call fit on (no outstanding
+            # dependencies)
+            current_phase = [
+                node for node, dependencies in stat_op_nodes.items() if not dependencies
+            ]
+            if not current_phase:
+                # this shouldn't happen, but lets not infinite loop just in case
+                raise RuntimeError("failed to find dependency-free StatOperator to fit")
+
+            self._fit_ops(dataset, current_phase)
+
+            # Remove all the operators we processed in this phase, and remove
+            # from the dependencies of other ops too
+            for node in current_phase:
+                stat_op_nodes.pop(node)
+            for dependencies in stat_op_nodes.values():
+                dependencies.difference_update(current_phase)
+
+        # This captures the output dtypes of operators like LambdaOp where
+        # the dtype can't be determined without running the transform
+        self._transform_impl(dataset, graph, capture_dtypes=True).sample_dtypes()
+        graph.construct_schema(schema, preserve_dtypes=True)
+
+        return graph
+
+    def _fit_ops(self, dataset: Dataset, graph, strict=False):
+        """Calculates statistics on a dataset for an operator graph
 
         Parameters
         -----------
@@ -378,6 +440,24 @@ class DaskExecutor:
 
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
+
+    def _transform_impl(self, dataset: Dataset, graph: Graph, capture_dtypes=False):
+        if not graph.output_schema:
+            graph.construct_schema(dataset.schema)
+
+        result = self.transform(
+            dataset, graph.output_node, graph.output_dtypes, capture_dtypes=capture_dtypes
+        )
+
+        if isinstance(result, Dataset):
+            return result
+        else:
+            return Dataset(
+                result,
+                cpu=dataset.cpu,
+                base_dataset=dataset.base_dataset,
+                schema=graph.output_schema,
+            )
 
     def _clear_worker_cache(self):
         # Clear worker caches to be "safe"
