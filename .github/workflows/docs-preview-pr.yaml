@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  WF_ID: ${{ github.event.workflow_run.id }}
+  WF_ID: ${{ github.event.pull_request.id }}
 
 jobs:
   build-docs:
