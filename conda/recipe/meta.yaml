@@ -33,7 +33,6 @@ requirements:
     - dask-cudf>=21.10.*
     - cupy>=7.2.0,<10.0.0a
     - nvtx>=0.2.1
-    - pynvml
 
 about:
   home: https://github.com/NVIDIA-Merlin/core
