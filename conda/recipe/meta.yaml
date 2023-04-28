@@ -30,6 +30,7 @@ requirements:
     {% for req in setup_py_data.get('install_requires', []) %}
     - {{ req }}
     {% endfor %}
+    - cupy>=10
     - nvtx>=0.2.1
 
 about:
