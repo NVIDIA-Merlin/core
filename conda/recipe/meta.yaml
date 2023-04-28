@@ -30,8 +30,6 @@ requirements:
     {% for req in setup_py_data.get('install_requires', []) %}
     - {{ req }}
     {% endfor %}
-    - dask-cudf>=21.10.*
-    - cupy>=7.2.0,<10.0.0a
     - nvtx>=0.2.1
 
 about:
