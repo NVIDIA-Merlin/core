@@ -43,4 +43,4 @@ jobs:
 
   preview:
     needs: [build-docs]
-    uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr-common.yaml@main
+    uses: nvidia-merlin/.github/.github/workflows/docs-preview-pr-common.yaml@docs-preview-remove-workflow-run-condition
