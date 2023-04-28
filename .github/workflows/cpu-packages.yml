@@ -97,8 +97,6 @@ jobs:
           name: conda
           path: ${{ steps.conda_build.outputs.conda_package }}
 
-
-
   release:
     name: Release
     runs-on: ubuntu-latest
