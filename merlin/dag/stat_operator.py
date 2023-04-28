@@ -15,10 +15,9 @@
 #
 from typing import Any
 
-import dask.dataframe as dd
-
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
+from merlin.io import Dataset
 
 
 class StatOperator(BaseOperator):
@@ -27,7 +26,7 @@ class StatOperator(BaseOperator):
     on top of the Operator class.
     """
 
-    def fit(self, col_selector: ColumnSelector, ddf: dd.DataFrame) -> Any:
+    def fit(self, col_selector: ColumnSelector, dataset: Dataset) -> Any:
         """Calculate statistics for this operator, and return a dask future
         to these statistics, which will be computed by the workflow."""
 
