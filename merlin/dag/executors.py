@@ -279,7 +279,7 @@ class DaskExecutor:
         strict=False,
     ):
         """
-        Transforms all partitions of a Dask Dataframe by applying the operators
+        Transforms all partitions of a dataset by applying the operators
         from a collection of Nodes
         """
         nodes = self._executor._output_nodes(graph)
