@@ -333,12 +333,12 @@ class DaskExecutor:
         )
 
     def fit(self, dataset: Dataset, graph, strict=False):
-        """Calculates statistics for a set of nodes on the input dataframe
+        """Calculates statistics for a set of nodes on the input dataset
 
         Parameters
         -----------
-        ddf: dask.Dataframe
-            The input dataframe to calculate statistics for. If there is a
+        dataset: merlin.io.Dataset
+            The input dataset to calculate statistics for. If there is a
             train/test split this should be the training dataset only.
         """
         nodes = self._executor._output_nodes(graph)
