@@ -114,14 +114,14 @@ def test_column_schema_protobuf_domain_check(tmpdir):
         "col1",
         tags=[],
         properties={"domain": {"min": 0, "max": 10}},
-        dtype=numpy.int,
+        dtype=int,
         is_list=False,
     )
     schema2 = ColumnSchema(
         "col2",
         tags=[],
         properties={"domain": {"min": 0.0, "max": 10.0}},
-        dtype=numpy.float,
+        dtype=float,
         is_list=False,
     )
     saved_schema = Schema([schema1, schema2])
@@ -167,7 +167,7 @@ def test_column_schema_set_protobuf(tmpdir, props1, props2, tags1, tags2, d_type
 
 @pytest.mark.parametrize("properties", [{}, {"domain": {"min": 0, "max": 10}}])
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("dtype", [float, int])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_type):
     # make sure we can round trip a schema to TensorflowMetadata without going to disk
@@ -187,7 +187,7 @@ def test_schema_to_tensorflow_metadata(tmpdir, properties, tags, dtype, list_typ
     ],
 )
 @pytest.mark.parametrize("tags", [[], ["a", "b", "c"]])
-@pytest.mark.parametrize("dtype", [numpy.float, numpy.int])
+@pytest.mark.parametrize("dtype", [float, int])
 @pytest.mark.parametrize("list_type", [True, False])
 def test_schema_to_tensorflow_metadata_json(tmpdir, properties, tags, dtype, list_type):
     schema = Schema(
@@ -262,7 +262,7 @@ def test_tensorflow_metadata_from_json():
 def test_shapes_survive_round_trip(dim1, dim2, dim3):
     dims = (dim1, dim2, dim3)
 
-    col_schema1 = ColumnSchema("col1", dtype=numpy.int, dims=dims)
+    col_schema1 = ColumnSchema("col1", dtype=int, dims=dims)
 
     schema = Schema([col_schema1])
     loaded_schema = TensorflowMetadata.from_merlin_schema(schema).to_merlin_schema()
