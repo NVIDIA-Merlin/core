@@ -71,7 +71,7 @@ class DTypeMappingRegistry:
         if mapping.matches_merlin(merlin_dtype):
             return mapping.to_merlin(merlin_dtype)
 
-        raise mn.unknown
+        return mn.unknown
 
     def to_merlin(self, external_dtype):
         """
