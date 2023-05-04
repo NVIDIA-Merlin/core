@@ -96,11 +96,7 @@ class DTypeMappingRegistry:
             if mapping.matches_external(external_dtype):
                 return mapping.to_merlin(external_dtype)
 
-        raise TypeError(
-            f"Merlin doesn't provide a mapping from {external_dtype} ({type(external_dtype)}) "
-            "to a Merlin dtype. If you'd like to provide one, you can use "
-            "`merlin.dtype.register()`."
-        )
+        return mn.unknown
 
     def to_merlin_via_numpy(self, external_dtype):
         """

@@ -40,9 +40,9 @@ def test_type_mappings_can_be_registered():
     assert merlin_dtype == test_type
 
 
-def test_unknown_types_raise_error():
+def test_unknown_types_return_unknown():
     class UnknownType:
         pass
 
-    with pytest.raises(TypeError):
-        md.dtype(UnknownType)
+    dtype = md.dtype(UnknownType)
+    assert dtype == md.unknown
