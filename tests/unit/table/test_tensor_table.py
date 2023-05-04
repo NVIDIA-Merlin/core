@@ -316,6 +316,7 @@ def test_gpu_transfer():
     assert gpu_table.device == Device.GPU
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
 
+
 def test_as_tensor_type_invalid_type():
     table = TensorTable({"a": np.array([1, 2, 3])})
     with pytest.raises(ValueError) as exc_info:
@@ -384,4 +385,3 @@ class TestTensorTableFromDf:
             table["feature"].values, xp.array([[1, 2], [3, 4]], dtype="int64")
         )
         assert table["feature"].offsets is None
-
