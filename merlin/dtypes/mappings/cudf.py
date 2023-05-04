@@ -15,6 +15,7 @@
 #
 import numpy as np
 
+import merlin.dtypes.aliases as mn
 from merlin.core.compat import cudf
 from merlin.core.dispatch import is_string_dtype
 from merlin.dtypes.mapping import DTypeMapping, NumpyPreprocessor
@@ -48,6 +49,9 @@ if cudf:
         # the mapping itself doesn't use cudf (yet?)
 
         cudf_dtypes = DTypeMapping(
+            {
+                mn.struct: [cudf.StructDtype],
+            },
             translator=NumpyPreprocessor("cudf", cudf_translator, attrs=["_categories"]),
         )
         _dtype_registry.register("cudf", cudf_dtypes)

@@ -7,4 +7,4 @@ on:
 
 jobs:
   set-stable-branch:
-    uses: nvidia-merlin/.github/.github/workflows/set-stable-branch.yaml@main
+    uses: NVIDIA-Merlin/.github/.github/workflows/set-stable-branch.yaml@main
