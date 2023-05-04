@@ -202,12 +202,12 @@ def test_tensor_cpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    tensor_table = tensor_table.to(source_column_type.framework_name)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    result = result.to(target_column_type.framework_name)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -316,8 +316,15 @@ def test_gpu_transfer():
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
 
 
-def test_to_unknown_framework():
+def test_as_tensor_type_invalid_type():
     table = TensorTable({"a": np.array([1, 2, 3])})
     with pytest.raises(ValueError) as exc_info:
-        table.to("unknown_framework")
-    assert "Unsupported framework name 'unknown_framework'" in str(exc_info.value)
+        table.as_tensor_type("not_a_type")
+    assert "tensor_type argument must be a type" in str(exc_info.value)
+
+
+def test_as_tensor_type_unsupported_type():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.as_tensor_type(np.ndindex)
+    assert "Unsupported tensor type" in str(exc_info.value)    

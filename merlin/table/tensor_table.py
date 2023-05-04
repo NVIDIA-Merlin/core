@@ -60,11 +60,12 @@ class TensorTable:
         Raises
         ------
         ValueError
-            If framework name provided does not match known formats
+            If tensor type provided does not match supported types
         """
+        if not isinstance(tensor_type, type):
+            raise ValueError(f"tensor_type argument must be a type. Received: {type(tensor_type)}")
 
-
-        if isinstance(tensor_type, TensorColumn):
+        if issubclass(tensor_type, TensorColumn):
             target_col_type = tensor_type
         else:
             framework_columns = {}
