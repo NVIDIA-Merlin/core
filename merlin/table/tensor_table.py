@@ -211,9 +211,10 @@ class TensorTable:
 
     @columns.setter
     def columns(self, col_names):
+        renamed_columns = {}
         for col, col_name in zip(self.columns, col_names):
-            self._columns[col_name] = self._columns[col]
-            del self._columns[col]
+            renamed_columns[col_name] = self._columns[col]
+        self._columns = renamed_columns
 
     @property
     def column_type(self):
