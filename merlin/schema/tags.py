@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import warnings
 from enum import Enum
 from typing import List, Set, Union
 
@@ -146,11 +145,6 @@ class TagSet:
         for tag in tag_set:
             atomized_tags.add(tag)
             if tag in COMPOUND_TAGS:
-                warnings.warn(
-                    f"Compound tags like {tag} have been deprecated "
-                    "and will be removed in a future version. "
-                    f"Please use the atomic versions of these tags, like {COMPOUND_TAGS[tag]}."
-                )
                 atomized_tags.update(COMPOUND_TAGS[tag])
 
         return atomized_tags
