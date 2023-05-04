@@ -62,27 +62,33 @@ class TensorTable:
         ValueError
             If tensor type provided does not match supported types
         """
+        framework_columns = {}
+        supported_columns = [NumpyColumn, CupyColumn, TorchColumn, TensorflowColumn]
+        for column in supported_columns:
+            column_tensor_type = column.array_type()
+            if column_tensor_type:
+                framework_columns[column_tensor_type] = column
+
+        enabled_tensor_types = ", ".join(f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns)
+        enabled_column_types = ", ".join(f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values())
+
         if not isinstance(tensor_type, type):
-            raise ValueError(f"tensor_type argument must be a type. Received: {type(tensor_type)}")
+            raise ValueError(
+                f"tensor_type argument must be a type. Received: {type(tensor_type)} \n"
+                f"Supported values are: {enabled_tensor_types}. \n"
+                f"Or TensorColumn Types: {enabled_column_types}"
+           )
 
         if issubclass(tensor_type, TensorColumn):
             target_col_type = tensor_type
         else:
-            framework_columns = {}
-            supported_columns = [NumpyColumn, CupyColumn, TorchColumn, TensorflowColumn]
-            for column in supported_columns:
-                column_tensor_type = column.array_type()
-                if column_tensor_type:
-                    framework_columns[column_tensor_type] = column
             try:
                 target_col_type = framework_columns[tensor_type]
             except KeyError as exc:
-                tensor_types = ", ".join(f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns)
-                column_types = ", ".join(f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values())
                 raise ValueError(
                     f"Unsupported tensor type '{tensor_type}'. \n"
-                    f"Supported values are: {tensor_types}. \n"
-                    f"Or TensorColumn Types: {column_types}"
+                    f"Supported values are: {enabled_tensor_types}. \n"
+                    f"Or TensorColumn Types: {enabled_column_types}"
                 ) from exc
 
         # if the current table already contains columns of the target type
