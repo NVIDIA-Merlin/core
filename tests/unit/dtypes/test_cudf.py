@@ -23,7 +23,7 @@ from merlin.core.compat import cudf
 def test_cudf_struct_dtype():
     struct_dtype = cudf.StructDtype({"a": "int64", "b": "string"})
     merlin_dtype = md.dtype(struct_dtype)
-    assert merlin_dtype == md.unknown
+    assert merlin_dtype == md.struct
 
     merlin_dtype = md.struct
     cudf_dtype = merlin_dtype.to("cudf")
