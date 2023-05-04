@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Dict
+from typing import Any, Dict, List, Type, Union
 
 from merlin.dag.utils import group_values_offsets
-from merlin.table.conversions import df_from_tensor_table, tensor_table_from_df
+from merlin.table.conversions import convert_col, df_from_tensor_table, tensor_table_from_df
 from merlin.table.cupy_column import CupyColumn
 from merlin.table.numpy_column import NumpyColumn
 from merlin.table.tensor_column import TensorColumn, create_tensor_column
@@ -43,6 +43,70 @@ class TensorTable:
             self._validate_columns(cols_dict)
 
         self._columns = cols_dict
+
+    def as_tensor_type(self, tensor_type: Union[Type, TensorColumn]) -> "TensorTable":
+        """Returns new TensorTable with columns cast to tensors of target framework.
+
+        Parameters
+        ----------
+        tensor_type : Union[Type, TensorColumn]
+            Tensor type or TensorColumn to convert to
+
+        Returns
+        -------
+        TensorTable
+            A new TensorTable with columns cast to framework tensors
+
+        Raises
+        ------
+        ValueError
+            If tensor type provided does not match supported types
+        """
+        framework_columns = {}
+        supported_columns = [NumpyColumn, CupyColumn, TorchColumn, TensorflowColumn]
+        for _column in supported_columns:
+            column_tensor_type = _column.array_type()
+            if column_tensor_type:
+                framework_columns[column_tensor_type] = _column
+
+        enabled_tensor_types = ", ".join(
+            f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns
+        )
+        enabled_column_types = ", ".join(
+            f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values()
+        )
+
+        if not isinstance(tensor_type, type):
+            raise ValueError(
+                f"tensor_type argument must be a type. Received: {type(tensor_type)} \n"
+                f"Supported values are: {enabled_tensor_types}. \n"
+                f"Or TensorColumn Types: {enabled_column_types}"
+            )
+
+        if issubclass(tensor_type, TensorColumn):
+            target_col_type = tensor_type
+        else:
+            try:
+                target_col_type = framework_columns[tensor_type]
+            except KeyError as exc:
+                raise ValueError(
+                    f"Unsupported tensor type '{tensor_type}'. \n"
+                    f"Supported values are: {enabled_tensor_types}. \n"
+                    f"Or TensorColumn Types: {enabled_column_types}"
+                ) from exc
+
+        # if the current table already contains columns of the target type
+        # no conversion required
+        if self.column_type == target_col_type:
+            return self
+
+        # construct new table with columns cast to target framework type
+        columns = {}
+        for column_name in self.columns:
+            columns[column_name] = convert_col(self[column_name], target_col_type)
+        table = TensorTable(columns)
+
+        return table
 
     def _convert_arrays_to_columns(self, columns, _unsafe=False):
         grouped_columns = group_values_offsets(columns or {})
@@ -137,7 +201,7 @@ class TensorTable:
         return TensorTable(self._columns.copy())
 
     @property
-    def columns(self):
+    def columns(self) -> List[str]:
         """
         Return the names of the columns
 

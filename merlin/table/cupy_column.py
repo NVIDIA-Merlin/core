@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.table.conversions import _from_dlpack_gpu, _to_dlpack
@@ -26,11 +26,11 @@ class CupyColumn(TensorColumn):
     """
 
     @classmethod
-    def array_type(cls) -> Type:
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        return cp.ndarray
+        return cp.ndarray if cp else None
 
     @classmethod
     def array_constructor(cls) -> Callable:
