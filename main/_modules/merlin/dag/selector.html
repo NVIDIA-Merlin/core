@@ -126,11 +126,11 @@
         <span class="n">subgroups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;ColumnSelector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tags</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">names</span> <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="n">tags</span> <span class="k">if</span> <span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span> <span class="o">=</span> <span class="n">subgroups</span> <span class="k">if</span> <span class="n">subgroups</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">names</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="p">[]</span>
@@ -157,6 +157,11 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">plain_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nested_check</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_all</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
