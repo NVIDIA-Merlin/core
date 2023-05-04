@@ -35,4 +35,4 @@ jobs:
       - name: Run tests
         run: |
           branch="${{ steps.get-branch-name.outputs.branch }}"
-          GIT_COMMIT=`git rev-parse HEAD` tox -e ${{ inputs.env }} -- $branch
+          GIT_COMMIT=$(git rev-parse HEAD) tox -e ${{ inputs.env }} -- $branch
