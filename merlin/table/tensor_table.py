@@ -209,6 +209,12 @@ class TensorTable:
         """
         return list(self.keys())
 
+    @columns.setter
+    def columns(self, col_names):
+        for col, col_name in zip(self.columns, col_names):
+            self._columns[col_name] = self._columns[col]
+            del self._columns[col]
+
     @property
     def column_type(self):
         return type(list(self.values())[0])
