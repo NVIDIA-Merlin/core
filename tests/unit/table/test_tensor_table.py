@@ -327,4 +327,4 @@ def test_as_tensor_type_unsupported_type():
     table = TensorTable({"a": np.array([1, 2, 3])})
     with pytest.raises(ValueError) as exc_info:
         table.as_tensor_type(np.ndindex)
-    assert "Unsupported tensor type" in str(exc_info.value)    
+    assert "Unsupported tensor type" in str(exc_info.value)

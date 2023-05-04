@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, List, Type, Union
 
 from merlin.dag.utils import group_values_offsets
 from merlin.table.conversions import convert_col, df_from_tensor_table, tensor_table_from_df
@@ -64,20 +64,24 @@ class TensorTable:
         """
         framework_columns = {}
         supported_columns = [NumpyColumn, CupyColumn, TorchColumn, TensorflowColumn]
-        for column in supported_columns:
-            column_tensor_type = column.array_type()
+        for _column in supported_columns:
+            column_tensor_type = _column.array_type()
             if column_tensor_type:
-                framework_columns[column_tensor_type] = column
+                framework_columns[column_tensor_type] = _column
 
-        enabled_tensor_types = ", ".join(f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns)
-        enabled_column_types = ", ".join(f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values())
+        enabled_tensor_types = ", ".join(
+            f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns
+        )
+        enabled_column_types = ", ".join(
+            f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values()
+        )
 
         if not isinstance(tensor_type, type):
             raise ValueError(
                 f"tensor_type argument must be a type. Received: {type(tensor_type)} \n"
                 f"Supported values are: {enabled_tensor_types}. \n"
                 f"Or TensorColumn Types: {enabled_column_types}"
-           )
+            )
 
         if issubclass(tensor_type, TensorColumn):
             target_col_type = tensor_type
@@ -98,8 +102,8 @@ class TensorTable:
 
         # construct new table with columns cast to target framework type
         columns = {}
-        for column in self.columns:
-            columns[column] = convert_col(self[column], target_col_type)
+        for column_name in self.columns:
+            columns[column_name] = convert_col(self[column_name], target_col_type)
         table = TensorTable(columns)
 
         return table
@@ -197,7 +201,7 @@ class TensorTable:
         return TensorTable(self._columns.copy())
 
     @property
-    def columns(self):
+    def columns(self) -> List[str]:
         """
         Return the names of the columns
 

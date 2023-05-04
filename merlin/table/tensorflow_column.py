@@ -51,12 +51,11 @@ class TensorflowColumn(TensorColumn):
         return tf.transpose(values)
 
     @classmethod
-    def array_type(cls) -> Type:
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        if tf:
-            return tf.Tensor
+        return tf.Tensor if tf else None
 
     @classmethod
     def array_constructor(cls) -> Callable:
