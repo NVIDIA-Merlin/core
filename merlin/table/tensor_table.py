@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Dict
+from typing import Any, Dict, Type, Union
 
 from merlin.dag.utils import group_values_offsets
 from merlin.table.conversions import convert_col, df_from_tensor_table, tensor_table_from_df
@@ -44,13 +44,13 @@ class TensorTable:
 
         self._columns = cols_dict
 
-    def as_tensor_type(self, tensor_type: Any) -> "TensorTable":
+    def as_tensor_type(self, tensor_type: Union[Type, TensorColumn]) -> "TensorTable":
         """Returns new TensorTable with columns cast to tensors of target framework.
 
         Parameters
         ----------
-        framework_name : str
-            Name of tensor Framework to convert columns to
+        tensor_type : Union[Type, TensorColumn]
+            Tensor type or TensorColumn to convert to
 
         Returns
         -------
@@ -62,20 +62,27 @@ class TensorTable:
         ValueError
             If framework name provided does not match known formats
         """
-        framework_columns = {
-            TensorflowColumn.array_type(): TensorflowColumn,
-            NumpyColumn.array_type(): NumpyColumn,
-            TorchColumn.array_type(): TorchColumn,
-            CupyColumn.array_type(): CupyColumn,
-        }
-        try:
-            target_col_type = framework_columns[tensor_name]
-        except KeyError as exc:
-            framework_names = ", ".join(f"'{name}'" for name in framework_columns)
-            raise ValueError(
-                f"Unsupported framework name '{framework_name}'. "
-                f"Supported values are: {framework_names}"
-            ) from exc
+
+
+        if isinstance(tensor_type, TensorColumn):
+            target_col_type = tensor_type
+        else:
+            framework_columns = {}
+            supported_columns = [NumpyColumn, CupyColumn, TorchColumn, TensorflowColumn]
+            for column in supported_columns:
+                column_tensor_type = column.array_type()
+                if column_tensor_type:
+                    framework_columns[column_tensor_type] = column
+            try:
+                target_col_type = framework_columns[tensor_type]
+            except KeyError as exc:
+                tensor_types = ", ".join(f"'{_class.__module__}.{_class.__name__}'" for _class in framework_columns)
+                column_types = ", ".join(f"'merlin.table.{_class.__name__}'" for _class in framework_columns.values())
+                raise ValueError(
+                    f"Unsupported tensor type '{tensor_type}'. \n"
+                    f"Supported values are: {tensor_types}. \n"
+                    f"Or TensorColumn Types: {column_types}"
+                ) from exc
 
         # if the current table already contains columns of the target type
         # no conversion required
