@@ -44,7 +44,7 @@ class TensorTable:
 
         self._columns = cols_dict
 
-    def to(self, framework_name: str) -> "TensorTable":
+    def as_tensor_type(self, tensor_type: Any) -> "TensorTable":
         """Returns new TensorTable with columns cast to tensors of target framework.
 
         Parameters
@@ -63,13 +63,13 @@ class TensorTable:
             If framework name provided does not match known formats
         """
         framework_columns = {
-            "tensorflow": TensorflowColumn,
-            "numpy": NumpyColumn,
-            "torch": TorchColumn,
-            "cupy": CupyColumn,
+            TensorflowColumn.array_type(): TensorflowColumn,
+            NumpyColumn.array_type(): NumpyColumn,
+            TorchColumn.array_type(): TorchColumn,
+            CupyColumn.array_type(): CupyColumn,
         }
         try:
-            target_col_type = framework_columns[framework_name]
+            target_col_type = framework_columns[tensor_name]
         except KeyError as exc:
             framework_names = ", ".join(f"'{name}'" for name in framework_columns)
             raise ValueError(
