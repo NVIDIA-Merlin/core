@@ -165,7 +165,10 @@ def df_from_tensor_table(table):
             offsets = make_series(col_data.offsets, device=device)
             df_dict[col_name] = create_multihot_col(offsets, values)
         else:
-            df_dict[col_name] = make_series(col_data.values, device=device)
+            values = col_data.values
+            if len(values.shape) > 1:
+                values = values.tolist()
+            df_dict[col_name] = make_series(values, device=device)
 
     return make_df(df_dict, device=device)
 
@@ -180,8 +183,8 @@ def _register_tensor_table_from_pandas_df():
     from merlin.table import NumpyColumn
 
     @tensor_table_from_df.register(pd.DataFrame)
-    def _tensor_table_from_pandas_df(df: pd.DataFrame):
-        return _create_table_from_df(df, NumpyColumn, device="cpu")
+    def _tensor_table_from_pandas_df(df: pd.DataFrame, schema=None):
+        return _create_table_from_df(df, NumpyColumn, device="cpu", schema=schema)
 
 
 @tensor_table_from_df.register_lazy("cudf")
@@ -190,18 +193,33 @@ def _register_tensor_table_from_cudf_df():
     from merlin.table import CupyColumn
 
     @tensor_table_from_df.register(cudf.DataFrame)
-    def _tensor_table_from_cudf_df(df: cudf.DataFrame):
-        return _create_table_from_df(df, CupyColumn)
+    def _tensor_table_from_cudf_df(df: cudf.DataFrame, schema=None):
+        return _create_table_from_df(df, CupyColumn, schema=schema)
 
 
-def _create_table_from_df(df, column_type, device=None):
+def _create_table_from_df(df, column_type, device=None, schema=None):
     from merlin.table import TensorTable
 
     array_cols = {}
     for col in df.columns:
         if is_list_dtype(df[col]):
             values_series, offsets_series = pull_apart_list(df[col], device=device)
-            array_cols[col] = column_type(values_series.values, offsets_series.values)
+            values = values_series.values
+            offsets = offsets_series.values
+            if schema and not schema[col].is_ragged:
+                row_lengths = offsets[1:] - offsets[:-1]
+                if not all(row_lengths == row_lengths[0]):
+                    raise ValueError(
+                        f"ColumnSchema for list column '{col}' describes a fixed size list. "
+                        "Found a ragged list output. If this dataframe contains a ragged list, "
+                        "Please check the 'schema' has a column shape defined to reflect this. "
+                    )
+                values_list = values.reshape(
+                    (len(row_lengths), int(row_lengths[0])) + values.shape[1:]
+                )
+                array_cols[col] = column_type(values_list)
+            else:
+                array_cols[col] = column_type(values_series.values, offsets_series.values)
         else:
             array_cols[col] = column_type(df[col].values)
 
