@@ -45,8 +45,8 @@ numpy_dtypes = {
     mn.datetime64us: [np.dtype("datetime64[us]")],
     mn.datetime64ns: [np.dtype("datetime64[ns]")],
     # Miscellaneous
-    mn.string: [np.dtype("str"), np.str],
-    mn.object_: [np.dtype("O"), np.object],
-    mn.boolean: [np.dtype("bool"), np.bool],
+    mn.string: [np.dtype("str"), str],
+    mn.object_: [np.dtype("O"), object],
+    mn.boolean: [np.dtype("bool"), bool],
 }
 _dtype_registry.register("numpy", numpy_dtypes)
