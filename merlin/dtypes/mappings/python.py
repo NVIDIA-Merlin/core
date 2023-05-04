@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import numpy as np
-
 import merlin.dtypes.aliases as mn
-from merlin.dtypes.mapping import DTypeMapping, NumpyPreprocessor
+from merlin.dtypes.mapping import DTypeMapping
 from merlin.dtypes.registry import _dtype_registry
 
 python_dtypes = DTypeMapping(
@@ -25,7 +23,6 @@ python_dtypes = DTypeMapping(
         mn.int64: int,
         mn.float64: float,
         mn.string: str,
-    },
-    translator=NumpyPreprocessor("python", np.dtype, classes=[str]),
+    }
 )
 _dtype_registry.register("python", python_dtypes)
