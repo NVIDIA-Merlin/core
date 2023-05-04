@@ -25,14 +25,13 @@ class CupyColumn(TensorColumn):
     A SeriesLike column backed by CuPy arrays
     """
 
-    framework_name = "cupy"
-
     @classmethod
     def array_type(cls) -> Type:
         """
         The type of the arrays backing this column
         """
-        return cp.ndarray
+        if cp:
+            return cp.ndarray
 
     @classmethod
     def array_constructor(cls) -> Callable:

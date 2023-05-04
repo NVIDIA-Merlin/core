@@ -46,8 +46,6 @@ class TensorflowColumn(TensorColumn):
     A SeriesLike column backed by Tensorflow tensors
     """
 
-    framework_name = "tensorflow"
-
     @classmethod
     def _transpose(cls, values):
         return tf.transpose(values)
@@ -57,7 +55,8 @@ class TensorflowColumn(TensorColumn):
         """
         The type of the arrays backing this column
         """
-        return tf.Tensor
+        if tf:
+            return tf.Tensor
 
     @classmethod
     def array_constructor(cls) -> Callable:

@@ -26,8 +26,6 @@ class NumpyColumn(TensorColumn):
     A SeriesLike column backed by NumPy arrays
     """
 
-    framework_name = "numpy"
-
     @classmethod
     def array_type(cls) -> Type:
         """

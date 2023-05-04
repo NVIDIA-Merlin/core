@@ -32,7 +32,8 @@ class TorchColumn(TensorColumn):
         """
         The type of the arrays backing this column
         """
-        return th.Tensor
+        if th:
+            return th.Tensor
 
     @classmethod
     def array_constructor(cls) -> Callable:
