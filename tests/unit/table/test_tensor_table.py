@@ -27,7 +27,6 @@ from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
 from merlin.schema import ColumnSchema, Schema
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
-from merlin.table.conversions import convert_col
 from tests.conftest import assert_eq
 
 col_type: List[Type] = []
@@ -204,15 +203,12 @@ def test_tensor_cpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
-    # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -237,15 +233,13 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -322,6 +316,19 @@ def test_gpu_transfer():
     assert gpu_table.device == Device.GPU
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
 
+def test_as_tensor_type_invalid_type():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.as_tensor_type("not_a_type")
+    assert "tensor_type argument must be a type" in str(exc_info.value)
+
+
+def test_as_tensor_type_unsupported_type():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.as_tensor_type(np.ndindex)
+    assert "Unsupported tensor type" in str(exc_info.value)
+
 
 class TestTensorTableFromDf:
     def test_default(self):
@@ -377,3 +384,4 @@ class TestTensorTableFromDf:
             table["feature"].values, xp.array([[1, 2], [3, 4]], dtype="int64")
         )
         assert table["feature"].offsets is None
+

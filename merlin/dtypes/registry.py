@@ -15,6 +15,7 @@
 #
 from typing import Dict, Union
 
+import merlin.dtypes.aliases as mn
 from merlin.dtypes.mapping import DTypeMapping
 
 
@@ -70,10 +71,7 @@ class DTypeMappingRegistry:
         if mapping.matches_merlin(merlin_dtype):
             return mapping.to_merlin(merlin_dtype)
 
-        raise TypeError(
-            f"Merlin doesn't provide a mapping from {merlin_dtype} to a {mapping_name} dtype. "
-            "If you'd like to provide one, you can use `merlin.dtype.register()`."
-        )
+        return mn.unknown
 
     def to_merlin(self, external_dtype):
         """
