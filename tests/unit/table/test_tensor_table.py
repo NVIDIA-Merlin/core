@@ -232,13 +232,13 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    tensor_table = tensor_table.to(source_column_type.framework_name)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    result = result.to(target_column_type.framework_name)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
