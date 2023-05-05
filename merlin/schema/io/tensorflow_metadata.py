@@ -19,6 +19,7 @@ from typing import Union
 import fsspec
 
 import merlin.dtypes as md
+from merlin.dtypes.shape import RaggedDimension, UniformDimension
 from merlin.schema.io import proto_utils, schema_bp
 from merlin.schema.io.schema_bp import Feature, FeatureType, FloatDomain, IntDomain
 from merlin.schema.io.schema_bp import Schema as ProtoSchema
@@ -273,9 +274,15 @@ def _pb_extra_metadata(column_schema):
     properties = {
         k: v for k, v in column_schema.properties.items() if k not in ("domain", "value_count")
     }
-    properties["_dims"] = list(
-        list(dim) if isinstance(dim, tuple) else dim for dim in column_schema.shape.as_tuple or []
+    _dims = (
+        list(
+            {"min": dim.min, "max": dim.max, "is_uniform": dim.is_uniform}
+            for dim in column_schema.shape.dims
+        )
+        if column_schema.shape.dims
+        else []
     )
+    properties["_dims"] = _dims
     properties["is_list"] = column_schema.is_list
     properties["is_ragged"] = column_schema.is_ragged
     if column_schema.dtype.element_size:
@@ -423,10 +430,18 @@ def _merlin_dtype(feature, properties):
         for dim in dims_list:
             if isinstance(dim, list):
                 dims.append(tuple(int(d) if isinstance(d, float) else d for d in dim))
-            elif dim is not None:
+            elif isinstance(dim, (int, float)):
                 dims.append(int(dim))
-            else:
+            elif dim is None:
                 dims.append(dim)
+            elif isinstance(dim, dict):
+                _min = int(dim["min"]) if isinstance(dim["min"], float) else dim["min"]
+                _max = int(dim["max"]) if isinstance(dim["max"], float) else dim["max"]
+                if dim["is_uniform"]:
+                    dims.append(UniformDimension(_min, _max))
+                else:
+                    dims.append(RaggedDimension(_min, _max))
+
         dtype = dtype.with_shape(tuple(dims))
 
         # If we found dims, avoid overwriting that shape with one inferred from counts or flags
@@ -452,10 +467,8 @@ def _merlin_column(feature):
         if Tags.CATEGORICAL not in tags:
             tags.append(Tags.CATEGORICAL)
 
-    dims = dtype.shape.as_tuple
-
-    if dims:
-        return ColumnSchema(name, tags, properties, dtype, dims=dims)
+    if dtype.shape.dims:
+        return ColumnSchema(name, tags, properties, dtype, dims=dtype.shape.dims)
     else:
         return ColumnSchema(name, tags, properties, dtype, is_list=is_list, is_ragged=is_ragged)
 

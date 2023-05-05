@@ -24,7 +24,7 @@ class DefaultShapes(Enum):
     SCALAR = (-1,)
 
 
-def Dimension(size=None):
+def Dimension(size=None, index=None):
     """Create a dimension from a size.
 
     A size can be one of:
@@ -35,7 +35,7 @@ def Dimension(size=None):
     if isinstance(size, (UniformDimension, RaggedDimension)):
         return size
     elif isinstance(size, tuple) and len(size) == 2:
-        if size[0] == size[1]:
+        if size[0] == size[1] or index == 0:
             return UniformDimension(size[0], size[1])
         return RaggedDimension(size[0], size[1])
     elif isinstance(size, int):
@@ -43,6 +43,8 @@ def Dimension(size=None):
             return UniformDimension()
         return UniformDimension(size, size)
     elif size is None:
+        if index == 0:
+            return UniformDimension()
         return RaggedDimension()
     else:
         raise ValueError(
@@ -178,10 +180,7 @@ class Shape:
         if self.dims is not None:
             new_dims = []
             for i, dim in enumerate(self.dims):
-                if i == 0:
-                    new_dim = UniformDimension(dim)
-                else:
-                    new_dim = Dimension(dim)
+                new_dim = Dimension(dim, index=i)
                 new_dims.append(new_dim)
 
             object.__setattr__(self, "dims", tuple(new_dims))
@@ -254,7 +253,7 @@ class Shape:
 
     @property
     def is_ragged(self):
-        return self.is_list and any(dim.is_uniform for dim in self.dims[1:])
+        return self.is_list and any(dim.is_ragged for dim in self.dims[1:])
 
     @property
     def as_tuple(self):
@@ -262,8 +261,7 @@ class Shape:
             return None
 
         return tuple(
-            (dim.size if dim.is_fixed or self.dim.is_uniform else (dim.min, dim.max)
-             for dim in self.dims)
+            dim.size if dim.is_fixed or dim.is_uniform else (dim.min, dim.max) for dim in self.dims
         )
 
     @property
