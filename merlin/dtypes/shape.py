@@ -75,6 +75,17 @@ class BaseDimension:
                 "The minimum size of a dimension must be non-negative. " f"Provided min: {self.min}"
             )
 
+        if self.min and not isinstance(self.min, int):
+            raise ValueError(
+                "The minimum size of a dimension must be an integer. "
+                f"Received a value of type '{type(self.min)}'"
+            )
+        if self.max and not isinstance(self.max, int):
+            raise ValueError(
+                "The maximum size of a dimension must be an integer. "
+                f"Received a value of type '{type(self.max)}'"
+            )
+
         if self.max and self.max < 0:
             raise ValueError(
                 "The maximum size of a dimension must be at least one. " f"Provided max: {self.max}"

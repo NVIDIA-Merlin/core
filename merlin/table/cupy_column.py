@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
 from merlin.core.compat import cupy as cp
 from merlin.table.conversions import _from_dlpack_gpu, _to_dlpack
@@ -26,11 +26,11 @@ class CupyColumn(TensorColumn):
     """
 
     @classmethod
-    def array_type(cls) -> Type:
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        return cp.ndarray
+        return cp.ndarray if cp else None
 
     @classmethod
     def array_constructor(cls) -> Callable:
@@ -43,8 +43,15 @@ class CupyColumn(TensorColumn):
         """
         return [Device.GPU]
 
-    def __init__(self, values: "cp.ndarray", offsets: "cp.ndarray" = None, dtype=None, _ref=None):
-        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU)
+    def __init__(
+        self,
+        values: "cp.ndarray",
+        offsets: "cp.ndarray" = None,
+        dtype=None,
+        _ref=None,
+        _unsafe=False,
+    ):
+        super().__init__(values, offsets, dtype, _ref=_ref, _device=Device.GPU, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -73,13 +80,22 @@ class CupyColumn(TensorColumn):
         """
         return self
 
+    @property
+    def _flatten_values(self):
+        return self.values.flatten()
+
+    def _reshape_values(self, values, shape):
+        return cp.reshape(values, shape)
+
 
 @_to_dlpack.register_lazy("cupy")
 def _register_to_dlpack_from_cupy():
     import cupy as cp
 
     @_to_dlpack.register(cp.ndarray)
-    def _to_dlpack_from_tf_tensor(tensor):
+    def _to_dlpack_from_cp_tensor(tensor):
+        if tensor.dtype == cp.dtype("bool"):
+            tensor = tensor.astype(cp.dtype("int8"))
         return tensor
 
 

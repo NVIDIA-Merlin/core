@@ -16,15 +16,14 @@
 
 import contextlib
 import threading
+from typing import Dict, Union
 
 import pandas as pd
-
-try:
-    import cudf
-except ImportError:
-    cudf = None
 import pyarrow as pa
 from dask.distributed import get_worker
+
+from merlin.core.compat import cudf
+from merlin.core.dispatch import DataFrameType
 
 # Use global variable as the default
 # cache when there are no distributed workers.
@@ -63,55 +62,80 @@ def _get_worker_cache(name):
 
 
 def fetch_table_data(
-    table_cache, path, cache="disk", cats_only=False, reader=None, columns=None, **kwargs
-):
-    """Utility to retrieve a cudf DataFrame from a cache (and add the
-    DataFrame to a cache if the element is missing).  Note that `cats_only=True`
-    results in optimized logic for the `Categorify` transformation.
+    table_cache: Dict[str, Union[pa.Table, DataFrameType]],
+    path,
+    *,
+    cache="disk",
+    cats_only=False,
+    reader=None,
+    columns=None,
+    **reader_kwargs
+) -> DataFrameType:
+    """Utility to retrieve a cudf DataFrame from a cache (and adds the
+    DataFrame to a cache if the element is missing).
+
+    Parameters
+    ----------
+    table_cache : Dict[str, Union[pa.Table, DataFrameType]]
+        Dataframe Cache
+    path : str, path object or file-like object
+        path to data representing DataFrame
+    cache : str, optional
+        Type of cache, by default "disk"
+        Supported values, {"device", "disk", "host"}
+    cats_only : bool, optional
+        Return labels column with index value, by default False
+    reader : Callable, optional
+        DataFrame function to read parquet from path, by default None
+    columns : List[str], optional
+        Read subset of columns, by default None (read all columns)
+    **reader_kwargs
+        Optional keyword arguments to pass to reader function
+
+    Returns
+    -------
+    DataFrameType
+        DataFrame read from table cache or from path
     """
+
     _lib = cudf if cudf else pd
     reader = reader or _lib.read_parquet
-    table = table_cache.get(path, None)
+    load_cudf = cudf and reader == cudf.read_parquet
+    table_or_df: Union[pa.Table, DataFrameType] = table_cache.get(path, None)
     cache_df = cache == "device"
-    if table is None:
+    if table_or_df is None:
         use_kwargs = {"columns": columns} if columns is not None else {}
-        use_kwargs.update(kwargs)
-        if cache in ("device", "disk"):
-            table = reader(path, **use_kwargs)
-        elif cache == "host":
-            if reader == _lib.read_parquet:  # pylint: disable=comparison-with-callable
-                # Using cudf-backed data with "host" caching.
-                # Cache as an Arrow table.
-                table = reader(path, **use_kwargs)
-                if cudf:
-                    table_cache[path] = table.to_arrow()
-                else:
-                    table_cache[path] = pa.Table.from_pandas(table)
-                if columns is not None:
-                    table = table[columns]
-            else:
-                # Using pandas-backed data with "host" caching.
-                # Just read in data and cache as a pandas DataFrame.
-                table = reader(path, **use_kwargs)
+        use_kwargs.update(reader_kwargs)
+        df = reader(path, **use_kwargs)
+        if columns is not None:
+            df = df[columns]
+        if cache == "host":
+            if cudf and isinstance(df, cudf.DataFrame):
+                table_cache[path] = df.to_arrow()
+            elif isinstance(df, pd.DataFrame):
+                table_cache[path] = pa.Table.from_pandas(df)
                 cache_df = True
         if cats_only:
-            table.index.name = "labels"
-            table.reset_index(drop=False, inplace=True)
+            df.index.name = "labels"
+            df.reset_index(drop=False, inplace=True)
         if cache_df:
-            table_cache[path] = table.copy(deep=False)
-    elif isinstance(table, pa.Table):
-        if cudf:
+            table_cache[path] = df.copy(deep=False)
+        return df
+    elif isinstance(table_or_df, pa.Table):
+        table = table_or_df
+        if cudf and load_cudf:
             df = cudf.DataFrame.from_arrow(table)
         else:
             df = table.to_pandas()
-        if not cats_only:
-            return df
         if columns is not None:
             df = df[columns]
-        df.index.name = "labels"
-        df.reset_index(drop=False, inplace=True)
+        if cats_only:
+            df.index.name = "labels"
+            df.reset_index(drop=False, inplace=True)
         return df
-    return table
+
+    # DataFrame type
+    return table_or_df
 
 
 def clean_worker_cache(name=None):

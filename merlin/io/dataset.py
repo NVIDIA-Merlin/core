@@ -30,6 +30,7 @@ from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 
+from merlin.core.compat import HAS_GPU, cudf, device_mem_size
 from merlin.core.dispatch import (
     convert_data,
     hex_to_int,
@@ -37,7 +38,7 @@ from merlin.core.dispatch import (
     is_list_dtype,
     list_val_dtype,
 )
-from merlin.core.utils import device_mem_size, global_dask_client, set_client_deprecated
+from merlin.core.utils import global_dask_client, set_client_deprecated
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io.csv import CSVDatasetEngine
 from merlin.io.dask import _ddf_to_dataset, _simple_shuffle
@@ -47,12 +48,6 @@ from merlin.io.parquet import ParquetDatasetEngine
 from merlin.io.shuffle import _check_shuffle_arg
 from merlin.schema import ColumnSchema, Schema
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
-
-try:
-    import cudf
-except ImportError:
-    cudf = None
-
 
 MERLIN_METADATA_DIR_NAME = ".merlin"
 LOG = logging.getLogger("merlin")
@@ -243,10 +238,23 @@ class Dataset:
         # Cache for "real" (sampled) metadata
         self._real_meta = {}
 
-        # Check if we are keeping data in cpu memory
+        # Check if we are keeping data in host or gpu device memory
         self.cpu = cpu
-        if not self.cpu:
-            self.cpu = cudf is None
+        if self.cpu is False:
+            if not HAS_GPU:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "No devices detected (with pynvml). "
+                    "Check that pynvml can be initialized. "
+                )
+            if cudf is None:
+                raise RuntimeError(
+                    "Cannot initialize Dataset on GPU. "
+                    "cudf package not found. "
+                    "Check that cudf is installed in this environment and can be imported.  "
+                )
+        if self.cpu is None:
+            self.cpu = cudf is None or not HAS_GPU
 
         # Keep track of base dataset (optional)
         self.base_dataset = base_dataset or self
@@ -565,6 +573,7 @@ class Dataset:
                 partition_size=partition_size,
             ),
             schema=self.schema,
+            cpu=self.cpu,
         )
 
     @classmethod
@@ -726,8 +735,10 @@ class Dataset:
             will be ignored. Default is False.
         output_files : dict, list or int
             The total number of desired output files. This option requires
-            `method="subgraph"`, and the default value will be the number of Dask
-            workers, multiplied by `out_files_per_proc`. For further output-file
+            `method="subgraph"`. When `out_files_per_proc=None`, the default
+            is the number of underlying Dask partitions. When `out_files_per_proc`
+            is set to an integer, the default is the product of that integer and
+            the total number of workers in the Dask cluster. For further output-file
             control, this argument may also be used to pass a dictionary mapping
             the output file names to partition indices, or a list of desired
             output-file names.
@@ -778,6 +789,7 @@ class Dataset:
             are planning to ingest the output data with HugeCTR. Default is False.
         """
 
+        preserve_partitions = False
         if partition_on:
             # Check that the user is not expecting a specific output-file
             # count/structure that is not supported
@@ -801,13 +813,18 @@ class Dataset:
             elif preserve_files and output_files:
                 raise ValueError("Cannot specify both preserve_files and output_files.")
             elif not (output_files or preserve_files):
-                # Default "subgraph" behavior - Set output_files to the
-                # total umber of workers, multiplied by out_files_per_proc
-                try:
-                    nworkers = len(global_dask_client().cluster.workers)
-                except AttributeError:
-                    nworkers = 1
-                output_files = nworkers * (out_files_per_proc or 1)
+                if out_files_per_proc:
+                    # Default "subgraph" behavior - Set output_files to the
+                    # total umber of workers, multiplied by out_files_per_proc
+                    try:
+                        nworkers = len(global_dask_client().cluster.workers)
+                    except AttributeError:
+                        nworkers = 1
+                    output_files = nworkers * out_files_per_proc
+                else:
+                    # Preserve original Dask partitions if output_files,
+                    # preserve_files AND out_files_per_proc are all None
+                    preserve_partitions = True
 
         # Replace None/False suffix argument with ""
         suffix = suffix or ""
@@ -821,6 +838,10 @@ class Dataset:
             ddf = self.to_ddf()
         else:
             ddf = self.to_ddf(shuffle=shuffle)
+
+        # Check if partitions should be preserved
+        if preserve_partitions:
+            output_files = ddf.npartitions
 
         # Deal with `method=="subgraph"`.
         # Convert `output_files` argument to a dict mapping
@@ -932,6 +953,8 @@ class Dataset:
         fs.mkdirs(str(output_path), exist_ok=True)
 
         tf_metadata = TensorflowMetadata.from_merlin_schema(schema)
+        tf_metadata.to_proto_text_file(output_path)
+
         metadata_path = fs.sep.join([str(output_path), MERLIN_METADATA_DIR_NAME])
         fs.mkdirs(metadata_path, exist_ok=True)
         tf_metadata.to_json_file(metadata_path)

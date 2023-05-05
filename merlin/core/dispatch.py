@@ -84,8 +84,16 @@ else:
 # Define mapping between non-nullable,
 # and nullable types in Pandas
 _PD_NULLABLE_MAP = {
+    "float32": "Float32",
+    "float64": "Float64",
+    "int8": "Int8",
+    "int16": "Int16",
     "int32": "Int32",
     "int64": "Int64",
+    "uint8": "UInt8",
+    "uint16": "UInt16",
+    "uint32": "UInt32",
+    "uint64": "UInt64",
 }
 
 
@@ -129,7 +137,7 @@ def read_parquet_metadata(path):
 
 def get_lib():
     """Dispatch to the appropriate library (cudf or pandas) for the current environment"""
-    return cudf or pd
+    return cudf if (cudf and HAS_GPU) else pd
 
 
 def reinitialize(managed_memory=False):
@@ -503,7 +511,7 @@ def encode_list_column(original, encoded, dtype=None):
 def pull_apart_list(original, device=None):
     values = flatten_list_column_values(original)
     if isinstance(original, pd.Series):
-        offsets = pd.Series([0]).append(original.map(len).cumsum()).reset_index(drop=True)
+        offsets = pd.concat([pd.Series([0]), original.map(len).cumsum()]).reset_index(drop=True)
         if isinstance(offsets[0], list):
             offsets = pd.Series(offsets.reshape().flatten()).reset_index(drop=True)
     else:
@@ -540,7 +548,12 @@ def concat(objs, **kwargs):
 
 def make_df(_like_df=None, device=None):
     """Return a DataFrame with the same dtype as `_like_df`"""
-    if not cudf or device == "cpu" or isinstance(_like_df, (pd.DataFrame, pd.Series)):
+    if (
+        not cudf
+        or device == "cpu"
+        or not HAS_GPU
+        or isinstance(_like_df, (pd.DataFrame, pd.Series))
+    ):
         # move to pandas need it on CPU (host memory)
         # can be a cudf, cupy or numpy Series
         if cudf and isinstance(_like_df, (cudf.DataFrame, cudf.Series)):

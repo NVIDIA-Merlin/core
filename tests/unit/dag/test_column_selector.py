@@ -270,6 +270,12 @@ def test_applying_inverse_selector_to_schema_selects_relevant_columns():
     assert result == schema
 
 
+def test_wildcard_selector_bool():
+    selector = ColumnSelector("*")
+
+    assert selector.all is True
+
+
 def test_wildcard_selection():
     selector = ColumnSelector("*")
 

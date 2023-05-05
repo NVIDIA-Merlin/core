@@ -15,6 +15,8 @@
 #
 import numpy as np
 
+import merlin.dtypes.aliases as mn
+from merlin.core.compat import cudf
 from merlin.core.dispatch import is_string_dtype
 from merlin.dtypes.mapping import DTypeMapping, NumpyPreprocessor
 from merlin.dtypes.registry import _dtype_registry
@@ -41,17 +43,19 @@ def cudf_translator(raw_dtype) -> np.dtype:
         return category_type
 
 
-try:
-    # We only want to register this mapping if cudf is available, even though
-    # the mapping itself doesn't use cudf (yet?)
+if cudf:
+    try:
+        # We only want to register this mapping if cudf is available, even though
+        # the mapping itself doesn't use cudf (yet?)
 
-    import cudf  # pylint:disable=unused-import # noqa: F401
+        cudf_dtypes = DTypeMapping(
+            {
+                mn.struct: [cudf.StructDtype],
+            },
+            translator=NumpyPreprocessor("cudf", cudf_translator, attrs=["_categories"]),
+        )
+        _dtype_registry.register("cudf", cudf_dtypes)
+    except ImportError as exc:
+        from warnings import warn
 
-    cudf_dtypes = DTypeMapping(
-        translator=NumpyPreprocessor("cudf", cudf_translator, attrs=["_categories"]),
-    )
-    _dtype_registry.register("cudf", cudf_dtypes)
-except ImportError as exc:
-    from warnings import warn
-
-    warn(f"cuDF dtype mappings did not load successfully due to an error: {exc.msg}")
+        warn(f"cuDF dtype mappings did not load successfully due to an error: {exc.msg}")

@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Optional, Tuple, Type, Union
 
-from merlin.core.compat import tensorflow as tf
+from merlin.core.compat.tensorflow import tensorflow as tf
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
@@ -47,11 +47,15 @@ class TensorflowColumn(TensorColumn):
     """
 
     @classmethod
-    def array_type(cls) -> Type:
+    def _transpose(cls, values):
+        return tf.transpose(values)
+
+    @classmethod
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        return tf.Tensor
+        return tf.Tensor if tf else None
 
     @classmethod
     def array_constructor(cls) -> Callable:
@@ -64,7 +68,9 @@ class TensorflowColumn(TensorColumn):
         """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "tf.Tensor", offsets: "tf.Tensor" = None, dtype=None, _ref=None, _unsafe=False
+    ):
         values_device = self._tf_device(values)
 
         if offsets is not None:
@@ -75,7 +81,7 @@ class TensorflowColumn(TensorColumn):
                     f"values ({values_device}) and offsets ({offsets_device})."
                 )
 
-        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
+        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -113,6 +119,14 @@ class TensorflowColumn(TensorColumn):
 
         return TensorflowColumn(values, offsets)
 
+    @property
+    def _flatten_values(self):
+        return tf.reshape(self.values, [-1])
+
+    def _reshape_values(self, values, shape):
+        with tf.device(values.device):
+            return tf.reshape(values, shape)
+
     def _tf_device(self, tensor):
         return Device.GPU if "GPU" in tensor.device else Device.CPU
 
@@ -144,7 +158,7 @@ def _register_from_dlpack_cpu_to_tf():
     @_from_dlpack_cpu.register(tf.Tensor)
     @_from_dlpack_cpu.register(eager_tensor_type)
     def _from_dlpack_cpu_to_tf(target_type, array):
-        return tf.experimental.dlpack.from_dlpack(array.__dlpack__())
+        return tf.convert_to_tensor(array)
 
 
 @_from_dlpack_gpu.register_lazy("tensorflow")

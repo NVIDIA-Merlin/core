@@ -16,16 +16,13 @@
 
 import pytest
 
+from merlin.core.compat import HAS_GPU
 from merlin.core.utils import Distributed, Serial, global_dask_client, set_dask_client
 
-try:
-    import cudf
-
+if HAS_GPU:
     _CPU = [True, False]
-except ImportError:
+else:
     _CPU = [True]
-    cudf = None
-_HAS_GPU = cudf is not None
 
 
 @pytest.mark.parametrize("cpu", _CPU)
@@ -44,8 +41,8 @@ def test_serial_context(client, cpu):
     assert global_dask_client() == client
 
 
-@pytest.mark.parametrize("cpu", [True, False])
-@pytest.mark.parametrize("nested_serial", _CPU)
+@pytest.mark.parametrize("cpu", _CPU)
+@pytest.mark.parametrize("nested_serial", [True, False])
 def test_nvt_distributed(cpu, nested_serial):
     if cpu:
         distributed = pytest.importorskip("distributed")

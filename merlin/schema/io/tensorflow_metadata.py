@@ -400,12 +400,6 @@ float_dtypes_map = {
 }
 
 
-def _coerce_int(v):
-    if isinstance(v, float):
-        return int(v)
-    return v
-
-
 def _merlin_dtype(feature, properties):
     dtype = md.unknown
     item_size = int(properties.get("dtype_item_size", 0)) or None
@@ -428,7 +422,7 @@ def _merlin_dtype(feature, properties):
         dims = []
         for dim in dims_list:
             if isinstance(dim, list):
-                dims.append(tuple(_coerce_int(d) for d in dim))
+                dims.append(tuple(int(d) if isinstance(d, float) else d for d in dim))
             elif dim is not None:
                 dims.append(int(dim))
             else:

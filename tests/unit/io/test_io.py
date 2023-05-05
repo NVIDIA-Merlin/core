@@ -30,13 +30,19 @@ from packaging.version import Version
 import merlin.dtypes as md
 import merlin.io
 from merlin.core import dispatch
+from merlin.core.compat import HAS_GPU, cudf
 from merlin.io.parquet import GPUParquetWriter
 from merlin.schema.io.tensorflow_metadata import TensorflowMetadata
 from merlin.schema.tags import Tags, TagSet
 from tests.conftest import allcols_csv, mycols_csv, mycols_pq
 
-cudf = pytest.importorskip("cudf")
-dask_cudf = pytest.importorskip("dask_cudf")
+if cudf:
+    dask_cudf = pytest.importorskip("dask_cudf")
+else:
+    pytest.mark.skip(reason="cudf did not import successfully")
+
+if not HAS_GPU:
+    pytestmark = pytest.mark.skip(reason="at least one visible CUDA GPU required.")
 
 
 def _check_partition_lens(ds):
@@ -443,6 +449,29 @@ def test_to_parquet_output_files(tmpdir, datasets, output_files, out_files_per_p
         assert len(ddf0) == len(ddf1)
 
 
+def test_to_parquet_default(tmpdir, datasets):
+    # Check that default `to_parquet` call preserves
+    # original Dask partitions
+    path = str(datasets["parquet"])
+    outdir = str(tmpdir)
+    dataset = merlin.io.Dataset(path, engine="parquet")
+    ddf0 = dataset.to_ddf(columns=mycols_pq)
+
+    # Write dataset
+    dataset.to_parquet(outdir)
+
+    # Check that we wrote expected metadata files
+    file_list = glob.glob(os.path.join(outdir, "*"))
+    assert os.path.join(outdir, "_metadata") in file_list
+    assert os.path.join(outdir, "_file_list.txt") in file_list
+    assert os.path.join(outdir, "_metadata.json") in file_list
+
+    # Check that data is correct
+    ddf1 = dd.read_parquet(outdir, columns=mycols_pq)
+    assert ddf0.npartitions == ddf1.npartitions
+    assert_eq(ddf0, ddf1, check_index=False)
+
+
 @pytest.mark.parametrize("row_group_size", [5000, 10000])
 @pytest.mark.parametrize("cpu", [True, False])
 def test_to_parquet_row_group_size(tmpdir, cpu, row_group_size):
@@ -653,6 +682,9 @@ def test_hive_partitioned_data(tmpdir, cpu):
     )
     assert result_paths
     assert all(p.endswith(".parquet") for p in result_paths)
+
+    # reading into dask dastaframe cannot have schema in same directory
+    os.remove(os.path.join(path, "schema.pbtxt"))
 
     # Read back with dask.dataframe and check the data
     df_check = dd.read_parquet(path, engine="pyarrow").compute()

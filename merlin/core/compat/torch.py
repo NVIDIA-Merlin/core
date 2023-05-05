@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022, NVIDIA CORPORATION.
+# Copyright (c) 2023, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,5 +14,9 @@
 # limitations under the License.
 #
 
-# flake8: noqa
-from merlin.dtypes.mappings import cudf, merlin, numpy, pandas, python, tf, torch, triton
+# pylint: disable=unused-import
+
+try:
+    import torch
+except ImportError:
+    torch = None

@@ -19,12 +19,12 @@ import os
 import random
 
 import dask
-import numpy as np
-import pandas as pd
 
-try:
-    import cudf
+from merlin.core.compat import HAS_GPU, cudf
+from merlin.core.compat import numpy as np
+from merlin.core.compat import pandas as pd
 
+if cudf:
     try:
         import cudf.testing._utils
 
@@ -33,8 +33,7 @@ try:
         import cudf.tests.utils
 
         assert_eq = cudf.tests.utils.assert_eq
-except ImportError:
-    cudf = None
+else:
 
     def assert_eq(a, b, *args, **kwargs):
         if isinstance(a, pd.DataFrame):
@@ -107,8 +106,8 @@ def get_cuda_cluster():
 
 @pytest.fixture(scope="session")
 def datasets(tmpdir_factory):
-    _lib = cudf if cudf else pd
-    _datalib = cudf if cudf else dask
+    _lib = cudf if cudf and HAS_GPU else pd
+    _datalib = cudf if cudf and HAS_GPU else dask
     df = _datalib.datasets.timeseries(
         start="2000-01-01",
         end="2000-01-04",
@@ -152,7 +151,7 @@ def datasets(tmpdir_factory):
     half = int(len(df) // 2)
 
     # Write Parquet Dataset
-    if cudf:
+    if cudf and isinstance(df, cudf.DataFrame):
         df.iloc[:half].to_parquet(
             str(datadir["parquet"].join("dataset-0.parquet")), row_group_size_rows=5000
         )
@@ -191,7 +190,7 @@ def paths(engine, datasets):
 
 @pytest.fixture(scope="function")
 def df(engine, paths):
-    _lib = cudf if cudf else pd
+    _lib = cudf if cudf and HAS_GPU else pd
     if engine == "parquet":
         df1 = _lib.read_parquet(paths[0])[mycols_pq]
         df2 = _lib.read_parquet(paths[1])[mycols_pq]
@@ -219,7 +218,7 @@ def dataset(request, paths, engine):
     try:
         cpu = request.getfixturevalue("cpu")
     except Exception:  # pylint: disable=broad-except
-        cpu = False
+        cpu = None
 
     kwargs = {}
     if engine == "csv-no-header":

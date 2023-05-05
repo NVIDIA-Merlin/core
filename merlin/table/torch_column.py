@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
-from merlin.core.compat import torch as th
+from merlin.core.compat.torch import torch as th
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
 from merlin.table.tensor_column import Device, TensorColumn
 
@@ -25,12 +25,14 @@ class TorchColumn(TensorColumn):
     A SeriesLike column backed by Torch tensors
     """
 
+    framework_name = "torch"
+
     @classmethod
-    def array_type(cls) -> Type:
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        return th.Tensor
+        return th.Tensor if th else None
 
     @classmethod
     def array_constructor(cls) -> Callable:
@@ -43,7 +45,9 @@ class TorchColumn(TensorColumn):
         """
         return [Device.CPU, Device.GPU]
 
-    def __init__(self, values: "th.Tensor", offsets: "th.Tensor" = None, dtype=None, _ref=None):
+    def __init__(
+        self, values: "th.Tensor", offsets: "th.Tensor" = None, dtype=None, _ref=None, _unsafe=False
+    ):
         values_device = self._th_device(values)
         if offsets is not None:
             offsets_device = self._th_device(offsets)
@@ -53,7 +57,7 @@ class TorchColumn(TensorColumn):
                     f"values ({values_device}) and offsets ({offsets_device})."
                 )
 
-        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref)
+        super().__init__(values, offsets, dtype, _device=values_device, _ref=_ref, _unsafe=_unsafe)
 
     def cpu(self):
         """
@@ -93,32 +97,39 @@ class TorchColumn(TensorColumn):
     def device(self) -> Device:
         return self._th_device(self.values)
 
+    @property
+    def _flatten_values(self):
+        return th.flatten(self.values)
+
+    def _reshape_values(self, values, shape):
+        return th.reshape(values, shape)
+
     def _th_device(self, tensor):
         return Device.GPU if tensor.is_cuda else Device.CPU
 
 
 @_to_dlpack.register_lazy("torch")
-def _register_to_dlpack_from_tf():
+def _register_to_dlpack_from_torch():
     import torch as th
 
     @_to_dlpack.register(th.Tensor)
-    def _to_dlpack_from_tf_tensor(tensor):
+    def _to_dlpack_from_torch_tensor(tensor):
         return tensor
 
 
 @_from_dlpack_cpu.register_lazy("torch")
-def _register_from_dlpack_cpu_to_tf():
+def _register_from_dlpack_cpu_to_torch():
     import torch as th
 
     @_from_dlpack_cpu.register(th.Tensor)
-    def _from_dlpack_cpu_to_tf(target_type, array):
+    def _from_dlpack_cpu_to_torch(target_type, array):
         return th.utils.dlpack.from_dlpack(array)
 
 
 @_from_dlpack_gpu.register_lazy("torch")
-def _register_from_dlpack_gpu_to_tf():
+def _register_from_dlpack_gpu_to_torch():
     import torch as th
 
     @_from_dlpack_gpu.register(th.Tensor)
-    def _from_dlpack_gpu_to_tf(target_type, array):
-        return th.utils.dlpack.from_dlpack(array)
+    def _from_dlpack_gpu_to_torch(target_type, array):
+        return th.utils.dlpack.from_dlpack(array.__dlpack__())

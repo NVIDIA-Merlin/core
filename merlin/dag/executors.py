@@ -45,7 +45,7 @@ class LocalExecutor:
         output_dtypes=None,
         additional_columns=None,
         capture_dtypes=False,
-        validate_dtypes=True,
+        strict=False,
     ):
         """
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
@@ -66,22 +66,16 @@ class LocalExecutor:
                 " compatibility.)"
             )
 
+        # There's usually only one node, but it's possibly to pass multiple nodes for `fit`
+        # If we have multiple, we concatenate their outputs into a single transformable
         output_data = None
-
         for node in nodes:
-            input_data = self._build_input_data(
-                node, transformable, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
-            )
-
-            if node.op:
-                transformed_data = self._transform_data(
-                    node, input_data, capture_dtypes=capture_dtypes, validate_dtypes=validate_dtypes
-                )
-            else:
-                transformed_data = input_data
-
+            transformed_data = self._execute_node(node, transformable, capture_dtypes, strict)
             output_data = self._combine_node_outputs(node, transformed_data, output_data)
 
+        # If there are any additional columns that weren't produced by one of the supplied nodes
+        # we grab them directly from the supplied input data. Normally this would happen on a
+        # per-node basis, but offers a safety net for the multi-node case
         if additional_columns:
             output_data = concat_columns(
                 [output_data, transformable[_get_unique(additional_columns)]]
@@ -89,69 +83,64 @@ class LocalExecutor:
 
         return output_data
 
-    def _build_input_data(self, node, transformable, capture_dtypes=False, validate_dtypes=True):
-        """
-        Recurse through the graph executing parent and dependency operators
-        to form the input dataframe for each output node
-        Parameters
-        ----------
-        node : Node
-            Output node of the graph to execute
-        transformable : Transformable
-            Dataframe to run the graph ending with node on
-        capture_dtypes : bool, optional
-            Overrides the schema dtypes with the actual dtypes when True, by default False
-        Returns
-        -------
-        Transformable
-            The input DataFrame or DictArray formed from
-            the outputs of upstream parent/dependency nodes
-        """
-        node_input_cols = _get_unique(node.input_schema.column_names)
+    def _execute_node(self, node, transformable, capture_dtypes=False, strict=False):
+        upstream_outputs = self._run_upstream_transforms(
+            node, transformable, capture_dtypes, strict
+        )
+        upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
+        transform_input = self._merge_upstream_columns(upstream_columns)
+        transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
+        return transform_output
+
+    def _run_upstream_transforms(self, node, transformable, capture_dtypes=False, strict=False):
+        upstream_outputs = []
+
+        for upstream_node in node.parents_with_dependencies:
+            node_output = self._execute_node(
+                upstream_node,
+                transformable,
+                capture_dtypes=capture_dtypes,
+                strict=strict,
+            )
+            if node_output is not None and len(node_output) > 0:
+                upstream_outputs.append(node_output)
+
+        return upstream_outputs
+
+    def _append_addl_root_columns(self, node, transformable, upstream_outputs):
+        node_input_cols = set(node.input_schema.column_names)
         addl_input_cols = set(node.dependency_columns.names)
 
-        if node.parents_with_dependencies:
-            # If there are parents, collect their outputs
-            # to build the current node's input
-            input_data = None
-            seen_columns = None
+        already_present = set()
+        for upstream_tensors in upstream_outputs:
+            for col in node_input_cols:
+                if col in upstream_tensors:
+                    already_present.add(col)
 
-            for parent in node.parents_with_dependencies:
-                parent_output_cols = _get_unique(parent.output_schema.column_names)
-                parent_data = self.transform(
-                    transformable,
-                    [parent],
-                    capture_dtypes=capture_dtypes,
-                    validate_dtypes=validate_dtypes,
-                )
-                if input_data is None or not len(input_data):
-                    input_data = parent_data[parent_output_cols]
-                    seen_columns = set(parent_output_cols)
-                else:
-                    new_columns = set(parent_output_cols) - seen_columns
-                    if new_columns:
-                        input_data = concat_columns([input_data, parent_data[list(new_columns)]])
-                        seen_columns.update(new_columns)
+        root_columns = node_input_cols.union(addl_input_cols) - already_present
 
-            # Check for additional input columns that aren't generated by parents
-            # and fetch them from the root DataFrame or DictArray
-            unseen_columns = set(node.input_schema.column_names) - seen_columns
-            addl_input_cols = addl_input_cols.union(unseen_columns)
+        if root_columns:
+            upstream_outputs.append(transformable[list(root_columns)])
 
-            # TODO: Find a better way to remove dupes
-            addl_input_cols = addl_input_cols - set(input_data.columns)
+        return upstream_outputs
 
-            if addl_input_cols:
-                input_data = concat_columns([input_data, transformable[list(addl_input_cols)]])
-        else:
-            # If there are no parents, this is an input node,
-            # so pull columns directly from root data
-            addl_input_cols = list(addl_input_cols) if addl_input_cols else []
-            input_data = transformable[node_input_cols + addl_input_cols]
+    def _merge_upstream_columns(self, upstream_outputs, merge_fn=concat_columns):
+        combined_outputs = None
+        seen_columns = set()
+        for upstream_output in upstream_outputs:
+            if combined_outputs is None or not len(combined_outputs):
+                combined_outputs = upstream_output
+                seen_columns = set(upstream_output.columns)
+            else:
+                new_columns = set(upstream_output.columns) - seen_columns
+                if new_columns:
+                    combined_outputs = merge_fn(
+                        [combined_outputs, upstream_output[list(new_columns)]]
+                    )
+                    seen_columns.update(new_columns)
+        return combined_outputs
 
-        return input_data
-
-    def _transform_data(self, node, input_data, capture_dtypes=False, validate_dtypes=True):
+    def _run_node_transform(self, node, input_data, capture_dtypes=False, strict=False):
         """
         Run the transform represented by the final node in the graph
         and check output dtypes against the output schema
@@ -163,8 +152,8 @@ class LocalExecutor:
             Dataframe to run the graph ending with node on
         capture_dtypes : bool, optional
             Overrides the schema dtypes with the actual dtypes when True, by default False
-        validate_dtypes : bool, optional
-            Checks the dtype of returned data against the schema, by default True
+        strict : bool, optional
+            Raises error if the dtype of returned data doesn't match the schema, by default False
         Returns
         -------
         Transformable
@@ -173,79 +162,85 @@ class LocalExecutor:
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
-            as the output schema columns when validate_dtypes is True
+            as the output schema columns when `strict` is True
         RuntimeError
             If no DataFrame or DictArray is returned from the operator
         """
+        if not node.op:
+            return input_data
+
         try:
             # use input_columns to ensure correct grouping (subgroups)
             selection = node.input_columns.resolve(node.input_schema)
-            output_data = node.op.transform(selection, input_data)
+            transformed_data = node.op.transform(selection, input_data)
 
-            # Update or validate output_data dtypes
-            if capture_dtypes or validate_dtypes:
-                for col_name, output_col_schema in node.output_schema.column_schemas.items():
-                    col_series = output_data[col_name]
-                    output_data_dtype = col_series.dtype
-                    col_shape = output_col_schema.shape
-                    is_list = is_list_dtype(col_series)
+            if transformed_data is None:
+                raise RuntimeError(f"Operator {node.op} didn't return a value during transform")
+            elif capture_dtypes:
+                self._capture_dtypes(node, transformed_data)
+            elif strict and len(transformed_data):
+                self._validate_dtypes(node, transformed_data)
 
-                    if is_list:
-                        output_data_dtype = list_val_dtype(col_series)
+            return transformed_data
 
-                        if not col_shape.is_list or col_shape.is_unknown:
-                            col_shape = DefaultShapes.LIST
-
-                    # TODO: Add a utility that condenses the known methods of fetching dtypes
-                    # from series/arrays into a single function, so that Tensorflow specific
-                    # code doesn't leak into the executors
-                    if not hasattr(output_data_dtype, "as_numpy_dtype") and hasattr(
-                        col_series, "numpy"
-                    ):
-                        output_data_dtype = col_series[0].cpu().numpy().dtype
-
-                    output_data_schema = output_col_schema.with_dtype(output_data_dtype).with_shape(
-                        col_shape
-                    )
-
-                    if capture_dtypes:
-                        node.output_schema.column_schemas[col_name] = output_data_schema
-                    elif validate_dtypes and len(output_data):
-                        # Validate that the dtypes match but only if they both exist
-                        # (since schemas may not have all dtypes specified, especially
-                        # in the tests)
-                        output_schema_dtype = output_col_schema.dtype.without_shape
-                        output_data_dtype = md.dtype(output_data_dtype).without_shape
-                        if (
-                            output_schema_dtype
-                            and output_data_dtype
-                            and output_schema_dtype != md.string
-                            and output_schema_dtype != output_data_dtype
-                        ):
-                            raise TypeError(
-                                f"Dtype discrepancy detected for column {col_name}: "
-                                f"operator {node.op.label} reported dtype "
-                                f"`{output_schema_dtype}` but returned dtype "
-                                f"`{output_data_dtype}`."
-                            )
-        except Exception:
+        except Exception as exc:
             LOG.exception("Failed to transform operator %s", node.op)
-            raise
-        if output_data is None:
-            raise RuntimeError(f"Operator {node.op} didn't return a value during transform")
+            raise exc
 
-        return output_data
+    def _capture_dtypes(self, node, output_data):
+        for col_name, output_col_schema in node.output_schema.column_schemas.items():
+            output_data_schema = self._build_schema_from_data(
+                output_data, col_name, output_col_schema
+            )
+            node.output_schema.column_schemas[col_name] = output_data_schema
 
-    def _combine_node_outputs(self, node, transformed_data, output):
+    # TODO: Turn this into a function
+    def _build_schema_from_data(self, output_data, col_name, output_col_schema):
+        column = output_data[col_name]
+        column_dtype = column.dtype
+        col_shape = output_col_schema.shape
+        is_list = is_list_dtype(column)
+
+        if is_list:
+            column_dtype = list_val_dtype(column)
+
+            if not col_shape.is_list or col_shape.is_unknown:
+                col_shape = DefaultShapes.LIST
+
+        return output_col_schema.with_dtype(column_dtype).with_shape(col_shape)
+
+    # TODO: Turn this into a function
+    def _validate_dtypes(self, node, output_data):
+        for col_name, output_col_schema in node.output_schema.column_schemas.items():
+            # Validate that the dtypes match but only if they both exist
+            # (since schemas may not have all dtypes specified, especially
+            # in the tests)
+            output_schema_dtype = output_col_schema.dtype.without_shape
+            output_data_dtype = md.dtype(output_data.dtype).without_shape
+            if (
+                output_schema_dtype
+                and output_data_dtype
+                and output_schema_dtype != md.string
+                and output_schema_dtype != output_data_dtype
+            ):
+                raise TypeError(
+                    f"Dtype discrepancy detected for column {col_name}: "
+                    f"operator {node.op.label} reported dtype "
+                    f"`{output_schema_dtype}` but returned dtype "
+                    f"`{output_data_dtype}`."
+                )
+
+    # TODO: Turn this into a function
+    def _combine_node_outputs(self, node, transformed, output):
         node_output_cols = _get_unique(node.output_schema.column_names)
 
         # dask needs output to be in the same order defined as meta, reorder partitions here
         # this also selects columns (handling the case of removing columns from the output using
         # "-" overload)
         if output is None:
-            output = transformed_data[node_output_cols]
+            output = transformed[node_output_cols]
         else:
-            output = concat_columns([output, transformed_data[node_output_cols]])
+            output = concat_columns([output, transformed[node_output_cols]])
 
         return output
 
@@ -267,7 +262,13 @@ class DaskExecutor:
         return {k: v for k, v in self.__dict__.items() if k != "client"}
 
     def transform(
-        self, ddf, graph, output_dtypes=None, additional_columns=None, capture_dtypes=False
+        self,
+        ddf,
+        graph,
+        output_dtypes=None,
+        additional_columns=None,
+        capture_dtypes=False,
+        strict=False,
     ):
         """
         Transforms all partitions of a Dask Dataframe by applying the operators
@@ -328,12 +329,13 @@ class DaskExecutor:
                 nodes,
                 additional_columns=additional_columns,
                 capture_dtypes=capture_dtypes,
+                strict=strict,
                 meta=output_dtypes,
                 enforce_metadata=False,
             )
         )
 
-    def fit(self, ddf, nodes):
+    def fit(self, ddf, nodes, strict=False):
         """Calculates statistics for a set of nodes on the input dataframe
 
         Parameters
@@ -360,6 +362,7 @@ class DaskExecutor:
                 node.parents_with_dependencies,
                 additional_columns=addl_input_cols,
                 capture_dtypes=True,
+                strict=strict,
             )
 
             try:
