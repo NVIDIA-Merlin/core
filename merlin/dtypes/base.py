@@ -38,6 +38,7 @@ class ElementType(Enum):
     DateTime = "datetime"
     Object = "object"
     Unknown = "unknown"
+    Struct = "struct"
 
 
 class ElementUnit(Enum):

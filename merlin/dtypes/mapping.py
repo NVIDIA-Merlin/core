@@ -137,7 +137,11 @@ class DTypeMapping:
         DType
             A Merlin DType object
         """
-        merlin_dtype = self.to_merlin_[external_dtype]
+        try:
+            merlin_dtype = self.to_merlin_[external_dtype]
+        except KeyError:
+            merlin_dtype = self.to_merlin_[type(external_dtype)]
+
         return merlin_dtype
 
     def from_merlin(self, merlin_dtype):
@@ -168,6 +172,6 @@ class DTypeMapping:
         # can't be used as dictionary keys. In that case, match
         # against the dtype class instead.
         try:
-            return dtype in mapping.keys()
+            return dtype in mapping.keys() or type(dtype) in mapping.keys()
         except TypeError:
             return type(dtype) in mapping.keys()

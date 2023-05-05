@@ -511,7 +511,7 @@ def encode_list_column(original, encoded, dtype=None):
 def pull_apart_list(original, device=None):
     values = flatten_list_column_values(original)
     if isinstance(original, pd.Series):
-        offsets = pd.Series([0]).append(original.map(len).cumsum()).reset_index(drop=True)
+        offsets = pd.concat([pd.Series([0]), original.map(len).cumsum()]).reset_index(drop=True)
         if isinstance(offsets[0], list):
             offsets = pd.Series(offsets.reshape().flatten()).reset_index(drop=True)
     else:
