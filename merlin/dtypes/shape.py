@@ -32,16 +32,16 @@ def Dimension(size=None):
       - int     : a fixed dimension of some size (-1 = unknown)
       - 2-tuple : the bounds of a ragged dimension (fixed if min == max)
     """
-    if isinstance(size, (FixedDimension, RaggedDimension)):
+    if isinstance(size, (UniformDimension, RaggedDimension)):
         return size
     elif isinstance(size, tuple) and len(size) == 2:
         if size[0] == size[1]:
-            return FixedDimension(size[0], size[1])
+            return UniformDimension(size[0], size[1])
         return RaggedDimension(size[0], size[1])
     elif isinstance(size, int):
         if size == -1:
-            return FixedDimension()
-        return FixedDimension(size, size)
+            return UniformDimension()
+        return UniformDimension(size, size)
     elif size is None:
         return RaggedDimension()
     else:
@@ -109,14 +109,14 @@ class BaseDimension:
         return self.max is not None
 
     @property
-    def is_uniform(self):
-        """Is the dimension uniform in size?"""
+    def is_fixed(self):
+        """Is the dimension fixed in size?"""
         return self.is_bounded and self.min == self.max
 
     @property
     def is_variable(self):
         """Can the size of the dimension vary between instances of tensors."""
-        return not self.is_uniform
+        return not self.is_fixed
 
     @property
     def is_unknown(self):
@@ -131,22 +131,30 @@ class BaseDimension:
 
 class RaggedDimension(BaseDimension):
     @property
-    def is_fixed(self):
+    def is_uniform(self):
         return False
+
+    @property
+    def is_ragged(self):
+        return True
 
     @property
     def size(self):
         return None
 
 
-class FixedDimension(BaseDimension):
+class UniformDimension(BaseDimension):
     @property
-    def is_fixed(self):
+    def is_uniform(self):
         return True
 
     @property
+    def is_ragged(self):
+        return False
+
+    @property
     def size(self):
-        if self.is_uniform:
+        if self.is_fixed:
             return self.max
         else:
             return -1
@@ -170,9 +178,10 @@ class Shape:
         if self.dims is not None:
             new_dims = []
             for i, dim in enumerate(self.dims):
-                if i == 0 and (dim is None or dim == (0, None)):
-                    dim = -1
-                new_dim = Dimension(dim)
+                if i == 0:
+                    new_dim = UniformDimension(dim)
+                else:
+                    new_dim = Dimension(dim)
                 new_dims.append(new_dim)
 
             object.__setattr__(self, "dims", tuple(new_dims))
@@ -191,9 +200,6 @@ class Shape:
             return True
 
         return self.dims == other.dims
-
-    def __getitem__(self, idx):
-        return self.dims[idx]
 
     def __iter__(self):
         return self.dims
@@ -240,7 +246,7 @@ class Shape:
 
     @property
     def is_variable(self):
-        return not self.is_uniform
+        return not self.is_fixed
 
     @property
     def is_list(self):
@@ -248,14 +254,16 @@ class Shape:
 
     @property
     def is_ragged(self):
-        return self.is_list and any(not dim.is_fixed for dim in self.dims[1:])
+        return self.is_list and any(dim.is_uniform for dim in self.dims[1:])
 
     @property
     def as_tuple(self):
-        return (
-            tuple((dim.size if dim.is_fixed else (dim.min, dim.max) for dim in self.dims))
-            if self.dims
-            else None
+        if not self.dims:
+            return None
+
+        return tuple(
+            (dim.size if dim.is_fixed or self.dim.is_uniform else (dim.min, dim.max)
+             for dim in self.dims)
         )
 
     @property
