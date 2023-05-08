@@ -16,6 +16,7 @@
 
 # flake8: noqa
 from merlin.dtypes import mappings
+from merlin.dtypes import aliases
 from merlin.dtypes.aliases import *
 from merlin.dtypes.base import DType
 from merlin.dtypes.registry import _dtype_registry
@@ -55,7 +56,7 @@ def dtype(external_dtype):
     except (TypeError, KeyError, AttributeError) as exc:
         base_exc = exc
 
-    if base_exc or merlin_dtype == mappings.unknown:
+    if base_exc or merlin_dtype == aliases.unknown:
         try:
             merlin_dtype = _dtype_registry.to_merlin_via_numpy(external_dtype)
         except TypeError as numpy_exc:
