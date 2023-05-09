@@ -17,7 +17,7 @@ jobs:
 
   store-pr-information:
     needs: [build]
-    runs: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Store PR information
         run: |
