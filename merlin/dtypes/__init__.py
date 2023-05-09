@@ -16,6 +16,7 @@
 
 # flake8: noqa
 from merlin.dtypes import mappings
+from merlin.dtypes import aliases
 from merlin.dtypes.aliases import *
 from merlin.dtypes.base import DType
 from merlin.dtypes.registry import _dtype_registry
@@ -47,15 +48,26 @@ def dtype(external_dtype):
     # If not, attempt to apply all the registered Merlin dtype mappings.
     # If we don't find a match with those, fall back on converting to
     # a numpy dtype and trying to match that instead.
+    base_exc = None
+    merlin_dtype = None
+
     try:
-        return _dtype_registry.to_merlin(external_dtype)
-    except TypeError as base_exc:
+        merlin_dtype = _dtype_registry.to_merlin(external_dtype)
+    except (TypeError, KeyError, AttributeError) as exc:
+        base_exc = exc
+
+    if base_exc or merlin_dtype == aliases.unknown:
         try:
-            return _dtype_registry.to_merlin_via_numpy(external_dtype)
-        except TypeError as exc:
+            merlin_dtype = _dtype_registry.to_merlin_via_numpy(external_dtype)
+        except TypeError as numpy_exc:
             # If we fail to find a match even after we try converting to
             # numpy, re-raise the original exception because it has more
             # information about the original external dtype that's causing
             # the problem. (We want to highlight that dtype, not whatever
             # numpy dtype it was converted to in the interim.)
-            raise base_exc from exc
+            if base_exc:
+                raise base_exc from numpy_exc
+            else:
+                raise numpy_exc
+
+    return merlin_dtype
