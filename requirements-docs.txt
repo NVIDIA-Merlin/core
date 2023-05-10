@@ -12,3 +12,7 @@ myst-nb==0.13.2
 linkify-it-py==1.0.3
 sphinx-external-toc==0.2.4
 attrs==21.4.0
+sphinx-book-theme
+pydata-sphinx-theme
+pydata-sphinx-theme
+sphinx_design

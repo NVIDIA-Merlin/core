@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import subprocess
 import sys
 
@@ -24,7 +25,7 @@ gitdir = os.path.join(repodir, r".git")
 # -- Project information -----------------------------------------------------
 
 project = "Merlin Core"
-copyright = "2022, NVIDIA"  # pylint: disable=redefined-builtin
+copyright = "2023, NVIDIA"  # pylint: disable=redefined-builtin
 author = "NVIDIA"
 
 
@@ -35,9 +36,9 @@ author = "NVIDIA"
 # ones.
 extensions = [
     "myst_nb",
+    "sphinx_design",
     "sphinx_multiversion",
     "sphinx_external_toc",
-    "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.githubpages",
@@ -78,12 +79,18 @@ suppress_warnings = ["etoc.toctree"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
+html_title = "Merlin Core"
+html_logo = "_static/logo-horizontal.svg"
 html_theme_options = {
-    "navigation_depth": 2,
-    "analytics_id": "G-NVJ1Y1YJHK",
+    "logo_only": False,
+    "repository_url": "https://github.com/NVIDIA-Merlin/core",
+    "use_repository_button": True,
+    "extra_navbar": "",
+    "extra_footer": "",
 }
-html_copy_source = False
+html_favicon = "_static/nvidia-logo-vert-rgb-blk-for-screen.png"
+html_copy_source = True
 html_show_sourcelink = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -94,16 +101,24 @@ html_css_files = ["css/custom.css"]
 
 if os.path.exists(gitdir):
     tag_refs = subprocess.check_output(["git", "tag", "-l", "v*"]).decode("utf-8").split()
-    tag_refs = natsorted(tag_refs)[-6:]
+    tag_refs = [tag for tag in tag_refs if re.match(r"^v[0-9]+.[0-9]+.[0-9]+$", tag)]
+    tag_refs = natsorted(tag_refs)[-1:]
     smv_tag_whitelist = r"^(" + r"|".join(tag_refs) + r")$"
 else:
     smv_tag_whitelist = r"^v.*$"
 
-smv_branch_whitelist = r"^(main|stable)$"
+smv_branch_whitelist = r"^(main)$"
 
 smv_refs_override_suffix = "-docs"
 
-html_sidebars = {"**": ["versions.html"]}
+html_sidebars = {
+    "**": [
+        "navbar-logo.html",
+        "search-field.html",
+        "sbt-sidebar-nav.html",
+        "versions.html",
+    ]
+}
 html_baseurl = "https://nvidia-merlin.github.io/models/stable"
 
 intersphinx_mapping = {
