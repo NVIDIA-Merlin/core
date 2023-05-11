@@ -54,7 +54,7 @@ class Rename(BaseOperator):
         self, col_selector: ColumnSelector, transformable: Transformable
     ) -> Transformable:
         transformable = transformable[col_selector.names]
-        transformable.columns = list(self.column_mapping(col_selector).keys())
+        transformable.columns = list(self.column_mapping(col_selector).keys())  # type: ignore[assignment]
         return transformable
 
     transform.__doc__ = BaseOperator.transform.__doc__
