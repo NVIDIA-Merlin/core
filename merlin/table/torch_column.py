@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
 from merlin.core.compat.torch import torch as th
 from merlin.table.conversions import _from_dlpack_cpu, _from_dlpack_gpu, _to_dlpack
@@ -25,12 +25,14 @@ class TorchColumn(TensorColumn):
     A SeriesLike column backed by Torch tensors
     """
 
+    framework_name = "torch"
+
     @classmethod
-    def array_type(cls) -> Type:
+    def array_type(cls) -> Optional[Type]:
         """
         The type of the arrays backing this column
         """
-        return th.Tensor
+        return th.Tensor if th else None
 
     @classmethod
     def array_constructor(cls) -> Callable:

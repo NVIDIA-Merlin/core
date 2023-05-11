@@ -139,7 +139,7 @@ class ColumnSchema:
             Copied object with new column name
 
         """
-        return replace(self, name=name)
+        return self._replace(name=name)
 
     def with_tags(self, tags: Union[str, Tags]) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column tags
@@ -155,7 +155,7 @@ class ColumnSchema:
             Copied object with new column tags
 
         """
-        return replace(self, tags=self.tags.override(tags))  # type: ignore
+        return self._replace(tags=self.tags.override(tags))  # type: ignore
 
     def with_properties(self, properties: dict) -> "ColumnSchema":
         """Create a copy of this ColumnSchema object with different column properties
@@ -185,16 +185,14 @@ class ColumnSchema:
         value_counts = properties.get("value_count", {})
 
         if value_counts:
-            return replace(
-                self,
+            return self._replace(
                 properties=new_properties,
                 dtype=self.dtype.without_shape,
                 is_list=None,
                 is_ragged=None,
             )
         else:
-            return replace(
-                self,
+            return self._replace(
                 properties=new_properties,
             )
 
@@ -225,8 +223,8 @@ class ColumnSchema:
             properties.pop("value_count", None)
             new_dtype = new_dtype.without_shape
 
-        return replace(
-            self, dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
+        return self._replace(
+            dtype=new_dtype, properties=properties, is_list=is_list, is_ragged=is_ragged
         )
 
     def with_shape(self, shape: Union[Tuple, Shape]) -> "ColumnSchema":
@@ -251,8 +249,7 @@ class ColumnSchema:
         dims = Shape(shape).as_tuple
         properties = self.properties.copy()
         properties.pop("value_count", None)
-        return replace(
-            self,
+        return self._replace(
             dims=dims,
             properties=properties,
             is_list=None,
@@ -289,6 +286,13 @@ class ColumnSchema:
         """ """
         domain = self.properties.get("domain")
         return Domain(**domain) if domain else None
+
+    def _replace(self, *args, **kwargs):
+        if "dims" not in kwargs and not (
+            "properties" in kwargs and "value_count" in kwargs["properties"]
+        ):
+            kwargs["dims"] = self.shape.as_tuple
+        return replace(self, *args, **kwargs)
 
     def _validate_shape_info(self, shape, value_counts, is_list, is_ragged):
         value_counts = value_counts or {}
@@ -452,10 +456,9 @@ class Schema:
 
         selected_schemas = {}
 
-        normalized_tags = [
-            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
-            for tag in tags
-        ]
+        normalized_tags = TagSet(tags)
+        if len(tags) == 1 and len(normalized_tags) > 1:
+            pred_fn = all
 
         for _, column_schema in self.column_schemas.items():
             if pred_fn(x in column_schema.tags for x in normalized_tags):
@@ -463,20 +466,41 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def excluding_by_tag(self, tags) -> "Schema":
+    def excluding_by_tag(self, tags, pred_fn=None) -> "Schema":
+        """Remove columns from the schema that match ANY of the supplied tags.
+
+        Parameters
+        ----------
+        tags : _type_
+            List of tags that describes which columns remove
+        pred_fn : `any` or `all`, optional, by default None (ANY)
+            Predicate function that decides if a column should be selected.
+            `all` can be provided to remove columns that contain ALL the tags provided
+
+        Returns
+        -------
+        Schema
+            New Schema containing only the columns that don't contain the provided tags
+        """
+        pred_fn = pred_fn or any
+
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
         selected_schemas = {}
 
+        normalized_tags = TagSet(tags)
+        if len(tags) == 1 and len(normalized_tags) > 1:
+            pred_fn = all
+
         for column_schema in self.column_schemas.values():
-            if not any(x in column_schema.tags for x in tags):
+            if not pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
 
-    def remove_by_tag(self, tags) -> "Schema":
-        return self.excluding_by_tag(tags)
+    def remove_by_tag(self, tags, pred_fn=None) -> "Schema":
+        return self.excluding_by_tag(tags, pred_fn=pred_fn)
 
     def select_by_name(self, names: List[str]) -> "Schema":
         """Select matching columns from this Schema object using a list of column names
