@@ -83,13 +83,17 @@ def test_equality():
     values = np.array([1, 2, 3, 4, 5, 6, 7, 8])
     np_col = NumpyColumn(values=values)
     np_col_2 = NumpyColumn(values=values)
-    assert np_col == np_col_2
+    assert all(np_col == np_col_2)
 
-    np_col_offs = NumpyColumn(values=values, offsets=np.array([0, 2, 4, 6, 8]))
-    assert np_col != np_col_offs
+    with pytest.raises(ValueError) as exc:
+        np_col_3 = NumpyColumn(values=np.array([1, 2, 3, 4]))
+        np_col != np_col_3  # pylint:disable=pointless-statement
+    assert "equality is only defined" in str(exc.value)
 
-    np_col_3 = NumpyColumn(values=np.array([1, 2, 3, 4]))
-    assert np_col != np_col_3
+    with pytest.raises(ValueError) as exc:
+        np_col_offs = NumpyColumn(values=values, offsets=np.array([0, 2, 4, 6, 8]))
+        np_col != np_col_offs  # pylint:disable=pointless-statement
+    assert "equality is only defined" in str(exc.value)
 
 
 @pytest.mark.skipif(not (cp and HAS_GPU), reason="requires CuPy and GPU")

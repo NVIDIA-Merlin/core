@@ -155,6 +155,16 @@ class TensorTable:
     def __delitem__(self, key):
         del self._columns[key]
 
+    def __eq__(self, other):
+        if self.columns != other.columns:
+            return False
+
+        column_eq = True
+        for col_name in self.columns:
+            column_eq *= self[col_name] == other[col_name]
+
+        return column_eq
+
     @property
     def device(self):
         return list(self.values())[0].device

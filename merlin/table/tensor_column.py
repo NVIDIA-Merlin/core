@@ -66,7 +66,13 @@ class TensorColumn:
             return object.__new__(cls)
 
     def __init__(
-        self, values: Any, offsets: Any = None, dtype=None, _ref=None, _device=None, _unsafe=False
+        self,
+        values: Any,
+        offsets: Any = None,
+        dtype=None,
+        _ref=None,
+        _device=None,
+        _unsafe=False,
     ):
         values, offsets = self._convert_nested_lists(values, offsets)
         if _ref and _ref.values.shape != values.shape:
@@ -174,12 +180,12 @@ class TensorColumn:
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
-        return (
-            _arrays_eq(self._values, other._values)
-            and _arrays_eq(self._offsets, other._offsets)
-            and self.dtype == other.dtype
-            and self.device == other.device
-        )
+
+        values_eq = _arrays_eq(self._values, other._values)
+        offsets_eq = _arrays_eq(self._offsets, other._offsets)
+        dtypes_eq = self.dtype == other.dtype
+        devices_eq = self.device == other.device
+        return values_eq * offsets_eq * dtypes_eq * devices_eq
 
     def _construct_shape(self, values, offsets):
         if offsets is not None:
@@ -255,7 +261,10 @@ def _arrays_eq(array1, array2):
     if array1 is None and array2 is None:
         return True
 
-    if array1 is None or array2 is None:
-        return False
+    if (array1 is None) ^ (array2 is None) or len(array1) != len(array2):
+        raise ValueError(
+            "TensorColumn equality is only defined for columns of identical "
+            "size, shape, and representation."
+        )
 
-    return len(array1) == len(array2) and all(array1 == array2)
+    return array1 == array2
