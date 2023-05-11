@@ -163,12 +163,28 @@ Returning True selects this column, False will not return that column.</p></li>
 
 <dl class="py method">
 <dt id="merlin.schema.Schema.excluding_by_tag">
-<code class="sig-name descname"><span class="pre">excluding_by_tag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#Schema.excluding_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.excluding_by_tag" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">excluding_by_tag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#Schema.excluding_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.excluding_by_tag" title="Permalink to this definition"></a></dt>
+<dd><p>Remove columns from the schema that match ANY of the supplied tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tags</strong> (<em>_type_</em>) – List of tags that describes which columns remove</p></li>
+<li><p><strong>pred_fn</strong> (<cite>any</cite> or <cite>all</cite>, optional, by default None (ANY)) – Predicate function that decides if a column should be selected.
+<cite>all</cite> can be provided to remove columns that contain ALL the tags provided</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New Schema containing only the columns that don’t contain the provided tags</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt id="merlin.schema.Schema.remove_by_tag">
-<code class="sig-name descname"><span class="pre">remove_by_tag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#Schema.remove_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.remove_by_tag" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">remove_by_tag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">merlin.schema.schema.Schema</span><a class="reference internal" href="../_modules/merlin/schema/schema.html#Schema.remove_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.remove_by_tag" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
