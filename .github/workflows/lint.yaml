@@ -20,6 +20,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check workflow files
-        uses: docker://rhysd/actionlint:latest
-        with:
-          args: -color
+        run: |
+          echo "::add-matcher::.github/actionlint-matcher.json"
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/fd7ba3c382e13dcc0248e425b4cbc3f1185fa3ee/scripts/download-actionlint.bash)
+          ./actionlint
+        shell: bash
