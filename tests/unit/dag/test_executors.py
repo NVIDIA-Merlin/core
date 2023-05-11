@@ -44,7 +44,10 @@ def test_local_executor_with_dataframe():
 
 def test_local_executor_with_dataframe_like():
     df = TensorTable(
-        {"a": np.array([1, 2, 3], dtype=np.int64), "b": np.array([4, 5, 6], dtype=np.int64)}
+        {
+            "a": np.array([1, 2, 3], dtype=np.int64),
+            "b": np.array([4, 5, 6], dtype=np.int64),
+        }
     )
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
     operator = ["a"] >> BaseOperator()
@@ -54,5 +57,5 @@ def test_local_executor_with_dataframe_like():
     executor = LocalExecutor()
     result = executor.transform(df, [graph.output_node])
 
-    assert result["a"] == df["a"]
+    assert all(result["a"] == df["a"])
     assert "b" not in result.columns
