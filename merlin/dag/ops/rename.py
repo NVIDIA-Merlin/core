@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.
+# Copyright (c) 2023, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,9 @@ class Rename(BaseOperator):
         self, col_selector: ColumnSelector, transformable: Transformable
     ) -> Transformable:
         transformable = transformable[col_selector.names]
-        transformable.columns = list(self.column_mapping(col_selector).keys())  # type: ignore[assignment]
+        transformable.columns = list(  # type: ignore[assignment]
+            self.column_mapping(col_selector).keys()
+        )
         return transformable
 
     transform.__doc__ = BaseOperator.transform.__doc__
