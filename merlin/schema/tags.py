@@ -143,9 +143,10 @@ class TagSet:
         atomized_tags = set()
 
         for tag in tag_set:
-            atomized_tags.add(tag)
             if tag in COMPOUND_TAGS:
                 atomized_tags.update(COMPOUND_TAGS[tag])
+            else:
+                atomized_tags.add(tag)
 
         return atomized_tags
 
