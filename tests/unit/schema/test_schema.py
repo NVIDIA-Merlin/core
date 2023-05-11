@@ -74,6 +74,17 @@ def test_select_by_tag_string():
     assert col2_selection == Schema([col2_schema])
 
 
+@pytest.mark.parametrize("item_id_col_tags", [[Tags.ITEM, Tags.ID], [Tags.ITEM_ID]])
+@pytest.mark.parametrize("select_by_tags", [[Tags.ITEM, Tags.ID], [Tags.ITEM_ID]])
+def test_select_by_compound_tag(item_id_col_tags, select_by_tags):
+    item_id_col_schema = ColumnSchema("item_id", tags=item_id_col_tags)
+    other_col_schema = ColumnSchema("feature")
+    schema = Schema([item_id_col_schema, other_col_schema])
+
+    selection = schema.select_by_tag(select_by_tags, all)
+    assert selection == Schema([item_id_col_schema])
+
+
 def test_select_by_any_tags():
     col1_schema = ColumnSchema("col1", tags=["a", "b", "c"])
     col2_schema = ColumnSchema("col2", tags=["b", "c", "d"])
