@@ -106,7 +106,11 @@
 
 
 <span class="k">class</span> <span class="nc">Supports</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicates what type of data representation this operator supports for transformations&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Indicates what type of data representation this operator supports for transformations</span>
+
+<span class="sd">    (Deprecated)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># cudf dataframe</span>
     <span class="n">CPU_DATAFRAME</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
@@ -116,6 +120,19 @@
     <span class="n">CPU_DICT_ARRAY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="c1"># dict of column name to cupy array</span>
     <span class="n">GPU_DICT_ARRAY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">DataFormats</span><span class="p">(</span><span class="n">Flag</span><span class="p">):</span>
+    <span class="n">CUDF_DATAFRAME</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">PANDAS_DATAFRAME</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="n">NUMPY_TENSOR_TABLE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CUPY_TENSOR_TABLE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">TF_TENSOR_TABLE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">TORCH_TENSOR_TABLE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+    <span class="n">NUMPY_DICT_ARRAY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">CUPY_DICT_ARRAY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="BaseOperator"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator">[docs]</a><span class="k">class</span> <span class="nc">BaseOperator</span><span class="p">:</span>
@@ -435,6 +452,15 @@
     <span class="k">def</span> <span class="nf">supports</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Supports</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns what kind of data representation this operator supports&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Supports</span><span class="o">.</span><span class="n">CPU_DATAFRAME</span> <span class="o">|</span> <span class="n">Supports</span><span class="o">.</span><span class="n">GPU_DATAFRAME</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supported_formats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFormats</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">DataFormats</span><span class="o">.</span><span class="n">PANDAS_DATAFRAME</span>
+            <span class="o">|</span> <span class="n">DataFormats</span><span class="o">.</span><span class="n">CUDF_DATAFRAME</span>
+            <span class="o">|</span> <span class="n">DataFormats</span><span class="o">.</span><span class="n">NUMPY_TENSOR_TABLE</span>
+            <span class="o">|</span> <span class="n">DataFormats</span><span class="o">.</span><span class="n">CUPY_TENSOR_TABLE</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
