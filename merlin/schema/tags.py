@@ -76,7 +76,7 @@ class TagSet:
         elif tags is None:
             tags = []
 
-        self._tags: Set[Tags] = self._normalize_tags(tags)
+        self._tags: Set[Union[str, Tags]] = self._normalize_tags(tags)
 
         collisions = self._detect_collisions(self._tags, self._tags)
         if collisions:
@@ -138,12 +138,17 @@ class TagSet:
 
         return tags
 
-    def _normalize_tags(self, tags) -> Set[Tags]:
-        tag_set = set(Tags[tag.upper()] if tag in Tags._value2member_map_ else tag for tag in tags)
-        atomized_tags = set()
+    def _normalize_tags(self, tags: List[Union[str, Tags]]) -> Set[Union[Tags, str]]:
+        tag_set: Set[Union[Tags, str]] = set()
+        for tag in tags:
+            if isinstance(tag, str) and tag.lower() in Tags._value2member_map_:
+                tag_set.add(Tags[tag.upper()])
+            else:
+                tag_set.add(tag)
 
+        atomized_tags: Set[Union[Tags, str]] = set()
         for tag in tag_set:
-            if tag in COMPOUND_TAGS:
+            if isinstance(tag, Tags) and tag in COMPOUND_TAGS:
                 atomized_tags.update(COMPOUND_TAGS[tag])
             else:
                 atomized_tags.add(tag)
