@@ -428,7 +428,7 @@ class Schema:
 
     def select_by_tag(
         self,
-        tags: Union[Union[str, Tags], List[Union[str, Tags]]],
+        tags: Union[Union[str, Tags], List[Union[str, Tags]], TagSet],
         pred_fn=None,
     ) -> "Schema":
         """Select columns from this Schema that match ANY of the supplied tags.
@@ -453,6 +453,7 @@ class Schema:
 
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
+        tags = TagSet(tags)
 
         selected_schemas = {}
 
