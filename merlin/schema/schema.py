@@ -456,10 +456,9 @@ class Schema:
 
         selected_schemas = {}
 
-        normalized_tags = [
-            Tags._value2member_map_.get(tag.lower(), tag) if isinstance(tag, str) else tag
-            for tag in tags
-        ]
+        normalized_tags = TagSet(tags)
+        if len(tags) == 1 and len(normalized_tags) > 1:
+            pred_fn = all
 
         for _, column_schema in self.column_schemas.items():
             if pred_fn(x in column_schema.tags for x in normalized_tags):
