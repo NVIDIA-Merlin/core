@@ -13,30 +13,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
 import logging
+from enum import Enum
 
 import dask
 import pandas as pd
 from dask.core import flatten
 
 import merlin.dtypes as md
+from merlin.core.compat import HAS_GPU, cudf, cupy, numpy, pandas
 from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype
 from merlin.core.utils import (
     ensure_optimize_dataframe_graph,
     global_dask_client,
     set_client_deprecated,
 )
-from merlin.dag import ColumnSelector, Graph, Node
+from merlin.dag import ColumnSelector, DataFormats, Graph, Node
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io.worker import clean_worker_cache
+from merlin.table import CupyColumn, NumpyColumn, TensorTable
 
 LOG = logging.getLogger("merlin")
+
+
+class Device(Enum):
+    CPU = 0
+    GPU = 1
 
 
 class LocalExecutor:
     """
     An executor for running Merlin operator DAGs locally
     """
+
+    def __init__(self, device=Device.GPU):
+        self.device = device if HAS_GPU else Device.CPU
 
     def transform(
         self,
@@ -88,7 +100,8 @@ class LocalExecutor:
             node, transformable, capture_dtypes, strict
         )
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
-        transform_input = self._merge_upstream_columns(upstream_columns)
+        formatted_columns = self._standardize_formats(node, upstream_columns)
+        transform_input = self._merge_upstream_columns(formatted_columns)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
         return transform_output
 
@@ -124,15 +137,39 @@ class LocalExecutor:
 
         return upstream_outputs
 
+    def _standardize_formats(self, workflow_node, node_input_data):
+        # Get the supported formats
+        op = workflow_node.op
+
+        if self.device == Device.CPU:
+            supported_formats = _mask_cpu_only(op.supported_formats)
+        else:
+            supported_formats = op.supported_formats
+
+        # Convert the first thing into a supported format
+        tensors = _convert_format(node_input_data[0], supported_formats)
+        target_format = _data_format(tensors)
+
+        # Convert the whole list into the same format
+        formatted_tensors = []
+        for upstream_tensors in node_input_data:
+            upstream_tensors = _convert_format(upstream_tensors, target_format)
+            formatted_tensors.append(upstream_tensors)
+
+        return formatted_tensors
+
     def _merge_upstream_columns(self, upstream_outputs, merge_fn=concat_columns):
         combined_outputs = None
         seen_columns = set()
+
         for upstream_output in upstream_outputs:
+            upstream_columns = set(upstream_output.keys())
+
             if combined_outputs is None or not len(combined_outputs):
                 combined_outputs = upstream_output
-                seen_columns = set(upstream_output.columns)
+                seen_columns = upstream_columns
             else:
-                new_columns = set(upstream_output.columns) - seen_columns
+                new_columns = upstream_columns - seen_columns
                 if new_columns:
                     combined_outputs = merge_fn(
                         [combined_outputs, upstream_output[list(new_columns)]]
@@ -157,14 +194,14 @@ class LocalExecutor:
         Returns
         -------
         Transformable
-            The output DataFrame or DictArray formed by executing the final node's transform
+            The output DataFrame or TensorTable formed by executing the final node's transform
         Raises
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
             as the output schema columns when `strict` is True
         RuntimeError
-            If no DataFrame or DictArray is returned from the operator
+            If no DataFrame or TensorTable is returned from the operator
         """
         if not node.op:
             return input_data
@@ -392,3 +429,113 @@ class DaskExecutor:
 def _get_unique(cols):
     # Need to preserve order in unique-column list
     return list({x: x for x in cols}.keys())
+
+
+def _mask_cpu_only(supported):
+    return functools.reduce(
+        lambda a, b: a | b,
+        (
+            v
+            for v in list(DataFormats)
+            if v & supported and ("NUMPY" in str(v) or "PANDAS" in str(v))
+        ),
+    )
+
+
+def _data_format(transformable):
+    data = TensorTable(transformable) if isinstance(transformable, dict) else transformable
+
+    if cudf and isinstance(data, cudf.DataFrame):
+        return DataFormats.CUDF_DATAFRAME
+    elif pandas and isinstance(data, pandas.DataFrame):
+        return DataFormats.PANDAS_DATAFRAME
+    elif isinstance(data, dict) and data.values():
+        first = list(data.values())[0]
+        if cupy and first and isinstance(first, cupy.ndarray):
+            return DataFormats.CUPY_DICT_ARRAY
+        if numpy and first and isinstance(first, numpy.ndarray):
+            return DataFormats.NUMPY_DICT_ARRAY
+    elif data.column_type is CupyColumn:
+        return DataFormats.CUPY_TENSOR_TABLE
+    elif data.column_type is NumpyColumn:
+        return DataFormats.NUMPY_TENSOR_TABLE
+    else:
+        if isinstance(data, TensorTable):
+            raise TypeError(f"Unknown type: {data.column_type}")
+        else:
+            raise TypeError(f"Unknown type: {type(data)}")
+
+
+def _convert_format(tensors, target_format):
+    """
+    Converts data to one of the formats specified in 'target_format'
+
+    This allows us to convert data to/from dataframe representations for operators that
+    only support certain reprentations
+    """
+    format_ = _data_format(tensors)
+
+    if format_ & target_format:
+        return tensors
+
+    elif target_format & DataFormats.CUPY_DICT_ARRAY:
+        if format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors).gpu().to_dict()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.to_dict()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu().to_dict()
+        elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
+            return TensorTable.from_df(tensors).gpu().to_dict()
+
+    elif target_format & DataFormats.NUMPY_DICT_ARRAY:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors).cpu().to_dict()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu().to_dict()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.to_dict()
+        elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
+            return TensorTable.from_df(tensors).cpu().to_dict()
+
+    elif target_format & DataFormats.CUPY_TENSOR_TABLE:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors)
+        elif format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors).gpu()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu()
+        elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
+            return TensorTable.from_df(tensors).gpu()
+
+    elif target_format & DataFormats.NUMPY_TENSOR_TABLE:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors).cpu()
+        elif format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors)
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu()
+        elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
+            return TensorTable.from_df(tensors).cpu()
+
+    elif target_format & DataFormats.CUDF_DATAFRAME:
+        if format_ == DataFormats.PANDAS_DATAFRAME:
+            return cudf.DataFrame(tensors)
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.to_df()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu().to_df()
+        elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
+            return TensorTable(tensors).gpu().to_df()
+
+    elif target_format & DataFormats.PANDAS_DATAFRAME:
+        if format_ == DataFormats.CUDF_DATAFRAME:
+            return tensors.to_pandas()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu().to_df()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.to_df()
+        elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
+            return TensorTable(tensors).cpu().to_df()
+
+    raise ValueError("unsupported target for converting tensors", target_format)
