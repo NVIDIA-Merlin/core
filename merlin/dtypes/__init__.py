@@ -15,8 +15,7 @@
 #
 
 # flake8: noqa
-from merlin.dtypes import mappings
-from merlin.dtypes import aliases
+from merlin.dtypes import aliases, mappings
 from merlin.dtypes.aliases import *
 from merlin.dtypes.base import DType
 from merlin.dtypes.registry import _dtype_registry

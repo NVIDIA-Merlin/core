@@ -128,6 +128,6 @@ def test_tagset_add_collision_error():
 def test_tagset_atomizes_compound_tags():
     for tag, atomic_tags in COMPOUND_TAGS.items():
         tag_set = TagSet([tag])
-        assert tag in tag_set
+        assert tag not in tag_set
         for atomic_tag in atomic_tags:
             assert atomic_tag in tag_set
