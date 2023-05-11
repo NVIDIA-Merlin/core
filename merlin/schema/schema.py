@@ -466,20 +466,41 @@ class Schema:
 
         return Schema(selected_schemas)
 
-    def excluding_by_tag(self, tags) -> "Schema":
+    def excluding_by_tag(self, tags, pred_fn=None) -> "Schema":
+        """Remove columns from the schema that match ANY of the supplied tags.
+
+        Parameters
+        ----------
+        tags : _type_
+            List of tags that describes which columns remove
+        pred_fn : `any` or `all`, optional, by default None (ANY)
+            Predicate function that decides if a column should be selected.
+            `all` can be provided to remove columns that contain ALL the tags provided
+
+        Returns
+        -------
+        Schema
+            New Schema containing only the columns that don't contain the provided tags
+        """
+        pred_fn = pred_fn or any
+
         if not isinstance(tags, (list, tuple)):
             tags = [tags]
 
         selected_schemas = {}
 
+        normalized_tags = TagSet(tags)
+        if len(tags) == 1 and len(normalized_tags) > 1:
+            pred_fn = all
+
         for column_schema in self.column_schemas.values():
-            if not any(x in column_schema.tags for x in tags):
+            if not pred_fn(x in column_schema.tags for x in normalized_tags):
                 selected_schemas[column_schema.name] = column_schema
 
         return Schema(selected_schemas)
 
-    def remove_by_tag(self, tags) -> "Schema":
-        return self.excluding_by_tag(tags)
+    def remove_by_tag(self, tags, pred_fn=None) -> "Schema":
+        return self.excluding_by_tag(tags, pred_fn=pred_fn)
 
     def select_by_name(self, names: List[str]) -> "Schema":
         """Select matching columns from this Schema object using a list of column names
