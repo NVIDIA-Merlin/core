@@ -1293,13 +1293,12 @@
 
         <span class="k">if</span> <span class="n">annotate_lists</span><span class="p">:</span>
             <span class="n">_real_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-            <span class="n">annotated</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">col</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">list_val_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]),</span>
-                    <span class="s2">&quot;is_list&quot;</span><span class="p">:</span> <span class="n">is_list_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]),</span>
-                <span class="p">}</span>
-                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">_real_meta</span><span class="o">.</span><span class="n">columns</span>
-            <span class="p">}</span>
+            <span class="n">annotated</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">_real_meta</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">is_list</span> <span class="o">=</span> <span class="n">is_list_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="n">list_val_dtype</span><span class="p">(</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">])</span> <span class="k">if</span> <span class="n">is_list</span> <span class="k">else</span> <span class="n">_real_meta</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="n">annotated</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;is_list&quot;</span><span class="p">:</span> <span class="n">is_list</span><span class="p">}</span>
+
             <span class="k">return</span> <span class="n">annotated</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_real_meta</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">dtypes</span></div>
