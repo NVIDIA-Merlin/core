@@ -1212,13 +1212,12 @@ class Dataset:
 
         if annotate_lists:
             _real_meta = self._real_meta[n]
-            annotated = {
-                col: {
-                    "dtype": list_val_dtype(_real_meta[col]),
-                    "is_list": is_list_dtype(_real_meta[col]),
-                }
-                for col in _real_meta.columns
-            }
+            annotated = {}
+            for col in _real_meta.columns:
+                is_list = is_list_dtype(_real_meta[col])
+                dtype = list_val_dtype(_real_meta[col]) if is_list else _real_meta[col].dtype
+                annotated[col] = {"dtype": dtype, "is_list": is_list}
+
             return annotated
 
         return self._real_meta[n].dtypes
