@@ -1214,7 +1214,7 @@ class Dataset:
             _real_meta = self._real_meta[n]
             annotated = {
                 col: {
-                    "dtype": list_val_dtype(_real_meta[col]) or _real_meta[col].dtype,
+                    "dtype": list_val_dtype(_real_meta[col]),
                     "is_list": is_list_dtype(_real_meta[col]),
                 }
                 for col in _real_meta.columns

@@ -49,3 +49,9 @@ class TestDatasetCpu:
     def test_false_missing_cudf_or_gpu(self):
         with pytest.raises(RuntimeError):
             Dataset(make_df({"a": [1, 2, 3]}), cpu=False)
+
+
+def test_infer_list_dtype_unknown():
+    df = pd.DataFrame({"col": [[], []]})
+    dataset = Dataset(df, cpu=True)
+    assert dataset.schema["col"].dtype.element_type.value == "unknown"
