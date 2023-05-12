@@ -209,6 +209,13 @@ class TensorTable:
         """
         return list(self.keys())
 
+    @columns.setter
+    def columns(self, col_names):
+        renamed_columns = {}
+        for col, col_name in zip(self.columns, col_names):
+            renamed_columns[col_name] = self._columns[col]
+        self._columns = renamed_columns
+
     @property
     def column_type(self):
         return type(list(self.values())[0])
@@ -241,10 +248,26 @@ class TensorTable:
         return result
 
     def cpu(self):
+        """
+        Move this TensorTable and its columns to CPU
+
+        Returns
+        -------
+        TensorTable
+            A new TensorTable containing the same columns but on CPU
+        """
         columns = {col_name: col_values.cpu() for col_name, col_values in self.items()}
         return TensorTable(columns)
 
     def gpu(self):
+        """
+        Move this TensorTable and its columns to GPU
+
+        Returns
+        -------
+        TensorTable
+            A new TensorTable containing the same columns but on GPU
+        """
         columns = {col_name: col_values.gpu() for col_name, col_values in self.items()}
         return TensorTable(columns)
 
