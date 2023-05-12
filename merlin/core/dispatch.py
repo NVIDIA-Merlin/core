@@ -16,7 +16,7 @@
 import enum
 import functools
 import itertools
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import dask.dataframe as dd
 import numpy as np
@@ -311,7 +311,7 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesLike) -> np.dtype:
+def list_val_dtype(ser: SeriesLike) -> Optional[np.dtype]:
     """
     Return the dtype of the leaves from a list or nested list
 
@@ -322,8 +322,8 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
 
     Returns
     -------
-    np.dtype
-        The dtype of the innermost elements
+    Optional[np.dtype]
+        The dtype of the innermost elements if we find one
     """
     if is_list_dtype(ser):
         if cudf is not None and isinstance(ser, cudf.Series):
@@ -331,7 +331,12 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
                 ser = ser.list.leaves
             return ser.dtype
         elif isinstance(ser, pd.Series):
-            return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
+            try:
+                return pd.core.dtypes.cast.infer_dtype_from(
+                    next(iter(pd.core.common.flatten(ser)))
+                )[0]
+            except StopIteration:
+                return None
     if isinstance(ser, np.ndarray):
         return ser.dtype
     # adds detection when in merlin column
