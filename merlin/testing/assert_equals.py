@@ -23,14 +23,14 @@ def assert_table_equal(left: TensorTable, right: TensorTable):
     pd.testing.assert_frame_equal(left.cpu().to_df(), right.cpu().to_df())
 
 
-# @lazy_singledispatch
-# def assert_column_equal(left, right):
-#     raise NotImplementedError
-
-
 @lazy_singledispatch
 def assert_transformable_equal(left, right):
     raise NotImplementedError
+
+
+@assert_transformable_equal.register(TensorTable)
+def _assert_equal_table(left, right):
+    assert_table_equal(left, right)
 
 
 @assert_transformable_equal.register_lazy("cudf")
@@ -39,7 +39,7 @@ def _register_assert_equal_df_cudf():
 
     @assert_transformable_equal.register(cudf.DataFrame)
     def _assert_equal_df_cudf(left, right):
-        return cudf.testing.assert_frame_equal(left, right)
+        cudf.testing.assert_frame_equal(left, right)
 
 
 @assert_transformable_equal.register_lazy("pandas")
@@ -48,11 +48,4 @@ def _register_assert_equal_pandas():
 
     @assert_transformable_equal.register(pandas.DataFrame)
     def _assert_equal_pandas(left, right):
-        return pandas.testing.assert_frame_equal(left, right)
-
-
-@assert_transformable_equal.register_lazy("merlin")
-def _register_assert_equal_merlin():
-    @assert_transformable_equal.register(TensorTable)
-    def _assert_equal_table(left, right):
-        return assert_table_equal(left, right)
+        pandas.testing.assert_frame_equal(left, right)

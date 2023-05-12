@@ -21,7 +21,7 @@ from merlin.core.compat import cudf
 from merlin.dag import ColumnSelector
 from merlin.dag.ops.rename import Rename
 from merlin.table import TensorTable
-from tests.conftest import assert_eq
+from merlin.testing import assert_transformable_equal
 
 transformables = [pd.DataFrame, TensorTable]
 if cudf:
@@ -37,23 +37,26 @@ def test_rename(transformable):
     op = Rename(f=lambda name: name.upper())
     transformed = op.transform(selector, df)
     expected = transformable({"X": np.array([1, 2, 3, 4, 5]), "Y": np.array([6, 7, 8, 9, 10])})
-    assert_eq(transformed, expected)
+    assert_transformable_equal(transformed, expected)
 
     op = Rename(postfix="_lower")
     transformed = op.transform(selector, df)
     expected = transformable(
-        {"x_lower": np.array([1, 2, 3, 4, 5]), "y_lower": np.array([6, 7, 8, 9, 10])}
+        {
+            "x_lower": np.array([1, 2, 3, 4, 5]),
+            "y_lower": np.array([6, 7, 8, 9, 10]),
+        }
     )
-    assert_eq(transformed, expected)
+    assert_transformable_equal(transformed, expected)
 
     selector = ColumnSelector(["x"])
 
     op = Rename(name="z")
     transformed = op.transform(selector, df)
     expected = transformable({"z": np.array([1, 2, 3, 4, 5])})
-    assert_eq(transformed, expected)
+    assert_transformable_equal(transformed, expected)
 
     op = Rename(f=lambda name: name.upper())
     transformed = op.transform(selector, df)
     expected = transformable({"X": np.array([1, 2, 3, 4, 5])})
-    assert_eq(transformed, expected)
+    assert_transformable_equal(transformed, expected)
