@@ -51,7 +51,7 @@ def test_udf(tmpdir, df, paths, gpu_memory_frac, engine, cpu):
     graph = Graph(substring)
     graph.construct_schema(dataset.schema)
     executor = DaskExecutor()
-    executor.fit(dataset.to_ddf(), [graph.output_node])
+    executor.fit(dataset, graph)
     new_gdf = executor.transform(dataset.to_ddf(), graph).compute()
 
     assert_eq_dd(new_gdf["name-cat"], df_copy["name-cat"].str.slice(1, 3), check_index=False)
@@ -70,8 +70,8 @@ def test_udf(tmpdir, df, paths, gpu_memory_frac, engine, cpu):
     graph = Graph(substring + ["name-cat", "name-string"])
     graph.construct_schema(dataset.schema)
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
-    new_gdf = executor.transform(dataset.to_ddf(), [graph.output_node]).compute()
+    executor.fit(dataset, graph)
+    new_gdf = executor.transform(dataset.to_ddf(), graph).compute()
 
     assert_eq_dd(
         new_gdf["name-cat_slice"],
@@ -96,7 +96,7 @@ def test_udf(tmpdir, df, paths, gpu_memory_frac, engine, cpu):
     graph = Graph(udf_op)
     graph.construct_schema(dataset.schema)
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
     new_gdf = executor.transform(dataset.to_ddf(), graph).compute()
 
     assert_eq_dd(
@@ -116,7 +116,7 @@ def test_udf(tmpdir, df, paths, gpu_memory_frac, engine, cpu):
     graph = Graph(udf_op)
     graph.construct_schema(dataset.schema)
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
     new_gdf = executor.transform(dataset.to_ddf(), graph).compute()
 
     assert new_gdf["id"].dtype == "float64"
@@ -149,7 +149,7 @@ def test_udf_misalign(cpu):
     graph.construct_schema(dataset.schema)
 
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
 
     transformed = executor.transform(dataset.to_ddf(), graph)
     assert_eq_dd(
@@ -186,7 +186,7 @@ def test_udf_schema_computation(cpu):
     graph = Graph(label_feature)
     graph.construct_schema(dataset.schema)
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
 
     output_schema = graph.output_node.output_schema
 
@@ -218,7 +218,7 @@ def test_udf_dtype_propagation(cpu):
     graph.construct_schema(dataset.schema)
 
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
 
     output_schema = graph.output_node.output_schema
 
@@ -249,7 +249,7 @@ def test_udf_dtype_multi_op_propagation(cpu):
     graph.construct_schema(dataset.schema)
 
     executor = DaskExecutor()
-    executor.fit(dataset, [graph.output_node])
+    executor.fit(dataset, graph)
 
     output_schema = graph.output_node.output_schema
 
