@@ -18,6 +18,7 @@ from typing import List, Union
 
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.ops import ConcatColumns, SelectionOp, SubsetColumns, SubtractionOp
+from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
@@ -273,6 +274,13 @@ class Node:
         -------
         Node
         """
+
+        if callable(operator) and not (
+            isinstance(operator, type) and issubclass(operator, BaseOperator)
+        ):
+            # implicit lambdaop conversion.
+            operator = UDF(operator)
+
         if isinstance(operator, type) and issubclass(operator, BaseOperator):
             # handle case where an operator class is passed
             operator = operator()
