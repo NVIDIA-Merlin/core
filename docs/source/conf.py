@@ -94,6 +94,7 @@ html_sidebars = {
         "search-field.html",
         "icon-links.html",
         "sbt-sidebar-nav.html",
+        "merlin-ecosystem.html",
         "versions.html",
     ]
 }
