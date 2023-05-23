@@ -116,7 +116,7 @@ if os.path.exists(gitdir):
 else:
     smv_tag_whitelist = r"^v.*$"
 
-smv_branch_whitelist = r"^(main)$"
+smv_branch_whitelist = r"^(main|stable)$"
 
 smv_refs_override_suffix = "-docs"
 
