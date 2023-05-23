@@ -106,7 +106,7 @@ html_show_sourcelink = False
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = ["css/custom.css", "css/versions.css"]
-html_js_files = ["js/rtd-theme.js"]
+html_js_files = ["js/rtd-version-switcher.js"]
 
 if os.path.exists(gitdir):
     tag_refs = subprocess.check_output(["git", "tag", "-l", "v*"]).decode("utf-8").split()
