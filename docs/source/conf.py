@@ -86,7 +86,7 @@ html_theme_options = {
     "logo_only": False,
     "repository_url": "https://github.com/NVIDIA-Merlin/core",
     "use_repository_button": True,
-    "extra_navbar": "",
+    "footer_content_items": ["copyright.html", "last-updated.html"],
     "extra_footer": "",
 }
 html_favicon = "_static/nvidia-logo-vert-rgb-blk-for-screen.png"
