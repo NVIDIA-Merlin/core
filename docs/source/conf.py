@@ -99,12 +99,12 @@ if os.path.exists(gitdir):
 else:
     smv_tag_whitelist = r"^v.*$"
 
-smv_branch_whitelist = r"^main$"
+smv_branch_whitelist = r"^(main|stable)$"
 
 smv_refs_override_suffix = "-docs"
 
 html_sidebars = {"**": ["versions.html"]}
-html_baseurl = "https://nvidia-merlin.github.io/models/main"
+html_baseurl = "https://nvidia-merlin.github.io/models/stable"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

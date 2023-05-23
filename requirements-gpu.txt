@@ -3,4 +3,3 @@
 # cudf>=21.12
 # dask-cudf>=21.12
 # dask-cuda>=21.12
-cupy-cuda11x

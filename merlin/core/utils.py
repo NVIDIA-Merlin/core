@@ -180,6 +180,7 @@ class Distributed:
         workflow = nvt.Workflow(["col"] >> ops.Normalize())
         dataset = nvt.Dataset(...)
         with Distributed():
+            workflow.fit(dataset)
             workflow.transform(dataset).to_parquet(...)
 
     In this case, all Dask-based scheduling and execution
@@ -195,6 +196,7 @@ class Distributed:
         workflow = nvt.Workflow(["col"] >> ops.Normalize())
         dataset = nvt.Dataset(...)
         exec = Distributed()
+        workflow.fit(dataset)
         workflow.transform(dataset).to_parquet(...)
         exec.deactivate()
 
@@ -216,6 +218,7 @@ class Distributed:
             rmm_pool_size="20GB",
             log_spilling=True,
         ):
+            workflow.fit(dataset)
             workflow.transform(dataset).to_parquet(...)
 
     In this case, the `cluster_type="cuda"` calls for the
