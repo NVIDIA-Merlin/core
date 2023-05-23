@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 from merlin.core.protocols import Transformable
-from merlin.dag import ColumnSelector
 from merlin.dag.base_operator import BaseOperator
+from merlin.dag.selector import ColumnSelector
 
 
 class Rename(BaseOperator):
