@@ -88,6 +88,7 @@ html_theme_options = {
     "use_repository_button": True,
     "footer_content_items": ["copyright.html", "last-updated.html"],
     "extra_footer": "",
+    "logo": {"text": "NVIDIA Merlin Core", "alt_text": "NVIDIA Merlin Core"},
 }
 html_favicon = "_static/nvidia-logo-vert-rgb-blk-for-screen.png"
 html_copy_source = True
