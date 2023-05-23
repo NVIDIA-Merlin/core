@@ -97,7 +97,7 @@ html_sidebars = {
         "versions.html",
     ]
 }
-html_favicon = "_static/nvidia-logo-vert-rgb-blk-for-screen.png"
+html_favicon = "_static/favicon.png"
 html_copy_source = True
 html_show_sourcelink = False
 
