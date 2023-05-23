@@ -143,6 +143,7 @@ autosummary_generate = True
 
 copydirs_additional_dirs = [
     "../../README.md",
+    "../../LICENSE",
 ]
 copydirs_file_rename = {
     "README.md": "index.md",
