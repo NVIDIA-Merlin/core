@@ -20,6 +20,7 @@ import pytest
 from dask.dataframe import assert_eq as assert_eq_dd
 
 import merlin.dtypes as md
+from merlin.core.compat import cupy as cp
 from merlin.dag import Graph
 from merlin.dag.executors import DaskExecutor
 from merlin.dag.ops import UDF, Rename
@@ -27,15 +28,11 @@ from merlin.dag.selector import ColumnSelector
 from merlin.io import Dataset
 from merlin.schema import Tags, TagSet
 
-try:
-    import cupy as cp
 
+if cp:
     _CPU = [True, False]
-    _HAS_GPU = True
-except ImportError:
+else:
     _CPU = [True]
-    _HAS_GPU = False
-    cp = None
 
 
 @pytest.mark.parametrize("gpu_memory_frac", [0.1])
