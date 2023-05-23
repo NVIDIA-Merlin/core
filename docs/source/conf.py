@@ -81,9 +81,7 @@ suppress_warnings = ["etoc.toctree"]
 #
 html_theme = "sphinx_book_theme"
 html_title = "Merlin Core"
-html_logo = "_static/logo-horizontal.svg"
 html_theme_options = {
-    "logo_only": False,
     "repository_url": "https://github.com/NVIDIA-Merlin/core",
     "use_repository_button": True,
     "footer_content_items": ["copyright.html", "last-updated.html"],
