@@ -1,8 +1,6 @@
 -r requirements.txt
 -r requirements-dev.txt
 
-Sphinx==3.5.4
-sphinx_rtd_theme==1.0.0
 sphinx-multiversion@git+https://github.com/mikemckiernan/sphinx-multiversion.git
 sphinxcontrib-copydirs@git+https://github.com/mikemckiernan/sphinxcontrib-copydirs.git
 recommonmark==0.7.1
@@ -12,7 +10,5 @@ myst-nb==0.13.2
 linkify-it-py==1.0.3
 sphinx-external-toc==0.2.4
 attrs==21.4.0
-sphinx-book-theme
-pydata-sphinx-theme
-pydata-sphinx-theme
+sphinx-book-theme==1.0.1
 sphinx_design
