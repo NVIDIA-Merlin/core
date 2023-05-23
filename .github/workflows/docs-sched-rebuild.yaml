@@ -30,8 +30,8 @@ jobs:
         run: |
           # setup local branches that we'd like to build docs for
           # required for sphinx-multiversion to find these
-          git branch --track main origin/main
-          git branch --track stable origin/stable
+          git branch --track --force main origin/main
+          git branch --track --force stable origin/stable
           tox -e docs-multi
       - name: Delete unnecessary files
         run: |
