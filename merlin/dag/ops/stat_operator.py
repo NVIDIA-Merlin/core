@@ -27,6 +27,8 @@ class StatOperator(BaseOperator):
     on top of the Operator class.
     """
 
+    fitted = False
+
     def fit(self, col_selector: ColumnSelector, ddf: dd.DataFrame) -> Any:
         """Calculate statistics for this operator, and return a dask future
         to these statistics, which will be computed by the workflow."""

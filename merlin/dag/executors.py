@@ -330,10 +330,18 @@ class DaskExecutor:
 
         self._clear_worker_cache()
 
+        for node in nodes:
+            if isinstance(node.op, StatOperator) and not node.op.fitted:
+                raise RuntimeError(
+                    f"Graphs containing {node.op} must be fit before "
+                    "attempting to use them to transform data."
+                )
+
         # Check if we are only selecting columns (no transforms).
         # If so, we should perform column selection at the ddf level.
         # Otherwise, Dask will not push the column selection into the
         # IO function.
+
         if not nodes:
             return ddf[_get_unique(additional_columns)] if additional_columns else ddf
 
@@ -395,8 +403,9 @@ class DaskExecutor:
 
         return LocalExecutor().transform(df, self.output_node, self.output_dtypes)
 
-    def fit(self, dataset: Dataset, graph: Graph):
-        clear_stats(graph)
+    def fit(self, dataset: Dataset, graph: Graph, refit=True):
+        if refit:
+            clear_stats(graph)
 
         if not graph.output_schema:
             graph.construct_schema(dataset.schema)
@@ -407,8 +416,16 @@ class DaskExecutor:
         # StatOperators (having StatOperators that depend on the output of other StatOperators
         # means that will have multiple phases in the fit cycle here)
         stat_op_nodes = {
-            node: Graph.get_nodes_by_op_type(node.parents_with_dependencies, StatOperator)
+            node: Graph.get_nodes_by_op_type(
+                [
+                    n
+                    for n in node.parents_with_dependencies
+                    if hasattr(n.op, "fitted") and not n.op.fitted
+                ],
+                StatOperator,
+            )
             for node in Graph.get_nodes_by_op_type([graph.output_node], StatOperator)
+            if not node.op.fitted
         }
 
         while stat_op_nodes:
@@ -490,6 +507,7 @@ class DaskExecutor:
 
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
+            node.op.fitted = True
 
     def _clear_worker_cache(self):
         # Clear worker caches to be "safe"
