@@ -28,7 +28,6 @@ from merlin.dag.selector import ColumnSelector
 from merlin.io import Dataset
 from merlin.schema import Tags, TagSet
 
-
 if cp:
     _CPU = [True, False]
 else:
