@@ -29,10 +29,12 @@ from dask.highlevelgraph import HighLevelGraph
 from dask.utils import natural_sort_key, parse_bytes
 from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
+from npy_append_array import NpyAppendArray
 
 from merlin.core.compat import HAS_GPU, cudf, device_mem_size
 from merlin.core.dispatch import (
     convert_data,
+    dataframe_columnwise_explode,
     hex_to_int,
     is_dataframe_object,
     is_list_dtype,
@@ -1066,6 +1068,41 @@ class Dataset:
             self.cpu,
             schema=self.schema,
         )
+
+    def to_npy(
+        self,
+        output_file: str,
+        append: bool = False,
+    ):
+        """Converts a dataset into an npy file, can append if data is larger than memory
+
+        Parameters
+        ----------
+        output_file : str
+            The output file path for the resulting npy file
+        append : bool, optional
+            Enables append mode for larger that memory data, by default False
+        """
+        data = self.to_ddf()
+        if append:
+            data = Dataset(data)
+            itr = iter(data.to_iter())
+            with NpyAppendArray(output_file) as nf:
+                for df in itr:
+                    to_write = dataframe_columnwise_explode(df)
+                    # after the explode there may not be object series anymore
+                    if "object" in to_write.dtypes.values and append:
+                        raise TypeError("Cannot append object columns")
+                    if (to_write.isnull()).any().any():
+                        raise ValueError("Cannot convert data because null values were detected")
+                    nf.append(to_write.to_numpy())
+        else:
+            to_write = dataframe_columnwise_explode(data.compute())
+            if "object" in to_write.dtypes.values and append:
+                raise TypeError("Cannot append object columns")
+            if (to_write.isnull()).any().any():
+                raise ValueError("Cannot convert data because null values were detected")
+            np.save(output_file, to_write.to_numpy())
 
     @property
     def num_rows(self):

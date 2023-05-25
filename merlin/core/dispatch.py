@@ -311,6 +311,27 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
+def columnwise_explode(series):
+    """Explode a list column along the column axis"""
+    if isinstance(series, pd.Series):
+        df = pd.DataFrame(series.tolist())
+    else:
+        df = cudf.DataFrame(series.to_pandas().tolist())
+    df.columns = [f"{series.name}_{c}" for c in df.columns]
+    return df
+
+
+def dataframe_columnwise_explode(dataframe):
+    """Explode all list columns in a dataframe along the column axis"""
+    columns_in_dataframe = dataframe.columns
+    for col in columns_in_dataframe:
+        if is_list_dtype(dataframe[col]):
+            col_df = columnwise_explode(dataframe[col])
+            dataframe = concat_columns([dataframe, col_df])
+            dataframe = dataframe.drop(labels=col, axis=1)
+    return dataframe
+
+
 def list_val_dtype(ser: SeriesLike) -> Optional[np.dtype]:
     """
     Return the dtype of the leaves from a list or nested list
@@ -356,6 +377,10 @@ def is_list_dtype(ser):
         return pd.api.types.is_list_like(ser.values[0])
     elif cudf and isinstance(ser, (cudf.Series, cudf.ListDtype)):
         return cudf_is_list_dtype(ser)
+    elif dask_cudf and isinstance(ser, dask_cudf.Series):
+        return cudf_is_list_dtype(ser.head())
+    elif isinstance(ser, dd.core.Series):
+        return pd.api.types.is_list_like(ser.head()[0])
     elif isinstance(ser, np.ndarray) or (cp and isinstance(ser, cp.ndarray)):
         return len(ser.shape) > 1
     return pd.api.types.is_list_like(ser)
