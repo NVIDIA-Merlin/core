@@ -424,15 +424,11 @@ class DaskExecutor:
         # means that will have multiple phases in the fit cycle here)
         stat_op_nodes = {
             node: Graph.get_nodes_by_op_type(
-                [
-                    n
-                    for n in node.parents_with_dependencies
-                    if hasattr(n.op, "fitted") and not n.op.fitted
-                ],
+                node.parents_with_dependencies,
                 StatOperator,
             )
             for node in Graph.get_nodes_by_op_type([graph.output_node], StatOperator)
-            if not node.op.fitted
+            if refit or not node.op.fitted
         }
 
         while stat_op_nodes:
@@ -511,7 +507,6 @@ class DaskExecutor:
             results = [r.result() for r in dask_client.compute(stats)]
         else:
             results = dask.compute(stats, scheduler="synchronous")[0]
-
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
             node.op.fitted = True
