@@ -28,13 +28,13 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU  # pylint: disable=unused-import # noqa: F401
 from merlin.core.compat import cudf
 from merlin.core.compat import cupy as cp
+from merlin.core.compat import dask_cudf
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
 rmm = None
 
 if cudf:
     try:
-        import dask_cudf
         import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
