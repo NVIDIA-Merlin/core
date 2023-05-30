@@ -327,10 +327,12 @@ document.write(`
 <span class="kn">from</span> <span class="nn">dask.utils</span> <span class="kn">import</span> <span class="n">natural_sort_key</span><span class="p">,</span> <span class="n">parse_bytes</span>
 <span class="kn">from</span> <span class="nn">fsspec.core</span> <span class="kn">import</span> <span class="n">get_fs_token_paths</span>
 <span class="kn">from</span> <span class="nn">fsspec.utils</span> <span class="kn">import</span> <span class="n">stringify_path</span>
+<span class="kn">from</span> <span class="nn">npy_append_array</span> <span class="kn">import</span> <span class="n">NpyAppendArray</span>
 
 <span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span><span class="p">,</span> <span class="n">cudf</span><span class="p">,</span> <span class="n">device_mem_size</span>
 <span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">convert_data</span><span class="p">,</span>
+    <span class="n">dataframe_columnwise_explode</span><span class="p">,</span>
     <span class="n">hex_to_int</span><span class="p">,</span>
     <span class="n">is_dataframe_object</span><span class="p">,</span>
     <span class="n">is_list_dtype</span><span class="p">,</span>
@@ -1364,6 +1366,41 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span><span class="p">,</span>
             <span class="n">schema</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Dataset.to_npy"><a class="viewcode-back" href="../../../api/merlin.io.html#merlin.io.Dataset.to_npy">[docs]</a>    <span class="k">def</span> <span class="nf">to_npy</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">append</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a dataset into an npy file, can append if data is larger than memory</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_file : str</span>
+<span class="sd">            The output file path for the resulting npy file</span>
+<span class="sd">        append : bool, optional</span>
+<span class="sd">            Enables append mode for larger that memory data, by default False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">append</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">itr</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">to_iter</span><span class="p">())</span>
+            <span class="k">with</span> <span class="n">NpyAppendArray</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">nf</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">itr</span><span class="p">:</span>
+                    <span class="n">to_write</span> <span class="o">=</span> <span class="n">dataframe_columnwise_explode</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                    <span class="c1"># after the explode there may not be object series anymore</span>
+                    <span class="k">if</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">to_write</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">values</span> <span class="ow">and</span> <span class="n">append</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot append object columns&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">to_write</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert data because null values were detected&quot;</span><span class="p">)</span>
+                    <span class="n">nf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_write</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">to_write</span> <span class="o">=</span> <span class="n">dataframe_columnwise_explode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">compute</span><span class="p">())</span>
+            <span class="k">if</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">to_write</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">values</span> <span class="ow">and</span> <span class="n">append</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot append object columns&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">to_write</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot convert data because null values were detected&quot;</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">to_write</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_rows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
