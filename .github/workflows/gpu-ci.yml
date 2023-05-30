@@ -3,14 +3,16 @@ name: GPU CI
 on:
   workflow_dispatch:
   push:
-    branches-ignore: [main]
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
 
 jobs:
   gpu-ci:
-    runs-on: linux-amd64-gpu-p100-latest-1
+    runs-on: 1GPU
 
     steps:
       - uses: actions/checkout@v3
