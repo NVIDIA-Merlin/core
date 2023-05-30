@@ -273,13 +273,17 @@ class LocalExecutor:
     def _combine_node_outputs(self, node, transformed, output):
         node_output_cols = _get_unique(node.output_schema.column_names)
 
-        # dask needs output to be in the same order defined as meta, reorder partitions here
-        # this also selects columns (handling the case of removing columns from the output using
-        # "-" overload)
-        if output is None:
-            output = transformed[node_output_cols]
+        if isinstance(transformed, dict):
+            selected_cols = {col: transformed[col] for col in node_output_cols}
         else:
-            output = concat_columns([output, transformed[node_output_cols]])
+            # dask needs output columns to be defined in the same order as meta,
+            # so reorder columns here
+            selected_cols = transformed[node_output_cols]
+
+        if output is None:
+            output = selected_cols
+        else:
+            output = concat_columns([output, selected_cols])
 
         return output
 
@@ -330,10 +334,18 @@ class DaskExecutor:
 
         self._clear_worker_cache()
 
+        for node in nodes:
+            if isinstance(node.op, StatOperator) and not node.op.fitted:
+                raise RuntimeError(
+                    f"Graphs containing {node.op} must be fit before "
+                    "attempting to use them to transform data."
+                )
+
         # Check if we are only selecting columns (no transforms).
         # If so, we should perform column selection at the ddf level.
         # Otherwise, Dask will not push the column selection into the
         # IO function.
+
         if not nodes:
             return ddf[_get_unique(additional_columns)] if additional_columns else ddf
 
@@ -382,7 +394,10 @@ class DaskExecutor:
 
         return Dataset(
             self._executor.transform(
-                ddf, graph.output_node, graph.output_dtypes, capture_dtypes=capture_dtypes
+                ddf,
+                graph.output_node,
+                graph.output_dtypes,
+                capture_dtypes=capture_dtypes,
             ),
             cpu=dataset.cpu,
             base_dataset=dataset.base_dataset,
@@ -395,8 +410,9 @@ class DaskExecutor:
 
         return LocalExecutor().transform(df, self.output_node, self.output_dtypes)
 
-    def fit(self, dataset: Dataset, graph: Graph):
-        clear_stats(graph)
+    def fit(self, dataset: Dataset, graph: Graph, refit=True):
+        if refit:
+            clear_stats(graph)
 
         if not graph.output_schema:
             graph.construct_schema(dataset.schema)
@@ -407,8 +423,12 @@ class DaskExecutor:
         # StatOperators (having StatOperators that depend on the output of other StatOperators
         # means that will have multiple phases in the fit cycle here)
         stat_op_nodes = {
-            node: Graph.get_nodes_by_op_type(node.parents_with_dependencies, StatOperator)
+            node: Graph.get_nodes_by_op_type(
+                node.parents_with_dependencies,
+                StatOperator,
+            )
             for node in Graph.get_nodes_by_op_type([graph.output_node], StatOperator)
+            if refit or not node.op.fitted
         }
 
         while stat_op_nodes:
@@ -487,9 +507,9 @@ class DaskExecutor:
             results = [r.result() for r in dask_client.compute(stats)]
         else:
             results = dask.compute(stats, scheduler="synchronous")[0]
-
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
+            node.op.fitted = True
 
     def _clear_worker_cache(self):
         # Clear worker caches to be "safe"
@@ -528,27 +548,25 @@ def _mask_cpu_only(supported):
 
 
 def _data_format(transformable):
-    data = TensorTable(transformable) if isinstance(transformable, dict) else transformable
-
-    if cudf and isinstance(data, cudf.DataFrame):
+    if cudf and isinstance(transformable, cudf.DataFrame):
         return DataFormats.CUDF_DATAFRAME
-    elif pandas and isinstance(data, pandas.DataFrame):
+    elif pandas and isinstance(transformable, pandas.DataFrame):
         return DataFormats.PANDAS_DATAFRAME
-    elif isinstance(data, dict) and data.values():
-        first = list(data.values())[0]
-        if cupy and first and isinstance(first, cupy.ndarray):
+    elif isinstance(transformable, dict) and transformable.values():
+        first = list(transformable.values())[0]
+        if cupy and isinstance(first, cupy.ndarray):
             return DataFormats.CUPY_DICT_ARRAY
-        if numpy and first and isinstance(first, numpy.ndarray):
+        if numpy and isinstance(first, numpy.ndarray):
             return DataFormats.NUMPY_DICT_ARRAY
-    elif data.column_type is CupyColumn:
+    elif transformable.column_type is CupyColumn:
         return DataFormats.CUPY_TENSOR_TABLE
-    elif data.column_type is NumpyColumn:
+    elif transformable.column_type is NumpyColumn:
         return DataFormats.NUMPY_TENSOR_TABLE
     else:
-        if isinstance(data, TensorTable):
-            raise TypeError(f"Unknown type: {data.column_type}")
+        if isinstance(transformable, TensorTable):
+            raise TypeError(f"Unknown type: {transformable.column_type}")
         else:
-            raise TypeError(f"Unknown type: {type(data)}")
+            raise TypeError(f"Unknown type: {type(transformable)}")
 
 
 def _convert_format(tensors, target_format):
