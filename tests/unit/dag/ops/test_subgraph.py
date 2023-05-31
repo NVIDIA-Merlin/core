@@ -20,9 +20,9 @@ from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
+from merlin.dag.ops.stat_operator import StatOperator
 from merlin.dag.ops.subgraph import Subgraph
 from merlin.dag.selector import ColumnSelector
-from merlin.dag.stat_operator import StatOperator
 from merlin.io import Dataset
 from merlin.schema import Schema
 
@@ -55,7 +55,8 @@ def test_subgraph_fit(dataset):
         def fit_finalize(self, dask_stats):
             return self.stats
 
-    subgraph_op = Subgraph("subgraph", ["x"] >> FitTestOp())
+    fit_test_op = FitTestOp()
+    subgraph_op = Subgraph("subgraph", ["x"] >> fit_test_op)
     main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
 
     main_graph = Graph(main_graph_ops)
@@ -65,7 +66,7 @@ def test_subgraph_fit(dataset):
     executor.fit(dataset, main_graph)
     result_df = executor.transform(dataset.to_ddf(), main_graph)
 
-    assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
+    assert result_df.compute() == dataset.to_ddf().compute()[["x"]]
     assert main_graph.subgraph("subgraph").output_node.op.stats["fit"] is True
 
 
@@ -96,5 +97,5 @@ def test_subgraph_looping(dataset):
     executor.fit(dataset, main_graph)
     result_df = executor.transform(dataset.to_ddf(), main_graph)
 
-    assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
-    assert (result_df.to_ddf().compute()[["x"]] > 5.0).all()[0]
+    assert result_df.compute() == dataset.to_ddf().compute()[["x"]]
+    assert (result_df.compute()[["x"]] > 5.0).all()[0]

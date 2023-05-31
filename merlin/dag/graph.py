@@ -26,7 +26,7 @@ from merlin.dag.node import (
     postorder_iter_nodes,
     preorder_iter_nodes,
 )
-from merlin.dag.stat_operator import StatOperator
+from merlin.dag.ops.stat_operator import StatOperator
 from merlin.schema import Schema
 
 LOG = logging.getLogger("merlin")

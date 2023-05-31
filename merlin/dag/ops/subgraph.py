@@ -17,12 +17,14 @@ from __future__ import annotations
 
 from typing import Callable
 
+import dask.dataframe as dd
+
 from merlin.core.protocols import Transformable
 from merlin.dag import Node
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
+from merlin.dag.ops.stat_operator import StatOperator
 from merlin.dag.selector import ColumnSelector
-from merlin.dag.stat_operator import StatOperator
 from merlin.io.dataset import Dataset
 from merlin.schema import Schema
 
