@@ -736,7 +736,8 @@ document.write(`
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="s2">&quot;`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. &quot;</span>
                     <span class="s2">&quot;Please setup a `dask_cuda.LocalCUDACluster` instead. &quot;</span>
-                    <span class="s2">&quot;Or to run on CPU instead, supply `cpu=True` parameter when creating the `Dataset`. &quot;</span>
+                    <span class="s2">&quot;Or to run on CPU instead, &quot;</span>
+                    <span class="s2">&quot;provide the parameter `cpu=True` when creating the `Dataset`. &quot;</span>
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ddf</span></div>
