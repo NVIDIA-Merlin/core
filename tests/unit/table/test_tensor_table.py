@@ -17,7 +17,7 @@ from typing import List, Tuple, Type
 
 import pytest
 
-from merlin.core.compat import HAS_GPU
+from merlin.core.compat import HAS_GPU, cudf
 from merlin.core.compat import cupy as cp
 from merlin.core.compat import numpy as np
 from merlin.core.compat.tensorflow import tensorflow as tf
@@ -25,8 +25,8 @@ from merlin.core.compat.torch import torch as th
 from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
 from merlin.dag import BaseOperator, ColumnSelector
+from merlin.schema import ColumnSchema, Schema
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
-from merlin.table.conversions import convert_col
 from tests.conftest import assert_eq
 
 col_type: List[Type] = []
@@ -203,15 +203,12 @@ def test_tensor_cpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
-    # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -236,15 +233,13 @@ def test_tensor_gpu_table_operator(source_column, target_column):
     tensor_table = TensorTable(target_input)
 
     # Column conversions would happen in the executor
-    for col_name, column in tensor_table.items():
-        tensor_table[col_name] = convert_col(column, source_column_type)
+    tensor_table = tensor_table.as_tensor_type(source_column_type)
 
     # Executor runs the ops
     result = op.transform(ColumnSelector(["a"]), tensor_table)
 
     # Column conversions would happen in the executor
-    for col_name, column in result.items():
-        result[col_name] = convert_col(column, target_column_type)
+    result = result.as_tensor_type(target_column_type)
 
     # Check the results
     assert isinstance(result, TensorTable)
@@ -320,3 +315,73 @@ def test_gpu_transfer():
 
     assert gpu_table.device == Device.GPU
     assert isinstance(list(cpu_table.values())[0], NumpyColumn)
+
+
+def test_as_tensor_type_invalid_type():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.as_tensor_type("not_a_type")
+    assert "tensor_type argument must be a type" in str(exc_info.value)
+
+
+def test_as_tensor_type_unsupported_type():
+    table = TensorTable({"a": np.array([1, 2, 3])})
+    with pytest.raises(ValueError) as exc_info:
+        table.as_tensor_type(np.ndindex)
+    assert "Unsupported tensor type" in str(exc_info.value)
+
+
+class TestTensorTableFromDf:
+    def test_default(self):
+        df = make_df(
+            {
+                "scalar": [0.1, 0.2],
+                "fixed_list": [[1, 2], [3, 4]],
+                "ragged_list": [[1, 2], [3]],
+            }
+        )
+        table = TensorTable.from_df(df)
+        xp = cp if cudf and isinstance(df, cudf.DataFrame) else np
+        xp.testing.assert_array_equal(
+            table["fixed_list"].values, xp.array([1, 2, 3, 4], dtype="int64")
+        )
+        xp.testing.assert_array_equal(
+            table["fixed_list"].offsets, xp.array([0, 2, 4], dtype="int32")
+        )
+        xp.testing.assert_array_equal(
+            table["ragged_list"].values, xp.array([1, 2, 3], dtype="int64")
+        )
+        xp.testing.assert_array_equal(
+            table["ragged_list"].offsets, xp.array([0, 2, 3], dtype="int32")
+        )
+        xp.testing.assert_array_equal(table["scalar"].values, xp.array([0.1, 0.2], dtype="float64"))
+        assert table["scalar"].offsets is None
+
+    def test_with_schema_ragged(self):
+        df = make_df({"feature": [[1, 2], [3, 4]]})
+        schema = Schema([ColumnSchema("feature", dims=(None, None))])
+        table = TensorTable.from_df(df, schema=schema)
+        xp = cp if cudf and isinstance(df, cudf.DataFrame) else np
+        xp.testing.assert_array_equal(
+            table["feature"].values, xp.array([1, 2, 3, 4], dtype="int64")
+        )
+        xp.testing.assert_array_equal(table["feature"].offsets, xp.array([0, 2, 4], dtype="int32"))
+
+    def test_with_schema_ragged_error(self):
+        df = make_df({"feature": [[1, 2], [3]]})
+        schema = Schema([ColumnSchema("feature", dims=(None, 2))])
+        with pytest.raises(ValueError) as exc_info:
+            TensorTable.from_df(df, schema=schema)
+        assert "ColumnSchema for list column 'feature' describes a fixed size list" in str(
+            exc_info.value
+        )
+
+    def test_with_schema_fixed(self):
+        df = make_df({"feature": [[1, 2], [3, 4]]})
+        schema = Schema([ColumnSchema("feature", dims=(None, 2))])
+        table = TensorTable.from_df(df, schema=schema)
+        xp = cp if cudf and isinstance(df, cudf.DataFrame) else np
+        xp.testing.assert_array_equal(
+            table["feature"].values, xp.array([[1, 2], [3, 4]], dtype="int64")
+        )
+        assert table["feature"].offsets is None

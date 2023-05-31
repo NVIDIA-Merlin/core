@@ -45,11 +45,11 @@ class ColumnSelector:
         subgroups: List["ColumnSelector"] = None,
         tags: List[Union[Tags, str]] = None,
     ):
+        self._all = False
         self._names = names if names is not None else []
         self._tags = tags if tags is not None else []
         self.subgroups = subgroups if subgroups is not None else []
 
-        self.all = isinstance(names, str) and names == "*"
         if self.all:
             self._names = []
             self._tags = []
@@ -76,6 +76,11 @@ class ColumnSelector:
                 self.subgroups.append(ColumnSelector(name))
         self._names = plain_names
         self._nested_check()
+
+    @property
+    def all(self):
+        self._all = self._all or (isinstance(self._names, str) and self._names == "*")
+        return self._all
 
     @property
     def tags(self):

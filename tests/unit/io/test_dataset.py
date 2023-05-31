@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import glob
+
+import numpy as np
 import pandas as pd
 import pytest
 
 from merlin.core.compat import HAS_GPU, cudf
-from merlin.core.dispatch import make_df
+from merlin.core.dispatch import dataframe_columnwise_explode, make_df
 from merlin.io import Dataset
 
 
@@ -49,3 +52,55 @@ class TestDatasetCpu:
     def test_false_missing_cudf_or_gpu(self):
         with pytest.raises(RuntimeError):
             Dataset(make_df({"a": [1, 2, 3]}), cpu=False)
+
+
+def test_infer_list_dtype_unknown():
+    df = pd.DataFrame({"col": [[], []]})
+    dataset = Dataset(df, cpu=True)
+    assert dataset.schema["col"].dtype.element_type.value == "unknown"
+
+
+@pytest.mark.parametrize("engine", ["csv", "parquet"])
+def test_dask_df_array_npy(tmpdir, datasets, engine):
+    paths = glob.glob(str(datasets[engine]) + "/*." + engine.split("-")[0])
+    # cannot have any null/NA entries
+    dataset = Dataset(Dataset(paths).to_ddf().compute().fillna(method="ffill"))
+    path = str(tmpdir / "result.npy")
+    dataset.to_npy(path)
+    nparr = np.load(path, allow_pickle=True)
+    numpy_arr = dataset.to_ddf().compute().to_numpy()
+    assert (nparr == numpy_arr).all()
+
+
+@pytest.mark.parametrize("append", [True, False])
+@pytest.mark.parametrize("engine", ["csv", "parquet"])
+def test_dask_df_array_npy_append(tmpdir, datasets, engine, append):
+    df = make_df(
+        {
+            "id": [1, 2, 3, 4, 5, 6],
+            "embed_1": [1, 2, 3, 4, 5, 6],
+            "embed_2": [1, 2, 3, 4, 5, 6],
+            "embed_3": [1, 2, 3, 4, 5, 6],
+        }
+    )
+    dataset = Dataset(df)
+    path = str(tmpdir / "result.npy")
+    dataset.to_npy(path, append=append)
+    nparr = np.load(path, allow_pickle=True)
+    numpy_arr = dataset.to_ddf().compute().to_numpy()
+    assert (nparr == numpy_arr).all()
+
+
+@pytest.mark.parametrize("append", [True, False])
+@pytest.mark.parametrize("engine", ["csv", "parquet"])
+def test_dask_df_array_npy_append_list(tmpdir, datasets, engine, append):
+    df = make_df(
+        {"id": [1, 2, 3, 4], "embedings": [[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]}
+    )
+    dataset = Dataset(df, cpu=True)
+    path = str(tmpdir / "result.npy")
+    dataset.to_npy(path, append=append)
+    nparr = np.load(path, allow_pickle=True)
+    ddf = dataset.to_ddf().compute()
+    numpy_arr = dataframe_columnwise_explode(ddf).to_numpy()
+    assert (nparr == numpy_arr).all()

@@ -25,7 +25,11 @@ from merlin.schema import ColumnSchema, Schema
 
 
 class Supports(Flag):
-    """Indicates what type of data representation this operator supports for transformations"""
+    """
+    Indicates what type of data representation this operator supports for transformations
+
+    (Deprecated)
+    """
 
     # cudf dataframe
     CPU_DATAFRAME = auto()
@@ -35,6 +39,19 @@ class Supports(Flag):
     CPU_DICT_ARRAY = auto()
     # dict of column name to cupy array
     GPU_DICT_ARRAY = auto()
+
+
+class DataFormats(Flag):
+    CUDF_DATAFRAME = auto()
+    PANDAS_DATAFRAME = auto()
+
+    NUMPY_TENSOR_TABLE = auto()
+    CUPY_TENSOR_TABLE = auto()
+    TF_TENSOR_TABLE = auto()
+    TORCH_TENSOR_TABLE = auto()
+
+    NUMPY_DICT_ARRAY = auto()
+    CUPY_DICT_ARRAY = auto()
 
 
 class BaseOperator:
@@ -358,6 +375,15 @@ class BaseOperator:
     def supports(self) -> Supports:
         """Returns what kind of data representation this operator supports"""
         return Supports.CPU_DATAFRAME | Supports.GPU_DATAFRAME
+
+    @property
+    def supported_formats(self) -> DataFormats:
+        return (
+            DataFormats.PANDAS_DATAFRAME
+            | DataFormats.CUDF_DATAFRAME
+            | DataFormats.NUMPY_TENSOR_TABLE
+            | DataFormats.CUPY_TENSOR_TABLE
+        )
 
     def _get_columns(self, df, selector):
         if isinstance(df, dict):

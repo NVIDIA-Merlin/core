@@ -13,33 +13,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import functools
 import logging
+from enum import Enum
 
 import dask
 import pandas as pd
 from dask.core import flatten
 
 import merlin.dtypes as md
+from merlin.core.compat import HAS_GPU, cudf, cupy, numpy, pandas
 from merlin.core.dispatch import concat_columns, is_list_dtype, list_val_dtype
 from merlin.core.utils import (
     ensure_optimize_dataframe_graph,
     global_dask_client,
     set_client_deprecated,
 )
-from merlin.dag import ColumnSelector, Graph, Node
-from merlin.dag.stat_operator import StatOperator
+from merlin.dag import ColumnSelector, DataFormats, Graph, Node
+from merlin.dag.ops.stat_operator import StatOperator
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io import Dataset
 from merlin.io.worker import clean_worker_cache
-from merlin.schema import Schema
+from merlin.table import CupyColumn, NumpyColumn, TensorTable
 
 LOG = logging.getLogger("merlin")
+
+
+class Device(Enum):
+    CPU = 0
+    GPU = 1
 
 
 class LocalExecutor:
     """
     An executor for running Merlin operator DAGs locally
     """
+
+    def __init__(self, device=Device.GPU):
+        self.device = device if HAS_GPU else Device.CPU
 
     def transform(
         self,
@@ -54,7 +65,20 @@ class LocalExecutor:
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
         by applying the operators from a collection of Nodes
         """
-        nodes = self._output_nodes(graph)
+        nodes = []
+        if isinstance(graph, Graph):
+            nodes.append(graph.output_node)
+        elif isinstance(graph, Node):
+            nodes.append(graph)
+        elif isinstance(graph, list):
+            nodes = graph
+        else:
+            raise TypeError(
+                f"LocalExecutor detected unsupported type of input for graph: {type(graph)}."
+                " `graph` argument must be either a `Graph` object (preferred)"
+                " or a list of `Node` objects (deprecated, but supported for backward "
+                " compatibility.)"
+            )
 
         # There's usually only one node, but it's possibly to pass multiple nodes for `fit`
         # If we have multiple, we concatenate their outputs into a single transformable
@@ -73,30 +97,13 @@ class LocalExecutor:
 
         return output_data
 
-    def _output_nodes(self, graph):
-        nodes = []
-        if isinstance(graph, Graph):
-            nodes.append(graph.output_node)
-        elif isinstance(graph, Node):
-            nodes.append(graph)
-        elif isinstance(graph, list):
-            nodes = graph
-        else:
-            raise TypeError(
-                f"LocalExecutor detected unsupported type of input for graph: {type(graph)}."
-                " `graph` argument must be either a `Graph` object (preferred)"
-                " or a list of `Node` objects (deprecated, but supported for backward "
-                " compatibility.)"
-            )
-
-        return nodes
-
     def _execute_node(self, node, transformable, capture_dtypes=False, strict=False):
         upstream_outputs = self._run_upstream_transforms(
             node, transformable, capture_dtypes, strict
         )
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
-        transform_input = self._merge_upstream_columns(upstream_columns)
+        formatted_columns = self._standardize_formats(node, upstream_columns)
+        transform_input = self._merge_upstream_columns(formatted_columns)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
         return transform_output
 
@@ -132,15 +139,39 @@ class LocalExecutor:
 
         return upstream_outputs
 
+    def _standardize_formats(self, workflow_node, node_input_data):
+        # Get the supported formats
+        op = workflow_node.op
+
+        if self.device == Device.CPU:
+            supported_formats = _mask_cpu_only(op.supported_formats)
+        else:
+            supported_formats = op.supported_formats
+
+        # Convert the first thing into a supported format
+        tensors = _convert_format(node_input_data[0], supported_formats)
+        target_format = _data_format(tensors)
+
+        # Convert the whole list into the same format
+        formatted_tensors = []
+        for upstream_tensors in node_input_data:
+            upstream_tensors = _convert_format(upstream_tensors, target_format)
+            formatted_tensors.append(upstream_tensors)
+
+        return formatted_tensors
+
     def _merge_upstream_columns(self, upstream_outputs, merge_fn=concat_columns):
         combined_outputs = None
         seen_columns = set()
+
         for upstream_output in upstream_outputs:
+            upstream_columns = set(upstream_output.keys())
+
             if combined_outputs is None or not len(combined_outputs):
                 combined_outputs = upstream_output
-                seen_columns = set(upstream_output.columns)
+                seen_columns = upstream_columns
             else:
-                new_columns = set(upstream_output.columns) - seen_columns
+                new_columns = upstream_columns - seen_columns
                 if new_columns:
                     combined_outputs = merge_fn(
                         [combined_outputs, upstream_output[list(new_columns)]]
@@ -165,14 +196,14 @@ class LocalExecutor:
         Returns
         -------
         Transformable
-            The output DataFrame or DictArray formed by executing the final node's transform
+            The output DataFrame or TensorTable formed by executing the final node's transform
         Raises
         ------
         TypeError
             If the transformed output columns don't have the same dtypes
             as the output schema columns when `strict` is True
         RuntimeError
-            If no DataFrame or DictArray is returned from the operator
+            If no DataFrame or TensorTable is returned from the operator
         """
         if not node.op:
             return input_data
@@ -242,13 +273,17 @@ class LocalExecutor:
     def _combine_node_outputs(self, node, transformed, output):
         node_output_cols = _get_unique(node.output_schema.column_names)
 
-        # dask needs output to be in the same order defined as meta, reorder partitions here
-        # this also selects columns (handling the case of removing columns from the output using
-        # "-" overload)
-        if output is None:
-            output = transformed[node_output_cols]
+        if isinstance(transformed, dict):
+            selected_cols = {col: transformed[col] for col in node_output_cols}
         else:
-            output = concat_columns([output, transformed[node_output_cols]])
+            # dask needs output columns to be defined in the same order as meta,
+            # so reorder columns here
+            selected_cols = transformed[node_output_cols]
+
+        if output is None:
+            output = selected_cols
+        else:
+            output = concat_columns([output, selected_cols])
 
         return output
 
@@ -271,7 +306,7 @@ class DaskExecutor:
 
     def transform(
         self,
-        dataset,
+        ddf,
         graph,
         output_dtypes=None,
         additional_columns=None,
@@ -282,23 +317,42 @@ class DaskExecutor:
         Transforms all partitions of a dataset by applying the operators
         from a collection of Nodes
         """
-        nodes = self._executor._output_nodes(graph)
+        nodes = []
+        if isinstance(graph, Graph):
+            nodes.append(graph.output_node)
+        elif isinstance(graph, Node):
+            nodes.append(graph)
+        elif isinstance(graph, list):
+            nodes = graph
+        else:
+            raise TypeError(
+                f"DaskExecutor detected unsupported type of input for graph: {type(graph)}."
+                " `graph` argument must be either a `Graph` object (preferred)"
+                " or a list of `Node` objects (deprecated, but supported for backward"
+                " compatibility.)"
+            )
 
         self._clear_worker_cache()
 
-        ddf = dataset.to_ddf()
+        for node in nodes:
+            if isinstance(node.op, StatOperator) and not node.op.fitted:
+                raise RuntimeError(
+                    f"Graphs containing {node.op} must be fit before "
+                    "attempting to use them to transform data."
+                )
 
         # Check if we are only selecting columns (no transforms).
         # If so, we should perform column selection at the ddf level.
         # Otherwise, Dask will not push the column selection into the
         # IO function.
+
         if not nodes:
             return ddf[_get_unique(additional_columns)] if additional_columns else ddf
 
         if isinstance(nodes, Node):
             nodes = [nodes]
 
-        columns = list(flatten(wfn.output_columns.names for wfn in nodes))
+        columns = list(flatten(node.output_columns.names for node in nodes))
         columns += additional_columns if additional_columns else []
 
         if isinstance(output_dtypes, dict):
@@ -320,48 +374,43 @@ class DaskExecutor:
             # don't require dtype information on the DDF this doesn't matter all that much
             output_dtypes = type(ddf._meta)({k: [] for k in columns})
 
-        return Dataset(
-            ensure_optimize_dataframe_graph(
-                ddf=ddf.map_partitions(
-                    self._executor.transform,
-                    nodes,
-                    additional_columns=additional_columns,
-                    capture_dtypes=capture_dtypes,
-                    strict=strict,
-                    meta=output_dtypes,
-                    enforce_metadata=False,
-                )
+        return ensure_optimize_dataframe_graph(
+            ddf=ddf.map_partitions(
+                self._executor.transform,
+                nodes,
+                additional_columns=additional_columns,
+                capture_dtypes=capture_dtypes,
+                strict=strict,
+                meta=output_dtypes,
+                enforce_metadata=False,
             )
         )
 
-    def fit(self, dataset: Dataset, graph: Graph, schema: Schema = None) -> "Graph":
-        """Calculates statistics on a dataset for an operator graph
+    def _transform_df(self, df):
+        if not self.graph.output_schema:
+            raise ValueError("no output schema")
 
-        Parameters
-        -----------
-        dataset: Dataset
-            The input dataset to calculate statistics for. If there is a train/test split this
-            data should be the training dataset only.
+        return LocalExecutor().transform(df, self.output_node, self.output_dtypes)
 
-        Returns
-        -------
-        Graph
-            This Graph with statistics calculated on it
-        """
-        graph.clear_stats()
-
-        if isinstance(dataset, Dataset):
-            schema = dataset.schema
+    def fit(self, dataset: Dataset, graph: Graph, refit=True):
+        if refit:
+            clear_stats(graph)
 
         if not graph.output_schema:
-            graph.construct_schema(schema)
+            graph.construct_schema(dataset.schema)
+
+        ddf = dataset.to_ddf(columns=graph._input_columns())
 
         # Get a dictionary mapping all StatOperators we need to fit to a set of any dependent
         # StatOperators (having StatOperators that depend on the output of other StatOperators
         # means that will have multiple phases in the fit cycle here)
         stat_op_nodes = {
-            node: Graph.get_nodes_by_op_type(node.parents_with_dependencies, StatOperator)
+            node: Graph.get_nodes_by_op_type(
+                node.parents_with_dependencies,
+                StatOperator,
+            )
             for node in Graph.get_nodes_by_op_type([graph.output_node], StatOperator)
+            if refit or not node.op.fitted
         }
 
         while stat_op_nodes:
@@ -374,7 +423,7 @@ class DaskExecutor:
                 # this shouldn't happen, but lets not infinite loop just in case
                 raise RuntimeError("failed to find dependency-free StatOperator to fit")
 
-            self._fit_ops(dataset, current_phase)
+            self.fit_phase(ddf, current_phase)
 
             # Remove all the operators we processed in this phase, and remove
             # from the dependencies of other ops too
@@ -385,75 +434,82 @@ class DaskExecutor:
 
         # This captures the output dtypes of operators like LambdaOp where
         # the dtype can't be determined without running the transform
-        self._transform_impl(dataset, graph, capture_dtypes=True).sample_dtypes()
-        graph.construct_schema(schema, preserve_dtypes=True)
+        # self._transform_impl(dataset, capture_dtypes=True).sample_dtypes()
+        Dataset(
+            self.transform(ddf, graph.output_node, graph.output_dtypes, capture_dtypes=True),
+            cpu=dataset.cpu,
+            base_dataset=dataset.base_dataset,
+            schema=graph.output_schema,
+        ).sample_dtypes()
+        graph.construct_schema(dataset.schema, preserve_dtypes=True)
 
         return graph
 
-    def _fit_ops(self, dataset: Dataset, graph, strict=False):
-        """Calculates statistics on a dataset for an operator graph
+    def fit_phase(self, ddf, nodes, strict=False):
+        """Calculates statistics for a set of nodes on the input dataframe
 
         Parameters
         -----------
-        dataset: merlin.io.Dataset
-            The input dataset to calculate statistics for. If there is a
+        ddf: dask.Dataframe
+            The input dataframe to calculate statistics for. If there is a
             train/test split this should be the training dataset only.
         """
-        nodes = self._executor._output_nodes(graph)
-
         stats = []
         for node in nodes:
-            # Check for additional input columns that aren't generated by parents
-            addl_input_cols = set()
-            if node.parents:
-                upstream_output_cols = sum(
-                    [upstream.output_columns for upstream in node.parents_with_dependencies],
-                    ColumnSelector(),
+            if hasattr(node.op, "fit"):
+                # Check for additional input columns that aren't generated by parents
+                addl_input_cols = set()
+                if node.parents:
+                    upstream_output_cols = sum(
+                        [upstream.output_columns for upstream in node.parents_with_dependencies],
+                        ColumnSelector(),
+                    )
+                    addl_input_cols = set(node.input_columns.names) - set(
+                        upstream_output_cols.names
+                    )
+
+                # apply transforms necessary for the inputs to the current column group, ignoring
+                # the transforms from the statop itself
+                transformed_ddf = self.transform(
+                    ddf,
+                    node.parents_with_dependencies,
+                    additional_columns=addl_input_cols,
+                    capture_dtypes=True,
+                    strict=strict,
                 )
-                addl_input_cols = set(node.input_columns.names) - set(upstream_output_cols.names)
 
-            # apply transforms necessary for the inputs to the current column group, ignoring
-            # the transforms from the statop itself
-            transformed = self.transform(
-                dataset,
-                node.parents_with_dependencies,
-                additional_columns=addl_input_cols,
-                capture_dtypes=True,
-                strict=strict,
-            )
-
-            try:
-                stats.append(node.op.fit(node.input_columns, transformed))
-            except Exception:
-                LOG.exception("Failed to fit operator %s", node.op)
-                raise
+                try:
+                    stats.append(node.op.fit(node.input_columns, transformed_ddf))
+                except Exception:
+                    LOG.exception("Failed to fit operator %s", node.op)
+                    raise
 
         dask_client = global_dask_client()
         if dask_client:
             results = [r.result() for r in dask_client.compute(stats)]
         else:
             results = dask.compute(stats, scheduler="synchronous")[0]
-
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
+            node.op.fitted = True
 
     def _transform_impl(self, dataset: Dataset, graph: Graph, capture_dtypes=False):
-        if not graph.output_schema:
+        if graph.output_schema:
             graph.construct_schema(dataset.schema)
 
-        result = self.transform(
-            dataset, graph.output_node, graph.output_dtypes, capture_dtypes=capture_dtypes
-        )
+        ddf = dataset.to_ddf(columns=graph._input_columns())
 
-        if isinstance(result, Dataset):
-            return result
-        else:
-            return Dataset(
-                result,
-                cpu=dataset.cpu,
-                base_dataset=dataset.base_dataset,
-                schema=graph.output_schema,
-            )
+        return Dataset(
+            self._executor.transform(
+                ddf,
+                graph.output_node,
+                graph.output_dtypes,
+                capture_dtypes=capture_dtypes,
+            ),
+            cpu=dataset.cpu,
+            base_dataset=dataset.base_dataset,
+            schema=graph.output_schema,
+        )
 
     def _clear_worker_cache(self):
         # Clear worker caches to be "safe"
@@ -464,6 +520,125 @@ class DaskExecutor:
             clean_worker_cache()
 
 
+def clear_stats(graph):
+    """Removes calculated statistics from each node in the workflow graph
+
+    See Also
+    --------
+    nvtabular.ops.stat_operator.StatOperator.clear
+    """
+    for stat in Graph.get_nodes_by_op_type([graph.output_node], StatOperator):
+        stat.op.clear()
+
+
 def _get_unique(cols):
     # Need to preserve order in unique-column list
     return list({x: x for x in cols}.keys())
+
+
+def _mask_cpu_only(supported):
+    return functools.reduce(
+        lambda a, b: a | b,
+        (
+            v
+            for v in list(DataFormats)
+            if v & supported and ("NUMPY" in str(v) or "PANDAS" in str(v))
+        ),
+    )
+
+
+def _data_format(transformable):
+    if cudf and isinstance(transformable, cudf.DataFrame):
+        return DataFormats.CUDF_DATAFRAME
+    elif pandas and isinstance(transformable, pandas.DataFrame):
+        return DataFormats.PANDAS_DATAFRAME
+    elif isinstance(transformable, dict) and transformable.values():
+        first = list(transformable.values())[0]
+        if cupy and isinstance(first, cupy.ndarray):
+            return DataFormats.CUPY_DICT_ARRAY
+        if numpy and isinstance(first, numpy.ndarray):
+            return DataFormats.NUMPY_DICT_ARRAY
+    elif transformable.column_type is CupyColumn:
+        return DataFormats.CUPY_TENSOR_TABLE
+    elif transformable.column_type is NumpyColumn:
+        return DataFormats.NUMPY_TENSOR_TABLE
+    else:
+        if isinstance(transformable, TensorTable):
+            raise TypeError(f"Unknown type: {transformable.column_type}")
+        else:
+            raise TypeError(f"Unknown type: {type(transformable)}")
+
+
+def _convert_format(tensors, target_format):
+    """
+    Converts data to one of the formats specified in 'target_format'
+
+    This allows us to convert data to/from dataframe representations for operators that
+    only support certain reprentations
+    """
+    format_ = _data_format(tensors)
+
+    if format_ & target_format:
+        return tensors
+
+    elif target_format & DataFormats.CUPY_DICT_ARRAY:
+        if format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors).gpu().to_dict()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.to_dict()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu().to_dict()
+        elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
+            return TensorTable.from_df(tensors).gpu().to_dict()
+
+    elif target_format & DataFormats.NUMPY_DICT_ARRAY:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors).cpu().to_dict()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu().to_dict()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.to_dict()
+        elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
+            return TensorTable.from_df(tensors).cpu().to_dict()
+
+    elif target_format & DataFormats.CUPY_TENSOR_TABLE:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors)
+        elif format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors).gpu()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu()
+        elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
+            return TensorTable.from_df(tensors).gpu()
+
+    elif target_format & DataFormats.NUMPY_TENSOR_TABLE:
+        if format_ == DataFormats.CUPY_DICT_ARRAY:
+            return TensorTable(tensors).cpu()
+        elif format_ == DataFormats.NUMPY_DICT_ARRAY:
+            return TensorTable(tensors)
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu()
+        elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
+            return TensorTable.from_df(tensors).cpu()
+
+    elif target_format & DataFormats.CUDF_DATAFRAME:
+        if format_ == DataFormats.PANDAS_DATAFRAME:
+            return cudf.DataFrame(tensors)
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.to_df()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.gpu().to_df()
+        elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
+            return TensorTable(tensors).gpu().to_df()
+
+    elif target_format & DataFormats.PANDAS_DATAFRAME:
+        if format_ == DataFormats.CUDF_DATAFRAME:
+            return tensors.to_pandas()
+        elif format_ == DataFormats.CUPY_TENSOR_TABLE:
+            return tensors.cpu().to_df()
+        elif format_ == DataFormats.NUMPY_TENSOR_TABLE:
+            return tensors.to_df()
+        elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
+            return TensorTable(tensors).cpu().to_df()
+
+    raise ValueError("unsupported target for converting tensors", target_format)

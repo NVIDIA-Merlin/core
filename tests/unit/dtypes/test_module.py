@@ -29,6 +29,19 @@ def test_numpy_types_convert_correctly(numpy_type, merlin_type):
     assert md.dtype(numpy_type) == merlin_type
 
 
+@pytest.mark.parametrize(
+    "dtype_name, dtype",
+    [
+        ("int32", md.int32),
+        ("float64", md.float64),
+        ("string", md.string),
+        ("struct", md.struct),
+    ],
+)
+def test_string_aliases_can_be_used(dtype_name, dtype):
+    assert md.dtype(dtype_name) == dtype
+
+
 def test_type_mappings_can_be_registered():
     class TestType:
         pass
@@ -40,9 +53,9 @@ def test_type_mappings_can_be_registered():
     assert merlin_dtype == test_type
 
 
-def test_unknown_types_raise_error():
+def test_unknown_types_return_unknown():
     class UnknownType:
         pass
 
-    with pytest.raises(TypeError):
-        md.dtype(UnknownType)
+    dtype = md.dtype(UnknownType)
+    assert dtype == md.unknown

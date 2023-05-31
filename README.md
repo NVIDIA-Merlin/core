@@ -1,13 +1,13 @@
 # [Merlin Core](https://github.com/NVIDIA-Merlin/core)
 
 [![PyPI](https://img.shields.io/pypi/v/merlin-core?color=orange&label=version)](https://pypi.python.org/pypi/merlin-core/)
-[![LICENSE](https://img.shields.io/github/license/NVIDIA-Merlin/core)](https://github.com/NVIDIA-Merlin/merlin-core/blob/main/LICENSE)
-[![Documentation](https://img.shields.io/badge/documentation-blue.svg)](https://nvidia-merlin.github.io/core/main/)
+[![LICENSE](https://img.shields.io/github/license/NVIDIA-Merlin/core)](LICENSE)
+[![Documentation](https://img.shields.io/badge/documentation-blue.svg)](https://nvidia-merlin.github.io/core)
 
 The Merlin Core library provides the core utilities for [NVIDIA Merlin](https://github.com/NVIDIA-Merlin) libraries
 like [NVTabular](https://github.com/NVIDIA-Merlin/NVTabular), [Transformers4Rec](https://github.com/NVIDIA-Merlin/Transformers4Rec)
 and [Merlin Models](https://github.com/NVIDIA-Merlin/models).
-For example, the [merlin.io.Dataset](https://nvidia-merlin.github.io/core/main/api/merlin.io.html#merlin.io.Dataset) and [merin.schema.Schema](https://nvidia-merlin.github.io/core/main/api/merlin.schema.html#merlin.schema.Schema) classes are fundamental for working with data and building recommender systems with Merlin.
+For example, the [merlin.io.Dataset](https://nvidia-merlin.github.io/core/stable/api/merlin.io.html#merlin.io.Dataset) and [merin.schema.Schema](https://nvidia-merlin.github.io/core/stable/api/merlin.schema.html#merlin.schema.Schema) classes are fundamental for working with data and building recommender systems with Merlin.
 
 ## Installation
 

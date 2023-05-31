@@ -16,7 +16,7 @@
 import enum
 import functools
 import itertools
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import dask.dataframe as dd
 import numpy as np
@@ -28,13 +28,13 @@ import pyarrow.parquet as pq
 from merlin.core.compat import HAS_GPU  # pylint: disable=unused-import # noqa: F401
 from merlin.core.compat import cudf
 from merlin.core.compat import cupy as cp
+from merlin.core.compat import dask_cudf
 from merlin.core.protocols import DataFrameLike, DictLike, SeriesLike
 
 rmm = None
 
 if cudf:
     try:
-        import dask_cudf
         import rmm  # type: ignore[no-redef]
         from cudf.core.column import as_column, build_column
 
@@ -311,7 +311,28 @@ def series_has_nulls(s):
         return s.has_nulls
 
 
-def list_val_dtype(ser: SeriesLike) -> np.dtype:
+def columnwise_explode(series):
+    """Explode a list column along the column axis"""
+    if isinstance(series, pd.Series):
+        df = pd.DataFrame(series.tolist())
+    else:
+        df = cudf.DataFrame(series.to_pandas().tolist())
+    df.columns = [f"{series.name}_{c}" for c in df.columns]
+    return df
+
+
+def dataframe_columnwise_explode(dataframe):
+    """Explode all list columns in a dataframe along the column axis"""
+    columns_in_dataframe = dataframe.columns
+    for col in columns_in_dataframe:
+        if is_list_dtype(dataframe[col]):
+            col_df = columnwise_explode(dataframe[col])
+            dataframe = concat_columns([dataframe, col_df])
+            dataframe = dataframe.drop(labels=col, axis=1)
+    return dataframe
+
+
+def list_val_dtype(ser: SeriesLike) -> Optional[np.dtype]:
     """
     Return the dtype of the leaves from a list or nested list
 
@@ -322,8 +343,8 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
 
     Returns
     -------
-    np.dtype
-        The dtype of the innermost elements
+    Optional[np.dtype]
+        The dtype of the innermost elements if we find one
     """
     if is_list_dtype(ser):
         if cudf is not None and isinstance(ser, cudf.Series):
@@ -331,7 +352,12 @@ def list_val_dtype(ser: SeriesLike) -> np.dtype:
                 ser = ser.list.leaves
             return ser.dtype
         elif isinstance(ser, pd.Series):
-            return pd.core.dtypes.cast.infer_dtype_from(next(iter(pd.core.common.flatten(ser))))[0]
+            try:
+                return pd.core.dtypes.cast.infer_dtype_from(
+                    next(iter(pd.core.common.flatten(ser)))
+                )[0]
+            except StopIteration:
+                return None
     if isinstance(ser, np.ndarray):
         return ser.dtype
     # adds detection when in merlin column
@@ -351,6 +377,10 @@ def is_list_dtype(ser):
         return pd.api.types.is_list_like(ser.values[0])
     elif cudf and isinstance(ser, (cudf.Series, cudf.ListDtype)):
         return cudf_is_list_dtype(ser)
+    elif dask_cudf and isinstance(ser, dask_cudf.Series):
+        return cudf_is_list_dtype(ser.head())
+    elif isinstance(ser, dd.core.Series):
+        return pd.api.types.is_list_like(ser.head()[0])
     elif isinstance(ser, np.ndarray) or (cp and isinstance(ser, cp.ndarray)):
         return len(ser.shape) > 1
     return pd.api.types.is_list_like(ser)
