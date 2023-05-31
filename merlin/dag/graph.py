@@ -16,7 +16,9 @@
 
 import logging
 from collections import deque
+from typing import Dict
 
+from merlin.dag.base_operator import BaseOperator
 from merlin.dag.node import (
     Node,
     _combine_schemas,
@@ -37,16 +39,17 @@ class Graph:
     """
 
     def __init__(self, output_node: Node):
+        if isinstance(output_node, BaseOperator):
+            output_node = Node.construct_from(output_node)
+
         self.output_node = output_node
-        self.subgraphs = {}
+        self.subgraphs: Dict[str, "Graph"] = {}
 
         parents_with_deps = self.output_node.parents_with_dependencies
         parents_with_deps.append(output_node)
 
-        for node in postorder_iter_nodes(output_node):
-            op = node.op
-            if op.is_subgraph and op.name:
-                self.subgraphs[op.name] = op.graph
+        self.subgraphs = {}
+        _find_subgraphs(output_node, self.subgraphs)
 
     def subgraph(self, name: str) -> "Graph":
         if name not in self.subgraphs:
@@ -220,3 +223,16 @@ def _get_schemaless_nodes(nodes):
 def _get_unique(cols):
     # Need to preserve order in unique-column list
     return list({x: x for x in cols}.keys())
+
+
+def _find_subgraphs(output_node, subgraphs):
+    for node in postorder_iter_nodes(output_node):
+        op = node.op
+        if op.is_subgraph and op.name:
+            if op.name in subgraphs:
+                raise ValueError(
+                    f"Found two subgraphs called {op.name}. "
+                    "Each subgraph must have a unique name."
+                )
+            subgraphs[op.name] = op.graph
+            _find_subgraphs(op.graph.output_node, subgraphs)

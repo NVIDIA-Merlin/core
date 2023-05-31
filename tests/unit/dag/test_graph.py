@@ -17,6 +17,7 @@ import pytest
 
 from merlin.dag import Graph, Node
 from merlin.dag.base_operator import BaseOperator
+from merlin.dag.ops.subgraph import Subgraph
 from merlin.dag.selector import ColumnSelector
 from merlin.schema.schema import ColumnSchema, Schema
 
@@ -56,13 +57,15 @@ def test_subgraph():
     sg2 = ["a", "c"] >> BaseOperator()
     sg3 = ["a", "d"] >> BaseOperator()
 
-    combined = sg1 + sg2 + sg3
-    graph = Graph(combined, subgraphs={"sub1": sg1, "sub2": sg2})
+    combined = Subgraph("sub1", sg1) + Subgraph("sub2", sg2) + sg3
+    graph = Graph(
+        combined,
+    )
     assert graph.subgraph("sub1").output_node == sg1
     assert graph.subgraph("sub2").output_node == sg2
 
     with pytest.raises(ValueError):
-        graph.subgraph("sg3")
+        graph.subgraph("sub3")
 
 
 def test_subgraph_with_summed_subgraphs():
@@ -70,37 +73,16 @@ def test_subgraph_with_summed_subgraphs():
     sg2 = ["a", "c"] >> BaseOperator()
     sg3 = ["a", "d"] >> BaseOperator()
 
-    combined1 = sg1 + sg2
-    combined2 = combined1 + sg3
-    combined3 = combined2 + (["x"] >> BaseOperator())
+    combined1 = Subgraph("sub1", sg1) + Subgraph("sub2", sg2)
+    combined2 = Subgraph("combined1", combined1) + Subgraph("sub3", sg3)
+    combined3 = Subgraph("combined2", combined2) + (["x"] >> BaseOperator())
+    output = Subgraph("combined3", combined3)
 
-    graph = Graph(
-        combined3,
-        subgraphs={
-            "sg1": sg1,
-            "sg2": sg2,
-            "sg3": sg3,
-            "combined1": combined1,
-            "combined2": combined2,
-        },
-    )
+    graph = Graph(output)
 
-    assert graph.subgraph("sg1").output_node == sg1
-    assert graph.subgraph("sg2").output_node == sg2
-    assert graph.subgraph("sg3").output_node == sg3
+    assert graph.subgraph("sub1").output_node == sg1
+    assert graph.subgraph("sub2").output_node == sg2
+    assert graph.subgraph("sub3").output_node == sg3
     assert graph.subgraph("combined1").output_node == combined1
     assert graph.subgraph("combined2").output_node == combined2
-
-
-def test_subgraph_with_unrelated_subgraph():
-    sg1 = ["a", "b"] >> BaseOperator()
-    sg2 = ["a", "c"] >> BaseOperator()
-    sg3 = ["c", "d"] >> BaseOperator()
-
-    # same input as sg3, but not included in the combined Graph.
-    unrelated = ["c", "d"] >> BaseOperator()
-
-    combined = sg1 + sg2 + sg3
-
-    with pytest.raises(ValueError):
-        Graph(combined, subgraphs={"sub1": sg1, "unrelated": unrelated})
+    assert graph.subgraph("combined3").output_node == combined3

@@ -63,7 +63,7 @@ def test_subgraph_fit(dataset):
 
     executor = DaskExecutor()
     executor.fit(dataset, main_graph)
-    result_df = executor.transform(dataset, main_graph)
+    result_df = executor.transform(dataset.to_ddf(), main_graph)
 
     assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
     assert main_graph.subgraph("subgraph").output_node.op.stats["fit"] is True
@@ -79,7 +79,9 @@ def test_subgraph_looping(dataset):
 
     subgraph = ["x"] >> LoopingTestOp()
     subgraph_op = Subgraph(
-        "subgraph", subgraph, loop_until=lambda transformable: (transformable["x"] > 5.0).all()
+        "subgraph",
+        subgraph,
+        loop_until=lambda transformable: (transformable["x"] > 5.0).all(),
     )
     main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
 
@@ -92,7 +94,7 @@ def test_subgraph_looping(dataset):
 
     executor = DaskExecutor()
     executor.fit(dataset, main_graph)
-    result_df = executor.transform(dataset, main_graph)
+    result_df = executor.transform(dataset.to_ddf(), main_graph)
 
     assert result_df.to_ddf().compute() == dataset.to_ddf().compute()[["x"]]
     assert (result_df.to_ddf().compute()[["x"]] > 5.0).all()[0]

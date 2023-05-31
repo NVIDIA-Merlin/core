@@ -314,7 +314,7 @@ class DaskExecutor:
         strict=False,
     ):
         """
-        Transforms all partitions of a dataset by applying the operators
+        Transforms all partitions of a Dask Dataframe by applying the operators
         from a collection of Nodes
         """
         nodes = []
@@ -384,6 +384,24 @@ class DaskExecutor:
                 meta=output_dtypes,
                 enforce_metadata=False,
             )
+        )
+
+    def _transform_impl(self, dataset: Dataset, graph: Graph, capture_dtypes=False):
+        if graph.output_schema:
+            graph.construct_schema(dataset.schema)
+
+        ddf = dataset.to_ddf(columns=graph._input_columns())
+
+        return Dataset(
+            self._executor.transform(
+                ddf,
+                graph.output_node,
+                graph.output_dtypes,
+                capture_dtypes=capture_dtypes,
+            ),
+            cpu=dataset.cpu,
+            base_dataset=dataset.base_dataset,
+            schema=graph.output_schema,
         )
 
     def _transform_df(self, df):
@@ -492,24 +510,6 @@ class DaskExecutor:
         for computed_stats, node in zip(results, nodes):
             node.op.fit_finalize(computed_stats)
             node.op.fitted = True
-
-    def _transform_impl(self, dataset: Dataset, graph: Graph, capture_dtypes=False):
-        if graph.output_schema:
-            graph.construct_schema(dataset.schema)
-
-        ddf = dataset.to_ddf(columns=graph._input_columns())
-
-        return Dataset(
-            self._executor.transform(
-                ddf,
-                graph.output_node,
-                graph.output_dtypes,
-                capture_dtypes=capture_dtypes,
-            ),
-            cpu=dataset.cpu,
-            base_dataset=dataset.base_dataset,
-            schema=graph.output_schema,
-        )
 
     def _clear_worker_cache(self):
         # Clear worker caches to be "safe"

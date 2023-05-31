@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import Callable
 
 from merlin.core.protocols import Transformable
+from merlin.dag import Node
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
 from merlin.dag.selector import ColumnSelector
@@ -146,3 +147,7 @@ class Subgraph(StatOperator):
     @property
     def is_subgraph(self):
         return True
+
+    def __add__(self, other):
+        node = Node.construct_from(self)
+        return node + other
