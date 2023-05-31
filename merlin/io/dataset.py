@@ -438,7 +438,8 @@ class Dataset:
                 raise RuntimeError(
                     "`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. "
                     "Please setup a `dask_cuda.LocalCUDACluster` instead. "
-                    "Or to run on CPU instead, supply `cpu=True` parameter when creating the `Dataset`. "
+                    "Or to run on CPU instead, "
+                    "provide the parameter `cpu=True` when creating the `Dataset`. "
                 )
 
         return ddf
