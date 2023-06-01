@@ -119,3 +119,9 @@ def test_to_ddf_incompatible_cluster():
     assert "`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`." in str(
         exc_info.value
     )
+
+def test_to_ddf_compatible_cluster():
+    df = make_df({"col": [1, 2, 3]})
+    dataset = Dataset(df)
+    with Distributed():
+        dataset.to_ddf()
