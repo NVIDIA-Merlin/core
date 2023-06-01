@@ -21,6 +21,7 @@ import pytest
 
 from merlin.core.compat import HAS_GPU, cudf
 from merlin.core.dispatch import dataframe_columnwise_explode, make_df
+from merlin.core.utils import Distributed
 from merlin.io import Dataset
 
 
@@ -104,3 +105,24 @@ def test_dask_df_array_npy_append_list(tmpdir, datasets, engine, append):
     ddf = dataset.to_ddf().compute()
     numpy_arr = dataframe_columnwise_explode(ddf).to_numpy()
     assert (nparr == numpy_arr).all()
+
+
+@pytest.mark.skipif(not cudf, reason="requires cuDF")
+def test_to_ddf_incompatible_cluster():
+    """Check that if we fail if the Dataset.to_ddf returns a dask_cudf.DataFrame
+    in a context where the global dask client is a `LocalCluster`"""
+    df = cudf.DataFrame({"col": [1, 2, 3]})
+    dataset = Dataset(df)
+    with Distributed(cluster_type="cpu"):
+        with pytest.raises(RuntimeError) as exc_info:
+            dataset.to_ddf()
+    assert "`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`." in str(
+        exc_info.value
+    )
+
+
+def test_to_ddf_compatible_cluster():
+    df = make_df({"col": [1, 2, 3]})
+    dataset = Dataset(df)
+    with Distributed():
+        dataset.to_ddf()
