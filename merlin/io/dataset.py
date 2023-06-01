@@ -433,7 +433,7 @@ class Dataset:
             if (
                 dask_cudf
                 and isinstance(ddf, dask_cudf.DataFrame)
-                and isinstance(dask_client.cluster, distributed.LocalCluster)
+                and type(dask_client.cluster) is distributed.LocalCluster
             ):
                 raise RuntimeError(
                     "`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. "
