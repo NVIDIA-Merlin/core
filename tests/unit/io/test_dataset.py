@@ -120,6 +120,7 @@ def test_to_ddf_incompatible_cluster():
         exc_info.value
     )
 
+
 def test_to_ddf_compatible_cluster():
     df = make_df({"col": [1, 2, 3]})
     dataset = Dataset(df)
