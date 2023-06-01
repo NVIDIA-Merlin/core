@@ -755,7 +755,7 @@ document.write(`
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">dask_cudf</span>
                 <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ddf</span><span class="p">,</span> <span class="n">dask_cudf</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dask_client</span><span class="o">.</span><span class="n">cluster</span><span class="p">,</span> <span class="n">distributed</span><span class="o">.</span><span class="n">LocalCluster</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">dask_client</span><span class="o">.</span><span class="n">cluster</span><span class="p">)</span> <span class="ow">is</span> <span class="n">distributed</span><span class="o">.</span><span class="n">LocalCluster</span>
             <span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="s2">&quot;`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. &quot;</span>
