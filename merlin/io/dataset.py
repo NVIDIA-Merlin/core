@@ -430,6 +430,7 @@ class Dataset:
 
         dask_client = global_dask_client()
         if dask_client is not None:
+            # pylint: disable=unidiomatic-typecheck
             if (
                 dask_cudf
                 and isinstance(ddf, dask_cudf.DataFrame)
