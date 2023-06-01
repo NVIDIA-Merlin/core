@@ -320,6 +320,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">import</span> <span class="nn">distributed</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">dask.base</span> <span class="kn">import</span> <span class="n">tokenize</span>
 <span class="kn">from</span> <span class="nn">dask.dataframe.core</span> <span class="kn">import</span> <span class="n">new_dd_object</span>
@@ -329,7 +330,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">fsspec.utils</span> <span class="kn">import</span> <span class="n">stringify_path</span>
 <span class="kn">from</span> <span class="nn">npy_append_array</span> <span class="kn">import</span> <span class="n">NpyAppendArray</span>
 
-<span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span><span class="p">,</span> <span class="n">cudf</span><span class="p">,</span> <span class="n">device_mem_size</span>
+<span class="kn">from</span> <span class="nn">merlin.core.compat</span> <span class="kn">import</span> <span class="n">HAS_GPU</span><span class="p">,</span> <span class="n">cudf</span><span class="p">,</span> <span class="n">dask_cudf</span><span class="p">,</span> <span class="n">device_mem_size</span>
 <span class="kn">from</span> <span class="nn">merlin.core.dispatch</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">convert_data</span><span class="p">,</span>
     <span class="n">dataframe_columnwise_explode</span><span class="p">,</span>
@@ -723,7 +724,22 @@ document.write(`
         <span class="c1"># Special dtype conversion (optional)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">:</span>
             <span class="n">_meta</span> <span class="o">=</span> <span class="n">_set_dtypes</span><span class="p">(</span><span class="n">ddf</span><span class="o">.</span><span class="n">_meta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">ddf</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="n">_set_dtypes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">_meta</span><span class="p">)</span>
+            <span class="n">ddf</span> <span class="o">=</span> <span class="n">ddf</span><span class="o">.</span><span class="n">map_partitions</span><span class="p">(</span><span class="n">_set_dtypes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="n">_meta</span><span class="p">)</span>
+
+        <span class="n">dask_client</span> <span class="o">=</span> <span class="n">global_dask_client</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">dask_client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">dask_cudf</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ddf</span><span class="p">,</span> <span class="n">dask_cudf</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">dask_client</span><span class="o">.</span><span class="n">cluster</span><span class="p">)</span> <span class="ow">is</span> <span class="n">distributed</span><span class="o">.</span><span class="n">LocalCluster</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. &quot;</span>
+                    <span class="s2">&quot;Please setup a `dask_cuda.LocalCUDACluster` instead. &quot;</span>
+                    <span class="s2">&quot;Or to run on CPU instead, &quot;</span>
+                    <span class="s2">&quot;provide the parameter `cpu=True` when creating the `Dataset`. &quot;</span>
+                <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">ddf</span></div>
 
     <span class="nd">@property</span>
