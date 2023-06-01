@@ -22,6 +22,7 @@ import warnings
 from pathlib import Path
 
 import dask
+import distributed
 import numpy as np
 from dask.base import tokenize
 from dask.dataframe.core import new_dd_object
@@ -31,7 +32,7 @@ from fsspec.core import get_fs_token_paths
 from fsspec.utils import stringify_path
 from npy_append_array import NpyAppendArray
 
-from merlin.core.compat import HAS_GPU, cudf, device_mem_size
+from merlin.core.compat import HAS_GPU, cudf, dask_cudf, device_mem_size
 from merlin.core.dispatch import (
     convert_data,
     dataframe_columnwise_explode,
@@ -425,7 +426,22 @@ class Dataset:
         # Special dtype conversion (optional)
         if self.dtypes:
             _meta = _set_dtypes(ddf._meta, self.dtypes)
-            return ddf.map_partitions(_set_dtypes, self.dtypes, meta=_meta)
+            ddf = ddf.map_partitions(_set_dtypes, self.dtypes, meta=_meta)
+
+        dask_client = global_dask_client()
+        if dask_client is not None:
+            if (
+                dask_cudf
+                and isinstance(ddf, dask_cudf.DataFrame)
+                and isinstance(dask_client.cluster, distributed.LocalCluster)
+            ):
+                raise RuntimeError(
+                    "`dask_cudf.DataFrame` is incompatible with `distributed.LocalCluster`. "
+                    "Please setup a `dask_cuda.LocalCUDACluster` instead. "
+                    "Or to run on CPU instead, "
+                    "provide the parameter `cpu=True` when creating the `Dataset`. "
+                )
+
         return ddf
 
     @property
