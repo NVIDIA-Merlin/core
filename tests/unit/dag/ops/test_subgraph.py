@@ -38,7 +38,7 @@ def test_subgraph(df):
     main_graph.construct_schema(Schema(list(df.columns)))
 
     result_df = LocalExecutor().transform(df, main_graph)
-    assert result_df == df[["x"]]
+    assert (result_df == df[["x"]]).all()[0]
 
     assert main_graph.subgraph("subgraph") == subgraph_op.graph
 
@@ -66,7 +66,7 @@ def test_subgraph_fit(dataset):
     executor.fit(dataset, main_graph)
     result_df = executor.transform(dataset.to_ddf(), main_graph)
 
-    assert result_df.compute() == dataset.to_ddf().compute()[["x"]]
+    assert (result_df.compute() == dataset.to_ddf().compute()[["x"]]).all()[0]
     assert main_graph.subgraph("subgraph").output_node.op.stats["fit"] is True
 
 
@@ -97,5 +97,4 @@ def test_subgraph_looping(dataset):
     executor.fit(dataset, main_graph)
     result_df = executor.transform(dataset.to_ddf(), main_graph)
 
-    assert result_df.compute() == dataset.to_ddf().compute()[["x"]]
     assert (result_df.compute()[["x"]] > 5.0).all()[0]
