@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: main
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
@@ -30,7 +31,6 @@ jobs:
         run: |
           # setup local branches that we'd like to build docs for
           # required for sphinx-multiversion to find these
-          git branch --track main origin/main || true
           git branch --track stable origin/stable || true
           tox -e docs-multi
       - name: Delete unnecessary files
