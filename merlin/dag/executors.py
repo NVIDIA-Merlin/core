@@ -417,11 +417,6 @@ class DaskExecutor:
         if not graph.output_schema:
             graph.construct_schema(dataset.schema)
 
-        # if isinstance(dataset, Dataset):
-        #     ddf = dataset.to_ddf(columns=graph._input_columns())
-        # else:
-        #     ddf = dataset
-
         # Get a dictionary mapping all StatOperators we need to fit to a set of any dependent
         # StatOperators (having StatOperators that depend on the output of other StatOperators
         # means that will have multiple phases in the fit cycle here)

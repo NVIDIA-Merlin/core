@@ -17,8 +17,6 @@ from __future__ import annotations
 
 from typing import Callable
 
-import dask.dataframe as dd
-
 from merlin.core.protocols import Transformable
 from merlin.dag import Node
 from merlin.dag.executors import DaskExecutor, LocalExecutor
@@ -141,6 +139,9 @@ class Subgraph(StatOperator):
             stat.op.clear()
 
     def column_mapping(self, col_selector):
+        """Applies logic to obtain correct column names, delegated to operators,
+        in subgraph.
+        """
         return self.graph.column_mapping
 
     def fit_finalize(self, dask_stats):
@@ -148,6 +149,7 @@ class Subgraph(StatOperator):
 
     @property
     def is_subgraph(self):
+        """Property that identifies if operator is a subgraph"""
         return True
 
     def __add__(self, other):
