@@ -282,6 +282,10 @@ class BaseOperator:
     def dynamic_dtypes(self):
         return False
 
+    @property
+    def is_subgraph(self):
+        return False
+
     def _compute_tags(self, col_schema, input_schema):
         tags = []
         if input_schema.column_schemas:

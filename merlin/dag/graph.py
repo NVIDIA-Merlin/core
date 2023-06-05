@@ -16,8 +16,9 @@
 
 import logging
 from collections import deque
-from typing import Dict, Optional
+from typing import Dict
 
+from merlin.dag.base_operator import BaseOperator
 from merlin.dag.node import (
     Node,
     _combine_schemas,
@@ -25,6 +26,7 @@ from merlin.dag.node import (
     postorder_iter_nodes,
     preorder_iter_nodes,
 )
+from merlin.dag.ops.stat_operator import StatOperator
 from merlin.schema import Schema
 
 LOG = logging.getLogger("merlin")
@@ -36,23 +38,23 @@ class Graph:
     transforms dataframes or dataframe-like data
     """
 
-    def __init__(self, output_node: Node, subgraphs: Optional[Dict[str, Node]] = None):
+    def __init__(self, output_node: Node):
+        if isinstance(output_node, BaseOperator):
+            output_node = Node.construct_from(output_node)
+
         self.output_node = output_node
-        self.subgraphs = subgraphs or {}
+        self.subgraphs: Dict[str, "Graph"] = {}
 
         parents_with_deps = self.output_node.parents_with_dependencies
         parents_with_deps.append(output_node)
 
-        for name, sg in self.subgraphs.items():
-            if sg not in parents_with_deps:
-                raise ValueError(
-                    f"The output node of subgraph {name} does not exist in the provided graph."
-                )
+        self.subgraphs = {}
+        _find_subgraphs(output_node, self.subgraphs)
 
     def subgraph(self, name: str) -> "Graph":
-        if name not in self.subgraphs.keys():
+        if name not in self.subgraphs:
             raise ValueError(f"No subgraph named {name}. Options are: {self.subgraphs.keys()}")
-        return Graph(self.subgraphs[name])
+        return self.subgraphs[name]
 
     @property
     def input_dtypes(self):
@@ -198,6 +200,16 @@ class Graph:
     def get_nodes_by_op_type(cls, nodes, op_type):
         return set(node for node in iter_nodes(nodes) if isinstance(node.op, op_type))
 
+    def clear_stats(self):
+        """Removes calculated statistics from each node in the graph
+
+        See Also
+        --------
+        StatOperator.clear
+        """
+        for stat in Graph.get_nodes_by_op_type([self.output_node], StatOperator):
+            stat.op.clear()
+
 
 def _get_schemaless_nodes(nodes):
     schemaless_nodes = []
@@ -211,3 +223,16 @@ def _get_schemaless_nodes(nodes):
 def _get_unique(cols):
     # Need to preserve order in unique-column list
     return list({x: x for x in cols}.keys())
+
+
+def _find_subgraphs(output_node, subgraphs):
+    for node in postorder_iter_nodes(output_node):
+        op = node.op
+        if op.is_subgraph and op.name:
+            if op.name in subgraphs:
+                raise ValueError(
+                    f"Found two subgraphs called {op.name}. "
+                    "Each subgraph must have a unique name."
+                )
+            subgraphs[op.name] = op.graph
+            _find_subgraphs(op.graph.output_node, subgraphs)

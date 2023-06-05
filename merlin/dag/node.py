@@ -195,6 +195,7 @@ class Node:
         """
         parents_schema = _combine_schemas(self.parents)
         deps_schema = _combine_schemas(self.dependencies)
+
         parents_selector = _combine_selectors(self.parents)
         dependencies_selector = _combine_selectors(self.dependencies)
 
@@ -260,7 +261,11 @@ class Node:
                     )
 
             self.op.validate_schemas(
-                parents_schema, deps_schema, self.input_schema, self.output_schema, strict_dtypes
+                parents_schema,
+                deps_schema,
+                self.input_schema,
+                self.output_schema,
+                strict_dtypes,
             )
 
     def __rshift__(self, operator):
@@ -530,7 +535,11 @@ class Node:
         return _to_graphviz(self)
 
     Nodable = Union[
-        "Node", str, List[str], ColumnSelector, List[Union["Node", str, List[str], ColumnSelector]]
+        "Node",
+        str,
+        List[str],
+        ColumnSelector,
+        List[Union["Node", str, List[str], ColumnSelector]],
     ]
 
     @classmethod
@@ -560,6 +569,10 @@ class Node:
             return Node(ColumnSelector([nodable]))
         if isinstance(nodable, ColumnSelector):
             return Node(nodable)
+        elif isinstance(nodable, BaseOperator):
+            node = Node()
+            node.op = nodable
+            return node
         elif isinstance(nodable, Node):
             return nodable
         elif isinstance(nodable, list):
