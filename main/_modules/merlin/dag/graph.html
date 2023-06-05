@@ -338,8 +338,9 @@ document.write(`
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
 
+<span class="kn">from</span> <span class="nn">merlin.dag.base_operator</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
 <span class="kn">from</span> <span class="nn">merlin.dag.node</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Node</span><span class="p">,</span>
     <span class="n">_combine_schemas</span><span class="p">,</span>
@@ -347,6 +348,7 @@ document.write(`
     <span class="n">postorder_iter_nodes</span><span class="p">,</span>
     <span class="n">preorder_iter_nodes</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">merlin.dag.ops.stat_operator</span> <span class="kn">import</span> <span class="n">StatOperator</span>
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">LOG</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;merlin&quot;</span><span class="p">)</span>
@@ -358,23 +360,23 @@ document.write(`
 <span class="sd">    transforms dataframes or dataframe-like data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_node</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">subgraphs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Node</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_node</span><span class="p">:</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_node</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">):</span>
+            <span class="n">output_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">output_node</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span> <span class="o">=</span> <span class="n">output_node</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span> <span class="o">=</span> <span class="n">subgraphs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;Graph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">parents_with_deps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span><span class="o">.</span><span class="n">parents_with_dependencies</span>
         <span class="n">parents_with_deps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output_node</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">sg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parents_with_deps</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The output node of subgraph </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> does not exist in the provided graph.&quot;</span>
-                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">_find_subgraphs</span><span class="p">(</span><span class="n">output_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Graph.subgraph"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Graph&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No subgraph named </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Options are: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_dtypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -518,7 +520,17 @@ document.write(`
 
 <div class="viewcode-block" id="Graph.get_nodes_by_op_type"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.get_nodes_by_op_type">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_nodes_by_op_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">op_type</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">op_type</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">op_type</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Graph.clear_stats"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.clear_stats">[docs]</a>    <span class="k">def</span> <span class="nf">clear_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes calculated statistics from each node in the graph</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        StatOperator.clear</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">Graph</span><span class="o">.</span><span class="n">get_nodes_by_op_type</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">output_node</span><span class="p">],</span> <span class="n">StatOperator</span><span class="p">):</span>
+            <span class="n">stat</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">_get_schemaless_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
@@ -533,6 +545,19 @@ document.write(`
 <span class="k">def</span> <span class="nf">_get_unique</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
     <span class="c1"># Need to preserve order in unique-column list</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">({</span><span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+
+<span class="k">def</span> <span class="nf">_find_subgraphs</span><span class="p">(</span><span class="n">output_node</span><span class="p">,</span> <span class="n">subgraphs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">postorder_iter_nodes</span><span class="p">(</span><span class="n">output_node</span><span class="p">):</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span>
+        <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span> <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">subgraphs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Found two subgraphs called </span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Each subgraph must have a unique name.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">subgraphs</span><span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">graph</span>
+            <span class="n">_find_subgraphs</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">,</span> <span class="n">subgraphs</span><span class="p">)</span>
 </pre></div>
 
                 </article>

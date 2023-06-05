@@ -510,6 +510,11 @@ operations they implement.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dynamic_dtypes</span></span><a class="headerlink" href="#merlin.dag.BaseOperator.dynamic_dtypes" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.dag.BaseOperator.is_subgraph">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_subgraph</span></span><a class="headerlink" href="#merlin.dag.BaseOperator.is_subgraph" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="merlin.dag.BaseOperator.output_column_names">
 <span class="sig-name descname"><span class="pre">output_column_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.selector.ColumnSelector"><span class="pre">merlin.dag.selector.ColumnSelector</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.dag.ColumnSelector" title="merlin.dag.selector.ColumnSelector"><span class="pre">merlin.dag.selector.ColumnSelector</span></a></span></span><a class="reference internal" href="../_modules/merlin/dag/base_operator.html#BaseOperator.output_column_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.output_column_names" title="Permalink to this definition">#</a></dt>
@@ -583,7 +588,7 @@ This lets you consume columns that aren’t part of the main transformation work
 
 <dl class="py class">
 <dt class="sig sig-object py" id="merlin.dag.Graph">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.dag.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.node.Node"><span class="pre">merlin.dag.node.Node</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subgraphs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.node.Node"><span class="pre">merlin.dag.node.Node</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.dag.</span></span><span class="sig-name descname"><span class="pre">Graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#merlin.dag.Node" title="merlin.dag.node.Node"><span class="pre">merlin.dag.node.Node</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Represents an DAG composed of Nodes, each of which contains an operator that
 transforms dataframes or dataframe-like data</p>
@@ -669,6 +674,16 @@ output columns derived from that column.</p>
 <dt class="sig sig-object py" id="merlin.dag.Graph.get_nodes_by_op_type">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_nodes_by_op_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph.get_nodes_by_op_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph.get_nodes_by_op_type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.dag.Graph.clear_stats">
+<span class="sig-name descname"><span class="pre">clear_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/dag/graph.html#Graph.clear_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Graph.clear_stats" title="Permalink to this definition">#</a></dt>
+<dd><p>Removes calculated statistics from each node in the graph</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">StatOperator.clear</span></code></p>
+</div>
+</dd></dl>
 
 </dd></dl>
 

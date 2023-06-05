@@ -517,6 +517,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parents_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">deps_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
+
         <span class="n">parents_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">dependencies_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
 
@@ -582,7 +583,11 @@ document.write(`
                     <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">validate_schemas</span><span class="p">(</span>
-                <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">strict_dtypes</span>
+                <span class="n">parents_schema</span><span class="p">,</span>
+                <span class="n">deps_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span>
+                <span class="n">strict_dtypes</span><span class="p">,</span>
             <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
@@ -852,7 +857,11 @@ document.write(`
         <span class="k">return</span> <span class="n">_to_graphviz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
-        <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]]</span>
+        <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">,</span>
+        <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">ColumnSelector</span><span class="p">,</span>
+        <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
     <span class="p">]</span>
 
 <div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
@@ -882,6 +891,10 @@ document.write(`
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">([</span><span class="n">nodable</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">nodable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">nodable</span>
+            <span class="k">return</span> <span class="n">node</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">nodable</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
