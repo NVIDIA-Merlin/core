@@ -69,7 +69,9 @@ class Subgraph(StatOperator):
             transformable = executor.transform(transformable, self.graph)
         return transformable
 
-    def fit(self, col_selector: ColumnSelector, dataset: Dataset):
+    def fit(
+        self, col_selector: ColumnSelector, dataset: Dataset
+    ):  # pylint: disable=arguments-renamed
         DaskExecutor().fit(dataset, self.graph)
 
     def compute_input_schema(
