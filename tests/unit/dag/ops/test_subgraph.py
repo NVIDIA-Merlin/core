@@ -46,7 +46,7 @@ def test_subgraph(df):
 @pytest.mark.parametrize("engine", ["parquet"])
 def test_subgraph_fit(dataset):
     class FitTestOp(StatOperator):
-        def fit(self, col_selector: ColumnSelector, dataset: Dataset):
+        def fit(self, col_selector: ColumnSelector, ddf):
             self.stats = {"fit": True}
 
         def clear(self):
