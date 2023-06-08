@@ -19,6 +19,7 @@ from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
 
+
 class UDF(BaseOperator):
     """
     UDF allows you to apply row level functions to a dataframe or TensorTable
@@ -69,6 +70,7 @@ class UDF(BaseOperator):
         self, col_selector: ColumnSelector, transformable: Transformable
     ) -> Transformable:
         from merlin.dag.executors import _convert_format, _data_format
+
         cols = {}
         data_format = _data_format(type(transformable)())
         for col in col_selector.names:
