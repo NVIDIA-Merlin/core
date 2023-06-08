@@ -19,7 +19,6 @@ from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
 
-
 class UDF(BaseOperator):
     """
     UDF allows you to apply row level functions to a dataframe or TensorTable
@@ -69,16 +68,26 @@ class UDF(BaseOperator):
     def transform(
         self, col_selector: ColumnSelector, transformable: Transformable
     ) -> Transformable:
-        new_df = type(transformable)()
+        from merlin.dag.executors import _convert_format, _data_format
+        cols = {}
+        data_format = _data_format(type(transformable)())
         for col in col_selector.names:
             if self._param_count == 2:
-                new_df[col] = self.f(transformable[col], transformable)
+                # cudf dataframe does not support datetime arrays on gpu device
+                try:
+                    cols[col] = self.f(transformable[col], transformable).values
+                except NotImplementedError:
+                    cols[col] = self.f(transformable[col], transformable).to_numpy()
             elif self._param_count == 1:
-                new_df[col] = self.f(transformable[col])
+                # cudf dataframe does not support datetime arrays on gpu device
+                try:
+                    cols[col] = self.f(transformable[col]).values
+                except NotImplementedError:
+                    cols[col] = self.f(transformable[col]).to_numpy()
             else:
                 # shouldn't ever happen,
                 raise RuntimeError(f"unhandled UDF param count {self._param_count}")
-        return new_df
+        return _convert_format(cols, data_format)
 
     transform.__doc__ = BaseOperator.transform.__doc__
 
