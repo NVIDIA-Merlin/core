@@ -512,7 +512,7 @@ class DaskExecutor:
 
         dask_client = global_dask_client()
         if dask_client:
-            results = [r.result() for r in dask_client.compute(stats)]
+            results = [r.result() for r in dask_client.compute(stats) if r is not None]
         else:
             results = dask.compute(stats, scheduler="synchronous")[0]
         for computed_stats, node in zip(results, nodes):
