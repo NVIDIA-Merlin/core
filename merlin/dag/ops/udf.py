@@ -15,6 +15,7 @@
 #
 from inspect import getsourcelines, signature
 
+from merlin.core.dispatch import make_df
 from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.selector import ColumnSelector
@@ -69,7 +70,7 @@ class UDF(BaseOperator):
     def transform(
         self, col_selector: ColumnSelector, transformable: Transformable
     ) -> Transformable:
-        new_df = type(transformable)()
+        new_df = {}
         for col in col_selector.names:
             if self._param_count == 2:
                 new_df[col] = self.f(transformable[col], transformable)
@@ -78,7 +79,8 @@ class UDF(BaseOperator):
             else:
                 # shouldn't ever happen,
                 raise RuntimeError(f"unhandled UDF param count {self._param_count}")
-        return new_df
+        # return input type data
+        return make_df(new_df)
 
     transform.__doc__ = BaseOperator.transform.__doc__
 

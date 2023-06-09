@@ -20,6 +20,7 @@ import pytest
 from dask.dataframe import assert_eq as assert_eq_dd
 
 import merlin.dtypes as md
+from merlin.core.compat import cudf
 from merlin.core.compat import cupy as cp
 from merlin.dag import Graph
 from merlin.dag.executors import DaskExecutor
@@ -250,3 +251,43 @@ def test_udf_dtype_multi_op_propagation(cpu):
     output_schema = graph.output_node.output_schema
 
     assert output_schema["c_1st_2nd"].dtype == md.dtype(np.float64)
+
+
+def test_udf_pandas_in_cudf_out_lambda_convert():
+    import time
+
+    size = 12
+    df0 = pd.DataFrame(
+        {
+            "a": np.arange(size),
+            "b": np.random.choice(["apple", "banana", "orange"], size),
+            "c": np.random.choice([time.time(), time.time() - 1], size).astype(np.float16),
+        }
+    )
+    ddf0 = dd.from_pandas(df0, npartitions=4)
+    dataset = Dataset(ddf0, cpu=True)
+
+    if cudf:
+
+        def func(col):
+            return cudf.to_datetime(col, unit="s")
+
+    else:
+
+        def func(col):
+            return pd.to_datetime(col, unit="s")
+
+    label = ColumnSelector(["a", "c"])
+
+    label_feature = label >> UDF(lambda col: col.astype(np.float32)) >> Rename(postfix="_1st")
+    b_labels = label_feature["c_1st"] >> UDF(func) >> Rename(postfix="_2nd")
+
+    graph = Graph(b_labels)
+    graph.construct_schema(dataset.schema)
+
+    executor = DaskExecutor()
+    executor.fit(dataset, graph)
+
+    output_schema = graph.output_node.output_schema
+
+    assert output_schema["c_1st_2nd"].dtype == md.dtype("datetime64[ns]")
