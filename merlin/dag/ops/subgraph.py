@@ -101,10 +101,7 @@ class Subgraph(StatOperator):
             Schema of selected columns from input, parents, and dependencies
         """
         if not self.graph.input_schema:
-            input_schema = super().compute_input_schema(
-                root_schema, parents_schema, deps_schema, selector
-            )
-            self.graph = self.graph.construct_schema(input_schema)
+            self.graph = self.graph.construct_schema(root_schema)
 
         return self.graph.input_schema
 

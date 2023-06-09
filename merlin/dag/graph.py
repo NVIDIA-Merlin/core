@@ -43,12 +43,11 @@ class Graph:
             output_node = Node.construct_from(output_node)
 
         self.output_node = output_node
-        self.subgraphs: Dict[str, "Graph"] = {}
 
         parents_with_deps = self.output_node.parents_with_dependencies
         parents_with_deps.append(output_node)
 
-        self.subgraphs = {}
+        self.subgraphs: Dict[str, "Graph"] = {}
         _find_subgraphs(output_node, self.subgraphs)
 
     def subgraph(self, name: str) -> "Graph":

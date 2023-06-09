@@ -603,6 +603,8 @@ def iter_nodes(nodes):
         current = queue.pop()
         if isinstance(current, list):
             queue.extend(current)
+        elif current.op.is_subgraph:
+            queue.extend(iter_nodes([current.op.graph.output_node]))
         else:
             yield current
             for node in current.parents_with_dependencies:
