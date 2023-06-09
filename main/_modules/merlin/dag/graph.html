@@ -365,12 +365,11 @@ document.write(`
             <span class="n">output_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">output_node</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span> <span class="o">=</span> <span class="n">output_node</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;Graph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">parents_with_deps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_node</span><span class="o">.</span><span class="n">parents_with_dependencies</span>
         <span class="n">parents_with_deps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output_node</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;Graph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_find_subgraphs</span><span class="p">(</span><span class="n">output_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Graph.subgraph"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Graph&quot;</span><span class="p">:</span>
