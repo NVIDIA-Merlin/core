@@ -13,9 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.core.protocols import Transformable
 from merlin.dag.base_operator import BaseOperator
-from merlin.dag.selector import ColumnSelector
 from merlin.schema.tags import Tags
 
 
@@ -29,11 +27,6 @@ class AddMetadata(BaseOperator):
         super().__init__()
         self.tags = tags or []
         self.properties = properties or {}
-
-    def transform(
-        self, col_selector: ColumnSelector, transformable: Transformable
-    ) -> Transformable:
-        return transformable
 
     @property
     def output_tags(self):
