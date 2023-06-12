@@ -15,6 +15,15 @@
 #
 # alias submodules here to avoid breaking everything with moving to submodules
 # flake8: noqa
+from merlin.dag.ops.add_metadata import (
+    AddMetadata,
+    AddProperties,
+    AddTags,
+    TagAsItemFeatures,
+    TagAsItemID,
+    TagAsUserFeatures,
+    TagAsUserID,
+)
 from merlin.dag.ops.concat_columns import ConcatColumns
 from merlin.dag.ops.rename import Rename
 from merlin.dag.ops.selection import SelectionOp
