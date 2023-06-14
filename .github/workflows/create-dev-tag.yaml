@@ -1,0 +1,12 @@
+name: Create Dev Tag
+
+on:
+  push:
+    branches:
+      - 'release-[0-9]+.[0-9]+'
+
+jobs:
+  create-dev-tag:
+    permissions:
+      contents: write
+    uses: NVIDIA-Merlin/.github/.github/workflows/create-dev-tag.yaml@main
