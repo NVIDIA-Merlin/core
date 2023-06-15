@@ -15,7 +15,7 @@
 #
 import pytest
 
-from merlin.dag import Graph, Node
+from merlin.dag import Graph, Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 from merlin.dag.base_operator import BaseOperator
 from merlin.dag.ops.subgraph import Subgraph
 from merlin.dag.selector import ColumnSelector
@@ -86,3 +86,12 @@ def test_subgraph_with_summed_subgraphs():
     assert graph.subgraph("combined1").output_node == combined1
     assert graph.subgraph("combined2").output_node == combined2
     assert graph.subgraph("combined3").output_node == combined3
+
+    post_len = len(list(postorder_iter_nodes(graph.output_node)))
+    pre_len = len(list(preorder_iter_nodes(graph.output_node)))
+    iter_node_list = list(iter_nodes([graph.output_node]))
+    iter_len = len(iter_node_list)
+
+    assert post_len == pre_len
+    assert iter_len == post_len
+    assert iter_len == pre_len

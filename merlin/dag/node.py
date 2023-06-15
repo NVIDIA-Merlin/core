@@ -597,14 +597,17 @@ class Node:
             )
 
 
-def iter_nodes(nodes):
+def iter_nodes(nodes, flatten_subgraphs=False):
     queue = nodes[:]
     while queue:
-        current = queue.pop()
+        current = queue.pop(0)
+        if flatten_subgraphs and current.op.is_subgraph:
+            new_nodes = iter_nodes([current.op.graph.output_node])
+            for node in new_nodes:
+                if node not in queue:
+                    queue.append(node)
         if isinstance(current, list):
             queue.extend(current)
-        elif current.op.is_subgraph:
-            queue.extend(iter_nodes([current.op.graph.output_node]))
         else:
             yield current
             for node in current.parents_with_dependencies:
@@ -613,7 +616,7 @@ def iter_nodes(nodes):
 
 
 # output node (bottom) -> selection leaf nodes (top)
-def preorder_iter_nodes(nodes):
+def preorder_iter_nodes(nodes, flatten_subgraphs=False):
     queue = []
     if not isinstance(nodes, list):
         nodes = [nodes]
@@ -624,7 +627,7 @@ def preorder_iter_nodes(nodes):
             if node in queue:
                 queue.remove(node)
 
-            if node.op.is_subgraph:
+            if flatten_subgraphs and node.op.is_subgraph:
                 queue.extend(list(preorder_iter_nodes(node.op.graph.output_node)))
             queue.append(node)
 
@@ -637,7 +640,7 @@ def preorder_iter_nodes(nodes):
 
 
 # selection leaf nodes (top) -> output node (bottom)
-def postorder_iter_nodes(nodes):
+def postorder_iter_nodes(nodes, flatten_subgraphs=False):
     queue = []
     if not isinstance(nodes, list):
         nodes = [nodes]
@@ -648,7 +651,7 @@ def postorder_iter_nodes(nodes):
 
             if node not in queue:
                 queue.append(node)
-            if node.op.is_subgraph:
+            if flatten_subgraphs and node.op.is_subgraph:
                 queue.extend(list(postorder_iter_nodes(node.op.graph.output_node)))
 
     traverse(nodes)
@@ -668,15 +671,18 @@ def _filter_by_type(elements, type_):
     return results
 
 
-def _combine_schemas(elements):
+def _combine_schemas(elements, input_schemas=False):
     combined = Schema()
     for elem in elements:
         if isinstance(elem, Node):
-            combined += elem.output_schema
+            if input_schemas:
+                combined += elem.input_schema
+            else:
+                combined += elem.output_schema
         elif isinstance(elem, ColumnSelector):
             combined += Schema(elem.names)
         elif isinstance(elem, list):
-            combined += _combine_schemas(elem)
+            combined += _combine_schemas(elem, input_schemas=input_schemas)
     return combined
 
 
