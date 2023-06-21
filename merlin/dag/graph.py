@@ -49,6 +49,8 @@ class Graph:
 
         self.subgraphs: Dict[str, "Graph"] = {}
         _find_subgraphs(output_node, self.subgraphs)
+        for node in list(postorder_iter_nodes(self.output_node, flatten_subgraphs=True)):
+            node.op.load_artifacts("")
 
     def subgraph(self, name: str) -> "Graph":
         if name not in self.subgraphs:

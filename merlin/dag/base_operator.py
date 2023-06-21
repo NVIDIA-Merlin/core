@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import os
 from enum import Flag, auto
 from typing import Any, List, Optional, Union
 
@@ -239,6 +240,24 @@ class BaseOperator:
         for col_name in col_selector.names:
             column_mapping[col_name] = [col_name]
         return column_mapping
+
+    def load_artifacts(self, artifact_path: Optional[os.PathLike] = None):
+        """Load artifacts from disk required for operator function.
+
+        Parameters
+        ----------
+        artifact_path : str
+            The path where artifacts are loaded from
+        """
+
+    def save_artifacts(self, artifact_path: Optional[os.PathLike] = None) -> None:
+        """Save artifacts required to be reload operator state from disk
+
+        Parameters
+        ----------
+        artifact_path : str
+            The path where artifacts are to be saved
+        """
 
     def compute_column_schema(self, col_name, input_schema):
         methods = [
