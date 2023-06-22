@@ -337,6 +337,7 @@ document.write(`
 <span class="c1">#</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Flag</span><span class="p">,</span> <span class="n">auto</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -561,6 +562,24 @@ document.write(`
         <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">col_selector</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="n">column_mapping</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">column_mapping</span></div>
+
+<div class="viewcode-block" id="BaseOperator.load_artifacts"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.load_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">load_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load artifacts from disk required for operator function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        artifact_path : str</span>
+<span class="sd">            The path where artifacts are loaded from</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="BaseOperator.save_artifacts"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.save_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">save_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save artifacts required to be reload operator state from disk</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        artifact_path : str</span>
+<span class="sd">            The path where artifacts are to be saved</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="BaseOperator.compute_column_schema"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.BaseOperator.compute_column_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_column_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
         <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span>

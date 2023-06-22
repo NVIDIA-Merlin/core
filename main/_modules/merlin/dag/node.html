@@ -919,14 +919,17 @@ document.write(`
             <span class="p">)</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:]</span>
     <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+            <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">iter_nodes</span><span class="p">([</span><span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">new_nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
-            <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">iter_nodes</span><span class="p">([</span><span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">current</span>
             <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current</span><span class="o">.</span><span class="n">parents_with_dependencies</span><span class="p">:</span>
@@ -935,7 +938,7 @@ document.write(`
 
 
 <span class="c1"># output node (bottom) -&gt; selection leaf nodes (top)</span>
-<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -946,6 +949,8 @@ document.write(`
             <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">preorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
@@ -957,7 +962,7 @@ document.write(`
 
 
 <span class="c1"># selection leaf nodes (top) -&gt; output node (bottom)</span>
-<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -965,8 +970,11 @@ document.write(`
     <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="n">current_nodes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
             <span class="n">traverse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parents_with_dependencies</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">postorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
 
     <span class="n">traverse</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
@@ -985,15 +993,18 @@ document.write(`
     <span class="k">return</span> <span class="n">results</span>
 
 
-<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">combined</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
+            <span class="k">if</span> <span class="n">input_schemas</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">input_schema</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="n">input_schemas</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">combined</span>
 
 

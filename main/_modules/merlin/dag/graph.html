@@ -371,6 +371,8 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;Graph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">_find_subgraphs</span><span class="p">(</span><span class="n">output_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">postorder_iter_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_node</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">load_artifacts</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Graph.subgraph"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Graph.subgraph">[docs]</a>    <span class="k">def</span> <span class="nf">subgraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Graph&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgraphs</span><span class="p">:</span>
@@ -445,7 +447,8 @@ document.write(`
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># leaf_node input and output schemas are the same (aka selection)</span>
-        <span class="k">return</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leaf_nodes</span><span class="p">)</span>
+        <span class="c1"># subgraphs can also be leaf nodes now, so input and output are different</span>
+        <span class="k">return</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leaf_nodes</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">leaf_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
