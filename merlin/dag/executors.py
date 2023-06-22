@@ -311,10 +311,6 @@ class DaskExecutor:
         if client is not None:
             set_client_deprecated(client, "DaskExecutor")
 
-    @property
-    def target_format(self):
-        return DataFormats.PANDAS_DATAFRAME | DataFormats.CUDF_DATAFRAME
-
     def __getstate__(self):
         # dask client objects aren't picklable - exclude from saved representation
         return {k: v for k, v in self.__dict__.items() if k != "client"}
