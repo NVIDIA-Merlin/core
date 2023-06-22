@@ -146,9 +146,9 @@ class Subgraph(StatOperator):
     def fit_finalize(self, dask_stats):
         return dask_stats
 
-    def set_storage_path(self, path, copy=False):
+    def set_storage_path(self, new_path, copy=False):
         for stat in Graph.get_nodes_by_op_type([self.graph.output_node], StatOperator):
-            stat.op.set_storage_path(path, copy=copy)
+            stat.op.set_storage_path(new_path, copy=copy)
 
     @property
     def is_subgraph(self):
