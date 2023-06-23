@@ -222,7 +222,8 @@ class LocalExecutor:
         try:
             # use input_columns to ensure correct grouping (subgroups)
             selection = node.input_columns.resolve(node.input_schema)
-            transformed_data = node.op.transform(selection, input_data)
+
+            transformed_data = self.run_op_transform(node, input_data, selection)
 
             if transformed_data is None:
                 raise RuntimeError(f"Operator {node.op} didn't return a value during transform")
@@ -236,6 +237,13 @@ class LocalExecutor:
         except Exception as exc:
             LOG.exception("Failed to transform operator %s", node.op)
             raise exc
+
+    def run_op_transform(self, node, input_data, selection):
+        """
+        This method is extracted from _run_node_transform so that we can override it with a
+        telemetry-wrapped version.
+        """
+        return node.op.transform(selection, input_data)
 
     def _capture_dtypes(self, node, output_data):
         for col_name, output_col_schema in node.output_schema.column_schemas.items():
