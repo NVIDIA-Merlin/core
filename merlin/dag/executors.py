@@ -51,15 +51,20 @@ class LocalExecutor:
 
     def __init__(self, device=Device.GPU):
         self.device = device if HAS_GPU else Device.CPU
-
-    @property
-    def target_format(self):
-        return (
+        self._target_format = (
             DataFormats.PANDAS_DATAFRAME
             | DataFormats.CUDF_DATAFRAME
             | DataFormats.NUMPY_TENSOR_TABLE
             | DataFormats.CUPY_TENSOR_TABLE
         )
+
+    @property
+    def target_format(self):
+        return self._target_format
+
+    @target_format.setter
+    def target_format(self, formats):
+        self._target_format = formats
 
     def transform(
         self,
@@ -306,6 +311,7 @@ class DaskExecutor:
 
     def __init__(self, client=None):
         self._executor = LocalExecutor()
+        self._executor.target_format = DataFormats.PANDAS_DATAFRAME | DataFormats.CUDF_DATAFRAME
 
         # Deprecate `client`
         if client is not None:
