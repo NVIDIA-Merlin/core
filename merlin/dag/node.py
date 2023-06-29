@@ -209,7 +209,6 @@ class Node:
         self.input_schema = self.op.compute_input_schema(
             root_schema, parents_schema, deps_schema, self.selector
         )
-
         self.selector = self.op.compute_selector(
             self.input_schema, self.selector, parents_selector, dependencies_selector
         )
@@ -345,8 +344,9 @@ class Node:
 
         return child
 
-    # handle the "column_name" + Node case
-    __radd__ = __add__
+    def __radd__(self, other):
+        other_node = Node.construct_from(other)
+        return other_node.__add__(self)
 
     def __sub__(self, other):
         """Removes columns from this Node with another to return a new Node
