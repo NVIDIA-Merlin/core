@@ -109,8 +109,8 @@ def test_concat_prefers_rhs_with_seen_root_output():
 
     graph.construct_schema(schema)
     result2 = LocalExecutor().transform(df, graph)
-    assert (result2["b"] == [2, 2, 2, 2, 2, 2]).all()
-    assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
+    assert result2["b"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
 
 
 def test_concat_prefers_rhs_with_unseen_root_output():
@@ -122,8 +122,8 @@ def test_concat_prefers_rhs_with_unseen_root_output():
 
     graph.construct_schema(schema)
     result2 = LocalExecutor().transform(df, graph)
-    assert (result2["b"] == [1, 1, 1, 1, 1, 1]).all()
-    assert (result2["a"] == [2, 2, 2, 2, 2, 2]).all()
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
 
 
 def test_concat_prefers_rhs_with_seen_and_unseen_root_output():
@@ -135,5 +135,5 @@ def test_concat_prefers_rhs_with_seen_and_unseen_root_output():
 
     graph.construct_schema(schema)
     result2 = LocalExecutor().transform(df, graph)
-    assert (result2["b"] == [1, 1, 1, 1, 1, 1]).all()
-    assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
