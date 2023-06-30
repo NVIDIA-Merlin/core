@@ -100,7 +100,7 @@ def test_subgraph_with_summed_subgraphs():
     assert iter_len == pre_len
 
 
-def test_selector_concat_parents():
+def test_selector_concat_graph_with_seen_root_output():
     df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
     graph = Graph((["a", "b"] >> UDF(lambda x: x + 1)) + ["a"])
@@ -113,20 +113,7 @@ def test_selector_concat_parents():
     assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
 
 
-def test_selector_concat_parents_inverted():
-    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
-
-    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["a", "b"])
-
-    schema = Schema(["a", "b"])
-
-    graph.construct_schema(schema)
-    result2 = LocalExecutor().transform(df, graph)
-    assert (result2["b"] == [1, 1, 1, 1, 1, 1]).all()
-    assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
-
-
-def test_selector_concat_parents_open():
+def test_selector_concat_graph_with_unseen_root_output():
     df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
     graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["b"])
@@ -137,3 +124,16 @@ def test_selector_concat_parents_open():
     result2 = LocalExecutor().transform(df, graph)
     assert (result2["b"] == [1, 1, 1, 1, 1, 1]).all()
     assert (result2["a"] == [2, 2, 2, 2, 2, 2]).all()
+
+
+def test_selector_concat_graph_with_seen_and_unseen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["a", "b"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert (result2["b"] == [1, 1, 1, 1, 1, 1]).all()
+    assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
