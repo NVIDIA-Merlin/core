@@ -100,7 +100,7 @@ def test_subgraph_with_summed_subgraphs():
     assert iter_len == pre_len
 
 
-def test_selector_concat_graph_with_seen_root_output():
+def test_concat_prefers_rhs_with_seen_root_output():
     df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
     graph = Graph((["a", "b"] >> UDF(lambda x: x + 1)) + ["a"])
@@ -113,7 +113,7 @@ def test_selector_concat_graph_with_seen_root_output():
     assert (result2["a"] == [1, 1, 1, 1, 1, 1]).all()
 
 
-def test_selector_concat_graph_with_unseen_root_output():
+def test_concat_prefers_rhs_with_unseen_root_output():
     df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
     graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["b"])
@@ -126,7 +126,7 @@ def test_selector_concat_graph_with_unseen_root_output():
     assert (result2["a"] == [2, 2, 2, 2, 2, 2]).all()
 
 
-def test_selector_concat_graph_with_seen_and_unseen_root_output():
+def test_concat_prefers_rhs_with_seen_and_unseen_root_output():
     df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
     graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["a", "b"])
