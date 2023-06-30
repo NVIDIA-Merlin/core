@@ -187,12 +187,19 @@ class LocalExecutor:
                 combined_outputs = upstream_output
                 seen_columns = upstream_columns
             else:
+                old_columns = seen_columns - upstream_columns
+                overlap_columns = seen_columns.intersection(upstream_columns)
                 new_columns = upstream_columns - seen_columns
+                merge_columns = []
+                if old_columns:
+                    merge_columns.append(combined_outputs[list(old_columns)])
+                if overlap_columns:
+                    merge_columns.append(upstream_output[list(overlap_columns)])
                 if new_columns:
-                    combined_outputs = merge_fn(
-                        [combined_outputs, upstream_output[list(new_columns)]]
-                    )
+                    merge_columns.append(upstream_output[list(new_columns)])
                     seen_columns.update(new_columns)
+                if merge_columns:
+                    combined_outputs = merge_fn(merge_columns)
         return combined_outputs
 
     def _run_node_transform(self, node, input_data, capture_dtypes=False, strict=False):
