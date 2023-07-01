@@ -613,7 +613,7 @@ def _convert_format(tensors, target_format):
     if format_ & target_format:
         return tensors
 
-    elif target_format & DataFormats.CUPY_DICT_ARRAY:
+    elif target_format & DataFormats.CUPY_DICT_ARRAY and cupy:
         if format_ == DataFormats.NUMPY_DICT_ARRAY:
             return TensorTable(tensors).gpu().to_dict()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -623,7 +623,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
             return TensorTable.from_df(tensors).gpu().to_dict()
 
-    elif target_format & DataFormats.NUMPY_DICT_ARRAY:
+    elif target_format & DataFormats.NUMPY_DICT_ARRAY and numpy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors).cpu().to_dict()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -633,7 +633,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
             return TensorTable.from_df(tensors).cpu().to_dict()
 
-    elif target_format & DataFormats.CUPY_TENSOR_TABLE:
+    elif target_format & DataFormats.CUPY_TENSOR_TABLE and cupy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors)
         elif format_ == DataFormats.NUMPY_DICT_ARRAY:
@@ -643,7 +643,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
             return TensorTable.from_df(tensors).gpu()
 
-    elif target_format & DataFormats.NUMPY_TENSOR_TABLE:
+    elif target_format & DataFormats.NUMPY_TENSOR_TABLE and numpy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors).cpu()
         elif format_ == DataFormats.NUMPY_DICT_ARRAY:
@@ -653,7 +653,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
             return TensorTable.from_df(tensors).cpu()
 
-    elif target_format & DataFormats.CUDF_DATAFRAME:
+    elif target_format & DataFormats.CUDF_DATAFRAME and cudf:
         if format_ == DataFormats.PANDAS_DATAFRAME:
             return cudf.DataFrame(tensors)
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -663,7 +663,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
             return TensorTable(tensors).gpu().to_df()
 
-    elif target_format & DataFormats.PANDAS_DATAFRAME:
+    elif target_format & DataFormats.PANDAS_DATAFRAME and pandas:
         if format_ == DataFormats.CUDF_DATAFRAME:
             return tensors.to_pandas()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
