@@ -14,7 +14,8 @@ jobs:
       credentials:
         username: ${{ secrets.SVC_DOCKER_USER }}
         password: ${{ secrets.SVC_DOCKER_TOKEN }}
-      options: --gpus=all
+      env:
+        NVIDIA_VISIBLE_DEVICES: ${{ env.NVIDIA_VISIBLE_DEVICES }}
     steps:
       - uses: actions/checkout@v3
         with:
