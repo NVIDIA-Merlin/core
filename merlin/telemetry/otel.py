@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-from merlin.telemetry.base import Telemetry
+from merlin.telemetry.base import TelemetryProvider
 
 
-class OtelTelemetry(Telemetry):
+class OtelTelemetry(TelemetryProvider):
     def __init__(self, tracer):
         self.tracer = tracer
 

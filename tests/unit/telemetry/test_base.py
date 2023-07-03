@@ -14,16 +14,16 @@
 # limitations under the License.
 #
 
-from merlin.telemetry import Telemetry, telemetry
+from merlin.telemetry import TelemetryProvider, telemetry
 
 
-def configure_telemetry(telemeter: Telemetry):
+def configure_telemetry(telemeter: TelemetryProvider):
     import merlin
 
     merlin.telemetry.TELEMETRY = telemeter
 
 
-class TestTelemetry(Telemetry):
+class TestTelemetry(TelemetryProvider):
     def __init__(self):
         self.spans = []
 

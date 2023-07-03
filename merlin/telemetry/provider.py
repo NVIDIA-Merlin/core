@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 
 
-class Telemetry(ABC):
+class TelemetryProvider(ABC):
     def __init__(self, *args, **kwargs):
         ...
 

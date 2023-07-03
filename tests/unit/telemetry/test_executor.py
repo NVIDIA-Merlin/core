@@ -22,16 +22,16 @@ from merlin.dag import BaseOperator, Graph
 from merlin.dag.executors import LocalExecutor
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
-from merlin.telemetry import Telemetry, telemetry
+from merlin.telemetry import TelemetryProvider, telemetry
 
 
-def configure_telemetry(telemeter: Telemetry):
+def configure_telemetry(provider: TelemetryProvider):
     import merlin
 
-    merlin.telemetry.TELEMETRY = telemeter
+    merlin.telemetry.TELEMETRY_PROVIDER = provider
 
 
-class TestTelemetry(Telemetry):
+class TestTelemetry(TelemetryProvider):
     def __init__(self):
         self.spans = []
 
@@ -83,7 +83,7 @@ class InstrumentedExecutor(LocalExecutor):
 
 
 @contextmanager
-def record_span(telemetry: Telemetry, name: str):
+def record_span(telemetry: TelemetryProvider, name: str):
     telemetry.span(f"{name} cm start")
     try:
         yield
@@ -97,7 +97,7 @@ class InstrumentedOperator(BaseOperator):
         self,
         col_selector: ColumnSelector,
         transformable: Transformable,
-        telemetry: Optional[Telemetry] = None,
+        telemetry: Optional[TelemetryProvider] = None,
     ) -> Transformable:
         telemetry.span(f"{self.__class__.__name__} decorator start")
         result = super().transform(col_selector, transformable)
@@ -112,7 +112,7 @@ class ContextManagerOperator(BaseOperator):
         self,
         col_selector: ColumnSelector,
         transformable: Transformable,
-        telemetry: Optional[Telemetry] = None,
+        telemetry: Optional[TelemetryProvider] = None,
     ) -> Transformable:
         with record_span(telemetry, self.__class__.__name__):
             result = super().transform(col_selector, transformable)

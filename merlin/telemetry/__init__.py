@@ -15,8 +15,8 @@
 #
 from typing import Optional
 
-from merlin.telemetry.base import Telemetry
 from merlin.telemetry.otel import OtelTelemetry
+from merlin.telemetry.provider import TelemetryProvider
 
 TELEMETRY = None
 
@@ -34,51 +34,3 @@ def telemetry(func):
     wrapper.telemetry = True
 
     return wrapper
-
-
-# class BaseOperator:
-#     @property
-#     def TELEMETRY(self):
-#         ...
-
-#     def telemetry(self, func):
-#         def wrapper(*args, **kwargs):
-#             return func(*args, telemetry=self.TELEMETRY, **kwargs)
-
-#         wrapper.telemetry = True
-
-#         return wrapper
-
-# class MyOperator(BaseOperator):
-
-#     def transform(self, col_):
-#         ...
-
-# # executor().transform(transformable, nodes, tracer=tracer)
-
-
-# class MyExecutor:
-#     def __init__(self, telem: Telemetry):
-#         self.telemetry = telem
-
-#     def transform(self, fn):
-#         if hasattr(fn, "telemetry"):
-#             return fn(telemetry=self.telemetry)
-#         else:
-#             return fn()
-
-
-# @telemetry
-# def my_fn(telemetry: Optional[Telemetry] = None):
-#     if telemetry:
-#         return telemetry.span
-
-
-# def my_other_fn():
-#     return 42
-
-
-# my_exec = MyExecutor(Telemetry())
-# my_exec.transform(my_fn)
-
-# my_exec.transform(my_other_fn)
