@@ -20,6 +20,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: actions/cache@v3
+        with:
+          path: .tox
+          key: tox-${{ matrix.image }}-${{ hashFiles('requirements/*.txt') }}
+      - name: Get Branch name
+        id: get-branch-name
+        uses: NVIDIA-Merlin/.github/actions/branch-name@6f0539fba24f60da2aee63c5925bee7cee3206e3
       - name: Run tests
         run: |
-          cd ${{ github.workspace }}; tox -e test-gpu
+          merlin_branch="${{ steps.get-branch-name.outputs.branch }}"
+          MERLIN_BRANCH=$merlin_branch COMPARE_BRANCH=$merlin_branch \
+            tox -e gpu
