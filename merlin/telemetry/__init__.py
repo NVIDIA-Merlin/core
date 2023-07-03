@@ -13,12 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Optional
-
-from merlin.telemetry.otel import OtelTelemetry
 from merlin.telemetry.provider import TelemetryProvider
 
-TELEMETRY = None
+
+TELEMETRY_PROVIDER = None
+
+
+def configure_telemetry_provider(provider: TelemetryProvider):
+    import merlin
+
+    merlin.telemetry.TELEMETRY_PROVIDER = provider
+
+
+def get_telemetry_provider() -> TelemetryProvider:
+    import merlin
+
+    return merlin.telemetry.TELEMETRY_PROVIDER
 
 
 # @telemetry decorator should not have an arg
@@ -29,7 +39,7 @@ TELEMETRY = None
 
 def telemetry(func):
     def wrapper(*args, **kwargs):
-        return func(*args, telemetry=TELEMETRY, **kwargs)
+        return func(*args, telemetry=TELEMETRY_PROVIDER, **kwargs)
 
     wrapper.telemetry = True
 

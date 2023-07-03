@@ -14,12 +14,22 @@
 # limitations under the License.
 #
 
-from merlin.telemetry.base import TelemetryProvider
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+from merlin.telemetry.provider import TelemetryProvider
 
 
-class OtelTelemetry(TelemetryProvider):
-    def __init__(self, tracer):
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+TRACER = trace.get_tracer(__name__)
+
+
+class OtelProvider(TelemetryProvider):
+    def __init__(self, tracer=TRACER):
         self.tracer = tracer
 
     def span(self, name: str):
-        self.tracer.start_span_as_current(name)
+        return self.tracer.start_as_current_span(name)

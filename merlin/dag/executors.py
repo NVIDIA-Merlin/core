@@ -35,6 +35,8 @@ from merlin.dtypes.shape import DefaultShapes
 from merlin.io import Dataset
 from merlin.io.worker import clean_worker_cache
 from merlin.table import CupyColumn, NumpyColumn, TensorTable
+from merlin.telemetry import get_telemetry_provider
+
 
 LOG = logging.getLogger("merlin")
 
@@ -51,6 +53,7 @@ class LocalExecutor:
 
     def __init__(self, device=Device.GPU):
         self.device = device if HAS_GPU else Device.CPU
+        self.telemetry = get_telemetry_provider()
 
     @property
     def target_format(self):
@@ -94,8 +97,12 @@ class LocalExecutor:
         # If we have multiple, we concatenate their outputs into a single transformable
         output_data = None
         for node in nodes:
-            transformed_data = self._execute_node(node, transformable, capture_dtypes, strict)
-            output_data = self._combine_node_outputs(node, transformed_data, output_data)
+            transformed_data = self._execute_node(
+                node, transformable, capture_dtypes, strict
+            )
+            output_data = self._combine_node_outputs(
+                node, transformed_data, output_data
+            )
 
         # If there are any additional columns that weren't produced by one of the supplied nodes
         # we grab them directly from the supplied input data. Normally this would happen on a
@@ -111,14 +118,20 @@ class LocalExecutor:
         upstream_outputs = self._run_upstream_transforms(
             node, transformable, capture_dtypes, strict
         )
-        upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
+        upstream_columns = self._append_addl_root_columns(
+            node, transformable, upstream_outputs
+        )
         formatted_columns = self._standardize_formats(node, upstream_columns)
         transform_input = self._merge_upstream_columns(formatted_columns)
-        transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
+        transform_output = self._run_node_transform(
+            node, transform_input, capture_dtypes, strict
+        )
         transform_output = _convert_format(transform_output, self.target_format)
         return transform_output
 
-    def _run_upstream_transforms(self, node, transformable, capture_dtypes=False, strict=False):
+    def _run_upstream_transforms(
+        self, node, transformable, capture_dtypes=False, strict=False
+    ):
         upstream_outputs = []
 
         for upstream_node in node.parents_with_dependencies:
@@ -226,7 +239,9 @@ class LocalExecutor:
             transformed_data = self.run_op_transform(node, input_data, selection)
 
             if transformed_data is None:
-                raise RuntimeError(f"Operator {node.op} didn't return a value during transform")
+                raise RuntimeError(
+                    f"Operator {node.op} didn't return a value during transform"
+                )
             elif capture_dtypes:
                 self._capture_dtypes(node, transformed_data)
             elif strict and len(transformed_data):
@@ -243,7 +258,12 @@ class LocalExecutor:
         This method is extracted from _run_node_transform so that we can override it with a
         telemetry-wrapped version.
         """
-        return node.op.transform(selection, input_data)
+        if self.telemetry:
+            with self.telemetry.span(f"{node.op.__class__.__name__}"):
+                result = node.op.transform(selection, input_data)
+        else:
+            result = node.op.transform(selection, input_data)
+        return result
 
     def _capture_dtypes(self, node, output_data):
         for col_name, output_col_schema in node.output_schema.column_schemas.items():
@@ -503,7 +523,10 @@ class DaskExecutor:
                 addl_input_cols = set()
                 if node.parents:
                     upstream_output_cols = sum(
-                        [upstream.output_columns for upstream in node.parents_with_dependencies],
+                        [
+                            upstream.output_columns
+                            for upstream in node.parents_with_dependencies
+                        ],
                         ColumnSelector(),
                     )
                     addl_input_cols = set(node.input_columns.names) - set(
