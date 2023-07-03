@@ -15,12 +15,49 @@
 #
 
 from abc import ABC, abstractmethod
+from contextlib import AbstractContextManager, nullcontext
 
 
 class TelemetryProvider(ABC):
-    def __init__(self, *args, **kwargs):
-        ...
+    """
+    Abstract base class for Merlin telemetry providers that integrate external telemetry tools
+    """
 
     @abstractmethod
-    def span(self):
-        ...
+    def span(self, name: str) -> AbstractContextManager:
+        """
+        Create a span that is recorded within a trace.
+
+        Parameters
+        ----------
+        name : str
+            Identifier for the recorded span
+
+        Returns
+        -------
+        AbstractContextManager
+            A context manager that records a span around the code executed within
+        """
+
+
+class NullTelemetryProvider(TelemetryProvider):
+    """A telemetry object that does nothing, which is the default when no other telemetry provider
+    is available. Essentially the same as the `None` primitive, but returns null context managers
+    as needed, so that the return values can be used in `with` blocks.
+    """
+
+    def span(self, name: str) -> AbstractContextManager:
+        """
+        Create a span that is recorded within a trace.
+
+        Parameters
+        ----------
+        name : str
+            Identifier for the recorded span
+
+        Returns
+        -------
+        AbstractContextManager
+            A context manager that records a span around the code executed within
+        """
+        return nullcontext()

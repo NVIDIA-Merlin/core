@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from contextlib import AbstractContextManager
 
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 
 from merlin.telemetry.provider import TelemetryProvider
-
 
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
@@ -28,8 +28,25 @@ TRACER = trace.get_tracer(__name__)
 
 
 class OtelProvider(TelemetryProvider):
+    """
+    Merlin telemetry provider that integrates Open Telemetry instrumentation.
+    """
+
     def __init__(self, tracer=TRACER):
         self.tracer = tracer
 
-    def span(self, name: str):
+    def span(self, name: str) -> AbstractContextManager:
+        """
+        Create a span that is recorded within an OpenTelemetry trace.
+
+        Parameters
+        ----------
+        name : str
+            Identifier for the recorded span
+
+        Returns
+        -------
+        AbstractContextManager
+            A context manager that records a span around the code executed within
+        """
         return self.tracer.start_as_current_span(name)

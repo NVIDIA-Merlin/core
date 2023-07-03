@@ -13,34 +13,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.telemetry.provider import TelemetryProvider
+from merlin.telemetry.provider import NullTelemetryProvider, TelemetryProvider
 
-
-TELEMETRY_PROVIDER = None
+TELEMETRY_PROVIDER: TelemetryProvider = NullTelemetryProvider()
 
 
 def configure_telemetry_provider(provider: TelemetryProvider):
+    """
+    Set the global telemetry provider for Merlin
+
+    Parameters
+    ----------
+    provider : TelemetryProvider
+
+    """
     import merlin
 
     merlin.telemetry.TELEMETRY_PROVIDER = provider
 
 
 def get_telemetry_provider() -> TelemetryProvider:
+    """
+    Get the global telemetry provider for Merlin
+
+    Returns
+    -------
+    TelemetryProvider
+        The telemetry provider currently in use
+    """
     import merlin
 
     return merlin.telemetry.TELEMETRY_PROVIDER
 
 
-# @telemetry decorator should not have an arg
-# we should only need to add a telemetry param to operator transform methods when we're using telemetry directly
-# we shouldn't have to add additional properties to the operators
-# the executor should be able to supply a telemetry object when running ops (somehow)
-
-
 def telemetry(func):
-    def wrapper(*args, **kwargs):
-        return func(*args, telemetry=TELEMETRY_PROVIDER, **kwargs)
+    """
+    A decorator that automatically records a span around the provided function
 
-    wrapper.telemetry = True
+    Parameters
+    ----------
+    func : Callable
+        Function to be wrapped by decorator.
+    """
+
+    def wrapper(*args, **kwargs):
+        telemetry = get_telemetry_provider()
+        with telemetry.span(f"{func.__qualname__}()"):
+            return func(*args, **kwargs)
 
     return wrapper
