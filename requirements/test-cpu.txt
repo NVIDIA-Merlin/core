@@ -1,2 +1,2 @@
--r requirements-test.txt
--r requirements.txt
+-r test.txt
+-r base.txt
