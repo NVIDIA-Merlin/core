@@ -1,83 +1,300 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>merlin.dag.node &mdash; Merlin Core  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/togglebutton.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/mystnb.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>merlin.dag.node &#8212; Merlin Core</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/versions.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../../../_static/js/rtd-version-switcher.js"></script>
+    <script src="../../../_static/design-tabs.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/merlin/dag/node';</script>
     <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/_modules/merlin/dag/node.html" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script >let toggleHintShow = 'Click to show';</script>
-        <script >let toggleHintHide = 'Click to hide';</script>
-        <script >let toggleOpenOnPrint = 'true';</script>
-        <script src="../../../_static/togglebutton.js"></script>
-        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../../../_static/js/theme.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-</head>
+    <link rel="search" title="Search" href="../../../search.html" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NVJ1Y1YJHK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-<body class="wy-body-for-nav">
-  <div class="banner">
-    <p class="banner">
-      Beginning in January 2023, versions for all NVIDIA Merlin projects
-      will change from semantic versioning like <code>4.0</code>
-      to calendar versioning like <code>23.01</code>.</p>
+    gtag('config', 'G-NVJ1Y1YJHK', {
+        'anonymize_ip': false,
+    });
+  </script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,300&display=swap" rel="stylesheet">
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
   </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> Merlin Core
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents</span></p>
-<ul>
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">NVIDIA Merlin Core</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.dag.html">merlin.dag package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.io.html">merlin.io package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.schema.html">merlin.schema package</a></li>
+</ul>
+</li>
 </ul>
 
-        </div>
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-merlin-ecosystem-nav" aria-label="Merlin Ecosystem Nav">
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Ecosystem</span></p>
+    <ul class="nav bd-sidenav">
+      <li class="toctree-l1"><a class="reference external" href="/models/">Models</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/systems/">Systems</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/NVTabular/">NVTabular</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Transformers4Rec/">Transformers4Rec</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/dataloader/">Dataloader</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Merlin/">Merlin</a></li>
+    </ul>
+  </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
       </div>
-    </nav>
+      
+      <main id="main-content" class="bd-main">
+        
+        
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Merlin Core</a>
-      </nav>
+<div class="sbt-scroll-pixel-helper"></div>
 
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>merlin.dag.node</li>
-      <li class="wy-breadcrumbs-aside">
-      </li>
-  </ul>
-  <hr/>
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/NVIDIA-Merlin/core" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <h1>Source code for merlin.dag.node</h1><div class="highlight"><pre>
 <span></span><span class="c1">#</span>
 <span class="c1"># Copyright (c) 2022, NVIDIA CORPORATION.</span>
@@ -98,10 +315,19 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">merlin.dag.base_operator</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
-<span class="kn">from</span> <span class="nn">merlin.dag.ops</span> <span class="kn">import</span> <span class="n">ConcatColumns</span><span class="p">,</span> <span class="n">SelectionOp</span><span class="p">,</span> <span class="n">SubsetColumns</span><span class="p">,</span> <span class="n">SubtractionOp</span>
+<span class="kn">from</span> <span class="nn">merlin.dag.ops</span> <span class="kn">import</span> <span class="n">ConcatColumns</span><span class="p">,</span> <span class="n">GroupingOp</span><span class="p">,</span> <span class="n">SelectionOp</span><span class="p">,</span> <span class="n">SubsetColumns</span><span class="p">,</span> <span class="n">SubtractionOp</span>
 <span class="kn">from</span> <span class="nn">merlin.dag.ops.udf</span> <span class="kn">import</span> <span class="n">UDF</span>
 <span class="kn">from</span> <span class="nn">merlin.dag.selector</span> <span class="kn">import</span> <span class="n">ColumnSelector</span>
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+
+<span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+    <span class="n">BaseOperator</span><span class="p">,</span>
+    <span class="nb">str</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ColumnSelector</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
+<span class="p">]</span>
 
 
 <div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
@@ -150,13 +376,7 @@
     <span class="c1"># These methods must maintain grouping</span>
 <div class="viewcode-block" id="Node.add_dependency"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_dependency">[docs]</a>    <span class="k">def</span> <span class="nf">add_dependency</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">dep</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a dependency node to this node</span>
@@ -180,13 +400,7 @@
 
 <div class="viewcode-block" id="Node.add_parent"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_parent">[docs]</a>    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">parent</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">parent</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a parent node to this node</span>
@@ -208,13 +422,7 @@
 
 <div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">child</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a child node to this node</span>
@@ -236,13 +444,7 @@
 
 <div class="viewcode-block" id="Node.remove_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">child</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removing a child node from this node</span>
@@ -276,6 +478,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parents_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">deps_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
+
         <span class="n">parents_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">dependencies_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
 
@@ -289,7 +492,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">compute_input_schema</span><span class="p">(</span>
             <span class="n">root_schema</span><span class="p">,</span> <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span>
         <span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">compute_selector</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span> <span class="n">parents_selector</span><span class="p">,</span> <span class="n">dependencies_selector</span>
         <span class="p">)</span>
@@ -341,7 +543,11 @@
                     <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">validate_schemas</span><span class="p">(</span>
-                <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">strict_dtypes</span>
+                <span class="n">parents_schema</span><span class="p">,</span>
+                <span class="n">deps_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span>
+                <span class="n">strict_dtypes</span><span class="p">,</span>
             <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
@@ -411,18 +617,26 @@
         <span class="n">other_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">other_nodes</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">other_node</span> <span class="ow">in</span> <span class="n">other_nodes</span><span class="p">:</span>
+            <span class="c1"># If the other node is a `[]`, we want to maintain grouping</span>
+            <span class="c1"># so create a selection node that we can use to do that</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">grouped_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">GroupingOp</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">other_node</span><span class="p">:</span>
+                    <span class="n">grouped_node</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span><span class="n">grouped_node</span><span class="p">)</span>
             <span class="c1"># If the other node is a `+` node, we want to collapse it into this `+` node to</span>
             <span class="c1"># avoid creating a cascade of repeated `+`s that we&#39;d need to optimize out by</span>
             <span class="c1"># re-combining them later in order to clean up the graph</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ConcatColumns</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ConcatColumns</span><span class="p">):</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">+=</span> <span class="n">other_node</span><span class="o">.</span><span class="n">grouped_parents_with_dependencies</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span><span class="n">other_node</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">child</span>
 
-    <span class="c1"># handle the &quot;column_name&quot; + Node case</span>
-    <span class="fm">__radd__</span> <span class="o">=</span> <span class="fm">__add__</span>
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_node</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes columns from this Node with another to return a new Node</span>
@@ -610,10 +824,6 @@
     <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_to_graphviz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
-        <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]]</span>
-    <span class="p">]</span>
-
 <div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">construct_from</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -641,6 +851,10 @@
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">([</span><span class="n">nodable</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">nodable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">nodable</span>
+            <span class="k">return</span> <span class="n">node</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">nodable</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -657,7 +871,11 @@
                 <span class="n">selection_nodes</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="p">[</span><span class="n">Node</span><span class="p">(</span><span class="n">_combine_selectors</span><span class="p">(</span><span class="n">selection_nodes</span><span class="p">))]</span> <span class="k">if</span> <span class="n">selection_nodes</span> <span class="k">else</span> <span class="p">[]</span>
                 <span class="p">)</span>
-                <span class="k">return</span> <span class="n">non_selection_nodes</span> <span class="o">+</span> <span class="n">selection_nodes</span>
+                <span class="n">group_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">GroupingOp</span><span class="p">())</span>
+                <span class="n">all_node</span> <span class="o">=</span> <span class="n">non_selection_nodes</span> <span class="o">+</span> <span class="n">selection_nodes</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_node</span><span class="p">:</span>
+                    <span class="n">group_node</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">group_node</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -665,10 +883,15 @@
             <span class="p">)</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:]</span>
     <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+            <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">iter_nodes</span><span class="p">([</span><span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">new_nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -679,7 +902,7 @@
 
 
 <span class="c1"># output node (bottom) -&gt; selection leaf nodes (top)</span>
-<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -690,6 +913,8 @@
             <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">preorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
@@ -701,7 +926,7 @@
 
 
 <span class="c1"># selection leaf nodes (top) -&gt; output node (bottom)</span>
-<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -709,8 +934,11 @@
     <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="n">current_nodes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
             <span class="n">traverse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parents_with_dependencies</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">postorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
 
     <span class="n">traverse</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
@@ -729,15 +957,18 @@
     <span class="k">return</span> <span class="n">results</span>
 
 
-<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">combined</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
+            <span class="k">if</span> <span class="n">input_schemas</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">input_schema</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="n">input_schemas</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">combined</span>
 
 
@@ -745,7 +976,9 @@
     <span class="n">combined</span> <span class="o">=</span> <span class="n">ColumnSelector</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">GroupingOp</span><span class="p">):</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">:</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">output_column_names</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span><span class="p">:</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span><span class="o">.</span><span class="n">column_names</span><span class="p">)</span>
@@ -760,8 +993,6 @@
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">subgroups</span><span class="o">=</span><span class="n">_combine_selectors</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">combined</span>
 
 
@@ -824,42 +1055,61 @@
     <span class="k">return</span> <span class="n">outputs</span>
 </pre></div>
 
-           </div>
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+            
           </div>
-          <footer>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023, NVIDIA.
+      <br/>
+    
+  </p>
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, NVIDIA.</p>
   </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
+  
+  <div class="footer-item">
+    
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-    <!-- Theme Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NVJ1Y1YJHK"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  
+</div>
+          </footer>
+        
 
-      gtag('config', 'G-NVJ1Y1YJHK', {
-          'anonymize_ip': false,
-      });
-    </script> 
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
-</body>
+  <footer class="bd-footer">
+  </footer>
+  </body>
 </html>
