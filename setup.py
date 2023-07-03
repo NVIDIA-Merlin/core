@@ -41,6 +41,7 @@ install_reqs = read_requirements("requirements/base.txt")
 
 requirements = {
     "base": read_requirements("requirements/base.txt"),
+    "telemetry": read_requirements("requirements/telemetry.txt"),
 }
 
 with open("README.md", encoding="utf8") as readme_file:
