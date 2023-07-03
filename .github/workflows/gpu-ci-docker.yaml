@@ -1,0 +1,23 @@
+name: GPU CI
+
+on:
+  push:
+    branches:
+      - "pull-request/[0-9]+"
+
+jobs:
+  gpu-ci-docker:
+    runs-on: linux-amd64-gpu-p100-latest-1
+
+    container:
+      image: nvcr.io/nvstaging/merlin/merlin-ci-runner:latest
+      credentials:
+        username: ${{ secrets.SVC_DOCKER_USER }}
+        password: ${{ secrets.SVC_DOCKER_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Run tests
+        run: |
+          cd ${{ github.workspace }}; tox -e test-gpu
