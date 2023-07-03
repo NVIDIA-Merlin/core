@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.telemetry.provider import NullTelemetryProvider, TelemetryProvider
+from merlin.telemetry.provider import TelemetryProvider
 
-TELEMETRY_PROVIDER: TelemetryProvider = NullTelemetryProvider()
+TELEMETRY_PROVIDER: TelemetryProvider = TelemetryProvider()
 
 
 def configure_telemetry_provider(provider: TelemetryProvider):

@@ -252,7 +252,7 @@ class Node:
                 strict_dtypes,
             )
 
-    def __rshift__(self, operator):
+    def __rshift__(self, other):
         """Transforms this Node by applying an BaseOperator
 
         Parameters
@@ -264,24 +264,27 @@ class Node:
         Node
         """
 
-        if callable(operator) and not (
-            isinstance(operator, type) and issubclass(operator, BaseOperator)
-        ):
-            # implicit lambdaop conversion.
-            operator = UDF(operator)
-
-        if isinstance(operator, type) and issubclass(operator, BaseOperator):
+        if isinstance(other, type) and issubclass(other, BaseOperator):
             # handle case where an operator class is passed
-            operator = operator()
+            other = other()
+        elif callable(other):
+            # implicit lambda conversion.
+            other = UDF(other)
 
-        if not isinstance(operator, BaseOperator):
-            raise ValueError(f"Expected operator or callable, got {operator.__class__}")
+        if isinstance(other, BaseOperator):
+            child = type(self)()
+            child.op = other
+        elif isinstance(other, Node):
+            from merlin.dag.ops import Subgraph
 
-        child = type(self)()
-        child.op = operator
+            child = type(self)()
+            child.op = Subgraph(other)
+        else:
+            raise ValueError(f"Expected operator or callable, got {other.__class__}")
+
         child.add_parent(self)
 
-        dependencies = operator.dependencies
+        dependencies = other.dependencies
 
         if dependencies:
             if not isinstance(dependencies, collections.abc.Sequence):
