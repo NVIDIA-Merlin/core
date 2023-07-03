@@ -15,9 +15,12 @@
 #
 import pytest
 
+from merlin.core.dispatch import make_df
 from merlin.dag import Graph, Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 from merlin.dag.base_operator import BaseOperator
+from merlin.dag.executors import LocalExecutor
 from merlin.dag.ops.subgraph import Subgraph
+from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
 from merlin.schema.schema import ColumnSchema, Schema
 
@@ -95,3 +98,42 @@ def test_subgraph_with_summed_subgraphs():
     assert post_len == pre_len
     assert iter_len == post_len
     assert iter_len == pre_len
+
+
+def test_concat_prefers_rhs_with_seen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a", "b"] >> UDF(lambda x: x + 1)) + ["a"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+
+
+def test_concat_prefers_rhs_with_unseen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["b"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
+
+
+def test_concat_prefers_rhs_with_seen_and_unseen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["a", "b"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
