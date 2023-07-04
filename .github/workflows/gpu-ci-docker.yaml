@@ -27,4 +27,4 @@ jobs:
         run: |
           merlin_branch="${{ steps.get-branch-name.outputs.branch }}"
           MERLIN_BRANCH=$merlin_branch COMPARE_BRANCH=$merlin_branch \
-            tox -e gpu
+            tox -e test-gpu
