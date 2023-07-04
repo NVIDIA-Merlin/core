@@ -25,6 +25,7 @@ from merlin.dag.ops.add_metadata import (
     TagAsUserID,
 )
 from merlin.dag.ops.concat_columns import ConcatColumns
+from merlin.dag.ops.grouping import GroupingOp
 from merlin.dag.ops.rename import Rename
 from merlin.dag.ops.selection import SelectionOp
 from merlin.dag.ops.subset_columns import SubsetColumns

@@ -17,10 +17,19 @@ import collections.abc
 from typing import List, Union
 
 from merlin.dag.base_operator import BaseOperator
-from merlin.dag.ops import ConcatColumns, SelectionOp, SubsetColumns, SubtractionOp
+from merlin.dag.ops import ConcatColumns, GroupingOp, SelectionOp, SubsetColumns, SubtractionOp
 from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
+
+Nodable = Union[
+    "Node",
+    BaseOperator,
+    str,
+    List[str],
+    ColumnSelector,
+    List[Union["Node", BaseOperator, str, List[str], ColumnSelector]],
+]
 
 
 class Node:
@@ -69,13 +78,7 @@ class Node:
     # These methods must maintain grouping
     def add_dependency(
         self,
-        dep: Union[
-            str,
-            List[str],
-            ColumnSelector,
-            "Node",
-            List[Union[str, List[str], "Node", ColumnSelector]],
-        ],
+        dep: Nodable,
     ):
         """
         Adding a dependency node to this node
@@ -99,13 +102,7 @@ class Node:
 
     def add_parent(
         self,
-        parent: Union[
-            str,
-            List[str],
-            ColumnSelector,
-            "Node",
-            List[Union[str, List[str], "Node", ColumnSelector]],
-        ],
+        parent: Nodable,
     ):
         """
         Adding a parent node to this node
@@ -127,13 +124,7 @@ class Node:
 
     def add_child(
         self,
-        child: Union[
-            str,
-            List[str],
-            ColumnSelector,
-            "Node",
-            List[Union[str, List[str], "Node", ColumnSelector]],
-        ],
+        child: Nodable,
     ):
         """
         Adding a child node to this node
@@ -155,13 +146,7 @@ class Node:
 
     def remove_child(
         self,
-        child: Union[
-            str,
-            List[str],
-            ColumnSelector,
-            "Node",
-            List[Union[str, List[str], "Node", ColumnSelector]],
-        ],
+        child: Nodable,
     ):
         """
         Removing a child node from this node
@@ -209,7 +194,6 @@ class Node:
         self.input_schema = self.op.compute_input_schema(
             root_schema, parents_schema, deps_schema, self.selector
         )
-
         self.selector = self.op.compute_selector(
             self.input_schema, self.selector, parents_selector, dependencies_selector
         )
@@ -335,18 +319,26 @@ class Node:
         other_nodes = [other_nodes]
 
         for other_node in other_nodes:
+            # If the other node is a `[]`, we want to maintain grouping
+            # so create a selection node that we can use to do that
+            if isinstance(other_node, list):
+                grouped_node = Node.construct_from(GroupingOp())
+                for node in other_node:
+                    grouped_node.add_parent(node)
+                child.add_dependency(grouped_node)
             # If the other node is a `+` node, we want to collapse it into this `+` node to
             # avoid creating a cascade of repeated `+`s that we'd need to optimize out by
             # re-combining them later in order to clean up the graph
-            if not isinstance(other_node, list) and isinstance(other_node.op, ConcatColumns):
+            elif isinstance(other_node.op, ConcatColumns):
                 child.dependencies += other_node.grouped_parents_with_dependencies
             else:
                 child.add_dependency(other_node)
 
         return child
 
-    # handle the "column_name" + Node case
-    __radd__ = __add__
+    def __radd__(self, other):
+        other_node = Node.construct_from(other)
+        return other_node.__add__(self)
 
     def __sub__(self, other):
         """Removes columns from this Node with another to return a new Node
@@ -534,14 +526,6 @@ class Node:
     def graph(self):
         return _to_graphviz(self)
 
-    Nodable = Union[
-        "Node",
-        str,
-        List[str],
-        ColumnSelector,
-        List[Union["Node", str, List[str], ColumnSelector]],
-    ]
-
     @classmethod
     def construct_from(
         cls,
@@ -589,7 +573,11 @@ class Node:
                 selection_nodes = (
                     [Node(_combine_selectors(selection_nodes))] if selection_nodes else []
                 )
-                return non_selection_nodes + selection_nodes
+                group_node = Node.construct_from(GroupingOp())
+                all_node = non_selection_nodes + selection_nodes
+                for node in all_node:
+                    group_node.add_parent(node)
+                return group_node
 
         else:
             raise TypeError(
@@ -597,14 +585,17 @@ class Node:
             )
 
 
-def iter_nodes(nodes):
+def iter_nodes(nodes, flatten_subgraphs=False):
     queue = nodes[:]
     while queue:
-        current = queue.pop()
+        current = queue.pop(0)
+        if flatten_subgraphs and current.op.is_subgraph:
+            new_nodes = iter_nodes([current.op.graph.output_node])
+            for node in new_nodes:
+                if node not in queue:
+                    queue.append(node)
         if isinstance(current, list):
             queue.extend(current)
-        elif current.op.is_subgraph:
-            queue.extend(iter_nodes([current.op.graph.output_node]))
         else:
             yield current
             for node in current.parents_with_dependencies:
@@ -613,7 +604,7 @@ def iter_nodes(nodes):
 
 
 # output node (bottom) -> selection leaf nodes (top)
-def preorder_iter_nodes(nodes):
+def preorder_iter_nodes(nodes, flatten_subgraphs=False):
     queue = []
     if not isinstance(nodes, list):
         nodes = [nodes]
@@ -624,6 +615,8 @@ def preorder_iter_nodes(nodes):
             if node in queue:
                 queue.remove(node)
 
+            if flatten_subgraphs and node.op.is_subgraph:
+                queue.extend(list(preorder_iter_nodes(node.op.graph.output_node)))
             queue.append(node)
 
         for node in current_nodes:
@@ -635,7 +628,7 @@ def preorder_iter_nodes(nodes):
 
 
 # selection leaf nodes (top) -> output node (bottom)
-def postorder_iter_nodes(nodes):
+def postorder_iter_nodes(nodes, flatten_subgraphs=False):
     queue = []
     if not isinstance(nodes, list):
         nodes = [nodes]
@@ -643,8 +636,11 @@ def postorder_iter_nodes(nodes):
     def traverse(current_nodes):
         for node in current_nodes:
             traverse(node.parents_with_dependencies)
+
             if node not in queue:
                 queue.append(node)
+            if flatten_subgraphs and node.op.is_subgraph:
+                queue.extend(list(postorder_iter_nodes(node.op.graph.output_node)))
 
     traverse(nodes)
     for node in queue:
@@ -663,15 +659,18 @@ def _filter_by_type(elements, type_):
     return results
 
 
-def _combine_schemas(elements):
+def _combine_schemas(elements, input_schemas=False):
     combined = Schema()
     for elem in elements:
         if isinstance(elem, Node):
-            combined += elem.output_schema
+            if input_schemas:
+                combined += elem.input_schema
+            else:
+                combined += elem.output_schema
         elif isinstance(elem, ColumnSelector):
             combined += Schema(elem.names)
         elif isinstance(elem, list):
-            combined += _combine_schemas(elem)
+            combined += _combine_schemas(elem, input_schemas=input_schemas)
     return combined
 
 
@@ -679,7 +678,9 @@ def _combine_selectors(elements):
     combined = ColumnSelector()
     for elem in elements:
         if isinstance(elem, Node):
-            if elem.selector:
+            if isinstance(elem.op, GroupingOp):
+                selector = elem.selector
+            elif elem.selector:
                 selector = elem.op.output_column_names(elem.selector)
             elif elem.output_schema:
                 selector = ColumnSelector(elem.output_schema.column_names)
@@ -694,8 +695,6 @@ def _combine_selectors(elements):
             combined += elem
         elif isinstance(elem, str):
             combined += ColumnSelector(elem)
-        elif isinstance(elem, list):
-            combined += ColumnSelector(subgroups=_combine_selectors(elem))
     return combined
 
 

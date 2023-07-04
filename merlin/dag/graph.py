@@ -49,6 +49,8 @@ class Graph:
 
         self.subgraphs: Dict[str, "Graph"] = {}
         _find_subgraphs(output_node, self.subgraphs)
+        for node in list(postorder_iter_nodes(self.output_node, flatten_subgraphs=True)):
+            node.op.load_artifacts("")
 
     def subgraph(self, name: str) -> "Graph":
         if name not in self.subgraphs:
@@ -123,7 +125,8 @@ class Graph:
     @property
     def input_schema(self):
         # leaf_node input and output schemas are the same (aka selection)
-        return _combine_schemas(self.leaf_nodes)
+        # subgraphs can also be leaf nodes now, so input and output are different
+        return _combine_schemas(self.leaf_nodes, input_schemas=True)
 
     @property
     def leaf_nodes(self):

@@ -51,6 +51,20 @@ class LocalExecutor:
 
     def __init__(self, device=Device.GPU):
         self.device = device if HAS_GPU else Device.CPU
+        self._target_format = (
+            DataFormats.PANDAS_DATAFRAME
+            | DataFormats.CUDF_DATAFRAME
+            | DataFormats.NUMPY_TENSOR_TABLE
+            | DataFormats.CUPY_TENSOR_TABLE
+        )
+
+    @property
+    def target_format(self):
+        return self._target_format
+
+    @target_format.setter
+    def target_format(self, formats):
+        self._target_format = formats
 
     def transform(
         self,
@@ -60,6 +74,7 @@ class LocalExecutor:
         additional_columns=None,
         capture_dtypes=False,
         strict=False,
+        target_format=None,
     ):
         """
         Transforms a single dataframe (possibly a partition of a Dask Dataframe)
@@ -79,7 +94,7 @@ class LocalExecutor:
                 " or a list of `Node` objects (deprecated, but supported for backward "
                 " compatibility.)"
             )
-
+        target_format = target_format or self.target_format
         # There's usually only one node, but it's possibly to pass multiple nodes for `fit`
         # If we have multiple, we concatenate their outputs into a single transformable
         output_data = None
@@ -95,7 +110,7 @@ class LocalExecutor:
                 [output_data, transformable[_get_unique(additional_columns)]]
             )
 
-        return output_data
+        return _convert_format(output_data, _data_format(transformable))
 
     def _execute_node(self, node, transformable, capture_dtypes=False, strict=False):
         upstream_outputs = self._run_upstream_transforms(
@@ -105,6 +120,7 @@ class LocalExecutor:
         formatted_columns = self._standardize_formats(node, upstream_columns)
         transform_input = self._merge_upstream_columns(formatted_columns)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
+        transform_output = _convert_format(transform_output, self.target_format)
         return transform_output
 
     def _run_upstream_transforms(self, node, transformable, capture_dtypes=False, strict=False):
@@ -171,12 +187,19 @@ class LocalExecutor:
                 combined_outputs = upstream_output
                 seen_columns = upstream_columns
             else:
+                old_columns = seen_columns - upstream_columns
+                overlap_columns = seen_columns.intersection(upstream_columns)
                 new_columns = upstream_columns - seen_columns
+                merge_columns = []
+                if old_columns:
+                    merge_columns.append(combined_outputs[list(old_columns)])
+                if overlap_columns:
+                    merge_columns.append(upstream_output[list(overlap_columns)])
                 if new_columns:
-                    combined_outputs = merge_fn(
-                        [combined_outputs, upstream_output[list(new_columns)]]
-                    )
+                    merge_columns.append(upstream_output[list(new_columns)])
                     seen_columns.update(new_columns)
+                if merge_columns:
+                    combined_outputs = merge_fn(merge_columns)
         return combined_outputs
 
     def _run_node_transform(self, node, input_data, capture_dtypes=False, strict=False):
@@ -295,6 +318,7 @@ class DaskExecutor:
 
     def __init__(self, client=None):
         self._executor = LocalExecutor()
+        self._executor.target_format = DataFormats.PANDAS_DATAFRAME | DataFormats.CUDF_DATAFRAME
 
         # Deprecate `client`
         if client is not None:
@@ -589,7 +613,7 @@ def _convert_format(tensors, target_format):
     if format_ & target_format:
         return tensors
 
-    elif target_format & DataFormats.CUPY_DICT_ARRAY:
+    elif target_format & DataFormats.CUPY_DICT_ARRAY and cupy:
         if format_ == DataFormats.NUMPY_DICT_ARRAY:
             return TensorTable(tensors).gpu().to_dict()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -599,7 +623,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
             return TensorTable.from_df(tensors).gpu().to_dict()
 
-    elif target_format & DataFormats.NUMPY_DICT_ARRAY:
+    elif target_format & DataFormats.NUMPY_DICT_ARRAY and numpy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors).cpu().to_dict()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -609,7 +633,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.PANDAS_DATAFRAME, DataFormats.CUDF_DATAFRAME]:
             return TensorTable.from_df(tensors).cpu().to_dict()
 
-    elif target_format & DataFormats.CUPY_TENSOR_TABLE:
+    elif target_format & DataFormats.CUPY_TENSOR_TABLE and cupy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors)
         elif format_ == DataFormats.NUMPY_DICT_ARRAY:
@@ -619,7 +643,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
             return TensorTable.from_df(tensors).gpu()
 
-    elif target_format & DataFormats.NUMPY_TENSOR_TABLE:
+    elif target_format & DataFormats.NUMPY_TENSOR_TABLE and numpy:
         if format_ == DataFormats.CUPY_DICT_ARRAY:
             return TensorTable(tensors).cpu()
         elif format_ == DataFormats.NUMPY_DICT_ARRAY:
@@ -629,7 +653,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.CUDF_DATAFRAME, DataFormats.PANDAS_DATAFRAME]:
             return TensorTable.from_df(tensors).cpu()
 
-    elif target_format & DataFormats.CUDF_DATAFRAME:
+    elif target_format & DataFormats.CUDF_DATAFRAME and cudf:
         if format_ == DataFormats.PANDAS_DATAFRAME:
             return cudf.DataFrame(tensors)
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
@@ -639,7 +663,7 @@ def _convert_format(tensors, target_format):
         elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
             return TensorTable(tensors).gpu().to_df()
 
-    elif target_format & DataFormats.PANDAS_DATAFRAME:
+    elif target_format & DataFormats.PANDAS_DATAFRAME and pandas:
         if format_ == DataFormats.CUDF_DATAFRAME:
             return tensors.to_pandas()
         elif format_ == DataFormats.CUPY_TENSOR_TABLE:
