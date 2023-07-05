@@ -1,7 +1,7 @@
-merlin.io package
-=================
+Merlin IO
+------------------
 
-.. autoclass:: merlin.io.Dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: generated
+   
+   merlin.io.Dataset
