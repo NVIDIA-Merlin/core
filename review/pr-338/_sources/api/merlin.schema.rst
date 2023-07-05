@@ -1,17 +1,9 @@
-merlin.schema package
-=====================
+Merlin Schema
+------------------
 
-.. autoclass:: merlin.schema.Schema
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. autoclass:: merlin.schema.ColumnSchema
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. autoclass:: merlin.schema.Tags
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: generated
+   
+   merlin.schema.Schema
+   merlin.schema.ColumnSchema
+   merlin.schema.Tags

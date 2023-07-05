@@ -162,9 +162,23 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.dag.html">merlin.dag package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.io.html">merlin.io package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.schema.html">merlin.schema package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -330,7 +344,7 @@ document.write(`
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Node is a group of columns that you want to apply the same transformations to.</span>
 <span class="sd">    Node&#39;s can be transformed by shifting operators on to them, which returns a new</span>
 <span class="sd">    Node with the transformations applied. This lets you define a graph of operations</span>
@@ -342,7 +356,7 @@ document.write(`
 <span class="sd">        Defines which columns to select from the input Dataset using column names and tags.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.__init__"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="p">[]</span>
@@ -360,7 +374,7 @@ document.write(`
         <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">SelectionOp</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">selector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">selector</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -374,7 +388,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">sel</span>
 
     <span class="c1"># These methods must maintain grouping</span>
-<div class="viewcode-block" id="Node.add_dependency"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_dependency">[docs]</a>    <span class="k">def</span> <span class="nf">add_dependency</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_dependency"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_dependency">[docs]</a>    <span class="k">def</span> <span class="nf">add_dependency</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dep</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
@@ -398,7 +412,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dep_node</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.add_parent"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_parent">[docs]</a>    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_parent"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_parent">[docs]</a>    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parent</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
@@ -420,7 +434,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parent_nodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
@@ -442,7 +456,7 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">child_nodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.remove_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.remove_child"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
@@ -465,7 +479,7 @@ document.write(`
             <span class="k">if</span> <span class="n">child_node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">child_node</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.compute_schemas"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.compute_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">compute_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">preserve_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.compute_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.compute_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">compute_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">preserve_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the input and output schema</span>
 
@@ -501,7 +515,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span> <span class="n">prev_output_schema</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.validate_schemas"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">strict_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.validate_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">strict_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this Node&#39;s input schema matches the output schemas of parents and dependencies</span>
 
@@ -714,7 +728,7 @@ document.write(`
         <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot; output&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="n">output</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
-<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove input columns and all output columns that depend on them.</span>
 
@@ -738,7 +752,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">removed_outputs</span></div>
 
-<div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">backends</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;exportable_backends&quot;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span></div>
 
@@ -824,7 +838,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_to_graphviz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">construct_from</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">nodable</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>

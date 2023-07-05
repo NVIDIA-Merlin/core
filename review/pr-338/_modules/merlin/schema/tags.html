@@ -162,9 +162,23 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.dag.html">merlin.dag package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.io.html">merlin.io package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.schema.html">merlin.schema package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -315,7 +329,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
 
 
-<div class="viewcode-block" id="Tags"><a class="viewcode-back" href="../../../api/merlin.schema.html#merlin.schema.Tags">[docs]</a><span class="k">class</span> <span class="nc">Tags</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="Tags"><a class="viewcode-back" href="../../../api/generated/merlin.schema.Tags.html#merlin.schema.Tags">[docs]</a><span class="k">class</span> <span class="nc">Tags</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standard tags used in the Merlin ecosystem&quot;&quot;&quot;</span>
 
     <span class="c1"># Feature types</span>
