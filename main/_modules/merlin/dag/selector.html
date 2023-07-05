@@ -162,9 +162,23 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.dag.html">merlin.dag package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.io.html">merlin.io package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.schema.html">merlin.schema package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -341,7 +355,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">Tags</span>
 
 
-<div class="viewcode-block" id="ColumnSelector"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.ColumnSelector">[docs]</a><span class="k">class</span> <span class="nc">ColumnSelector</span><span class="p">:</span>
+<div class="viewcode-block" id="ColumnSelector"><a class="viewcode-back" href="../../../api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector">[docs]</a><span class="k">class</span> <span class="nc">ColumnSelector</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A ColumnSelector describes a group of columns to be transformed by Operators in a</span>
 <span class="sd">    Graph. Operators can be applied to the selected columns by shifting (&gt;&gt;) operators</span>
 <span class="sd">    on to the ColumnSelector, which returns a new Node with the transformations</span>
@@ -361,7 +375,7 @@ document.write(`
 <span class="sd">        at-least-one of the tags provided will be considered.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="ColumnSelector.__init__"><a class="viewcode-back" href="../../../api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">subgroups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;ColumnSelector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -397,7 +411,7 @@ document.write(`
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">plain_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_nested_check</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested_check</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -480,7 +494,7 @@ document.write(`
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ColumnSelector.resolve"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.ColumnSelector.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+<div class="viewcode-block" id="ColumnSelector.resolve"><a class="viewcode-back" href="../../../api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.resolve">[docs]</a>    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Takes a schema and produces a new selector with selected column names</span>
 <span class="sd">        how selection occurs (tags, name) does not matter.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
@@ -494,7 +508,7 @@ document.write(`
             <span class="n">new_selector</span><span class="o">.</span><span class="n">subgroups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">new_selector</span></div>
 
-<div class="viewcode-block" id="ColumnSelector.filter_columns"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.ColumnSelector.filter_columns">[docs]</a>    <span class="k">def</span> <span class="nf">filter_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_selector</span><span class="p">:</span> <span class="s2">&quot;ColumnSelector&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="ColumnSelector.filter_columns"><a class="viewcode-back" href="../../../api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.filter_columns">[docs]</a>    <span class="k">def</span> <span class="nf">filter_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_selector</span><span class="p">:</span> <span class="s2">&quot;ColumnSelector&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Narrow the content of this selector to the columns that would be selected by another</span>
 
