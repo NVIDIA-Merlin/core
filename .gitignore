@@ -61,6 +61,7 @@ cover/
 # Sphinx documentation
 docs/build/
 docs/source/README.md
+docs/source/LICENSE
 
 # IPython
 profile_default/

@@ -15,8 +15,12 @@
 #
 import pytest
 
-from merlin.dag import Graph, Node
+from merlin.core.dispatch import make_df
+from merlin.dag import Graph, Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 from merlin.dag.base_operator import BaseOperator
+from merlin.dag.executors import LocalExecutor
+from merlin.dag.ops.subgraph import Subgraph
+from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
 from merlin.schema.schema import ColumnSchema, Schema
 
@@ -56,13 +60,15 @@ def test_subgraph():
     sg2 = ["a", "c"] >> BaseOperator()
     sg3 = ["a", "d"] >> BaseOperator()
 
-    combined = sg1 + sg2 + sg3
-    graph = Graph(combined, subgraphs={"sub1": sg1, "sub2": sg2})
+    combined = Subgraph("sub1", sg1) + Subgraph("sub2", sg2) + sg3
+    graph = Graph(
+        combined,
+    )
     assert graph.subgraph("sub1").output_node == sg1
     assert graph.subgraph("sub2").output_node == sg2
 
     with pytest.raises(ValueError):
-        graph.subgraph("sg3")
+        graph.subgraph("sub3")
 
 
 def test_subgraph_with_summed_subgraphs():
@@ -70,37 +76,64 @@ def test_subgraph_with_summed_subgraphs():
     sg2 = ["a", "c"] >> BaseOperator()
     sg3 = ["a", "d"] >> BaseOperator()
 
-    combined1 = sg1 + sg2
-    combined2 = combined1 + sg3
-    combined3 = combined2 + (["x"] >> BaseOperator())
+    combined1 = Subgraph("sub1", sg1) + Subgraph("sub2", sg2)
+    combined2 = Subgraph("combined1", combined1) + Subgraph("sub3", sg3)
+    combined3 = Subgraph("combined2", combined2) + (["x"] >> BaseOperator())
+    output = Subgraph("combined3", combined3)
 
-    graph = Graph(
-        combined3,
-        subgraphs={
-            "sg1": sg1,
-            "sg2": sg2,
-            "sg3": sg3,
-            "combined1": combined1,
-            "combined2": combined2,
-        },
-    )
+    graph = Graph(output)
 
-    assert graph.subgraph("sg1").output_node == sg1
-    assert graph.subgraph("sg2").output_node == sg2
-    assert graph.subgraph("sg3").output_node == sg3
+    assert graph.subgraph("sub1").output_node == sg1
+    assert graph.subgraph("sub2").output_node == sg2
+    assert graph.subgraph("sub3").output_node == sg3
     assert graph.subgraph("combined1").output_node == combined1
     assert graph.subgraph("combined2").output_node == combined2
+    assert graph.subgraph("combined3").output_node == combined3
+
+    post_len = len(list(postorder_iter_nodes(graph.output_node)))
+    pre_len = len(list(preorder_iter_nodes(graph.output_node)))
+    iter_node_list = list(iter_nodes([graph.output_node]))
+    iter_len = len(iter_node_list)
+
+    assert post_len == pre_len
+    assert iter_len == post_len
+    assert iter_len == pre_len
 
 
-def test_subgraph_with_unrelated_subgraph():
-    sg1 = ["a", "b"] >> BaseOperator()
-    sg2 = ["a", "c"] >> BaseOperator()
-    sg3 = ["c", "d"] >> BaseOperator()
+def test_concat_prefers_rhs_with_seen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
 
-    # same input as sg3, but not included in the combined Graph.
-    unrelated = ["c", "d"] >> BaseOperator()
+    graph = Graph((["a", "b"] >> UDF(lambda x: x + 1)) + ["a"])
 
-    combined = sg1 + sg2 + sg3
+    schema = Schema(["a", "b"])
 
-    with pytest.raises(ValueError):
-        Graph(combined, subgraphs={"sub1": sg1, "unrelated": unrelated})
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+
+
+def test_concat_prefers_rhs_with_unseen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["b"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [2, 2, 2, 2, 2, 2]
+
+
+def test_concat_prefers_rhs_with_seen_and_unseen_root_output():
+    df = make_df({"a": [1, 1, 1, 1, 1, 1], "b": [1, 1, 1, 1, 1, 1]})
+
+    graph = Graph((["a"] >> UDF(lambda x: x + 1)) + ["a", "b"])
+
+    schema = Schema(["a", "b"])
+
+    graph.construct_schema(schema)
+    result2 = LocalExecutor().transform(df, graph)
+    assert result2["b"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
+    assert result2["a"].to_numpy().tolist() == [1, 1, 1, 1, 1, 1]
