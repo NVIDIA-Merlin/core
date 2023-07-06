@@ -39,6 +39,7 @@ extensions = [
     "sphinx_design",
     "sphinx_multiversion",
     "sphinx_external_toc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.githubpages",

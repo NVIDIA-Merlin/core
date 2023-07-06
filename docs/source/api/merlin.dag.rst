@@ -1,25 +1,10 @@
-merlin.dag package
-==================
+Merlin DAG
+------------------
 
-.. autoclass:: merlin.dag.BaseOperator
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. autosummary::
+   :toctree: generated
 
-
-.. autoclass:: merlin.dag.Graph
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-.. autoclass:: merlin.dag.Node
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-.. autoclass:: merlin.dag.ColumnSelector
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   merlin.dag.BaseOperator
+   merlin.dag.Graph
+   merlin.dag.Node
+   merlin.dag.ColumnSelector
