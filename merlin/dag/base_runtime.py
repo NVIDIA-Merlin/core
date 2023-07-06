@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022, NVIDIA CORPORATION.
+# Copyright (c) 2023, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 from merlin.core.protocols import Transformable
-from merlin.dag import Graph
 from merlin.dag.executors import LocalExecutor
+from merlin.dag.graph import Graph
 
 
 class Runtime:
-    """A Systems Graph Runtime.
+    """A Graph Runtime.
 
     This class can be used as a base class for custom runtimes.
     """
