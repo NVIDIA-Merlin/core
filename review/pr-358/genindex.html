@@ -162,12 +162,18 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/merlin.dag.html">Merlin DAG</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.io.Dataset.html">merlin.io.Dataset</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.schema.Schema.html">merlin.schema.Schema</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/generated/merlin.schema.Tags.html">merlin.schema.Tags</a></li>
@@ -320,6 +326,7 @@ document.write(`
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -332,9 +339,17 @@ document.write(`
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.__init__">__init__() (merlin.io.Dataset method)</a>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.__init__">__init__() (merlin.dag.BaseOperator method)</a>
 
       <ul>
+        <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.__init__">(merlin.dag.ColumnSelector method)</a>
+</li>
+        <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.__init__">(merlin.dag.Graph method)</a>
+</li>
+        <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.__init__">(merlin.dag.Node method)</a>
+</li>
+        <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.__init__">(merlin.io.Dataset method)</a>
+</li>
         <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.__init__">(merlin.schema.ColumnSchema method)</a>
 </li>
         <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.__init__">(merlin.schema.Schema method)</a>
@@ -348,10 +363,18 @@ document.write(`
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.apply">apply() (merlin.schema.Schema method)</a>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.add_child">add_child() (merlin.dag.Node method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.add_dependency">add_dependency() (merlin.dag.Node method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.add_parent">add_parent() (merlin.dag.Node method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.all">all (merlin.dag.ColumnSelector property)</a>
+</li>
+      <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.apply">apply() (merlin.schema.Schema method)</a>
+</li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.apply_inverse">apply_inverse() (merlin.schema.Schema method)</a>
 </li>
   </ul></td>
@@ -360,10 +383,12 @@ document.write(`
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.BINARY">BINARY (merlin.schema.Tags attribute)</a>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator">BaseOperator (class in merlin.dag)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.BINARY">BINARY (merlin.schema.Tags attribute)</a>
+</li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.BINARY_CLASSIFICATION">BINARY_CLASSIFICATION (merlin.schema.Tags attribute)</a>
 </li>
   </ul></td>
@@ -376,19 +401,47 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.CLASSIFICATION">CLASSIFICATION (merlin.schema.Tags attribute)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.clear_stats">clear_stats() (merlin.dag.Graph method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.column_mapping">column_mapping (merlin.dag.Graph property)</a>
+
+      <ul>
+        <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.column_mapping">(merlin.dag.Node property)</a>
+</li>
+      </ul></li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.column_mapping">column_mapping() (merlin.dag.BaseOperator method)</a>
+</li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.column_names">column_names (merlin.schema.Schema property)</a>
 </li>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema">ColumnSchema (class in merlin.schema)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector">ColumnSelector (class in merlin.dag)</a>
+</li>
+      <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.compute">compute() (merlin.io.Dataset method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.compute">compute() (merlin.io.Dataset method)</a>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_column_schema">compute_column_schema() (merlin.dag.BaseOperator method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_input_schema">compute_input_schema() (merlin.dag.BaseOperator method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_output_schema">compute_output_schema() (merlin.dag.BaseOperator method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.compute_schemas">compute_schemas() (merlin.dag.Node method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_selector">compute_selector() (merlin.dag.BaseOperator method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.construct_from">construct_from() (merlin.dag.Node class method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.construct_schema">construct_schema() (merlin.dag.Graph method)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.CONTEXT">CONTEXT (merlin.schema.Tags attribute)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.CONTINUOUS">CONTINUOUS (merlin.schema.Tags attribute)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.copy">copy() (merlin.schema.Schema method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.create_node">create_node() (merlin.dag.BaseOperator method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -398,11 +451,17 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset">Dataset (class in merlin.io)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.dependencies">dependencies (merlin.dag.BaseOperator property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.dependency_columns">dependency_columns (merlin.dag.Node property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.dims">dims (merlin.schema.ColumnSchema attribute)</a>
 </li>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.dtype">dtype (merlin.schema.ColumnSchema attribute)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.dynamic_dtypes">dynamic_dtypes (merlin.dag.BaseOperator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -420,6 +479,8 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.excluding_by_tag">excluding_by_tag() (merlin.schema.Schema method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.exportable">exportable() (merlin.dag.Node method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -427,6 +488,8 @@ document.write(`
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.file_partition_map">file_partition_map (merlin.io.Dataset property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.filter_columns">filter_columns() (merlin.dag.ColumnSelector method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -441,6 +504,18 @@ document.write(`
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.get">get() (merlin.schema.Schema method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.get_nodes_by_op_type">get_nodes_by_op_type() (merlin.dag.Graph class method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph">Graph (class in merlin.dag)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.graph">graph (merlin.dag.Node property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.grouped_names">grouped_names (merlin.dag.ColumnSelector property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.grouped_parents_with_dependencies">grouped_parents_with_dependencies (merlin.dag.Node property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -460,13 +535,21 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.infer_schema">infer_schema() (merlin.io.Dataset method)</a>
 </li>
-      <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.int_domain">int_domain (merlin.schema.ColumnSchema property)</a>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.input_columns">input_columns (merlin.dag.Node property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.input_dtypes">input_dtypes (merlin.dag.Graph property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.input_schema">input_schema (merlin.dag.Graph property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.int_domain">int_domain (merlin.schema.ColumnSchema property)</a>
+</li>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.is_list">is_list (merlin.schema.ColumnSchema attribute)</a>
 </li>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.is_ragged">is_ragged (merlin.schema.ColumnSchema attribute)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.is_subgraph">is_subgraph (merlin.dag.BaseOperator property)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.ITEM">ITEM (merlin.schema.Tags attribute)</a>
 </li>
@@ -478,7 +561,19 @@ document.write(`
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.label">label (merlin.dag.BaseOperator property)</a>
+
+      <ul>
+        <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.label">(merlin.dag.Node property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.leaf_nodes">leaf_nodes (merlin.dag.Graph property)</a>
+</li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.LIST">LIST (merlin.schema.Tags attribute)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.load_artifacts">load_artifacts() (merlin.dag.BaseOperator method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -516,8 +611,12 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.name">name (merlin.schema.ColumnSchema attribute)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.names">names (merlin.dag.ColumnSelector property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node">Node (class in merlin.dag)</a>
+</li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.npartitions">npartitions (merlin.io.Dataset property)</a>
 </li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.num_rows">num_rows (merlin.io.Dataset property)</a>
@@ -525,9 +624,33 @@ document.write(`
   </ul></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.output_column_names">output_column_names() (merlin.dag.BaseOperator method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.output_columns">output_columns (merlin.dag.Node property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.output_dtype">output_dtype (merlin.dag.BaseOperator property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.output_dtypes">output_dtypes (merlin.dag.Graph property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.output_properties">output_properties (merlin.dag.BaseOperator property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.output_schema">output_schema (merlin.dag.Graph property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.output_tags">output_tags (merlin.dag.BaseOperator property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.parents_with_dependencies">parents_with_dependencies (merlin.dag.Node property)</a>
+</li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.partition_lens">partition_lens (merlin.io.Dataset property)</a>
 </li>
   </ul></td>
@@ -546,13 +669,23 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.REGRESSION">REGRESSION (merlin.schema.Tags attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.remove_by_tag">remove_by_tag() (merlin.schema.Schema method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_child">remove_child() (merlin.dag.Node method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.remove_col">remove_col() (merlin.schema.Schema method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.remove_inputs">remove_inputs() (merlin.dag.Graph method)</a>
+
+      <ul>
+        <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_inputs">(merlin.dag.Node method)</a>
+</li>
+      </ul></li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.repartition">repartition() (merlin.io.Dataset method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.resolve">resolve() (merlin.dag.ColumnSelector method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -562,6 +695,8 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.sample_dtypes">sample_dtypes() (merlin.io.Dataset method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.save_artifacts">save_artifacts() (merlin.dag.BaseOperator method)</a>
+</li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema">Schema (class in merlin.schema)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.select">select() (merlin.schema.Schema method)</a>
@@ -569,6 +704,8 @@ document.write(`
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.select_by_name">select_by_name() (merlin.schema.Schema method)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Schema.html#merlin.schema.Schema.select_by_tag">select_by_tag() (merlin.schema.Schema method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.selector">selector (merlin.dag.Node property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -582,6 +719,12 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.shuffle_by_keys">shuffle_by_keys() (merlin.io.Dataset method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.Graph.html#merlin.dag.Graph.subgraph">subgraph() (merlin.dag.Graph method)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.supported_formats">supported_formats (merlin.dag.BaseOperator property)</a>
+</li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.supports">supports (merlin.dag.BaseOperator property)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -590,8 +733,12 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags">Tags (class in merlin.schema)</a>
 </li>
-      <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.tags">tags (merlin.schema.ColumnSchema attribute)</a>
+      <li><a href="api/generated/merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector.tags">tags (merlin.dag.ColumnSelector property)</a>
+
+      <ul>
+        <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.tags">(merlin.schema.ColumnSchema attribute)</a>
 </li>
+      </ul></li>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.tail">tail() (merlin.io.Dataset method)</a>
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.TARGET">TARGET (merlin.schema.Tags attribute)</a>
@@ -622,6 +769,8 @@ document.write(`
 </li>
       <li><a href="api/generated/merlin.schema.Tags.html#merlin.schema.Tags.TOKENIZED">TOKENIZED (merlin.schema.Tags attribute)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.transform">transform() (merlin.dag.BaseOperator method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -642,6 +791,12 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.io.Dataset.html#merlin.io.Dataset.validate_dataset">validate_dataset() (merlin.io.Dataset method)</a>
 </li>
+      <li><a href="api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.validate_schemas">validate_schemas() (merlin.dag.BaseOperator method)</a>
+
+      <ul>
+        <li><a href="api/generated/merlin.dag.Node.html#merlin.dag.Node.validate_schemas">(merlin.dag.Node method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema.value_count">value_count (merlin.schema.ColumnSchema property)</a>
