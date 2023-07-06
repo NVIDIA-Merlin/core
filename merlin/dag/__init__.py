@@ -16,6 +16,7 @@
 
 # flake8: noqa
 from merlin.dag.base_operator import BaseOperator, DataFormats, Supports
+from merlin.dag.base_runtime import Runtime
 from merlin.dag.graph import Graph
 from merlin.dag.node import Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 from merlin.dag.selector import ColumnSelector
