@@ -403,12 +403,6 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.export" title="merlin.dag.BaseOperator.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>(path, input_schema, output_schema, ...)</p></td>
 <td><p>Export the class object as a config and all related files to the user defined path.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.from_model_registry" title="merlin.dag.BaseOperator.from_model_registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_model_registry</span></code></a>(registry, **kwargs)</p></td>
-<td><p>Loads the Operator from the provided ModelRegistry.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.from_path" title="merlin.dag.BaseOperator.from_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_path</span></code></a>(path, **kwargs)</p></td>
-<td><p>Loads the Operator from the path where it was exported after training.</p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.load_artifacts" title="merlin.dag.BaseOperator.load_artifacts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_artifacts</span></code></a>([artifact_path])</p></td>
 <td><p>Load artifacts from disk required for operator function.</p></td>
 </tr>
@@ -731,46 +725,6 @@ This lets you consume columns that aren’t part of the main transformation work
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="merlin.dag.BaseOperator.from_model_registry">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_model_registry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">merlin.dag.utils.ModelRegistry</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.dag.BaseOperator" title="merlin.dag.base_operator.BaseOperator"><span class="pre">merlin.dag.base_operator.BaseOperator</span></a></span></span><a class="reference internal" href="../../_modules/merlin/dag/base_operator.html#BaseOperator.from_model_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.from_model_registry" title="Permalink to this definition">#</a></dt>
-<dd><p>Loads the Operator from the provided ModelRegistry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>registry</strong> (<em>ModelRegistry</em>) – A ModleRegistry object that will provide the path to the model.</p></li>
-<li><p><strong>**kwargs</strong> – Other kwargs to pass to your Operator’s constructor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New node for graph.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Operator</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="merlin.dag.BaseOperator.from_path">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.dag.BaseOperator" title="merlin.dag.base_operator.BaseOperator"><span class="pre">merlin.dag.base_operator.BaseOperator</span></a></span></span><a class="reference internal" href="../../_modules/merlin/dag/base_operator.html#BaseOperator.from_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.BaseOperator.from_path" title="Permalink to this definition">#</a></dt>
-<dd><p>Loads the Operator from the path where it was exported after training.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Path to the exported model.</p></li>
-<li><p><strong>**kwargs</strong> – Other kwargs to pass to your Operator’s constructor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>New node for graph.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>InferenceOperator</p>
 </dd>
 </dl>
 </dd></dl>

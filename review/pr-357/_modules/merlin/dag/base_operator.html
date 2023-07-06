@@ -368,6 +368,7 @@ document.write(`
     <span class="n">CUPY_DICT_ARRAY</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
 
+<span class="c1"># pylint: disable=too-many-public-methods</span>
 <div class="viewcode-block" id="BaseOperator"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator">[docs]</a><span class="k">class</span> <span class="nc">BaseOperator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all operator classes.</span>
@@ -758,54 +759,7 @@ document.write(`
 <span class="sd">        -------</span>
 <span class="sd">        model_config: dict</span>
 <span class="sd">            The config for the exported operator (Triton model).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;Exporting an operator to run in a particular context (i.e. Triton) &quot;</span>
-            <span class="s2">&quot;only makes sense when a runtime is specified. To select an &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;operator for the appropriate runtime, replace </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;with a runtime-specific operator class, possibly </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">Triton&quot;</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="BaseOperator.from_model_registry"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.from_model_registry">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_model_registry</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">registry</span><span class="p">:</span> <span class="n">merlin</span><span class="o">.</span><span class="n">dag</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ModelRegistry</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseOperator&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads the Operator from the provided ModelRegistry.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        registry : ModelRegistry</span>
-<span class="sd">            A ModleRegistry object that will provide the path to the model.</span>
-<span class="sd">        **kwargs</span>
-<span class="sd">            Other kwargs to pass to your Operator&#39;s constructor.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Operator</span>
-<span class="sd">            New node for graph.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">get_artifact_uri</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="BaseOperator.from_path"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.from_path">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BaseOperator&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads the Operator from the path where it was exported after training.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        path : str</span>
-<span class="sd">            Path to the exported model.</span>
-<span class="sd">        **kwargs</span>
-<span class="sd">            Other kwargs to pass to your Operator&#39;s constructor.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        InferenceOperator</span>
-<span class="sd">            New node for graph.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> operators cannot be instantiated with a path.&quot;</span><span class="p">)</span></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
     <span class="c1"># TODO: This operator should be moved once all triton specific op migrations completed</span>
     <span class="nd">@property</span>

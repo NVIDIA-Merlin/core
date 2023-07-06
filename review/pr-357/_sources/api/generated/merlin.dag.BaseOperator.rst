@@ -21,8 +21,6 @@
       ~BaseOperator.compute_selector
       ~BaseOperator.create_node
       ~BaseOperator.export
-      ~BaseOperator.from_model_registry
-      ~BaseOperator.from_path
       ~BaseOperator.load_artifacts
       ~BaseOperator.output_column_names
       ~BaseOperator.save_artifacts
