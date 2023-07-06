@@ -56,6 +56,7 @@ class DataFormats(Flag):
     CUPY_DICT_ARRAY = auto()
 
 
+# pylint: disable=too-many-public-methods
 class BaseOperator:
     """
     Base class for all operator classes.
@@ -447,53 +448,6 @@ class BaseOperator:
         model_config: dict
             The config for the exported operator (Triton model).
         """
-        raise NotImplementedError(
-            "Exporting an operator to run in a particular context (i.e. Triton) "
-            "only makes sense when a runtime is specified. To select an "
-            f"operator for the appropriate runtime, replace {self.__class__.__name__} "
-            f"with a runtime-specific operator class, possibly {self.__class__.__name__}Triton"
-        )
-
-    @classmethod
-    def from_model_registry(
-        cls, registry: merlin.dag.utils.ModelRegistry, **kwargs
-    ) -> "BaseOperator":
-        """
-        Loads the Operator from the provided ModelRegistry.
-
-        Parameters
-        ----------
-        registry : ModelRegistry
-            A ModleRegistry object that will provide the path to the model.
-        **kwargs
-            Other kwargs to pass to your Operator's constructor.
-
-        Returns
-        -------
-        Operator
-            New node for graph.
-        """
-
-        return cls.from_path(registry.get_artifact_uri(), **kwargs)
-
-    @classmethod
-    def from_path(cls, path, **kwargs) -> "BaseOperator":
-        """
-        Loads the Operator from the path where it was exported after training.
-
-        Parameters
-        ----------
-        path : str
-            Path to the exported model.
-        **kwargs
-            Other kwargs to pass to your Operator's constructor.
-
-        Returns
-        -------
-        InferenceOperator
-            New node for graph.
-        """
-        raise NotImplementedError(f"{cls.__name__} operators cannot be instantiated with a path.")
 
     # TODO: This operator should be moved once all triton specific op migrations completed
     @property
