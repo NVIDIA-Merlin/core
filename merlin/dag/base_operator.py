@@ -441,15 +441,10 @@ class BaseOperator:
         node_id : int, optional
             The placement of the node in the graph (starts at 1), by default None.
         version : int, optional
-            The version of the model, by default 1.
+            The version of the operator, by default 1.
 
         Returns
         -------
         model_config: dict
-            The config for the exported operator (Triton model).
+            The config for the exported operator.
         """
-
-    # TODO: This operator should be moved once all triton specific op migrations completed
-    @property
-    def scalar_shape(self):
-        return [1]

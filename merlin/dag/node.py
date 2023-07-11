@@ -452,21 +452,22 @@ class Node:
         version: int = 1,
     ):
         """
-        Export a Triton config directory for this node.
+        Export a directory for this node, containing the required artifacts
+        to run in the target context.
 
         Parameters
         ----------
         output_path : Union[str, os.PathLike]
-            The base path to write this node's config directory.
+            The base path to write this node's export directory.
         node_id : int, optional
             The id of this node in a larger graph (for disambiguation), by default None.
         version : int, optional
-            The Triton model version to use for this config export, by default 1.
+            The version of the node to use for this export, by default 1.
 
         Returns
         -------
         ModelConfig
-            Triton model config corresponding to this node.
+            A config corresponding to the export of this node.
         """
         return self.op.export(
             output_path,
@@ -479,7 +480,7 @@ class Node:
     @property
     def export_name(self):
         """
-        Name for the exported Triton config directory.
+        Name for the exported node directory.
 
         Returns
         -------
