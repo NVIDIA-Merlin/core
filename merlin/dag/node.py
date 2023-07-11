@@ -466,7 +466,7 @@ class Node:
 
         Returns
         -------
-        ModelConfig
+        Config
             A config corresponding to the export of this node.
         """
         return self.op.export(
