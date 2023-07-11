@@ -464,10 +464,6 @@ class Node:
         version : int, optional
             The version of the node to use for this export, by default 1.
 
-        Returns
-        -------
-        Config
-            A config corresponding to the export of this node.
         """
         return self.op.export(
             output_path,
