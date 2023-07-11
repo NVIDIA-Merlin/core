@@ -43,7 +43,6 @@
       ~BaseOperator.output_dtype
       ~BaseOperator.output_properties
       ~BaseOperator.output_tags
-      ~BaseOperator.scalar_shape
       ~BaseOperator.supported_formats
       ~BaseOperator.supports
    

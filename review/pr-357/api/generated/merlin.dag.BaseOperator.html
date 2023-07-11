@@ -451,13 +451,10 @@ document.write(`
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.output_tags" title="merlin.dag.BaseOperator.output_tags"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_tags</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.scalar_shape" title="merlin.dag.BaseOperator.scalar_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_shape</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.supported_formats" title="merlin.dag.BaseOperator.supported_formats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supported_formats</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.supported_formats" title="merlin.dag.BaseOperator.supported_formats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supported_formats</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.supports" title="merlin.dag.BaseOperator.supports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.BaseOperator.supports" title="merlin.dag.BaseOperator.supports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">supports</span></code></a></p></td>
 <td><p>Returns what kind of data representation this operator supports</p></td>
 </tr>
 </tbody>
@@ -717,22 +714,17 @@ This lets you consume columns that aren’t part of the main transformation work
 <li><p><strong>output_schema</strong> (<a class="reference internal" href="merlin.schema.Schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – A schema with information about the outputs of this operator.</p></li>
 <li><p><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><em>optional</em>) – Parameters dictionary of key, value pairs stored in exported config, by default None.</p></li>
 <li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The placement of the node in the graph (starts at 1), by default None.</p></li>
-<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The version of the model, by default 1.</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The version of the operator, by default 1.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>model_config</strong> – The config for the exported operator (Triton model).</p>
+<dd class="field-even"><p><strong>model_config</strong> – The config for the exported operator.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="merlin.dag.BaseOperator.scalar_shape">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scalar_shape</span></span><a class="headerlink" href="#merlin.dag.BaseOperator.scalar_shape" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

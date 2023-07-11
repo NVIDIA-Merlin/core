@@ -753,18 +753,13 @@ document.write(`
 <span class="sd">        node_id : int, optional</span>
 <span class="sd">            The placement of the node in the graph (starts at 1), by default None.</span>
 <span class="sd">        version : int, optional</span>
-<span class="sd">            The version of the model, by default 1.</span>
+<span class="sd">            The version of the operator, by default 1.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        model_config: dict</span>
-<span class="sd">            The config for the exported operator (Triton model).</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
-    <span class="c1"># TODO: This operator should be moved once all triton specific op migrations completed</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scalar_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+<span class="sd">            The config for the exported operator.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 </pre></div>
 
                 </article>
