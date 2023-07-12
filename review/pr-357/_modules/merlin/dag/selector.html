@@ -163,7 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Operator.html">merlin.dag.Operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
@@ -453,7 +453,7 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">other</span>
 
     <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">merlin</span><span class="o">.</span><span class="n">dag</span><span class="o">.</span><span class="n">BaseOperator</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">merlin</span><span class="o">.</span><span class="n">dag</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
             <span class="c1"># handle case where an operator class is passed</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span><span class="p">()</span>
 

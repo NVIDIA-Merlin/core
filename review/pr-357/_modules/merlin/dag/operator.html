@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>merlin.dag.base_operator &#8212; Merlin Core</title>
+    <title>merlin.dag.operator &#8212; Merlin Core</title>
   
   
   
@@ -46,8 +46,8 @@
     <script src="../../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script src="../../../_static/js/rtd-version-switcher.js"></script>
     <script src="../../../_static/design-tabs.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/merlin/dag/base_operator';</script>
-    <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/_modules/merlin/dag/base_operator.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/merlin/dag/operator';</script>
+    <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/_modules/merlin/dag/operator.html" />
     <link rel="shortcut icon" href="../../../_static/favicon.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -163,7 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.BaseOperator.html">merlin.dag.BaseOperator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Operator.html">merlin.dag.Operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
@@ -309,7 +309,7 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <h1>Source code for merlin.dag.base_operator</h1><div class="highlight"><pre>
+  <h1>Source code for merlin.dag.operator</h1><div class="highlight"><pre>
 <span></span><span class="c1">#</span>
 <span class="c1"># Copyright (c) 2022, NVIDIA CORPORATION.</span>
 <span class="c1">#</span>
@@ -332,6 +332,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">merlin.dag</span>
+<span class="kn">import</span> <span class="nn">merlin.dag.utils</span>
 <span class="kn">from</span> <span class="nn">merlin.core.protocols</span> <span class="kn">import</span> <span class="n">Transformable</span>
 <span class="kn">from</span> <span class="nn">merlin.dag.selector</span> <span class="kn">import</span> <span class="n">ColumnSelector</span>
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">ColumnSchema</span><span class="p">,</span> <span class="n">Schema</span>
@@ -368,12 +369,12 @@ document.write(`
 
 
 <span class="c1"># pylint: disable=too-many-public-methods</span>
-<div class="viewcode-block" id="BaseOperator"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator">[docs]</a><span class="k">class</span> <span class="nc">BaseOperator</span><span class="p">:</span>
+<div class="viewcode-block" id="Operator"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator">[docs]</a><span class="k">class</span> <span class="nc">Operator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for all operator classes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseOperator.compute_selector"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_selector">[docs]</a>    <span class="k">def</span> <span class="nf">compute_selector</span><span class="p">(</span>
+<div class="viewcode-block" id="Operator.compute_selector"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.compute_selector">[docs]</a>    <span class="k">def</span> <span class="nf">compute_selector</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
         <span class="n">selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span>
@@ -406,7 +407,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">selector</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">input_schema</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseOperator.compute_input_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_input_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_input_schema</span><span class="p">(</span>
+<div class="viewcode-block" id="Operator.compute_input_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.compute_input_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_input_schema</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
         <span class="n">parents_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
@@ -438,7 +439,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">parents_schema</span> <span class="o">+</span> <span class="n">deps_schema</span></div>
 
-<div class="viewcode-block" id="BaseOperator.compute_output_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_output_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_output_schema</span><span class="p">(</span>
+<div class="viewcode-block" id="Operator.compute_output_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.compute_output_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_output_schema</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
         <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span>
@@ -488,7 +489,7 @@ document.write(`
 
         <span class="k">return</span> <span class="n">output_schema</span></div>
 
-<div class="viewcode-block" id="BaseOperator.validate_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span>
+<div class="viewcode-block" id="Operator.validate_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parents_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
         <span class="n">deps_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
@@ -516,7 +517,7 @@ document.write(`
 <span class="sd">            Enables strict checking for column dtype matching if True, by default False</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="BaseOperator.transform"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+<div class="viewcode-block" id="Operator.transform"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">transformable</span><span class="p">:</span> <span class="n">Transformable</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transformable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the dataframe by applying this operator to the set of input columns</span>
@@ -535,7 +536,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">transformable</span></div>
 
-<div class="viewcode-block" id="BaseOperator.column_mapping"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.column_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">column_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">):</span>
+<div class="viewcode-block" id="Operator.column_mapping"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.column_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">column_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute which output columns depend on which input columns</span>
 
@@ -554,7 +555,7 @@ document.write(`
             <span class="n">column_mapping</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">column_mapping</span></div>
 
-<div class="viewcode-block" id="BaseOperator.load_artifacts"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.load_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">load_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Operator.load_artifacts"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.load_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">load_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load artifacts from disk required for operator function.</span>
 
 <span class="sd">        Parameters</span>
@@ -563,7 +564,7 @@ document.write(`
 <span class="sd">            The path where artifacts are loaded from</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="BaseOperator.save_artifacts"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.save_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">save_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Operator.save_artifacts"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.save_artifacts">[docs]</a>    <span class="k">def</span> <span class="nf">save_artifacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save artifacts required to be reload operator state from disk</span>
 
 <span class="sd">        Parameters</span>
@@ -572,7 +573,7 @@ document.write(`
 <span class="sd">            The path where artifacts are to be saved</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="BaseOperator.compute_column_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.compute_column_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_column_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Operator.compute_column_schema"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.compute_column_schema">[docs]</a>    <span class="k">def</span> <span class="nf">compute_column_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">):</span>
         <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_compute_dtype</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_compute_tags</span><span class="p">,</span>
@@ -653,7 +654,7 @@ document.write(`
     <span class="c1"># TODO: Update instructions for how to define custom</span>
     <span class="c1"># operators to reflect constructing the column mapping</span>
     <span class="c1"># (They should no longer override this method)</span>
-<div class="viewcode-block" id="BaseOperator.output_column_names"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.output_column_names">[docs]</a>    <span class="k">def</span> <span class="nf">output_column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnSelector</span><span class="p">:</span>
+<div class="viewcode-block" id="Operator.output_column_names"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.output_column_names">[docs]</a>    <span class="k">def</span> <span class="nf">output_column_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col_selector</span><span class="p">:</span> <span class="n">ColumnSelector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColumnSelector</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a set of columns names returns the names of the transformed columns this</span>
 <span class="sd">        operator will produce</span>
 
@@ -700,7 +701,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-<div class="viewcode-block" id="BaseOperator.create_node"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.create_node">[docs]</a>    <span class="k">def</span> <span class="nf">create_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
+<div class="viewcode-block" id="Operator.create_node"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.create_node">[docs]</a>    <span class="k">def</span> <span class="nf">create_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">merlin</span><span class="o">.</span><span class="n">dag</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -735,7 +736,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BaseOperator.export"><a class="viewcode-back" href="../../../api/generated/merlin.dag.BaseOperator.html#merlin.dag.BaseOperator.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">output_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Operator.export"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Operator.html#merlin.dag.Operator.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">output_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Export the class object as a config and all related files to the user defined path.</span>
 
