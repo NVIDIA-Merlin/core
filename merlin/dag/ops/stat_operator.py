@@ -17,11 +17,11 @@ from typing import Any
 
 import dask.dataframe as dd
 
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 
 
-class StatOperator(BaseOperator):
+class StatOperator(Operator):
     """
     Base class for statistical operator classes. This adds a 'fit' and 'finalize' method
     on top of the Operator class.

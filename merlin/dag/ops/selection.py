@@ -18,14 +18,14 @@ from __future__ import annotations
 import logging
 
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
 LOG = logging.getLogger("SelectionOp")
 
 
-class SelectionOp(BaseOperator):
+class SelectionOp(Operator):
     """
     This operator class provides an implementation of the behavior of selection (e.g. input) nodes.
     """

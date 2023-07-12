@@ -24,7 +24,7 @@ from merlin.core.compat.tensorflow import tensorflow as tf
 from merlin.core.compat.torch import torch as th
 from merlin.core.dispatch import df_from_dict, dict_from_df, make_df
 from merlin.core.protocols import DictLike, Transformable
-from merlin.dag import BaseOperator, ColumnSelector
+from merlin.dag import ColumnSelector, Operator
 from merlin.schema import ColumnSchema, Schema
 from merlin.table import CupyColumn, Device, NumpyColumn, TensorflowColumn, TensorTable, TorchColumn
 from tests.conftest import assert_eq
@@ -165,7 +165,7 @@ def test_column_device_validation():
     assert "on the same device" in str(exc_info)
 
 
-class PaddingOperator(BaseOperator):
+class PaddingOperator(Operator):
     def __init__(self, length=None, array_lib=np):
         self.length = length
         self.array_lib = array_lib

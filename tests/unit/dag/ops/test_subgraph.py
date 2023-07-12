@@ -17,9 +17,9 @@
 import pytest
 
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import DaskExecutor, LocalExecutor
 from merlin.dag.graph import Graph
+from merlin.dag.operator import Operator
 from merlin.dag.ops.stat_operator import StatOperator
 from merlin.dag.ops.subgraph import Subgraph
 from merlin.dag.selector import ColumnSelector
@@ -29,9 +29,9 @@ from merlin.schema import Schema
 
 @pytest.mark.parametrize("engine", ["parquet"])
 def test_subgraph(df):
-    ops = ["x"] >> BaseOperator() >> BaseOperator()
+    ops = ["x"] >> Operator() >> Operator()
     subgraph_op = Subgraph("subgraph", ops)
-    main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
+    main_graph_ops = ["x", "y"] >> Operator() >> subgraph_op >> Operator()
 
     main_graph = Graph(main_graph_ops)
 
@@ -57,7 +57,7 @@ def test_subgraph_fit(dataset):
 
     fit_test_op = FitTestOp()
     subgraph_op = Subgraph("subgraph", ["x"] >> fit_test_op)
-    main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
+    main_graph_ops = ["x", "y"] >> Operator() >> subgraph_op >> Operator()
 
     main_graph = Graph(main_graph_ops)
     main_graph.construct_schema(dataset.schema)
@@ -72,7 +72,7 @@ def test_subgraph_fit(dataset):
 
 @pytest.mark.parametrize("engine", ["parquet"])
 def test_subgraph_looping(dataset):
-    class LoopingTestOp(BaseOperator):
+    class LoopingTestOp(Operator):
         def transform(
             self, col_selector: ColumnSelector, transformable: Transformable
         ) -> Transformable:
@@ -84,7 +84,7 @@ def test_subgraph_looping(dataset):
         subgraph,
         loop_until=lambda transformable: (transformable["x"] > 5.0).all(),
     )
-    main_graph_ops = ["x", "y"] >> BaseOperator() >> subgraph_op >> BaseOperator()
+    main_graph_ops = ["x", "y"] >> Operator() >> subgraph_op >> Operator()
 
     main_graph = Graph(main_graph_ops)
     main_graph.construct_schema(dataset.schema)

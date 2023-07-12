@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.schema.tags import Tags
 
 
-class AddMetadata(BaseOperator):
+class AddMetadata(Operator):
     """
     This operator will add user defined tags and properties
     to a Schema.

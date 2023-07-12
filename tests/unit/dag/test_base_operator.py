@@ -15,8 +15,8 @@
 #
 import pytest
 
-from merlin.dag.base_operator import BaseOperator as Operator
 from merlin.dag.graph import Graph
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
