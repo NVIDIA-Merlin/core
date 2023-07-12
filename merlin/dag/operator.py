@@ -448,6 +448,3 @@ class Operator:
         model_config: dict
             The config for the exported operator.
         """
-
-
-BaseOperator = Operator
