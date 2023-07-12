@@ -18,7 +18,6 @@ import logging
 from collections import deque
 from typing import Dict
 
-from merlin.dag.base_operator import BaseOperator
 from merlin.dag.node import (
     Node,
     _combine_schemas,
@@ -26,6 +25,7 @@ from merlin.dag.node import (
     postorder_iter_nodes,
     preorder_iter_nodes,
 )
+from merlin.dag.operator import Operator
 from merlin.dag.ops.stat_operator import StatOperator
 from merlin.schema import Schema
 
@@ -39,7 +39,7 @@ class Graph:
     """
 
     def __init__(self, output_node: Node):
-        if isinstance(output_node, BaseOperator):
+        if isinstance(output_node, Operator):
             output_node = Node.construct_from(output_node)
 
         self.output_node = output_node

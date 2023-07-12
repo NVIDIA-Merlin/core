@@ -20,6 +20,7 @@ from enum import Flag, auto
 from typing import Any, List, Optional, Union
 
 import merlin.dag
+import merlin.dag.utils
 from merlin.core.protocols import Transformable
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
@@ -55,7 +56,8 @@ class DataFormats(Flag):
     CUPY_DICT_ARRAY = auto()
 
 
-class BaseOperator:
+# pylint: disable=too-many-public-methods
+class Operator:
     """
     Base class for all operator classes.
     """
@@ -409,3 +411,40 @@ class BaseOperator:
             return {col_name: df[col_name] for col_name in selector.names}
         else:
             return df[selector.names]
+
+    @property
+    def export_name(self):
+        """
+        Provides a clear common english identifier for this operator.
+
+        Returns
+        -------
+        String
+            Name of the current class as spelled in module.
+        """
+        return self.__class__.__name__.lower()
+
+    def export(self, path: str, input_schema: Schema, output_schema: Schema, **kwargs):
+        """
+        Export the class object as a config and all related files to the user defined path.
+
+        Parameters
+        ----------
+        path : str
+            Artifact export path
+        input_schema : Schema
+            A schema with information about the inputs to this operator.
+        output_schema : Schema
+            A schema with information about the outputs of this operator.
+        params : dict, optional
+            Parameters dictionary of key, value pairs stored in exported config, by default None.
+        node_id : int, optional
+            The placement of the node in the graph (starts at 1), by default None.
+        version : int, optional
+            The version of the operator, by default 1.
+
+        Returns
+        -------
+        model_config: dict
+            The config for the exported operator.
+        """

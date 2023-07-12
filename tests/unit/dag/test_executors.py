@@ -19,8 +19,8 @@ import pandas as pd
 
 from merlin.core.dispatch import make_df
 from merlin.dag import Graph
-from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import LocalExecutor
+from merlin.dag.operator import Operator
 from merlin.schema.schema import ColumnSchema, Schema
 from merlin.table import TensorTable
 
@@ -28,7 +28,7 @@ from merlin.table import TensorTable
 def test_local_executor_with_dataframe():
     df = make_df({"a": [1, 2, 3], "b": [4, 5, 6]})
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
-    operator = ["a"] >> BaseOperator()
+    operator = ["a"] >> Operator()
     graph = Graph(operator)
     graph.construct_schema(schema)
 
@@ -47,7 +47,7 @@ def test_local_executor_with_dataframe_like():
         {"a": np.array([1, 2, 3], dtype=np.int64), "b": np.array([4, 5, 6], dtype=np.int64)}
     )
     schema = Schema([ColumnSchema("a", dtype=np.int64), ColumnSchema("b", dtype=np.int64)])
-    operator = ["a"] >> BaseOperator()
+    operator = ["a"] >> Operator()
     graph = Graph(operator)
     graph.construct_schema(schema)
 

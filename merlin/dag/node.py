@@ -16,7 +16,7 @@
 import collections.abc
 from typing import List, Union
 
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.ops import ConcatColumns, GroupingOp, SelectionOp, SubsetColumns, SubtractionOp
 from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
@@ -24,11 +24,11 @@ from merlin.schema import Schema
 
 Nodable = Union[
     "Node",
-    BaseOperator,
+    Operator,
     str,
     List[str],
     ColumnSelector,
-    List[Union["Node", BaseOperator, str, List[str], ColumnSelector]],
+    List[Union["Node", Operator, str, List[str], ColumnSelector]],
 ]
 
 
@@ -253,28 +253,30 @@ class Node:
             )
 
     def __rshift__(self, operator):
-        """Transforms this Node by applying an BaseOperator
+        """Transforms this Node by applying an Operator
 
-        Parameters
-        -----------
-        operators: BaseOperator or callable
 
-        Returns
-        -------
-        Node
+               Parameters
+               -----------
+               operators: Operator
+        or callable
+
+               Returns
+               -------
+               Node
         """
 
         if callable(operator) and not (
-            isinstance(operator, type) and issubclass(operator, BaseOperator)
+            isinstance(operator, type) and issubclass(operator, Operator)
         ):
             # implicit lambdaop conversion.
             operator = UDF(operator)
 
-        if isinstance(operator, type) and issubclass(operator, BaseOperator):
+        if isinstance(operator, type) and issubclass(operator, Operator):
             # handle case where an operator class is passed
             operator = operator()
 
-        if not isinstance(operator, BaseOperator):
+        if not isinstance(operator, Operator):
             raise ValueError(f"Expected operator or callable, got {operator.__class__}")
 
         child = type(self)()
@@ -553,7 +555,7 @@ class Node:
             return Node(ColumnSelector([nodable]))
         if isinstance(nodable, ColumnSelector):
             return Node(nodable)
-        elif isinstance(nodable, BaseOperator):
+        elif isinstance(nodable, Operator):
             node = Node()
             node.op = nodable
             return node

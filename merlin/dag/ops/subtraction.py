@@ -16,12 +16,12 @@
 from __future__ import annotations
 
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import Schema
 
 
-class SubtractionOp(BaseOperator):
+class SubtractionOp(Operator):
     """
     This operator class provides an implementation for the `-` operator used in constructing graphs.
     """

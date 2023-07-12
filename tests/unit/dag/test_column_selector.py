@@ -15,7 +15,7 @@
 #
 import pytest
 
-from merlin.dag import BaseOperator
+from merlin.dag import Operator
 from merlin.dag.node import Node
 from merlin.dag.ops.selection import SelectionOp
 from merlin.dag.selector import ColumnSelector
@@ -143,12 +143,12 @@ def test_addition_works_with_none():
 
 def test_rshift_operator_onto_selector_creates_selection_node():
     selector = ColumnSelector(["a", "b", "c"])
-    operator = BaseOperator()
+    operator = Operator()
 
     output_node = selector >> operator
 
     assert isinstance(output_node, Node)
-    assert isinstance(output_node.op, BaseOperator)
+    assert isinstance(output_node.op, Operator)
     assert output_node._selector is None
     assert len(output_node.parents) == 1
 
