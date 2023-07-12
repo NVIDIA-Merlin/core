@@ -18,6 +18,6 @@ from merlin.dag.graph import Graph
 from merlin.dag.node import Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
 
 # flake8: noqa
-from merlin.dag.operator import DataFormats, Operator, Supports
+from merlin.dag.operator import BaseOperator, DataFormats, Operator, Supports
 from merlin.dag.selector import ColumnSelector
 from merlin.dag.utils import group_values_offsets, ungroup_values_offsets
