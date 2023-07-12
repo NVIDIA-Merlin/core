@@ -20,7 +20,6 @@ from enum import Flag, auto
 from typing import Any, List, Optional, Union
 
 import merlin.dag
-import merlin.dag.utils
 from merlin.core.protocols import Transformable
 from merlin.dag.selector import ColumnSelector
 from merlin.schema import ColumnSchema, Schema
