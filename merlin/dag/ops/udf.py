@@ -17,11 +17,11 @@ from inspect import getsourcelines, signature
 
 from merlin.core.dispatch import make_df
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 
 
-class UDF(BaseOperator):
+class UDF(Operator):
     """
     UDF allows you to apply row level functions to a dataframe or TensorTable
 
@@ -82,7 +82,7 @@ class UDF(BaseOperator):
         # return input type data
         return make_df(new_df)
 
-    transform.__doc__ = BaseOperator.transform.__doc__
+    transform.__doc__ = Operator.transform.__doc__
 
     @property
     def dependencies(self):

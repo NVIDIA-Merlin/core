@@ -15,11 +15,11 @@
 #
 
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 
 
-class SubsetColumns(BaseOperator):
+class SubsetColumns(Operator):
     """
     This operator class provides an implementation for the `[]` operator
     used in constructing graphs.

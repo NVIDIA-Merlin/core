@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 from merlin.core.protocols import Transformable
-from merlin.dag.base_operator import BaseOperator
+from merlin.dag.operator import Operator
 from merlin.dag.selector import ColumnSelector
 
 
-class Rename(BaseOperator):
+class Rename(Operator):
     """This operation renames columns by one of several methods:
 
         - using a user defined lambda function to transform column names
@@ -59,7 +59,7 @@ class Rename(BaseOperator):
         )
         return transformable
 
-    transform.__doc__ = BaseOperator.transform.__doc__
+    transform.__doc__ = Operator.transform.__doc__
 
     def column_mapping(self, col_selector):
         column_mapping = {}

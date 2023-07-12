@@ -141,7 +141,7 @@ class ColumnSelector:
         return self + other
 
     def __rshift__(self, operator):
-        if isinstance(operator, type) and issubclass(operator, merlin.dag.BaseOperator):
+        if isinstance(operator, type) and issubclass(operator, merlin.dag.Operator):
             # handle case where an operator class is passed
             operator = operator()
 

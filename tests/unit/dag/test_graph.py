@@ -17,8 +17,8 @@ import pytest
 
 from merlin.core.dispatch import make_df
 from merlin.dag import Graph, Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
-from merlin.dag.base_operator import BaseOperator
 from merlin.dag.executors import LocalExecutor
+from merlin.dag.operator import Operator
 from merlin.dag.ops.subgraph import Subgraph
 from merlin.dag.ops.udf import UDF
 from merlin.dag.selector import ColumnSelector
@@ -56,9 +56,9 @@ def test_remove_dependencies():
 
 
 def test_subgraph():
-    sg1 = ["a", "b"] >> BaseOperator()
-    sg2 = ["a", "c"] >> BaseOperator()
-    sg3 = ["a", "d"] >> BaseOperator()
+    sg1 = ["a", "b"] >> Operator()
+    sg2 = ["a", "c"] >> Operator()
+    sg3 = ["a", "d"] >> Operator()
 
     combined = Subgraph("sub1", sg1) + Subgraph("sub2", sg2) + sg3
     graph = Graph(
@@ -72,13 +72,13 @@ def test_subgraph():
 
 
 def test_subgraph_with_summed_subgraphs():
-    sg1 = ["a", "b"] >> BaseOperator()
-    sg2 = ["a", "c"] >> BaseOperator()
-    sg3 = ["a", "d"] >> BaseOperator()
+    sg1 = ["a", "b"] >> Operator()
+    sg2 = ["a", "c"] >> Operator()
+    sg3 = ["a", "d"] >> Operator()
 
     combined1 = Subgraph("sub1", sg1) + Subgraph("sub2", sg2)
     combined2 = Subgraph("combined1", combined1) + Subgraph("sub3", sg3)
-    combined3 = Subgraph("combined2", combined2) + (["x"] >> BaseOperator())
+    combined3 = Subgraph("combined2", combined2) + (["x"] >> Operator())
     output = Subgraph("combined3", combined3)
 
     graph = Graph(output)
