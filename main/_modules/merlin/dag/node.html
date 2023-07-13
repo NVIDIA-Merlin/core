@@ -350,6 +350,7 @@ document.write(`
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#</span>
 <span class="kn">import</span> <span class="nn">collections.abc</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">merlin.dag.operator</span> <span class="kn">import</span> <span class="n">Operator</span>
@@ -781,6 +782,46 @@ document.write(`
 <div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">backends</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;exportable_backends&quot;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span></div>
+
+<div class="viewcode-block" id="Node.export"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="n">node_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export a directory for this node, containing the required artifacts</span>
+<span class="sd">        to run in the target context.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : Union[str, os.PathLike]</span>
+<span class="sd">            The base path to write this node&#39;s export directory.</span>
+<span class="sd">        node_id : int, optional</span>
+<span class="sd">            The id of this node in a larger graph (for disambiguation), by default None.</span>
+<span class="sd">        version : int, optional</span>
+<span class="sd">            The version of the node to use for this export, by default 1.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+            <span class="n">output_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span>
+            <span class="n">node_id</span><span class="o">=</span><span class="n">node_id</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">export_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Name for the exported node directory.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Name supplied by this node&#39;s operator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">export_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parents_with_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

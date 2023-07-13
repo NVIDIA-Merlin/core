@@ -19,6 +19,7 @@
       ~Node.add_parent
       ~Node.compute_schemas
       ~Node.construct_from
+      ~Node.export
       ~Node.exportable
       ~Node.remove_child
       ~Node.remove_inputs
@@ -34,6 +35,7 @@
    
       ~Node.column_mapping
       ~Node.dependency_columns
+      ~Node.export_name
       ~Node.graph
       ~Node.grouped_parents_with_dependencies
       ~Node.input_columns

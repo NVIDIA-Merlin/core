@@ -429,16 +429,19 @@ that makes up your workflow</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.construct_from" title="merlin.dag.Node.construct_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">construct_from</span></code></a>(nodable)</p></td>
 <td><p>Convert Node-like objects to a Node or list of Nodes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.exportable" title="merlin.dag.Node.exportable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exportable</span></code></a>([backend])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.export" title="merlin.dag.Node.export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code></a>(output_path[, node_id, version])</p></td>
+<td><p>Export a directory for this node, containing the required artifacts to run in the target context.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.exportable" title="merlin.dag.Node.exportable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exportable</span></code></a>([backend])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.remove_child" title="merlin.dag.Node.remove_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child</span></code></a>(child)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.remove_child" title="merlin.dag.Node.remove_child"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_child</span></code></a>(child)</p></td>
 <td><p>Removing a child node from this node</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.remove_inputs" title="merlin.dag.Node.remove_inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_inputs</span></code></a>(input_cols)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.remove_inputs" title="merlin.dag.Node.remove_inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_inputs</span></code></a>(input_cols)</p></td>
 <td><p>Remove input columns and all output columns that depend on them.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.validate_schemas" title="merlin.dag.Node.validate_schemas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_schemas</span></code></a>(root_schema[, strict_dtypes])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.validate_schemas" title="merlin.dag.Node.validate_schemas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_schemas</span></code></a>(root_schema[, strict_dtypes])</p></td>
 <td><p>Check if this Node's input schema matches the output schemas of parents and dependencies</p></td>
 </tr>
 </tbody>
@@ -456,25 +459,28 @@ that makes up your workflow</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.dependency_columns" title="merlin.dag.Node.dependency_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dependency_columns</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.graph" title="merlin.dag.Node.graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graph</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.export_name" title="merlin.dag.Node.export_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">export_name</span></code></a></p></td>
+<td><p>Name for the exported node directory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.graph" title="merlin.dag.Node.graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">graph</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.grouped_parents_with_dependencies" title="merlin.dag.Node.grouped_parents_with_dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grouped_parents_with_dependencies</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.grouped_parents_with_dependencies" title="merlin.dag.Node.grouped_parents_with_dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grouped_parents_with_dependencies</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.input_columns" title="merlin.dag.Node.input_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_columns</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.input_columns" title="merlin.dag.Node.input_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_columns</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.label" title="merlin.dag.Node.label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.label" title="merlin.dag.Node.label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">label</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.output_columns" title="merlin.dag.Node.output_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_columns</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.output_columns" title="merlin.dag.Node.output_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_columns</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.parents_with_dependencies" title="merlin.dag.Node.parents_with_dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parents_with_dependencies</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.parents_with_dependencies" title="merlin.dag.Node.parents_with_dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parents_with_dependencies</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.dag.Node.selector" title="merlin.dag.Node.selector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selector</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.dag.Node.selector" title="merlin.dag.Node.selector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">selector</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -585,6 +591,36 @@ that makes up your workflow</p>
 <dt class="sig sig-object py" id="merlin.dag.Node.exportable">
 <span class="sig-name descname"><span class="pre">exportable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/dag/node.html#Node.exportable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.exportable" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.dag.Node.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.11)"><span class="pre">os.PathLike</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/dag/node.html#Node.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.dag.Node.export" title="Permalink to this definition">#</a></dt>
+<dd><p>Export a directory for this node, containing the required artifacts
+to run in the target context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.11)"><em>os.PathLike</em></a><em>]</em>) – The base path to write this node’s export directory.</p></li>
+<li><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The id of this node in a larger graph (for disambiguation), by default None.</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – The version of the node to use for this export, by default 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.dag.Node.export_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">export_name</span></span><a class="headerlink" href="#merlin.dag.Node.export_name" title="Permalink to this definition">#</a></dt>
+<dd><p>Name for the exported node directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Name supplied by this node’s operator.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="merlin.dag.Node.parents_with_dependencies">
