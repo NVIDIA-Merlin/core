@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 import collections.abc
+import os
 from typing import List, Union
 
 from merlin.dag.operator import Operator
@@ -445,6 +446,46 @@ class Node:
     def exportable(self, backend: str = None):
         backends = getattr(self.op, "exportable_backends", [])
         return hasattr(self.op, "export") and backend in backends
+
+    def export(
+        self,
+        output_path: Union[str, os.PathLike],
+        node_id: int = None,
+        version: int = 1,
+    ):
+        """
+        Export a directory for this node, containing the required artifacts
+        to run in the target context.
+
+        Parameters
+        ----------
+        output_path : Union[str, os.PathLike]
+            The base path to write this node's export directory.
+        node_id : int, optional
+            The id of this node in a larger graph (for disambiguation), by default None.
+        version : int, optional
+            The version of the node to use for this export, by default 1.
+
+        """
+        return self.op.export(
+            output_path,
+            self.input_schema,
+            self.output_schema,
+            node_id=node_id,
+            version=version,
+        )
+
+    @property
+    def export_name(self):
+        """
+        Name for the exported node directory.
+
+        Returns
+        -------
+        str
+            Name supplied by this node's operator.
+        """
+        return self.op.export_name
 
     @property
     def parents_with_dependencies(self):
