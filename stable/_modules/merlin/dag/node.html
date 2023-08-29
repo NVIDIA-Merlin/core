@@ -162,9 +162,23 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../../README.html">Introduction</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.dag.html">merlin.dag package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.io.html">merlin.io package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../api/merlin.schema.html">merlin.schema package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Operator.html">merlin.dag.Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -194,12 +208,12 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Tags</dt>
-      <dd><a href="../../../../v0.10.0/index.html">v0.10.0</a></dd>
       <dd><a href="../../../../v23.02.00/index.html">v23.02.00</a></dd>
       <dd><a href="../../../../v23.02.01/index.html">v23.02.01</a></dd>
       <dd><a href="../../../../v23.04.00/index.html">v23.04.00</a></dd>
       <dd><a href="../../../../v23.05.00/index.html">v23.05.00</a></dd>
       <dd><a href="../../../../v23.06.00/index.html">v23.06.00</a></dd>
+      <dd><a href="../../../../v23.08.00/index.html">v23.08.00</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>
@@ -336,15 +350,26 @@ document.write(`
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#</span>
 <span class="kn">import</span> <span class="nn">collections.abc</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">merlin.dag.base_operator</span> <span class="kn">import</span> <span class="n">BaseOperator</span>
-<span class="kn">from</span> <span class="nn">merlin.dag.ops</span> <span class="kn">import</span> <span class="n">ConcatColumns</span><span class="p">,</span> <span class="n">SelectionOp</span><span class="p">,</span> <span class="n">SubsetColumns</span><span class="p">,</span> <span class="n">SubtractionOp</span>
+<span class="kn">from</span> <span class="nn">merlin.dag.operator</span> <span class="kn">import</span> <span class="n">Operator</span>
+<span class="kn">from</span> <span class="nn">merlin.dag.ops</span> <span class="kn">import</span> <span class="n">ConcatColumns</span><span class="p">,</span> <span class="n">GroupingOp</span><span class="p">,</span> <span class="n">SelectionOp</span><span class="p">,</span> <span class="n">SubsetColumns</span><span class="p">,</span> <span class="n">SubtractionOp</span>
+<span class="kn">from</span> <span class="nn">merlin.dag.ops.udf</span> <span class="kn">import</span> <span class="n">UDF</span>
 <span class="kn">from</span> <span class="nn">merlin.dag.selector</span> <span class="kn">import</span> <span class="n">ColumnSelector</span>
 <span class="kn">from</span> <span class="nn">merlin.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 
+<span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
+    <span class="n">Operator</span><span class="p">,</span>
+    <span class="nb">str</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">ColumnSelector</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">Operator</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
+<span class="p">]</span>
 
-<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Node is a group of columns that you want to apply the same transformations to.</span>
 <span class="sd">    Node&#39;s can be transformed by shifting operators on to them, which returns a new</span>
 <span class="sd">    Node with the transformations applied. This lets you define a graph of operations</span>
@@ -356,7 +381,7 @@ document.write(`
 <span class="sd">        Defines which columns to select from the input Dataset using column names and tags.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.__init__"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="p">[]</span>
@@ -374,7 +399,7 @@ document.write(`
         <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">SelectionOp</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">selector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="n">selector</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -388,15 +413,9 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">sel</span>
 
     <span class="c1"># These methods must maintain grouping</span>
-<div class="viewcode-block" id="Node.add_dependency"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_dependency">[docs]</a>    <span class="k">def</span> <span class="nf">add_dependency</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_dependency"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_dependency">[docs]</a>    <span class="k">def</span> <span class="nf">add_dependency</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dep</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">dep</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a dependency node to this node</span>
@@ -418,15 +437,9 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dep_node</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.add_parent"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_parent">[docs]</a>    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_parent"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_parent">[docs]</a>    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">parent</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">parent</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a parent node to this node</span>
@@ -446,15 +459,9 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parent_nodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.add_child"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">child</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adding a child node to this node</span>
@@ -474,15 +481,9 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">child_nodes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.remove_child"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span>
+<div class="viewcode-block" id="Node.remove_child"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_child">[docs]</a>    <span class="k">def</span> <span class="nf">remove_child</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">child</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-            <span class="n">ColumnSelector</span><span class="p">,</span>
-            <span class="s2">&quot;Node&quot;</span><span class="p">,</span>
-            <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">]],</span>
-        <span class="p">],</span>
+        <span class="n">child</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Removing a child node from this node</span>
@@ -503,7 +504,7 @@ document.write(`
             <span class="k">if</span> <span class="n">child_node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">child_node</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.compute_schemas"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.compute_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">compute_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">preserve_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.compute_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.compute_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">compute_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">preserve_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Defines the input and output schema</span>
 
@@ -516,6 +517,7 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">parents_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">deps_schema</span> <span class="o">=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
+
         <span class="n">parents_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
         <span class="n">dependencies_selector</span> <span class="o">=</span> <span class="n">_combine_selectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
 
@@ -529,7 +531,6 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">compute_input_schema</span><span class="p">(</span>
             <span class="n">root_schema</span><span class="p">,</span> <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span>
         <span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">compute_selector</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span> <span class="n">parents_selector</span><span class="p">,</span> <span class="n">dependencies_selector</span>
         <span class="p">)</span>
@@ -539,7 +540,7 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selector</span><span class="p">,</span> <span class="n">prev_output_schema</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Node.validate_schemas"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">strict_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.validate_schemas"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.validate_schemas">[docs]</a>    <span class="k">def</span> <span class="nf">validate_schemas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">strict_dtypes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this Node&#39;s input schema matches the output schemas of parents and dependencies</span>
 
@@ -581,25 +582,38 @@ document.write(`
                     <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">validate_schemas</span><span class="p">(</span>
-                <span class="n">parents_schema</span><span class="p">,</span> <span class="n">deps_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">strict_dtypes</span>
+                <span class="n">parents_schema</span><span class="p">,</span>
+                <span class="n">deps_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span>
+                <span class="n">strict_dtypes</span><span class="p">,</span>
             <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms this Node by applying an BaseOperator</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transforms this Node by applying an Operator</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        -----------</span>
-<span class="sd">        operators: BaseOperator or callable</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Node</span>
+<span class="sd">               Parameters</span>
+<span class="sd">               -----------</span>
+<span class="sd">               operators: Operator</span>
+<span class="sd">        or callable</span>
+
+<span class="sd">               Returns</span>
+<span class="sd">               -------</span>
+<span class="sd">               Node</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">Operator</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># implicit lambdaop conversion.</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">UDF</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">Operator</span><span class="p">):</span>
             <span class="c1"># handle case where an operator class is passed</span>
             <span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">BaseOperator</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">Operator</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected operator or callable, got </span><span class="si">{</span><span class="n">operator</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">child</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)()</span>
@@ -644,18 +658,26 @@ document.write(`
         <span class="n">other_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">other_nodes</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">other_node</span> <span class="ow">in</span> <span class="n">other_nodes</span><span class="p">:</span>
+            <span class="c1"># If the other node is a `[]`, we want to maintain grouping</span>
+            <span class="c1"># so create a selection node that we can use to do that</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">grouped_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">GroupingOp</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">other_node</span><span class="p">:</span>
+                    <span class="n">grouped_node</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span><span class="n">grouped_node</span><span class="p">)</span>
             <span class="c1"># If the other node is a `+` node, we want to collapse it into this `+` node to</span>
             <span class="c1"># avoid creating a cascade of repeated `+`s that we&#39;d need to optimize out by</span>
             <span class="c1"># re-combining them later in order to clean up the graph</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ConcatColumns</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_node</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ConcatColumns</span><span class="p">):</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">+=</span> <span class="n">other_node</span><span class="o">.</span><span class="n">grouped_parents_with_dependencies</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">add_dependency</span><span class="p">(</span><span class="n">other_node</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">child</span>
 
-    <span class="c1"># handle the &quot;column_name&quot; + Node case</span>
-    <span class="fm">__radd__</span> <span class="o">=</span> <span class="fm">__add__</span>
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_node</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes columns from this Node with another to return a new Node</span>
@@ -733,7 +755,7 @@ document.write(`
         <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot; output&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="n">output</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
-<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="Node.remove_inputs"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.remove_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove input columns and all output columns that depend on them.</span>
 
@@ -757,9 +779,49 @@ document.write(`
 
         <span class="k">return</span> <span class="n">removed_outputs</span></div>
 
-<div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Node.exportable"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.exportable">[docs]</a>    <span class="k">def</span> <span class="nf">exportable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">backends</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;exportable_backends&quot;</span><span class="p">,</span> <span class="p">[])</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;export&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">backend</span> <span class="ow">in</span> <span class="n">backends</span></div>
+
+<div class="viewcode-block" id="Node.export"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">],</span>
+        <span class="n">node_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export a directory for this node, containing the required artifacts</span>
+<span class="sd">        to run in the target context.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        output_path : Union[str, os.PathLike]</span>
+<span class="sd">            The base path to write this node&#39;s export directory.</span>
+<span class="sd">        node_id : int, optional</span>
+<span class="sd">            The id of this node in a larger graph (for disambiguation), by default None.</span>
+<span class="sd">        version : int, optional</span>
+<span class="sd">            The version of the node to use for this export, by default 1.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+            <span class="n">output_path</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_schema</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_schema</span><span class="p">,</span>
+            <span class="n">node_id</span><span class="o">=</span><span class="n">node_id</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">export_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Name for the exported node directory.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Name supplied by this node&#39;s operator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">export_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parents_with_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -843,11 +905,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_to_graphviz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="n">Nodable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
-        <span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Node&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ColumnSelector</span><span class="p">]]</span>
-    <span class="p">]</span>
-
-<div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/merlin.dag.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Node.construct_from"><a class="viewcode-back" href="../../../api/generated/merlin.dag.Node.html#merlin.dag.Node.construct_from">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">construct_from</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">nodable</span><span class="p">:</span> <span class="n">Nodable</span><span class="p">,</span>
@@ -874,6 +932,10 @@ document.write(`
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">ColumnSelector</span><span class="p">([</span><span class="n">nodable</span><span class="p">]))</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">nodable</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">Operator</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">op</span> <span class="o">=</span> <span class="n">nodable</span>
+            <span class="k">return</span> <span class="n">node</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">nodable</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodable</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -890,7 +952,11 @@ document.write(`
                 <span class="n">selection_nodes</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="p">[</span><span class="n">Node</span><span class="p">(</span><span class="n">_combine_selectors</span><span class="p">(</span><span class="n">selection_nodes</span><span class="p">))]</span> <span class="k">if</span> <span class="n">selection_nodes</span> <span class="k">else</span> <span class="p">[]</span>
                 <span class="p">)</span>
-                <span class="k">return</span> <span class="n">non_selection_nodes</span> <span class="o">+</span> <span class="n">selection_nodes</span>
+                <span class="n">group_node</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">construct_from</span><span class="p">(</span><span class="n">GroupingOp</span><span class="p">())</span>
+                <span class="n">all_node</span> <span class="o">=</span> <span class="n">non_selection_nodes</span> <span class="o">+</span> <span class="n">selection_nodes</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_node</span><span class="p">:</span>
+                    <span class="n">group_node</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">group_node</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -898,10 +964,15 @@ document.write(`
             <span class="p">)</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:]</span>
     <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+            <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">iter_nodes</span><span class="p">([</span><span class="n">current</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">new_nodes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -912,7 +983,7 @@ document.write(`
 
 
 <span class="c1"># output node (bottom) -&gt; selection leaf nodes (top)</span>
-<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">preorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -923,6 +994,8 @@ document.write(`
             <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">preorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
             <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
@@ -934,7 +1007,7 @@ document.write(`
 
 
 <span class="c1"># selection leaf nodes (top) -&gt; output node (bottom)</span>
-<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">postorder_iter_nodes</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">flatten_subgraphs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodes</span><span class="p">]</span>
@@ -942,8 +1015,11 @@ document.write(`
     <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="n">current_nodes</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_nodes</span><span class="p">:</span>
             <span class="n">traverse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parents_with_dependencies</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
                 <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">flatten_subgraphs</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">is_subgraph</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">postorder_iter_nodes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">output_node</span><span class="p">)))</span>
 
     <span class="n">traverse</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">queue</span><span class="p">:</span>
@@ -962,15 +1038,18 @@ document.write(`
     <span class="k">return</span> <span class="n">results</span>
 
 
-<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_combine_schemas</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">combined</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
+            <span class="k">if</span> <span class="n">input_schemas</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">input_schema</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ColumnSelector</span><span class="p">):</span>
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">Schema</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">combined</span> <span class="o">+=</span> <span class="n">_combine_schemas</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">input_schemas</span><span class="o">=</span><span class="n">input_schemas</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">combined</span>
 
 
@@ -978,7 +1057,9 @@ document.write(`
     <span class="n">combined</span> <span class="o">=</span> <span class="n">ColumnSelector</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">GroupingOp</span><span class="p">):</span>
+                <span class="n">selector</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span>
+            <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">:</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">output_column_names</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">selector</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span><span class="p">:</span>
                 <span class="n">selector</span> <span class="o">=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">output_schema</span><span class="o">.</span><span class="n">column_names</span><span class="p">)</span>
@@ -993,8 +1074,6 @@ document.write(`
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">elem</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">combined</span> <span class="o">+=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">combined</span> <span class="o">+=</span> <span class="n">ColumnSelector</span><span class="p">(</span><span class="n">subgroups</span><span class="o">=</span><span class="n">_combine_selectors</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">combined</span>
 
 
