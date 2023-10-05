@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+enum ElementUnit {
+  YEAR = 0;
+  MONTH = 1;
+  DAY = 2;
+  HOUR = 3;
+  MINUTE = 4;
+  SECOND = 5;
+  MILLISECOND = 6;
+  MICROSECOND = 7;
+  NANOSECOND = 8;
+}
+
+enum ElementType {
+  UNKNOWN = 0;
+  BOOL = 1;
+  INT = 2;
+  UINT = 3;
+  FLOAT = 4;
+  STRING = 5;
+  DATETIME = 6;
+  OBJECT = 7;
+}
+
+message Dtype {
+  string name = 1;
+  ElementType element_type = 2;
+  int64 element_size = 3;
+  ElementUnit element_unit = 4;
+  bool signed = 5;
+}
+
+message Shape {
+  // The dimensions that define the shape
+  repeated Dim dim = 1;
+
+  // An axis in a multi-dimensional feature representation.
+  message Dim {
+    oneof dim_type {
+      int64 size = 1;
+      Range size_range = 2;
+    }
+
+    // The (potentially open-ended) range of values for this dimension
+    message Range {
+      int64 min = 2;
+      int64 max = 3;
+    }
+  }
+}
+
+message Property {
+  oneof prop_type {
+    double float_value = 1;
+    int64 int_value = 2;
+    string string_value = 3;
+  }
+}
+
+message IntDomain {
+  string name = 1;
+  int64 min = 2;
+  int64 max = 3;
+}
+
+// Since this is used for both 32 and 64 bit floats,
+// the range has to be defined as a double
+message FloatDomain {
+  string name = 1;
+  double min = 2;
+  double max = 3;
+}
+
+message Field {
+  Dtype dtype = 1;  // includes shape
+  Shape shape = 2;
+  int64 cardinality = 3;
+
+  repeated string tags = 4;
+  map<string, Property> properties = 5;
+
+  oneof domain {
+    IntDomain int_domain = 6;
+    FloatDomain float_domain = 7;
+  }
+
+  string name = 8;
+}
+
+message Schema {
+  repeated Field fields = 1;
+}
