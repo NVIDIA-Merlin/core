@@ -375,7 +375,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="merlin.io.Dataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.io.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npartitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_mem_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/io/dataset.html#Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Universal external-data wrapper for NVTabular</p>
 <p>The NVTabular <cite>Workflow</cite> and <cite>DataLoader</cite>-related APIs require all
 external data to be converted to the universal <cite>Dataset</cite> type.  The
@@ -471,32 +471,32 @@ CSV dataset into a new Parquet dataset optimized for use with NVTabular.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path_or_source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>list of str</em><em>, or </em><em>&lt;dask.dataframe</em><em>|</em><em>cudf</em><em>|</em><em>pd&gt;.DataFrame</em>) – Dataset path (or list of paths), or a DataFrame. If string,
+<li><p><strong>path_or_source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>list of str</em><em>, or </em><em>&lt;dask.dataframe</em><em>|</em><em>cudf</em><em>|</em><em>pd&gt;.DataFrame</em>) – Dataset path (or list of paths), or a DataFrame. If string,
 should specify a specific file or directory path. If this is a
 directory path, the directory structure must be flat (nested
 directories are not yet supported).</p></li>
-<li><p><strong>engine</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>DatasetEngine</em>) – DatasetEngine object or string identifier of engine. Current
+<li><p><strong>engine</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>DatasetEngine</em>) – DatasetEngine object or string identifier of engine. Current
 string options include: (“parquet”, “csv”, “avro”). This argument
 is ignored if path_or_source is a DataFrame type.</p></li>
-<li><p><strong>npartitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Desired number of Dask-collection partitions to produce in
+<li><p><strong>npartitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Desired number of Dask-collection partitions to produce in
 the <code class="docutils literal notranslate"><span class="pre">to_ddf</span></code> method when <code class="docutils literal notranslate"><span class="pre">path_or_source</span></code> corresponds to a
 DataFrame type.  This argument is ignored for file-based
 <code class="docutils literal notranslate"><span class="pre">path_or_source</span></code> input.</p></li>
-<li><p><strong>part_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Desired size (in bytes) of each Dask partition.
+<li><p><strong>part_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Desired size (in bytes) of each Dask partition.
 If None, part_mem_fraction will be used to calculate the
 partition size.  Note that the underlying engine may allow
 other custom kwargs to override this argument. This argument
 is ignored if path_or_source is a DataFrame type.</p></li>
-<li><p><strong>part_mem_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em> (</em><em>default 0.125</em><em>)</em>) – Fractional size of desired dask partitions (relative
+<li><p><strong>part_mem_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em> (</em><em>default 0.125</em><em>)</em>) – Fractional size of desired dask partitions (relative
 to GPU memory capacity). Ignored if part_size is passed
 directly. Note that the underlying engine may allow other
 custom kwargs to override this argument. This argument
 is ignored if path_or_source is a DataFrame type. If
 <code class="docutils literal notranslate"><span class="pre">cpu=True</span></code>, this value will be relative to the total
 host memory detected by the client process.</p></li>
-<li><p><strong>storage_options</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – Further parameters to pass to the bytes backend. This argument
+<li><p><strong>storage_options</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Further parameters to pass to the bytes backend. This argument
 is ignored if path_or_source is a DataFrame type.</p></li>
-<li><p><strong>cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – WARNING: Experimental Feature!
+<li><p><strong>cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – WARNING: Experimental Feature!
 Whether NVTabular should keep all data in cpu memory when
 the Dataset is converted to an internal Dask collection. The
 default value is False, unless <code class="docutils literal notranslate"><span class="pre">cudf</span></code> and <code class="docutils literal notranslate"><span class="pre">dask_cudf</span></code>
@@ -523,7 +523,7 @@ and <cite>aggregate_files</cite> (the latter is experimental).</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in output <cite>DataFrame</cite>. If not specified,
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in output <cite>DataFrame</cite>. If not specified,
 the output will contain all known columns in the Dataset.</p></li>
 <li><p><strong>shuffle</strong> (<em>bool; default False</em>) – Whether to shuffle the order of partitions in the output
 <cite>dask_cudf.DataFrame</cite>.  Note that this does not shuffle
@@ -565,7 +565,7 @@ combinations are moved to the same partition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>)</em>) – Column names to shuffle by.</p></li>
+<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em>) – Column names to shuffle by.</p></li>
 <li><p><strong>hive_data</strong> (<em>bool; default None</em>) – Whether the dataset is backed by a hive-partitioned
 dataset (with the keys encoded in the directory structure).
 By default, the Dataset’s <cite>file_partition_map</cite> property will
@@ -592,7 +592,7 @@ ignored.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>npartitions</strong> (<em>int; default None</em>) – Number of partitions in output <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>. Only used if
 <code class="docutils literal notranslate"><span class="pre">partition_size</span></code> isn’t specified.</p></li>
-<li><p><strong>partition_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>str; default None</em>) – Max number of bytes of memory for each partition. Use
+<li><p><strong>partition_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> or </em><em>str; default None</em>) – Max number of bytes of memory for each partition. Use
 numbers or strings like ‘5MB’. If specified, <code class="docutils literal notranslate"><span class="pre">npartitions</span></code>
 will be ignored.</p></li>
 </ul>
@@ -633,9 +633,9 @@ each iteration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in each <cite>DataFrame</cite>. If not specified,
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in each <cite>DataFrame</cite>. If not specified,
 the outputs will contain all known columns in the Dataset.</p></li>
-<li><p><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>)</em><em>; default None</em>) – A specific list of partition indices to iterate over. If
+<li><p><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>)</em><em>; default None</em>) – A specific list of partition indices to iterate over. If
 nothing is specified, all partitions will be returned in
 order (or the shuffled order, if <cite>shuffle=True</cite>).</p></li>
 <li><p><strong>shuffle</strong> (<em>bool; default False</em>) – Whether to shuffle the order of <cite>dask_cudf.DataFrame</cite>
@@ -651,7 +651,7 @@ the row-count. By default, the file-metadata
 optimization will only be used if the current Dataset is
 backed by a file-based engine. Otherwise, it is possible
 that an intermediate transform has modified the row-count.</p></li>
-<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Number of dataset passes to include within a single iterator.
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of dataset passes to include within a single iterator.
 This option is used for multi-epoch data-loading. Default is 1.</p></li>
 </ul>
 </dd>
@@ -679,16 +679,16 @@ all data is persisted.  This results in a full shuffle of the
 data processed by each worker.  To improve performance, this option
 currently uses host-memory <cite>BytesIO</cite> objects for the intermediate
 persist stage. The <cite>FULL</cite> option is not yet implemented.</p></li>
-<li><p><strong>partition_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>)</em>) – Columns to use for hive-partitioning.  If this option is used,
+<li><p><strong>partition_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em>) – Columns to use for hive-partitioning.  If this option is used,
 <cite>preserve_files</cite>, <cite>output_files</cite>, and <cite>out_files_per_proc</cite>
 cannot be specified, and <cite>method</cite> will be ignored.  Also, the
 <cite>PER_WORKER</cite> shuffle will not be supported.</p></li>
-<li><p><strong>preserve_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Whether to preserve the original file-to-partition mapping of
+<li><p><strong>preserve_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether to preserve the original file-to-partition mapping of
 the base dataset. This option requires <cite>method=”subgraph”</cite>, and is
 only available if the base dataset is known, and if it corresponds
 to csv or parquet format. If True, the <cite>out_files_per_proc</cite> option
 will be ignored. Default is False.</p></li>
-<li><p><strong>output_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The total number of desired output files. This option requires
+<li><p><strong>output_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The total number of desired output files. This option requires
 <cite>method=”subgraph”</cite>. When <cite>out_files_per_proc=None</cite>, the default
 is the number of underlying Dask partitions. When <cite>out_files_per_proc</cite>
 is set to an integer, the default is the product of that integer and
@@ -709,9 +709,9 @@ being less than <cite>5000</cite> rows. If smaller row-groups are necessary, try
 calling <cite>to_cpu()</cite> before writing to disk.</p></li>
 <li><p><strong>num_threads</strong> (<em>integer</em>) – Number of IO threads to use for writing the output dataset.
 For <cite>0</cite> (default), no dedicated IO threads will be used.</p></li>
-<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
+<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
 Keys are column names, values are datatypes.</p></li>
-<li><p><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>False</em>) – File-name extension to use for all output files. This argument
+<li><p><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>False</em>) – File-name extension to use for all output files. This argument
 is ignored if a specific list of file names is specified using
 the <code class="docutils literal notranslate"><span class="pre">output_files</span></code> option. If <code class="docutils literal notranslate"><span class="pre">preserve_files=True</span></code>, this
 suffix will be appended to the original name of each file,
@@ -728,7 +728,7 @@ each of these subgraphs is executed, in full, by the same worker (as
 a single large task). In some cases, it may be more ideal to prioritize
 concurrency. In that case, a worker-based approach can be used by
 specifying <cite>method=”worker”</cite>.</p></li>
-<li><p><strong>write_hugectr_keyset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to write a HugeCTR keyset output file (“_hugectr.keyset”).
+<li><p><strong>write_hugectr_keyset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to write a HugeCTR keyset output file (“_hugectr.keyset”).
 Writing this file can be very slow, and should only be done if you
 are planning to ingest the output data with HugeCTR. Default is False.</p></li>
 </ul>
@@ -761,7 +761,7 @@ all data is persisted.  This results in a full shuffle of the
 data processed by each worker.  To improve performance, this option
 currently uses host-memory <cite>BytesIO</cite> objects for the intermediate
 persist stage. The <cite>FULL</cite> option is not yet implemented.</p></li>
-<li><p><strong>file_partition_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – Dictionary mapping of output file names to partition indices
+<li><p><strong>file_partition_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary mapping of output file names to partition indices
 that should be written to that file name.  If this argument
 is passed, only the partitions included in the dictionary
 will be written to disk, and the <cite>output_files_per_proc</cite> argument
@@ -770,7 +770,7 @@ will be ignored.</p></li>
 shuffling the data</p></li>
 <li><p><strong>num_threads</strong> (<em>integer</em>) – Number of IO threads to use for writing the output dataset.
 For <cite>0</cite> (default), no dedicated IO threads will be used.</p></li>
-<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
+<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
 Keys are column names, values are datatypes.</p></li>
 </ul>
 </dd>
@@ -799,13 +799,13 @@ Keys are column names, values are datatypes.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="merlin.io.Dataset.to_npy">
-<span class="sig-name descname"><span class="pre">to_npy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/io/dataset.html#Dataset.to_npy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_npy" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_npy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/merlin/io/dataset.html#Dataset.to_npy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_npy" title="Permalink to this definition">#</a></dt>
 <dd><p>Converts a dataset into an npy file, can append if data is larger than memory</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The output file path for the resulting npy file</p></li>
-<li><p><strong>append</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Enables append mode for larger that memory data, by default False</p></li>
+<li><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The output file path for the resulting npy file</p></li>
+<li><p><strong>append</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Enables append mode for larger that memory data, by default False</p></li>
 </ul>
 </dd>
 </dl>
@@ -846,7 +846,7 @@ and <cite>require_metadata_file</cite>. For more information, see
 processing.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -869,10 +869,10 @@ this method preserves the original ordering.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output_path</strong> (<em>string</em>) – Root directory path to use for the new (regenerated) dataset.</p></li>
-<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>(</em><em>string</em><em>)</em><em>, </em><em>optional</em>) – Subset of columns to include in the regenerated dataset.</p></li>
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><em>string</em><em>)</em><em>, </em><em>optional</em>) – Subset of columns to include in the regenerated dataset.</p></li>
 <li><p><strong>output_format</strong> (<em>string</em><em>, </em><em>optional</em>) – Format to use for regenerated dataset.  Only “parquet” (default)
 is currently supported.</p></li>
-<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the task graph or to return a Delayed object.
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the task graph or to return a Delayed object.
 By default, the graph will be executed.</p></li>
 <li><p><strong>**kwargs</strong> – Key-word arguments to pass down to the engine’s regenerate_dataset
 method. See <cite>ParquetDatasetEngine.regenerate_dataset</cite> for more
@@ -885,7 +885,7 @@ corresponding to the number of generated data files.  If <cite>False</cite>,
 the returned value will be a <cite>Delayed</cite> object.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a> or Delayed</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a> or Delayed</p>
 </dd>
 </dl>
 </dd></dl>
@@ -896,7 +896,7 @@ the returned value will be a <cite>Delayed</cite> object.</p>
 <dd><p>Create a schema containing the column names and inferred dtypes of the Dataset</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rows to sample to infer the dtypes. Defaults to 1.</p>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rows to sample to infer the dtypes. Defaults to 1.</p>
 </dd>
 </dl>
 </dd></dl>
