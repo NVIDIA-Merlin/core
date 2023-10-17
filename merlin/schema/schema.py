@@ -96,8 +96,10 @@ class ColumnSchema:
             new_shape = dtype.shape
         elif value_counts:
             new_shape = self._shape_from_counts(Domain(**value_counts))
+        elif self.is_list and self.is_ragged is False:
+            new_shape = Shape((-1, -1))
         elif self.is_list:
-            new_shape = self._shape_from_flags(self.is_list)
+            new_shape = Shape((-1, None))
         else:
             new_shape = Shape()
 
@@ -115,11 +117,8 @@ class ColumnSchema:
 
         object.__setattr__(self, "properties", properties)
 
-    def _shape_from_flags(self, is_list):
-        return Shape(((0, None), (0, None))) if is_list else None
-
     def _shape_from_counts(self, value_count):
-        return Shape(((0, None), (value_count.min or 0, value_count.max)))
+        return Shape((-1, (value_count.min or 0, value_count.max)))
 
     @property
     def shape(self):

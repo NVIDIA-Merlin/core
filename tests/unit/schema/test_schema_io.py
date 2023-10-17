@@ -205,7 +205,7 @@ def test_schema_with_shape_to_tensorflow_metadata_json():
     ragged_dim = loaded_schema["col"].shape[1]
     assert isinstance(ragged_dim.max, int)
     assert isinstance(ragged_dim.min, int)
-    assert ragged_dim == Dimension(min=1, max=5)
+    assert ragged_dim == Dimension((1, 5))
 
 
 def test_tensorflow_metadata_from_json():

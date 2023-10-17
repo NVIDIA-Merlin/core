@@ -28,7 +28,7 @@ def test_empty_dimension():
 
 
 def test_min_max_val_dimension():
-    dim = Dimension(2, 3)
+    dim = Dimension((2, 3))
     assert dim.min == 2
     assert dim.max == 3
 
@@ -36,32 +36,29 @@ def test_min_max_val_dimension():
 def test_fixed_min_with_unbounded_max():
     dim = Dimension(2)
     assert dim.min == 2
-    assert dim.max is None
+    assert dim.max == 2
 
-    dim = Dimension(2, None)
+    dim = Dimension((2, None))
     assert dim.min == 2
     assert dim.max is None
 
 
 def test_min_is_none_raises_error():
     with pytest.raises(ValueError):
-        Dimension(None)
-
-    with pytest.raises(ValueError):
-        Dimension(None, 1)
+        Dimension((None, 1))
 
 
 def test_bounds_must_be_non_negative():
     with pytest.raises(ValueError):
-        Dimension(-1, 2)
+        Dimension((-1, 2))
 
     with pytest.raises(ValueError):
-        Dimension(2, -1)
+        Dimension((2, -1))
 
 
 def test_max_less_than_min():
     with pytest.raises(ValueError):
-        Dimension(2, 1)
+        Dimension((2, 1))
 
 
 def test_is_bounded():
@@ -69,15 +66,15 @@ def test_is_bounded():
     assert dim.is_bounded is False
 
     dim = Dimension(2)
-    assert dim.is_bounded is False
-
-    dim = Dimension(2, 2)
     assert dim.is_bounded is True
 
-    dim = Dimension(2, 4)
+    dim = Dimension((2, 2))
     assert dim.is_bounded is True
 
-    dim = Dimension(2, None)
+    dim = Dimension((2, 4))
+    assert dim.is_bounded is True
+
+    dim = Dimension((2, None))
     assert dim.is_bounded is False
 
 
@@ -86,15 +83,15 @@ def test_is_fixed():
     assert dim.is_fixed is False
 
     dim = Dimension(2)
-    assert dim.is_fixed is False
-
-    dim = Dimension(2, 2)
     assert dim.is_fixed is True
 
-    dim = Dimension(2, 4)
+    dim = Dimension((2, 2))
+    assert dim.is_fixed is True
+
+    dim = Dimension((2, 4))
     assert dim.is_fixed is False
 
-    dim = Dimension(2, None)
+    dim = Dimension((2, None))
     assert dim.is_fixed is False
 
 
@@ -103,15 +100,15 @@ def test_is_variable():
     assert dim.is_variable is True
 
     dim = Dimension(2)
-    assert dim.is_variable is True
-
-    dim = Dimension(2, 2)
     assert dim.is_variable is False
 
-    dim = Dimension(2, 4)
+    dim = Dimension((2, 2))
+    assert dim.is_variable is False
+
+    dim = Dimension((2, 4))
     assert dim.is_variable is True
 
-    dim = Dimension(2, None)
+    dim = Dimension((2, None))
     assert dim.is_variable is True
 
 
