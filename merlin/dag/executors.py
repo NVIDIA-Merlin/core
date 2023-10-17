@@ -35,6 +35,7 @@ from merlin.dtypes.shape import DefaultShapes
 from merlin.io import Dataset
 from merlin.io.worker import clean_worker_cache
 from merlin.table import CupyColumn, NumpyColumn, TensorTable
+from merlin.telemetry import get_telemetry_provider, telemetry
 
 LOG = logging.getLogger("merlin")
 
@@ -51,6 +52,7 @@ class LocalExecutor:
 
     def __init__(self, device=Device.GPU):
         self.device = device if HAS_GPU else Device.CPU
+        self.telemetry = get_telemetry_provider()
         self._target_format = (
             DataFormats.PANDAS_DATAFRAME
             | DataFormats.CUDF_DATAFRAME
@@ -66,6 +68,7 @@ class LocalExecutor:
     def target_format(self, formats):
         self._target_format = formats
 
+    @telemetry
     def transform(
         self,
         transformable,
@@ -116,10 +119,13 @@ class LocalExecutor:
         upstream_outputs = self._run_upstream_transforms(
             node, transformable, capture_dtypes, strict
         )
+
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
         formatted_columns = self._standardize_formats(node, upstream_columns)
         transform_input = self._merge_upstream_columns(formatted_columns)
+
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
+
         transform_output = _convert_format(transform_output, self.target_format)
         return transform_output
 
@@ -234,7 +240,8 @@ class LocalExecutor:
         try:
             # use input_columns to ensure correct grouping (subgroups)
             selection = node.input_columns.resolve(node.input_schema)
-            transformed_data = node.op.transform(selection, input_data)
+
+            transformed_data = self._run_op_transform(node, input_data, selection)
 
             if transformed_data is None:
                 raise RuntimeError(f"Operator {node.op} didn't return a value during transform")
@@ -248,6 +255,20 @@ class LocalExecutor:
         except Exception as exc:
             LOG.exception("Failed to transform operator %s", node.op)
             raise exc
+
+    def _run_op_transform(self, node, input_data, selection):
+        """
+        This method is extracted from _run_node_transform so that we can override it with a
+        telemetry-wrapped version.
+        """
+        op_name = ""
+        if hasattr(node.op, "name"):
+            op_name = f'"{node.op.name}"'
+
+        with self.telemetry.span(f"{node.op.__class__.__name__}({op_name})"):
+            result = node.op.transform(selection, input_data)
+
+        return result
 
     def _capture_dtypes(self, node, output_data):
         for col_name, output_col_schema in node.output_schema.column_schemas.items():
