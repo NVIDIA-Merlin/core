@@ -21,7 +21,7 @@ from numba import cuda
 
 from merlin.core.has_gpu import HAS_GPU  # noqa pylint: disable=unused-import
 
-if not cuda.is_available():
+if not HAS_GPU:
     cuda = None
 
 try:
