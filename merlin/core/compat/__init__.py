@@ -21,8 +21,7 @@ from numba import cuda
 
 from merlin.core.has_gpu import HAS_GPU  # noqa pylint: disable=unused-import
 
-if not HAS_GPU:
-    cuda = None
+cuda = False if not HAS_GPU else cuda
 
 try:
     import psutil
@@ -99,10 +98,7 @@ def device_mem_size(kind="total", cpu=False):
     if kind not in ["free", "total"]:
         raise ValueError(f"{kind} not a supported option for device_mem_size.")
     try:
-        if kind == "free":
-            return int(cuda.current_context().get_memory_info()[0])
-        else:
-            return int(cuda.current_context().get_memory_info()[1])
+        return pynvml_mem_size(kind=kind)
     except NotImplementedError:
         if kind == "free":
             # Not using NVML "free" memory, because it will not include RMM-managed memory
