@@ -97,14 +97,9 @@ def device_mem_size(kind="total", cpu=False):
 
     if kind not in ["free", "total"]:
         raise ValueError(f"{kind} not a supported option for device_mem_size.")
-    try:
-        return pynvml_mem_size(kind=kind)
-    except NotImplementedError:
-        if kind == "free":
-            # Not using NVML "free" memory, because it will not include RMM-managed memory
-            warnings.warn("get_memory_info is not supported. Using total device memory from NVML.")
-        size = pynvml_mem_size(kind="total", index=0)
-        return size
+
+    return pynvml_mem_size(kind=kind)
+
 
 
 try:
