@@ -101,7 +101,6 @@ def device_mem_size(kind="total", cpu=False):
     return pynvml_mem_size(kind=kind)
 
 
-
 try:
     import numpy
 except ImportError:

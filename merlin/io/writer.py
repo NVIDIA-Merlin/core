@@ -196,7 +196,11 @@ class ThreadedWriter(Writer):
         if self.shuffle:
             df = shuffle_df(df)
         int_slice_size = df.shape[0] // self.num_out_files
-        slice_size = int_slice_size if int_slice_size > 0 and df.shape[0] % int_slice_size == 0 else int_slice_size + 1
+        slice_size = (
+            int_slice_size
+            if int_slice_size > 0 and df.shape[0] % int_slice_size == 0
+            else int_slice_size + 1
+        )
         for x in range(self.num_out_files):
             start = x * slice_size
             end = start + slice_size
