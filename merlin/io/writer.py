@@ -25,6 +25,7 @@ from fsspec.core import get_fs_token_paths
 from merlin.core.compat import cupy as cp
 from merlin.core.dispatch import annotate
 from merlin.io.shuffle import shuffle_df
+import logging
 
 
 class Writer:
@@ -193,10 +194,13 @@ class ThreadedWriter(Writer):
         # Pandas does not support the `scatter_by_map` method
         # used in `_add_data_scatter`. So, we manually shuffle
         # the df and write out slices.
+        logging.error(f"df: {df.shape}, {self.num_out_files}")
         if self.shuffle:
             df = shuffle_df(df)
+        logging.error(f"df: {df.shape}, {self.num_out_files}")
         int_slice_size = df.shape[0] // self.num_out_files
-        slice_size = int_slice_size if df.shape[0] % int_slice_size == 0 else int_slice_size + 1
+        logging.error(f"df: {df.shape}, {self.num_out_files}, {int_slice_size}")
+        slice_size = int_slice_size if int_slice_size > 0 and df.shape[0] % int_slice_size == 0 else int_slice_size + 1
         for x in range(self.num_out_files):
             start = x * slice_size
             end = start + slice_size
