@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+from datetime import datetime
 
 from natsort import natsorted
 
@@ -24,8 +25,14 @@ gitdir = os.path.join(repodir, r".git")
 
 # -- Project information -----------------------------------------------------
 
+year_range = "2023"
+year_now = str(datetime.now().year)
+if year_range != year_now:
+    year_range = year_range + chr(8211) + year_now
+
+
 project = "Merlin Core"
-copyright = "2023, NVIDIA"  # pylint: disable=redefined-builtin
+copyright = year_range + ", NVIDIA"  # pylint: disable=redefined-builtin
 author = "NVIDIA"
 
 
@@ -85,8 +92,7 @@ html_title = "Merlin Core"
 html_theme_options = {
     "repository_url": "https://github.com/NVIDIA-Merlin/core",
     "use_repository_button": True,
-    "footer_content_items": ["copyright.html", "last-updated.html"],
-    "extra_footer": "",
+    "footer_content_items": ["copyright.html", "footer.html"],
     "logo": {"text": "NVIDIA Merlin Core", "alt_text": "NVIDIA Merlin Core"},
 }
 html_sidebars = {
