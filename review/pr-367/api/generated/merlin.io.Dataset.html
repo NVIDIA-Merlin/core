@@ -1,0 +1,1153 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>merlin.io.Dataset &#8212; Merlin Core</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=86edd663" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/versions.css?v=69fc36dc" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/merlin.io.Dataset';</script>
+    <script src="../../_static/js/rtd-version-switcher.js?v=425801f2"></script>
+    <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/api/generated/merlin.io.Dataset.html" />
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Merlin Schema" href="../merlin.schema.html" />
+    <link rel="prev" title="Merlin IO" href="../merlin.io.html" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NVJ1Y1YJHK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NVJ1Y1YJHK', {
+        'anonymize_ip': false,
+    });
+  </script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,300&display=swap" rel="stylesheet">
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">NVIDIA Merlin Core</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../README.html">Introduction</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">API Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Operator.html">merlin.dag.Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../merlin.io.html">Merlin IO</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.schema.html">Merlin Schema</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-merlin-ecosystem-nav" aria-label="Merlin Ecosystem Nav">
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Ecosystem</span></p>
+    <ul class="nav bd-sidenav">
+      <li class="toctree-l1"><a class="reference external" href="/models/">Models</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/systems/">Systems</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/NVTabular/">NVTabular</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Transformers4Rec/">Transformers4Rec</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/dataloader/">Dataloader</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Merlin/">Merlin</a></li>
+    </ul>
+  </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/NVIDIA-Merlin/core" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/generated/merlin.io.Dataset.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>merlin.io.Dataset</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.__init__"><code class="docutils literal notranslate"><span class="pre">Dataset.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_ddf"><code class="docutils literal notranslate"><span class="pre">Dataset.to_ddf()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.file_partition_map"><code class="docutils literal notranslate"><span class="pre">Dataset.file_partition_map</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.partition_lens"><code class="docutils literal notranslate"><span class="pre">Dataset.partition_lens</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_cpu"><code class="docutils literal notranslate"><span class="pre">Dataset.to_cpu()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_gpu"><code class="docutils literal notranslate"><span class="pre">Dataset.to_gpu()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.shuffle_by_keys"><code class="docutils literal notranslate"><span class="pre">Dataset.shuffle_by_keys()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.repartition"><code class="docutils literal notranslate"><span class="pre">Dataset.repartition()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.merge"><code class="docutils literal notranslate"><span class="pre">Dataset.merge()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_iter"><code class="docutils literal notranslate"><span class="pre">Dataset.to_iter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_parquet"><code class="docutils literal notranslate"><span class="pre">Dataset.to_parquet()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_hugectr"><code class="docutils literal notranslate"><span class="pre">Dataset.to_hugectr()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.compute"><code class="docutils literal notranslate"><span class="pre">Dataset.compute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.head"><code class="docutils literal notranslate"><span class="pre">Dataset.head()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.persist"><code class="docutils literal notranslate"><span class="pre">Dataset.persist()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.tail"><code class="docutils literal notranslate"><span class="pre">Dataset.tail()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_npy"><code class="docutils literal notranslate"><span class="pre">Dataset.to_npy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.num_rows"><code class="docutils literal notranslate"><span class="pre">Dataset.num_rows</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.npartitions"><code class="docutils literal notranslate"><span class="pre">Dataset.npartitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.validate_dataset"><code class="docutils literal notranslate"><span class="pre">Dataset.validate_dataset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.regenerate_dataset"><code class="docutils literal notranslate"><span class="pre">Dataset.regenerate_dataset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.infer_schema"><code class="docutils literal notranslate"><span class="pre">Dataset.infer_schema()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.sample_dtypes"><code class="docutils literal notranslate"><span class="pre">Dataset.sample_dtypes()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="merlin-io-dataset">
+<h1>merlin.io.Dataset<a class="headerlink" href="#merlin-io-dataset" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="merlin.io.Dataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.io.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npartitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_mem_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Universal external-data wrapper for NVTabular</p>
+<p>The NVTabular <cite>Workflow</cite> and <cite>DataLoader</cite>-related APIs require all
+external data to be converted to the universal <cite>Dataset</cite> type.  The
+main purpose of this class is to abstract away the raw format of the
+data, and to allow other NVTabular classes to reliably materialize a
+<cite>dask_cudf.DataFrame</cite> collection (and/or collection-based iterator)
+on demand.</p>
+<p>A new <cite>Dataset</cite> object can be initialized from a variety of different
+raw-data formats. To initialize an object from a directory path or
+file list, the <cite>engine</cite> argument should be used to specify either
+“parquet” or “csv” format.  If the first argument contains a list
+of files with a suffix of either “parquet” or “csv”, the engine can
+be inferred:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize Dataset with a parquet-dataset directory.</span>
+<span class="c1"># must specify engine=&quot;parquet&quot;</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span>
+
+<span class="c1"># Initialize Dataset with list of csv files.</span>
+<span class="c1"># engine=&quot;csv&quot; argument is optional</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">([</span><span class="s2">&quot;file_0.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;file_1.csv&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Since NVTabular leverages <cite>fsspec</cite> as a file-system interface,
+the underlying data can be stored either locally, or in a remote/cloud
+data store.  To read from remote storage, like gds or s3, the
+appropriate protocol should be prepended to the <cite>Dataset</cite> path
+argument(s), and any special backend parameters should be passed
+in a <cite>storage_options</cite> dictionary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize Dataset with s3 parquet data</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span>
+    <span class="s2">&quot;s3://bucket/path&quot;</span><span class="p">,</span>
+    <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span>
+    <span class="n">storage_options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;anon&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;use_ssl&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, both parquet and csv-based data will be converted to
+a Dask-DataFrame collection with a maximum partition size of
+roughly 12.5 percent of the total memory on a single device.  The
+partition size can be changed to a different fraction of total
+memory on a single device with the <cite>part_mem_fraction</cite> argument.
+Alternatively, a specific byte size can be specified with the
+<cite>part_size</cite> argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dataset partitions will be ~10% single-GPU memory (or smaller)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;bigfile.parquet&quot;</span><span class="p">,</span> <span class="n">part_mem_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># Dataset partitions will be ~1GB (or smaller)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;bigfile.parquet&quot;</span><span class="p">,</span> <span class="n">part_size</span><span class="o">=</span><span class="s2">&quot;1GB&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that, if both the fractional and literal options are used
+at the same time, <cite>part_size</cite> will take precedence.  Also, for
+parquet-formatted data, the partitioning is done at the row-
+group level, and the byte-size of the first row-group (after
+CuDF conversion) is used to map all other partitions.
+Therefore, if the distribution of row-group sizes is not
+uniform, the partition sizes will not be balanced.</p>
+<p>In addition to handling data stored on disk, a <cite>Dataset</cite> object
+can also be initialized from an existing CuDF/Pandas DataFrame,
+or from a Dask-DataFrame collection (e.g. <cite>dask_cudf.DataFrame</cite>).
+For these in-memory formats, the size/number of partitions will
+not be modified.  That is, a CuDF/Pandas DataFrame (or PyArrow
+Table) will produce a single-partition collection, while the
+number/size of a Dask-DataFrame collection will be preserved:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize from CuDF DataFrame (creates 1 partition)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">cudf</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+
+<span class="c1"># Initialize from Dask-CuDF DataFrame (preserves partitions)</span>
+<span class="n">ddf</span> <span class="o">=</span> <span class="n">dask_cudf</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ddf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since the <cite>Dataset</cite> API can both ingest and output a Dask
+collection, it is straightforward to transform data either before
+or after an NVTabular workflow is executed. This means that some
+complex pre-processing operations, that are not yet supported
+in NVTabular, can still be accomplished with the Dask-CuDF API:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sort input data before final Dataset initialization</span>
+<span class="c1"># Warning: Global sorting requires significant device memory!</span>
+<span class="n">ddf</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_ddf</span><span class="p">()</span>
+<span class="n">ddf</span> <span class="o">=</span> <span class="n">ddf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;user_rank&quot;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">ddf</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>Dataset Optimization Tips (DOTs)</cite></p>
+<p>The NVTabular dataset should be created from Parquet files in order
+to get the best possible performance, preferably with a row group size
+of around 128MB.  While NVTabular also supports reading from CSV files,
+reading CSV can be over twice as slow as reading from Parquet. Take a
+look at this <a class="reference external" href="https://github.com/NVIDIA/NVTabular/blob/main/examples/optimize_criteo.ipynb">notebook</a> for an example of transforming the original Criteo
+CSV dataset into a new Parquet dataset optimized for use with NVTabular.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_or_source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, or </em><em>&lt;dask.dataframe</em><em>|</em><em>cudf</em><em>|</em><em>pd&gt;.DataFrame</em>) – Dataset path (or list of paths), or a DataFrame. If string,
+should specify a specific file or directory path. If this is a
+directory path, the directory structure must be flat (nested
+directories are not yet supported).</p></li>
+<li><p><strong>engine</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>DatasetEngine</em>) – DatasetEngine object or string identifier of engine. Current
+string options include: (“parquet”, “csv”, “avro”). This argument
+is ignored if path_or_source is a DataFrame type.</p></li>
+<li><p><strong>npartitions</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Desired number of Dask-collection partitions to produce in
+the <code class="docutils literal notranslate"><span class="pre">to_ddf</span></code> method when <code class="docutils literal notranslate"><span class="pre">path_or_source</span></code> corresponds to a
+DataFrame type.  This argument is ignored for file-based
+<code class="docutils literal notranslate"><span class="pre">path_or_source</span></code> input.</p></li>
+<li><p><strong>part_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Desired size (in bytes) of each Dask partition.
+If None, part_mem_fraction will be used to calculate the
+partition size.  Note that the underlying engine may allow
+other custom kwargs to override this argument. This argument
+is ignored if path_or_source is a DataFrame type.</p></li>
+<li><p><strong>part_mem_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a><em> (</em><em>default 0.125</em><em>)</em>) – Fractional size of desired dask partitions (relative
+to GPU memory capacity). Ignored if part_size is passed
+directly. Note that the underlying engine may allow other
+custom kwargs to override this argument. This argument
+is ignored if path_or_source is a DataFrame type. If
+<code class="docutils literal notranslate"><span class="pre">cpu=True</span></code>, this value will be relative to the total
+host memory detected by the client process.</p></li>
+<li><p><strong>storage_options</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Further parameters to pass to the bytes backend. This argument
+is ignored if path_or_source is a DataFrame type.</p></li>
+<li><p><strong>cpu</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – WARNING: Experimental Feature!
+Whether NVTabular should keep all data in cpu memory when
+the Dataset is converted to an internal Dask collection. The
+default value is False, unless <code class="docutils literal notranslate"><span class="pre">cudf</span></code> and <code class="docutils literal notranslate"><span class="pre">dask_cudf</span></code>
+are not installed (in which case the default is True). In the
+future, if True, NVTabular will NOT use any available GPU
+devices for down-stream processing.
+NOTE: Down-stream ops and output do not yet support a
+Dataset generated with <code class="docutils literal notranslate"><span class="pre">cpu=True</span></code>.</p></li>
+<li><p><strong>base_dataset</strong> (<a class="reference internal" href="#merlin.io.Dataset" title="merlin.io.Dataset"><em>Dataset</em></a>) – Optional reference to the original “base” Dataset object used
+to construct the current Dataset instance.  This object is
+used to preserve file-partition mapping information.</p></li>
+<li><p><strong>schema</strong> (<a class="reference internal" href="merlin.schema.Schema.html#merlin.schema.Schema" title="merlin.schema.Schema"><em>Schema</em></a>) – Optional argument, to support custom user defined Schemas.
+This overrides the derived schema behavior.</p></li>
+<li><p><strong>**kwargs</strong> – Key-word arguments to pass through to Dask.dataframe IO function.
+For the Parquet engine(s), notable arguments include <cite>filters</cite>
+and <cite>aggregate_files</cite> (the latter is experimental).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npartitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">part_mem_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.__init__" title="merlin.io.Dataset.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(path_or_source[, engine, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.compute" title="merlin.io.Dataset.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.head" title="merlin.io.Dataset.head"><code class="xref py py-obj docutils literal notranslate"><span class="pre">head</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.infer_schema" title="merlin.io.Dataset.infer_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">infer_schema</span></code></a>([n])</p></td>
+<td><p>Create a schema containing the column names and inferred dtypes of the Dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.merge" title="merlin.io.Dataset.merge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code></a>(left, right, **kwargs)</p></td>
+<td><p>Merge two Dataset objects</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.persist" title="merlin.io.Dataset.persist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">persist</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.regenerate_dataset" title="merlin.io.Dataset.regenerate_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regenerate_dataset</span></code></a>(output_path[, columns, ...])</p></td>
+<td><p>EXPERIMENTAL: Regenerate an NVTabular Dataset for efficient processing by writing out new Parquet files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.repartition" title="merlin.io.Dataset.repartition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repartition</span></code></a>([npartitions, partition_size])</p></td>
+<td><p>Repartition the underlying ddf, and return a new Dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.sample_dtypes" title="merlin.io.Dataset.sample_dtypes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_dtypes</span></code></a>([n, annotate_lists])</p></td>
+<td><p>Return the real dtypes of the Dataset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.shuffle_by_keys" title="merlin.io.Dataset.shuffle_by_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shuffle_by_keys</span></code></a>(keys[, hive_data, npartitions])</p></td>
+<td><p>Shuffle the in-memory Dataset so that all unique-key combinations are moved to the same partition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.tail" title="merlin.io.Dataset.tail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tail</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_cpu" title="merlin.io.Dataset.to_cpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_cpu</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_ddf" title="merlin.io.Dataset.to_ddf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ddf</span></code></a>([columns, shuffle, seed])</p></td>
+<td><p>Convert <cite>Dataset</cite> object to <cite>dask_cudf.DataFrame</cite></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_gpu" title="merlin.io.Dataset.to_gpu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_gpu</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_hugectr" title="merlin.io.Dataset.to_hugectr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_hugectr</span></code></a>(output_path, cats, conts, labels)</p></td>
+<td><p>Writes out to a hugectr dataset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_iter" title="merlin.io.Dataset.to_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_iter</span></code></a>([columns, indices, shuffle, seed, ...])</p></td>
+<td><p>Convert <cite>Dataset</cite> object to a <cite>cudf.DataFrame</cite> iterator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_npy" title="merlin.io.Dataset.to_npy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_npy</span></code></a>(output_file[, append])</p></td>
+<td><p>Converts a dataset into an npy file, can append if data is larger than memory</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.to_parquet" title="merlin.io.Dataset.to_parquet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_parquet</span></code></a>(output_path[, shuffle, ...])</p></td>
+<td><p>Writes out to a parquet dataset</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.validate_dataset" title="merlin.io.Dataset.validate_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_dataset</span></code></a>(**kwargs)</p></td>
+<td><p>Validate for efficient processing.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.file_partition_map" title="merlin.io.Dataset.file_partition_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_partition_map</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.npartitions" title="merlin.io.Dataset.npartitions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">npartitions</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.num_rows" title="merlin.io.Dataset.num_rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">num_rows</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.partition_lens" title="merlin.io.Dataset.partition_lens"><code class="xref py py-obj docutils literal notranslate"><span class="pre">partition_lens</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_ddf">
+<span class="sig-name descname"><span class="pre">to_ddf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_ddf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_ddf" title="Link to this definition">#</a></dt>
+<dd><p>Convert <cite>Dataset</cite> object to <cite>dask_cudf.DataFrame</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in output <cite>DataFrame</cite>. If not specified,
+the output will contain all known columns in the Dataset.</p></li>
+<li><p><strong>shuffle</strong> (<em>bool; default False</em>) – Whether to shuffle the order of partitions in the output
+<cite>dask_cudf.DataFrame</cite>.  Note that this does not shuffle
+the rows within each partition. This is because the data
+is not actually loaded into memory for this operation.</p></li>
+<li><p><strong>seed</strong> (<em>int; Optional</em>) – The random seed to use if <cite>shuffle=True</cite>.  If nothing
+is specified, the current system time will be used by the
+<cite>random</cite> std library.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.io.Dataset.file_partition_map">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_partition_map</span></span><a class="headerlink" href="#merlin.io.Dataset.file_partition_map" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.io.Dataset.partition_lens">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">partition_lens</span></span><a class="headerlink" href="#merlin.io.Dataset.partition_lens" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_cpu">
+<span class="sig-name descname"><span class="pre">to_cpu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_cpu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_cpu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_gpu">
+<span class="sig-name descname"><span class="pre">to_gpu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_gpu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_gpu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.shuffle_by_keys">
+<span class="sig-name descname"><span class="pre">shuffle_by_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hive_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npartitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.shuffle_by_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.shuffle_by_keys" title="Link to this definition">#</a></dt>
+<dd><p>Shuffle the in-memory Dataset so that all unique-key
+combinations are moved to the same partition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em>) – Column names to shuffle by.</p></li>
+<li><p><strong>hive_data</strong> (<em>bool; default None</em>) – Whether the dataset is backed by a hive-partitioned
+dataset (with the keys encoded in the directory structure).
+By default, the Dataset’s <cite>file_partition_map</cite> property will
+be inspected to infer this setting. When <cite>hive_data</cite> is True,
+the number of output partitions will correspond to the number
+of unique key combinations in the dataset.</p></li>
+<li><p><strong>npartitions</strong> (<em>int; default None</em>) – Number of partitions in the output Dataset. For hive-partitioned
+data, this value should be &lt;= the number of unique key
+combinations (the default), otherwise it will be ignored. For
+data that is not hive-partitioned, the <code class="docutils literal notranslate"><span class="pre">npartitions</span></code> input
+should be &lt;= the original partition count, otherwise it will be
+ignored.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.repartition">
+<span class="sig-name descname"><span class="pre">repartition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">npartitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.repartition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.repartition" title="Link to this definition">#</a></dt>
+<dd><p>Repartition the underlying ddf, and return a new Dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>npartitions</strong> (<em>int; default None</em>) – Number of partitions in output <code class="docutils literal notranslate"><span class="pre">Dataset</span></code>. Only used if
+<code class="docutils literal notranslate"><span class="pre">partition_size</span></code> isn’t specified.</p></li>
+<li><p><strong>partition_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em> or </em><em>str; default None</em>) – Max number of bytes of memory for each partition. Use
+numbers or strings like ‘5MB’. If specified, <code class="docutils literal notranslate"><span class="pre">npartitions</span></code>
+will be ignored.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.merge">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.merge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.merge" title="Link to this definition">#</a></dt>
+<dd><p>Merge two Dataset objects</p>
+<p>Produces a new Dataset object. If the <code class="docutils literal notranslate"><span class="pre">cpu</span></code> Dataset attributes
+do not match, the right side will be modified. See Dask-Dataframe
+<code class="docutils literal notranslate"><span class="pre">merge</span></code> documentation for more information. Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ds_1</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;file.parquet&quot;</span><span class="p">)</span>
+<span class="n">ds_2</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">cudf</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+<span class="n">ds_merged</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">ds_1</span><span class="p">,</span> <span class="n">ds_2</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<a class="reference internal" href="#merlin.io.Dataset" title="merlin.io.Dataset"><em>Dataset</em></a>) – Left-side Dataset object.</p></li>
+<li><p><strong>right</strong> (<a class="reference internal" href="#merlin.io.Dataset" title="merlin.io.Dataset"><em>Dataset</em></a>) – Right-side Dataset object.</p></li>
+<li><p><strong>**kwargs</strong> – Key-word arguments to be passed through to Dask-Dataframe.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_iter">
+<span class="sig-name descname"><span class="pre">to_iter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_file_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_iter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_iter" title="Link to this definition">#</a></dt>
+<dd><p>Convert <cite>Dataset</cite> object to a <cite>cudf.DataFrame</cite> iterator.</p>
+<p>Note that this method will use <cite>to_ddf</cite> to produce a
+<cite>dask_cudf.DataFrame</cite>, and materialize a single partition for
+each iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em><em>; default None</em>) – Columns to include in each <cite>DataFrame</cite>. If not specified,
+the outputs will contain all known columns in the Dataset.</p></li>
+<li><p><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>)</em><em>; default None</em>) – A specific list of partition indices to iterate over. If
+nothing is specified, all partitions will be returned in
+order (or the shuffled order, if <cite>shuffle=True</cite>).</p></li>
+<li><p><strong>shuffle</strong> (<em>bool; default False</em>) – Whether to shuffle the order of <cite>dask_cudf.DataFrame</cite>
+partitions used by the iterator.  If the <cite>indices</cite>
+argument is specified, those indices correspond to the
+partition indices AFTER the shuffle operation.</p></li>
+<li><p><strong>seed</strong> (<em>int; Optional</em>) – The random seed to use if <cite>shuffle=True</cite>.  If nothing
+is specified, the current system time will be used by the
+<cite>random</cite> std library.</p></li>
+<li><p><strong>use_file_metadata</strong> (<em>bool; Optional</em>) – Whether to allow the returned <code class="docutils literal notranslate"><span class="pre">DataFrameIter</span></code> object to
+use file metadata from the <code class="docutils literal notranslate"><span class="pre">base_dataset</span></code> to estimate
+the row-count. By default, the file-metadata
+optimization will only be used if the current Dataset is
+backed by a file-based engine. Otherwise, it is possible
+that an intermediate transform has modified the row-count.</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of dataset passes to include within a single iterator.
+This option is used for multi-epoch data-loading. Default is 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_parquet">
+<span class="sig-name descname"><span class="pre">to_parquet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preserve_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_files_per_proc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_group_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cats</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'subgraph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_hugectr_keyset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_parquet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_parquet" title="Link to this definition">#</a></dt>
+<dd><p>Writes out to a parquet dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>string</em>) – Path to write processed/shuffled output data</p></li>
+<li><p><strong>shuffle</strong> (<em>merlin.io.Shuffle enum</em>) – How to shuffle the output dataset. For all options,
+other than <cite>None</cite> (which means no shuffling), the partitions
+of the underlying dataset/ddf will be randomly ordered. If
+<cite>PER_PARTITION</cite> is specified, each worker/process will also
+shuffle the rows within each partition before splitting and
+appending the data to a number (<cite>out_files_per_proc</cite>) of output
+files. Output files are distinctly mapped to each worker process.
+If <cite>PER_WORKER</cite> is specified, each worker will follow the same
+procedure as <cite>PER_PARTITION</cite>, but will re-shuffle each file after
+all data is persisted.  This results in a full shuffle of the
+data processed by each worker.  To improve performance, this option
+currently uses host-memory <cite>BytesIO</cite> objects for the intermediate
+persist stage. The <cite>FULL</cite> option is not yet implemented.</p></li>
+<li><p><strong>partition_on</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>)</em>) – Columns to use for hive-partitioning.  If this option is used,
+<cite>preserve_files</cite>, <cite>output_files</cite>, and <cite>out_files_per_proc</cite>
+cannot be specified, and <cite>method</cite> will be ignored.  Also, the
+<cite>PER_WORKER</cite> shuffle will not be supported.</p></li>
+<li><p><strong>preserve_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether to preserve the original file-to-partition mapping of
+the base dataset. This option requires <cite>method=”subgraph”</cite>, and is
+only available if the base dataset is known, and if it corresponds
+to csv or parquet format. If True, the <cite>out_files_per_proc</cite> option
+will be ignored. Default is False.</p></li>
+<li><p><strong>output_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The total number of desired output files. This option requires
+<cite>method=”subgraph”</cite>. When <cite>out_files_per_proc=None</cite>, the default
+is the number of underlying Dask partitions. When <cite>out_files_per_proc</cite>
+is set to an integer, the default is the product of that integer and
+the total number of workers in the Dask cluster. For further output-file
+control, this argument may also be used to pass a dictionary mapping
+the output file names to partition indices, or a list of desired
+output-file names.</p></li>
+<li><p><strong>out_files_per_proc</strong> (<em>integer</em>) – Number of output files that each process will use to shuffle an input
+partition. Default is 1. If <cite>method=”worker”</cite>, the total number of output
+files will always be the total number of Dask workers, multiplied by this
+argument. If <cite>method=”subgraph”</cite>, the total number of files is determined
+by <cite>output_files</cite> (and <cite>out_files_per_proc</cite> must be 1 if a dictionary is
+specified).</p></li>
+<li><p><strong>row_group_size</strong> (<em>integer</em>) – Maximum number of rows to include in each Parquet row-group. By default,
+the maximum row-group size will be chosen by the backend Parquet engine
+(cudf or pyarrow). Note that cudf currently prohibits this value from
+being less than <cite>5000</cite> rows. If smaller row-groups are necessary, try
+calling <cite>to_cpu()</cite> before writing to disk.</p></li>
+<li><p><strong>num_threads</strong> (<em>integer</em>) – Number of IO threads to use for writing the output dataset.
+For <cite>0</cite> (default), no dedicated IO threads will be used.</p></li>
+<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
+Keys are column names, values are datatypes.</p></li>
+<li><p><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>False</em>) – File-name extension to use for all output files. This argument
+is ignored if a specific list of file names is specified using
+the <code class="docutils literal notranslate"><span class="pre">output_files</span></code> option. If <code class="docutils literal notranslate"><span class="pre">preserve_files=True</span></code>, this
+suffix will be appended to the original name of each file,
+unless the original extension is “.csv”, “.parquet”, “.avro”,
+or “.orc” (in which case the old extension will be replaced).</p></li>
+<li><p><strong>cats</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – List of categorical columns</p></li>
+<li><p><strong>conts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – List of continuous columns</p></li>
+<li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – List of label columns</p></li>
+<li><p><strong>method</strong> (<em>{&quot;subgraph&quot;</em><em>, </em><em>&quot;worker&quot;}</em>) – General algorithm to use for the parallel graph execution. In order
+to minimize memory pressure, <cite>to_parquet</cite> will use a <cite>“subgraph”</cite> by
+default. This means that we segment the full Dask task graph into a
+distinct subgraph for each output file (or output-file group). Then,
+each of these subgraphs is executed, in full, by the same worker (as
+a single large task). In some cases, it may be more ideal to prioritize
+concurrency. In that case, a worker-based approach can be used by
+specifying <cite>method=”worker”</cite>.</p></li>
+<li><p><strong>write_hugectr_keyset</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to write a HugeCTR keyset output file (“_hugectr.keyset”).
+Writing this file can be very slow, and should only be done if you
+are planning to ingest the output data with HugeCTR. Default is False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_hugectr">
+<span class="sig-name descname"><span class="pre">to_hugectr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_partition_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_files_per_proc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_hugectr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_hugectr" title="Link to this definition">#</a></dt>
+<dd><p>Writes out to a hugectr dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>string</em>) – Path to write processed/shuffled output data</p></li>
+<li><p><strong>cats</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – List of categorical columns</p></li>
+<li><p><strong>conts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – List of continuous columns</p></li>
+<li><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – List of label columns</p></li>
+<li><p><strong>shuffle</strong> (<em>merlin.io.Shuffle</em><em>, </em><em>optional</em>) – How to shuffle the output dataset. Shuffling is only
+performed if the data is written to disk. For all options,
+other than <cite>None</cite> (which means no shuffling), the partitions
+of the underlying dataset/ddf will be randomly ordered. If
+<cite>PER_PARTITION</cite> is specified, each worker/process will also
+shuffle the rows within each partition before splitting and
+appending the data to a number (<cite>out_files_per_proc</cite>) of output
+files. Output files are distinctly mapped to each worker process.
+If <cite>PER_WORKER</cite> is specified, each worker will follow the same
+procedure as <cite>PER_PARTITION</cite>, but will re-shuffle each file after
+all data is persisted.  This results in a full shuffle of the
+data processed by each worker.  To improve performance, this option
+currently uses host-memory <cite>BytesIO</cite> objects for the intermediate
+persist stage. The <cite>FULL</cite> option is not yet implemented.</p></li>
+<li><p><strong>file_partition_map</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary mapping of output file names to partition indices
+that should be written to that file name.  If this argument
+is passed, only the partitions included in the dictionary
+will be written to disk, and the <cite>output_files_per_proc</cite> argument
+will be ignored.</p></li>
+<li><p><strong>out_files_per_proc</strong> (<em>integer</em>) – Number of files to create (per process) after
+shuffling the data</p></li>
+<li><p><strong>num_threads</strong> (<em>integer</em>) – Number of IO threads to use for writing the output dataset.
+For <cite>0</cite> (default), no dedicated IO threads will be used.</p></li>
+<li><p><strong>dtypes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary containing desired datatypes for output columns.
+Keys are column names, values are datatypes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#merlin.io.Dataset.compute" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#merlin.io.Dataset.head" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.persist">
+<span class="sig-name descname"><span class="pre">persist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#merlin.io.Dataset.persist" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.tail">
+<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#merlin.io.Dataset.tail" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.to_npy">
+<span class="sig-name descname"><span class="pre">to_npy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.to_npy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.to_npy" title="Link to this definition">#</a></dt>
+<dd><p>Converts a dataset into an npy file, can append if data is larger than memory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The output file path for the resulting npy file</p></li>
+<li><p><strong>append</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Enables append mode for larger that memory data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.io.Dataset.num_rows">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_rows</span></span><a class="headerlink" href="#merlin.io.Dataset.num_rows" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.io.Dataset.npartitions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">npartitions</span></span><a class="headerlink" href="#merlin.io.Dataset.npartitions" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.validate_dataset">
+<span class="sig-name descname"><span class="pre">validate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.validate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.validate_dataset" title="Link to this definition">#</a></dt>
+<dd><p>Validate for efficient processing.</p>
+<p>The purpose of this method is to validate that the Dataset object
+meets the minimal requirements for efficient NVTabular processing.
+For now, this criteria requires the data to be in parquet format.</p>
+<p>Example Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">validate_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Key-word arguments to pass down to the engine’s validate_dataset
+method. For the recommended parquet format, these arguments
+include <cite>add_metadata_file</cite>, <cite>row_group_max_size</cite>, <cite>file_min_size</cite>,
+and <cite>require_metadata_file</cite>. For more information, see
+<cite>ParquetDatasetEngine.validate_dataset</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>valid</strong> – <cite>True</cite> if the input dataset is valid for efficient NVTabular
+processing.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.regenerate_dataset">
+<span class="sig-name descname"><span class="pre">regenerate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.regenerate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.regenerate_dataset" title="Link to this definition">#</a></dt>
+<dd><p>EXPERIMENTAL:
+Regenerate an NVTabular Dataset for efficient processing by writing
+out new Parquet files. In contrast to default <code class="docutils literal notranslate"><span class="pre">to_parquet</span></code> behavior,
+this method preserves the original ordering.</p>
+<p>Example Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">regenerate_dataset</span><span class="p">(</span>
+    <span class="n">out_path</span><span class="p">,</span> <span class="n">part_size</span><span class="o">=</span><span class="s2">&quot;1MiB&quot;</span><span class="p">,</span> <span class="n">file_size</span><span class="o">=</span><span class="s2">&quot;10MiB&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>string</em>) – Root directory path to use for the new (regenerated) dataset.</p></li>
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><em>string</em><em>)</em><em>, </em><em>optional</em>) – Subset of columns to include in the regenerated dataset.</p></li>
+<li><p><strong>output_format</strong> (<em>string</em><em>, </em><em>optional</em>) – Format to use for regenerated dataset.  Only “parquet” (default)
+is currently supported.</p></li>
+<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the task graph or to return a Delayed object.
+By default, the graph will be executed.</p></li>
+<li><p><strong>**kwargs</strong> – Key-word arguments to pass down to the engine’s regenerate_dataset
+method. See <cite>ParquetDatasetEngine.regenerate_dataset</cite> for more
+information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> – If <cite>compute=True</cite> (default), the return value will be an integer
+corresponding to the number of generated data files.  If <cite>False</cite>,
+the returned value will be a <cite>Delayed</cite> object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a> or Delayed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.infer_schema">
+<span class="sig-name descname"><span class="pre">infer_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.infer_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.infer_schema" title="Link to this definition">#</a></dt>
+<dd><p>Create a schema containing the column names and inferred dtypes of the Dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rows to sample to infer the dtypes. Defaults to 1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.io.Dataset.sample_dtypes">
+<span class="sig-name descname"><span class="pre">sample_dtypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate_lists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.sample_dtypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.sample_dtypes" title="Link to this definition">#</a></dt>
+<dd><p>Return the real dtypes of the Dataset</p>
+<p>Use cached metadata if this operation was
+already performed. Otherwise, call down to the
+underlying engine for sampling logic.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../merlin.io.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Merlin IO</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../merlin.schema.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Merlin Schema</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.__init__"><code class="docutils literal notranslate"><span class="pre">Dataset.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_ddf"><code class="docutils literal notranslate"><span class="pre">Dataset.to_ddf()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.file_partition_map"><code class="docutils literal notranslate"><span class="pre">Dataset.file_partition_map</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.partition_lens"><code class="docutils literal notranslate"><span class="pre">Dataset.partition_lens</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_cpu"><code class="docutils literal notranslate"><span class="pre">Dataset.to_cpu()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_gpu"><code class="docutils literal notranslate"><span class="pre">Dataset.to_gpu()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.shuffle_by_keys"><code class="docutils literal notranslate"><span class="pre">Dataset.shuffle_by_keys()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.repartition"><code class="docutils literal notranslate"><span class="pre">Dataset.repartition()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.merge"><code class="docutils literal notranslate"><span class="pre">Dataset.merge()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_iter"><code class="docutils literal notranslate"><span class="pre">Dataset.to_iter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_parquet"><code class="docutils literal notranslate"><span class="pre">Dataset.to_parquet()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_hugectr"><code class="docutils literal notranslate"><span class="pre">Dataset.to_hugectr()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.compute"><code class="docutils literal notranslate"><span class="pre">Dataset.compute()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.head"><code class="docutils literal notranslate"><span class="pre">Dataset.head()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.persist"><code class="docutils literal notranslate"><span class="pre">Dataset.persist()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.tail"><code class="docutils literal notranslate"><span class="pre">Dataset.tail()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.to_npy"><code class="docutils literal notranslate"><span class="pre">Dataset.to_npy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.num_rows"><code class="docutils literal notranslate"><span class="pre">Dataset.num_rows</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.npartitions"><code class="docutils literal notranslate"><span class="pre">Dataset.npartitions</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.validate_dataset"><code class="docutils literal notranslate"><span class="pre">Dataset.validate_dataset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.regenerate_dataset"><code class="docutils literal notranslate"><span class="pre">Dataset.regenerate_dataset()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.infer_schema"><code class="docutils literal notranslate"><span class="pre">Dataset.infer_schema()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.io.Dataset.sample_dtypes"><code class="docutils literal notranslate"><span class="pre">Dataset.sample_dtypes()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023, NVIDIA.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
