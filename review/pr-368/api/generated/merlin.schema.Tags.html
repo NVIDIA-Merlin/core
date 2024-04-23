@@ -1,0 +1,732 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>merlin.schema.Tags &#8212; Merlin Core</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=86edd663" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/versions.css?v=69fc36dc" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/merlin.schema.Tags';</script>
+    <script src="../../_static/js/rtd-version-switcher.js?v=425801f2"></script>
+    <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/api/generated/merlin.schema.Tags.html" />
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="merlin.schema.ColumnSchema" href="merlin.schema.ColumnSchema.html" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NVJ1Y1YJHK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NVJ1Y1YJHK', {
+        'anonymize_ip': false,
+    });
+  </script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,300&display=swap" rel="stylesheet">
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">NVIDIA Merlin Core</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../README.html">Introduction</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">API Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Operator.html">merlin.dag.Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../merlin.schema.html">Merlin Schema</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.Schema.html">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">merlin.schema.Tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-merlin-ecosystem-nav" aria-label="Merlin Ecosystem Nav">
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Ecosystem</span></p>
+    <ul class="nav bd-sidenav">
+      <li class="toctree-l1"><a class="reference external" href="/models/">Models</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/systems/">Systems</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/NVTabular/">NVTabular</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Transformers4Rec/">Transformers4Rec</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/dataloader/">Dataloader</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Merlin/">Merlin</a></li>
+    </ul>
+  </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/NVIDIA-Merlin/core" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/generated/merlin.schema.Tags.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>merlin.schema.Tags</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags"><code class="docutils literal notranslate"><span class="pre">Tags</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.__init__"><code class="docutils literal notranslate"><span class="pre">Tags.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CATEGORICAL"><code class="docutils literal notranslate"><span class="pre">Tags.CATEGORICAL</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CONTINUOUS"><code class="docutils literal notranslate"><span class="pre">Tags.CONTINUOUS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.LIST"><code class="docutils literal notranslate"><span class="pre">Tags.LIST</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SEQUENCE"><code class="docutils literal notranslate"><span class="pre">Tags.SEQUENCE</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TEXT"><code class="docutils literal notranslate"><span class="pre">Tags.TEXT</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TOKENIZED"><code class="docutils literal notranslate"><span class="pre">Tags.TOKENIZED</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TIME"><code class="docutils literal notranslate"><span class="pre">Tags.TIME</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.EMBEDDING"><code class="docutils literal notranslate"><span class="pre">Tags.EMBEDDING</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ID"><code class="docutils literal notranslate"><span class="pre">Tags.ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.USER"><code class="docutils literal notranslate"><span class="pre">Tags.USER</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ITEM"><code class="docutils literal notranslate"><span class="pre">Tags.ITEM</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SESSION"><code class="docutils literal notranslate"><span class="pre">Tags.SESSION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CONTEXT"><code class="docutils literal notranslate"><span class="pre">Tags.CONTEXT</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TARGET"><code class="docutils literal notranslate"><span class="pre">Tags.TARGET</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.REGRESSION"><code class="docutils literal notranslate"><span class="pre">Tags.REGRESSION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.CLASSIFICATION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.BINARY"><code class="docutils literal notranslate"><span class="pre">Tags.BINARY</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.MULTI_CLASS"><code class="docutils literal notranslate"><span class="pre">Tags.MULTI_CLASS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.USER_ID"><code class="docutils literal notranslate"><span class="pre">Tags.USER_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ITEM_ID"><code class="docutils literal notranslate"><span class="pre">Tags.ITEM_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SESSION_ID"><code class="docutils literal notranslate"><span class="pre">Tags.SESSION_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TEXT_TOKENIZED"><code class="docutils literal notranslate"><span class="pre">Tags.TEXT_TOKENIZED</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.BINARY_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.BINARY_CLASSIFICATION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.MULTI_CLASS_CLASSIFICATION</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="merlin-schema-tags">
+<h1>merlin.schema.Tags<a class="headerlink" href="#merlin-schema-tags" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="merlin.schema.Tags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.schema.</span></span><span class="sig-name descname"><span class="pre">Tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/schema/tags.html#Tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Tags" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Standard tags used in the Merlin ecosystem</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Tags.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#merlin.schema.Tags.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.CATEGORICAL" title="merlin.schema.Tags.CATEGORICAL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CATEGORICAL</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.CONTINUOUS" title="merlin.schema.Tags.CONTINUOUS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONTINUOUS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.LIST" title="merlin.schema.Tags.LIST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LIST</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.SEQUENCE" title="merlin.schema.Tags.SEQUENCE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SEQUENCE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.TEXT" title="merlin.schema.Tags.TEXT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEXT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.TOKENIZED" title="merlin.schema.Tags.TOKENIZED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TOKENIZED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.TIME" title="merlin.schema.Tags.TIME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.EMBEDDING" title="merlin.schema.Tags.EMBEDDING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EMBEDDING</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.ID" title="merlin.schema.Tags.ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ID</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.USER" title="merlin.schema.Tags.USER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">USER</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.ITEM" title="merlin.schema.Tags.ITEM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITEM</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.SESSION" title="merlin.schema.Tags.SESSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SESSION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.CONTEXT" title="merlin.schema.Tags.CONTEXT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONTEXT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.TARGET" title="merlin.schema.Tags.TARGET"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TARGET</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.REGRESSION" title="merlin.schema.Tags.REGRESSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">REGRESSION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.CLASSIFICATION" title="merlin.schema.Tags.CLASSIFICATION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CLASSIFICATION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.BINARY" title="merlin.schema.Tags.BINARY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BINARY</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.MULTI_CLASS" title="merlin.schema.Tags.MULTI_CLASS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MULTI_CLASS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.USER_ID" title="merlin.schema.Tags.USER_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">USER_ID</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.ITEM_ID" title="merlin.schema.Tags.ITEM_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITEM_ID</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.SESSION_ID" title="merlin.schema.Tags.SESSION_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SESSION_ID</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.TEXT_TOKENIZED" title="merlin.schema.Tags.TEXT_TOKENIZED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEXT_TOKENIZED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Tags.BINARY_CLASSIFICATION" title="merlin.schema.Tags.BINARY_CLASSIFICATION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BINARY_CLASSIFICATION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION" title="merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MULTI_CLASS_CLASSIFICATION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.CATEGORICAL">
+<span class="sig-name descname"><span class="pre">CATEGORICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'categorical'</span></em><a class="headerlink" href="#merlin.schema.Tags.CATEGORICAL" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.CONTINUOUS">
+<span class="sig-name descname"><span class="pre">CONTINUOUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'continuous'</span></em><a class="headerlink" href="#merlin.schema.Tags.CONTINUOUS" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.LIST">
+<span class="sig-name descname"><span class="pre">LIST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'list'</span></em><a class="headerlink" href="#merlin.schema.Tags.LIST" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.SEQUENCE">
+<span class="sig-name descname"><span class="pre">SEQUENCE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sequence'</span></em><a class="headerlink" href="#merlin.schema.Tags.SEQUENCE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.TEXT">
+<span class="sig-name descname"><span class="pre">TEXT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'text'</span></em><a class="headerlink" href="#merlin.schema.Tags.TEXT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.TOKENIZED">
+<span class="sig-name descname"><span class="pre">TOKENIZED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tokenized'</span></em><a class="headerlink" href="#merlin.schema.Tags.TOKENIZED" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.TIME">
+<span class="sig-name descname"><span class="pre">TIME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'time'</span></em><a class="headerlink" href="#merlin.schema.Tags.TIME" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.EMBEDDING">
+<span class="sig-name descname"><span class="pre">EMBEDDING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'embedding'</span></em><a class="headerlink" href="#merlin.schema.Tags.EMBEDDING" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.ID">
+<span class="sig-name descname"><span class="pre">ID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'id'</span></em><a class="headerlink" href="#merlin.schema.Tags.ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.USER">
+<span class="sig-name descname"><span class="pre">USER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'user'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.ITEM">
+<span class="sig-name descname"><span class="pre">ITEM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'item'</span></em><a class="headerlink" href="#merlin.schema.Tags.ITEM" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.SESSION">
+<span class="sig-name descname"><span class="pre">SESSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'session'</span></em><a class="headerlink" href="#merlin.schema.Tags.SESSION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.CONTEXT">
+<span class="sig-name descname"><span class="pre">CONTEXT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'context'</span></em><a class="headerlink" href="#merlin.schema.Tags.CONTEXT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.TARGET">
+<span class="sig-name descname"><span class="pre">TARGET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'target'</span></em><a class="headerlink" href="#merlin.schema.Tags.TARGET" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.REGRESSION">
+<span class="sig-name descname"><span class="pre">REGRESSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'regression'</span></em><a class="headerlink" href="#merlin.schema.Tags.REGRESSION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">CLASSIFICATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.CLASSIFICATION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.BINARY">
+<span class="sig-name descname"><span class="pre">BINARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'binary'</span></em><a class="headerlink" href="#merlin.schema.Tags.BINARY" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.MULTI_CLASS">
+<span class="sig-name descname"><span class="pre">MULTI_CLASS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'multi_class'</span></em><a class="headerlink" href="#merlin.schema.Tags.MULTI_CLASS" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.USER_ID">
+<span class="sig-name descname"><span class="pre">USER_ID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'user_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.USER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.ITEM_ID">
+<span class="sig-name descname"><span class="pre">ITEM_ID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'item_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.ITEM_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.SESSION_ID">
+<span class="sig-name descname"><span class="pre">SESSION_ID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'session_id'</span></em><a class="headerlink" href="#merlin.schema.Tags.SESSION_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.TEXT_TOKENIZED">
+<span class="sig-name descname"><span class="pre">TEXT_TOKENIZED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'text_tokenized'</span></em><a class="headerlink" href="#merlin.schema.Tags.TEXT_TOKENIZED" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.BINARY_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">BINARY_CLASSIFICATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'binary_classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.BINARY_CLASSIFICATION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION">
+<span class="sig-name descname"><span class="pre">MULTI_CLASS_CLASSIFICATION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'multi_class_classification'</span></em><a class="headerlink" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="merlin.schema.ColumnSchema.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">merlin.schema.ColumnSchema</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags"><code class="docutils literal notranslate"><span class="pre">Tags</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.__init__"><code class="docutils literal notranslate"><span class="pre">Tags.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CATEGORICAL"><code class="docutils literal notranslate"><span class="pre">Tags.CATEGORICAL</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CONTINUOUS"><code class="docutils literal notranslate"><span class="pre">Tags.CONTINUOUS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.LIST"><code class="docutils literal notranslate"><span class="pre">Tags.LIST</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SEQUENCE"><code class="docutils literal notranslate"><span class="pre">Tags.SEQUENCE</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TEXT"><code class="docutils literal notranslate"><span class="pre">Tags.TEXT</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TOKENIZED"><code class="docutils literal notranslate"><span class="pre">Tags.TOKENIZED</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TIME"><code class="docutils literal notranslate"><span class="pre">Tags.TIME</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.EMBEDDING"><code class="docutils literal notranslate"><span class="pre">Tags.EMBEDDING</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ID"><code class="docutils literal notranslate"><span class="pre">Tags.ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.USER"><code class="docutils literal notranslate"><span class="pre">Tags.USER</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ITEM"><code class="docutils literal notranslate"><span class="pre">Tags.ITEM</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SESSION"><code class="docutils literal notranslate"><span class="pre">Tags.SESSION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CONTEXT"><code class="docutils literal notranslate"><span class="pre">Tags.CONTEXT</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TARGET"><code class="docutils literal notranslate"><span class="pre">Tags.TARGET</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.REGRESSION"><code class="docutils literal notranslate"><span class="pre">Tags.REGRESSION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.CLASSIFICATION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.BINARY"><code class="docutils literal notranslate"><span class="pre">Tags.BINARY</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.MULTI_CLASS"><code class="docutils literal notranslate"><span class="pre">Tags.MULTI_CLASS</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.USER_ID"><code class="docutils literal notranslate"><span class="pre">Tags.USER_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.ITEM_ID"><code class="docutils literal notranslate"><span class="pre">Tags.ITEM_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.SESSION_ID"><code class="docutils literal notranslate"><span class="pre">Tags.SESSION_ID</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.TEXT_TOKENIZED"><code class="docutils literal notranslate"><span class="pre">Tags.TEXT_TOKENIZED</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.BINARY_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.BINARY_CLASSIFICATION</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Tags.MULTI_CLASS_CLASSIFICATION"><code class="docutils literal notranslate"><span class="pre">Tags.MULTI_CLASS_CLASSIFICATION</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023, NVIDIA.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
