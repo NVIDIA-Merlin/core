@@ -1,0 +1,815 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>merlin.schema.Schema &#8212; Merlin Core</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=aac151e3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/versions.css?v=69fc36dc" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/merlin.schema.Schema';</script>
+    <script src="../../_static/js/rtd-version-switcher.js?v=425801f2"></script>
+    <link rel="canonical" href="https://nvidia-merlin.github.io/models/stable/api/generated/merlin.schema.Schema.html" />
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="merlin.schema.ColumnSchema" href="merlin.schema.ColumnSchema.html" />
+    <link rel="prev" title="Merlin Schema" href="../merlin.schema.html" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NVJ1Y1YJHK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NVJ1Y1YJHK', {
+        'anonymize_ip': false,
+    });
+  </script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,300&display=swap" rel="stylesheet">
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">NVIDIA Merlin Core</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../README.html">Introduction</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">API Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.dag.html">Merlin DAG</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Operator.html">merlin.dag.Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Graph.html">merlin.dag.Graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.Node.html">merlin.dag.Node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.dag.ColumnSelector.html">merlin.dag.ColumnSelector</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../merlin.io.html">Merlin IO</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="merlin.io.Dataset.html">merlin.io.Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../merlin.schema.html">Merlin Schema</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">merlin.schema.Schema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.ColumnSchema.html">merlin.schema.ColumnSchema</a></li>
+<li class="toctree-l3"><a class="reference internal" href="merlin.schema.Tags.html">merlin.schema.Tags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-merlin-ecosystem-nav" aria-label="Merlin Ecosystem Nav">
+  <div class="bd-toc-item navbar-nav">
+    <p aria-level="2" class="caption" role="heading"><span class="caption-text">Ecosystem</span></p>
+    <ul class="nav bd-sidenav">
+      <li class="toctree-l1"><a class="reference external" href="/models/">Models</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/systems/">Systems</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/NVTabular/">NVTabular</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Transformers4Rec/">Transformers4Rec</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/dataloader/">Dataloader</a></li>
+      <li class="toctree-l1"><a class="reference external" href="/Merlin/">Merlin</a></li>
+    </ul>
+  </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/NVIDIA-Merlin/core" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/api/generated/merlin.schema.Schema.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>merlin.schema.Schema</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema"><code class="docutils literal notranslate"><span class="pre">Schema</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.__init__"><code class="docutils literal notranslate"><span class="pre">Schema.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.column_names"><code class="docutils literal notranslate"><span class="pre">Schema.column_names</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select"><code class="docutils literal notranslate"><span class="pre">Schema.select()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.apply"><code class="docutils literal notranslate"><span class="pre">Schema.apply()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding"><code class="docutils literal notranslate"><span class="pre">Schema.excluding()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.apply_inverse"><code class="docutils literal notranslate"><span class="pre">Schema.apply_inverse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.select_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.excluding_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.remove_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.remove_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select_by_name"><code class="docutils literal notranslate"><span class="pre">Schema.select_by_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding_by_name"><code class="docutils literal notranslate"><span class="pre">Schema.excluding_by_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.remove_col"><code class="docutils literal notranslate"><span class="pre">Schema.remove_col()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.without"><code class="docutils literal notranslate"><span class="pre">Schema.without()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.get"><code class="docutils literal notranslate"><span class="pre">Schema.get()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.first"><code class="docutils literal notranslate"><span class="pre">Schema.first</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.to_pandas"><code class="docutils literal notranslate"><span class="pre">Schema.to_pandas()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.copy"><code class="docutils literal notranslate"><span class="pre">Schema.copy()</span></code></a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="merlin-schema-schema">
+<h1>merlin.schema.Schema<a class="headerlink" href="#merlin-schema-schema" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="merlin.schema.Schema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">merlin.schema.</span></span><span class="sig-name descname"><span class="pre">Schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_schemas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A collection of column schemas for a dataset.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column_schemas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.__init__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.__init__" title="merlin.schema.Schema.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([column_schemas])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.apply" title="merlin.schema.Schema.apply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply</span></code></a>(selector)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.apply_inverse" title="merlin.schema.Schema.apply_inverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_inverse</span></code></a>(selector)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.copy" title="merlin.schema.Schema.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Return a copy of the schema</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.excluding" title="merlin.schema.Schema.excluding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">excluding</span></code></a>(selector)</p></td>
+<td><p>Select non-matching columns from this Schema object using a ColumnSelector</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.excluding_by_name" title="merlin.schema.Schema.excluding_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">excluding_by_name</span></code></a>(col_names)</p></td>
+<td><p>Remove columns from this Schema object by name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.excluding_by_tag" title="merlin.schema.Schema.excluding_by_tag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">excluding_by_tag</span></code></a>(tags[, pred_fn])</p></td>
+<td><p>Remove columns from the schema that match ANY of the supplied tags.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.get" title="merlin.schema.Schema.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(col_name[, default])</p></td>
+<td><p>Get a ColumnSchema by name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.remove_by_tag" title="merlin.schema.Schema.remove_by_tag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_by_tag</span></code></a>(tags[, pred_fn])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.remove_col" title="merlin.schema.Schema.remove_col"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_col</span></code></a>(col_name)</p></td>
+<td><p>Remove a column from this Schema object by name</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.select" title="merlin.schema.Schema.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a>(selector)</p></td>
+<td><p>Select matching columns from this Schema object using a ColumnSelector</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.select_by_name" title="merlin.schema.Schema.select_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_by_name</span></code></a>(names)</p></td>
+<td><p>Select matching columns from this Schema object using a list of column names</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.select_by_tag" title="merlin.schema.Schema.select_by_tag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_by_tag</span></code></a>(tags[, pred_fn])</p></td>
+<td><p>Select columns from this Schema that match ANY of the supplied tags.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.to_pandas" title="merlin.schema.Schema.to_pandas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pandas</span></code></a>()</p></td>
+<td><p>Convert this Schema object to a pandas DataFrame</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.without" title="merlin.schema.Schema.without"><code class="xref py py-obj docutils literal notranslate"><span class="pre">without</span></code></a>(col_names)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.schema.Schema.column_names" title="merlin.schema.Schema.column_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">column_names</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#merlin.schema.Schema.first" title="merlin.schema.Schema.first"><code class="xref py py-obj docutils literal notranslate"><span class="pre">first</span></code></a></p></td>
+<td><p>Returns the first ColumnSchema in the Schema.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.schema.Schema.column_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_names</span></span><a class="headerlink" href="#merlin.schema.Schema.column_names" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.select" title="Link to this definition">#</a></dt>
+<dd><p>Select matching columns from this Schema object using a ColumnSelector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selector</strong> (<a class="reference internal" href="merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – Selector that describes which columns match</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New object containing only the ColumnSchemas of selected columns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.apply" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.excluding">
+<span class="sig-name descname"><span class="pre">excluding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.excluding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.excluding" title="Link to this definition">#</a></dt>
+<dd><p>Select non-matching columns from this Schema object using a ColumnSelector</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selector</strong> (<a class="reference internal" href="merlin.dag.ColumnSelector.html#merlin.dag.ColumnSelector" title="merlin.dag.ColumnSelector"><em>ColumnSelector</em></a>) – Selector that describes which columns match</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New object containing only the ColumnSchemas of selected columns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.apply_inverse">
+<span class="sig-name descname"><span class="pre">apply_inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.apply_inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.apply_inverse" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.select_by_tag">
+<span class="sig-name descname"><span class="pre">select_by_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="merlin.schema.Tags.html#merlin.schema.Tags" title="merlin.schema.tags.Tags"><span class="pre">Tags</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="merlin.schema.Tags.html#merlin.schema.Tags" title="merlin.schema.tags.Tags"><span class="pre">Tags</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.select_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.select_by_tag" title="Link to this definition">#</a></dt>
+<dd><p>Select columns from this Schema that match ANY of the supplied tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tags</strong> (<em>List</em><em>[</em><em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><a class="reference internal" href="merlin.schema.Tags.html#merlin.schema.Tags" title="merlin.schema.Tags"><em>Tags</em></a><em>]</em><em>] </em><em>:</em>) – List of tags that describes which columns match</p></li>
+<li><p><strong>pred_fn</strong> (<cite>any</cite> or <cite>all</cite>) – Predicate function that decides if the column should be selected.
+Receives iterable of bool values indicating whether each
+of the provided tags is present on a column schema.
+Returning True selects this column, False will not return that column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New object containing only the ColumnSchemas of selected columns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.excluding_by_tag">
+<span class="sig-name descname"><span class="pre">excluding_by_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.excluding_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.excluding_by_tag" title="Link to this definition">#</a></dt>
+<dd><p>Remove columns from the schema that match ANY of the supplied tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tags</strong> (<em>_type_</em>) – List of tags that describes which columns remove</p></li>
+<li><p><strong>pred_fn</strong> (<cite>any</cite> or <cite>all</cite>, optional, by default None (ANY)) – Predicate function that decides if a column should be selected.
+<cite>all</cite> can be provided to remove columns that contain ALL the tags provided</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New Schema containing only the columns that don’t contain the provided tags</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.remove_by_tag">
+<span class="sig-name descname"><span class="pre">remove_by_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.remove_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.remove_by_tag" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.select_by_name">
+<span class="sig-name descname"><span class="pre">select_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.select_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.select_by_name" title="Link to this definition">#</a></dt>
+<dd><p>Select matching columns from this Schema object using a list of column names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>] </em><em>:</em>) – List of column names that describes which columns match</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New object containing only the ColumnSchemas of selected columns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.excluding_by_name">
+<span class="sig-name descname"><span class="pre">excluding_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.excluding_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.excluding_by_name" title="Link to this definition">#</a></dt>
+<dd><p>Remove columns from this Schema object by name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>col_names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – Names of the column to remove</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New Schema object after the columns are removed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.remove_col">
+<span class="sig-name descname"><span class="pre">remove_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.remove_col"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.remove_col" title="Link to this definition">#</a></dt>
+<dd><p>Remove a column from this Schema object by name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>col_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Name of the column to remove</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>This Schema object after the column is removed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.Schema">Schema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.without">
+<span class="sig-name descname"><span class="pre">without</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.without"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.without" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema" title="merlin.schema.schema.ColumnSchema"><span class="pre">ColumnSchema</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema" title="merlin.schema.schema.ColumnSchema"><span class="pre">ColumnSchema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.get" title="Link to this definition">#</a></dt>
+<dd><p>Get a ColumnSchema by name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Name of the column to get</p></li>
+<li><p><strong>default</strong> (<em>ColumnSchema :</em>) – <dl class="simple">
+<dt>Default value to return if column is not found.</dt><dd><p>(Default value = None)</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Retrieved column schema (or default value, if not found)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema" title="merlin.schema.ColumnSchema">ColumnSchema</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="merlin.schema.Schema.first">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema" title="merlin.schema.schema.ColumnSchema"><span class="pre">ColumnSchema</span></a></em><a class="headerlink" href="#merlin.schema.Schema.first" title="Link to this definition">#</a></dt>
+<dd><p>Returns the first ColumnSchema in the Schema. Useful for cases where you select down
+to a single column via select_by_name or select_by_tag, and just want the value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The first column schema present in this Schema object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="merlin.schema.ColumnSchema.html#merlin.schema.ColumnSchema" title="merlin.schema.ColumnSchema">ColumnSchema</a></p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.12)"><strong>ValueError</strong></a> – If this Schema object contains no column schemas</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.to_pandas">
+<span class="sig-name descname"><span class="pre">to_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.to_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.to_pandas" title="Link to this definition">#</a></dt>
+<dd><p>Convert this Schema object to a pandas DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataFrame containing the column schemas in this Schema object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="merlin.schema.Schema.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#merlin.schema.Schema" title="merlin.schema.schema.Schema"><span class="pre">Schema</span></a></span></span><a class="reference internal" href="../../_modules/merlin/schema/schema.html#Schema.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.schema.Schema.copy" title="Link to this definition">#</a></dt>
+<dd><p>Return a copy of the schema</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../merlin.schema.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Merlin Schema</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="merlin.schema.ColumnSchema.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">merlin.schema.ColumnSchema</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema"><code class="docutils literal notranslate"><span class="pre">Schema</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.__init__"><code class="docutils literal notranslate"><span class="pre">Schema.__init__()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.column_names"><code class="docutils literal notranslate"><span class="pre">Schema.column_names</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select"><code class="docutils literal notranslate"><span class="pre">Schema.select()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.apply"><code class="docutils literal notranslate"><span class="pre">Schema.apply()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding"><code class="docutils literal notranslate"><span class="pre">Schema.excluding()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.apply_inverse"><code class="docutils literal notranslate"><span class="pre">Schema.apply_inverse()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.select_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.excluding_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.remove_by_tag"><code class="docutils literal notranslate"><span class="pre">Schema.remove_by_tag()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.select_by_name"><code class="docutils literal notranslate"><span class="pre">Schema.select_by_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.excluding_by_name"><code class="docutils literal notranslate"><span class="pre">Schema.excluding_by_name()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.remove_col"><code class="docutils literal notranslate"><span class="pre">Schema.remove_col()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.without"><code class="docutils literal notranslate"><span class="pre">Schema.without()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.get"><code class="docutils literal notranslate"><span class="pre">Schema.get()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.first"><code class="docutils literal notranslate"><span class="pre">Schema.first</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.to_pandas"><code class="docutils literal notranslate"><span class="pre">Schema.to_pandas()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#merlin.schema.Schema.copy"><code class="docutils literal notranslate"><span class="pre">Schema.copy()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023–2024, NVIDIA.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p>
+<a href="https://www.nvidia.com/en-us/about-nvidia/privacy-policy/" target="_blank">Privacy Policy</a> |
+<a href="https://www.nvidia.com/en-us/about-nvidia/privacy-center/" target="_blank">Manage My Privacy</a> |
+<a href="https://www.nvidia.com/en-us/preferences/start/" target="_blank">Do Not Sell or Share My Data</a> |
+<a href="https://www.nvidia.com/en-us/about-nvidia/terms-of-service/" target="_blank">Terms of Service</a> |
+<a href="https://www.nvidia.com/en-us/about-nvidia/accessibility/" target="_blank">Accessibility</a> |
+<a href="https://www.nvidia.com/en-us/about-nvidia/company-policies/" target="_blank">Corporate Policies</a> |
+<a href="https://www.nvidia.com/en-us/product-security/" target="_blank">Product Security</a> |
+<a href="https://www.nvidia.com/en-us/contact/" target="_blank">Contact</a>
+</p>
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
