@@ -120,7 +120,7 @@ class LocalExecutor:
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
         formatted_columns = self._standardize_formats(node, upstream_columns)
         transform_input = self._merge_upstream_columns(formatted_columns)
-        if  "CategorifyTransform" in str(node.op):
+        if "CategorifyTransform" in str(node.op):
             transform_input = group_values_offsets(transform_input)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
         if "CategorifyTransform" in str(node.op):
@@ -677,6 +677,5 @@ def _convert_format(tensors, target_format):
             return tensors.to_df()
         elif format_ in [DataFormats.NUMPY_DICT_ARRAY, DataFormats.CUPY_DICT_ARRAY]:
             return TensorTable(tensors).cpu().to_df()
-    
 
     raise ValueError("unsupported target for converting tensors", target_format)
