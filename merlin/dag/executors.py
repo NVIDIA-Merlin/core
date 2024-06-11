@@ -31,6 +31,7 @@ from merlin.core.utils import (
 )
 from merlin.dag import ColumnSelector, DataFormats, Graph, Node
 from merlin.dag.ops.stat_operator import StatOperator
+from merlin.dag.utils import group_values_offsets
 from merlin.dtypes.shape import DefaultShapes
 from merlin.io import Dataset
 from merlin.io.worker import clean_worker_cache
@@ -119,7 +120,11 @@ class LocalExecutor:
         upstream_columns = self._append_addl_root_columns(node, transformable, upstream_outputs)
         formatted_columns = self._standardize_formats(node, upstream_columns)
         transform_input = self._merge_upstream_columns(formatted_columns)
+        if "CategorifyTransform" in str(node.op):
+            transform_input = group_values_offsets(transform_input)
         transform_output = self._run_node_transform(node, transform_input, capture_dtypes, strict)
+        if "CategorifyTransform" in str(node.op):
+            transform_output = TensorTable(transform_output)
         transform_output = _convert_format(transform_output, self.target_format)
         return transform_output
 
