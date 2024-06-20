@@ -32,4 +32,10 @@ jobs:
     name: "NVTabular (CPU)"
     uses: ./.github/workflows/tox.yml
     with:
-      env: test-nvtabular-cpu
+      env: test-nvtabular
+
+  nvtabular-gpu:
+    name: "NVTabular (GPU)"
+    uses: ./.github/workflows/tox-gpu.yml
+    with:
+      env: test-nvtabular
