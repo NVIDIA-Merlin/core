@@ -1,3 +1,0 @@
-from merlin.core import _DASK_QUERY_PLANNING_ENABLED
-
-assert _DASK_QUERY_PLANNING_ENABLED is False
