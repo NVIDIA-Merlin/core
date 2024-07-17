@@ -34,8 +34,13 @@ else:
     from packaging.version import parse
 
     if parse(dask.__version__) > parse("2024.6.0"):
+        # For newer versions of dask, we can just check
+        # the official DASK_EXPR_ENABLED constant
         _DASK_QUERY_PLANNING_ENABLED = dd.DASK_EXPR_ENABLED
     else:
+        # For older versions of dask, we must assume query
+        # planning is enabled if dask_expr was imported
+        # (because we can't know for sure)
         _DASK_QUERY_PLANNING_ENABLED = "dask_expr" in sys.modules
 
 
@@ -43,6 +48,8 @@ if _DASK_QUERY_PLANNING_ENABLED:
     raise NotImplementedError(
         "Merlin does not support the query-planning API in Dask "
         "Dataframe yet. Please make sure query-planning is "
-        "disabled before dask.dataframe is imported. E.g.:\n"
-        "dask.config.set({'dataframe.query-planning': False})"
+        "disabled before dask.dataframe is imported.\n\n"
+        "e.g. dask.config.set({'dataframe.query-planning': False})"
+        "\n\nOr set the environment variable: "
+        "export DASK_DATAFRAME__QUERY_PLANNING=False"
     )
