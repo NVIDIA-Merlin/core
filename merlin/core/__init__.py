@@ -19,12 +19,17 @@ from merlin.core import _version
 __version__ = _version.get_versions()["version"]
 
 
-# If dask is installed, make sure query-planning is disabled
 _DASK_QUERY_PLANNING_ENABLED = False
 try:
+    # Disable query-planning and string conversion
     import dask
 
-    dask.config.set({"dataframe.query-planning": False})
+    dask.config.set(
+        {
+            "dataframe.query-planning": False,
+            "dataframe.convert-string": False,
+        }
+    )
 except ImportError:
     pass
 else:
