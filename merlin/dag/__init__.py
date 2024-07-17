@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022, NVIDIA CORPORATION.
+# Copyright (c) 2022-2024, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
 # limitations under the License.
 #
 # flake8: noqa
+
+from merlin.config import validate_dask_configs
+
+validate_dask_configs()
 
 from merlin.dag.graph import Graph
 from merlin.dag.node import Node, iter_nodes, postorder_iter_nodes, preorder_iter_nodes
