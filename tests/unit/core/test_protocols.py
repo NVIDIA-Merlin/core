@@ -42,6 +42,6 @@ def test_dataframes_match_protocols(protocol, device):
 
 @pytest.mark.parametrize("device", _DEVICES)
 def test_series_are_serieslike(device):
-    obj = make_series([], device=device)
+    obj = make_series([0], device=device)
 
     assert isinstance(obj, SeriesLike)
