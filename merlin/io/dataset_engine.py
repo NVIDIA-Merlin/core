@@ -51,18 +51,6 @@ class DatasetEngine:
     def num_rows(self):
         raise NotImplementedError(""" Returns the number of rows in the dataset """)
 
-    def validate_dataset(self, **kwargs):
-        raise NotImplementedError(
-            """The `validate_dataset` method is no longer supported
-            for merlin versions >23.08, because it relies on deprecated
-            functionality in pyarrow.
-            """
-        )
-
-    @classmethod
-    def regenerate_dataset(cls, dataset, output_path, columns=None, **kwargs):
-        raise NotImplementedError(""" Regenerate a dataset with optimal properties """)
-
     def sample_data(self, n=1):
         """Return a sample of real data from the dataset
 
