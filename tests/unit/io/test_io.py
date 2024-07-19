@@ -190,7 +190,7 @@ def test_io_partitions_push(tmpdir):
     # Generate random csv files
     files = [os.path.join(tmpdir, f"csv/day_{i}") for i in range(23)]
     for file in files:
-        with open(file, "w") as f:
+        with open(file, "w", encoding="utf-8") as f:
             f.write("0,1,2,3,a,b,c\n" * 1000)
 
     # Load csv files
@@ -672,6 +672,7 @@ def test_hive_partitioned_data(tmpdir, cpu):
     # Make sure the directory structure is hive-like
     df_expect = ddf.compute()
     df_expect = df_expect.sort_values(["id", "x", "y"]).reset_index(drop=True)
+    ts_dtype = df_expect["timestamp"].dtype
     timestamp_check = df_expect["timestamp"].iloc[0]
     name_check = df_expect["name"].iloc[0]
     result_paths = glob.glob(
@@ -689,7 +690,7 @@ def test_hive_partitioned_data(tmpdir, cpu):
     # Read back with dask.dataframe and check the data
     df_check = dd.read_parquet(path, engine="pyarrow").compute()
     df_check["name"] = df_check["name"].astype("object")
-    df_check["timestamp"] = df_check["timestamp"].astype("int64")
+    df_check["timestamp"] = df_check["timestamp"].astype(ts_dtype)
     df_check = df_check.sort_values(["id", "x", "y"]).reset_index(drop=True)
     for col in df_expect:
         # Order of columns can change after round-trip partitioning
@@ -698,7 +699,7 @@ def test_hive_partitioned_data(tmpdir, cpu):
     # Read back with NVT and check the data
     df_check = merlin.io.Dataset(path, engine="parquet").to_ddf().compute()
     df_check["name"] = df_check["name"].astype("object")
-    df_check["timestamp"] = df_check["timestamp"].astype("int64")
+    df_check["timestamp"] = df_check["timestamp"].astype(ts_dtype)
     df_check = df_check.sort_values(["id", "x", "y"]).reset_index(drop=True)
     for col in df_expect:
         # Order of columns can change after round-trip partitioning
