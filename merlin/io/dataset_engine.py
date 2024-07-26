@@ -51,13 +51,6 @@ class DatasetEngine:
     def num_rows(self):
         raise NotImplementedError(""" Returns the number of rows in the dataset """)
 
-    def validate_dataset(self, **kwargs):
-        raise NotImplementedError(""" Returns True if the raw data is efficient for NVTabular """)
-
-    @classmethod
-    def regenerate_dataset(cls, dataset, output_path, columns=None, **kwargs):
-        raise NotImplementedError(""" Regenerate a dataset with optimal properties """)
-
     def sample_data(self, n=1):
         """Return a sample of real data from the dataset
 
