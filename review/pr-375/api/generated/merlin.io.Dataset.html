@@ -584,8 +584,8 @@ and <cite>aggregate_files</cite> (the latter is experimental).</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.persist" title="merlin.io.Dataset.persist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">persist</span></code></a>(*args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.regenerate_dataset" title="merlin.io.Dataset.regenerate_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regenerate_dataset</span></code></a>(output_path[, columns, ...])</p></td>
-<td><p>EXPERIMENTAL: Regenerate an NVTabular Dataset for efficient processing by writing out new Parquet files.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.regenerate_dataset" title="merlin.io.Dataset.regenerate_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regenerate_dataset</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#merlin.io.Dataset.repartition" title="merlin.io.Dataset.repartition"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repartition</span></code></a>([npartitions, partition_size])</p></td>
 <td><p>Repartition the underlying ddf, and return a new Dataset</p></td>
@@ -621,7 +621,7 @@ and <cite>aggregate_files</cite> (the latter is experimental).</p></li>
 <td><p>Writes out to a parquet dataset</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#merlin.io.Dataset.validate_dataset" title="merlin.io.Dataset.validate_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_dataset</span></code></a>(**kwargs)</p></td>
-<td><p>Validate for efficient processing.</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -952,71 +952,12 @@ Keys are column names, values are datatypes.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="merlin.io.Dataset.validate_dataset">
 <span class="sig-name descname"><span class="pre">validate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.validate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.validate_dataset" title="Link to this definition">#</a></dt>
-<dd><p>Validate for efficient processing.</p>
-<p>The purpose of this method is to validate that the Dataset object
-meets the minimal requirements for efficient NVTabular processing.
-For now, this criteria requires the data to be in parquet format.</p>
-<p>Example Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">validate_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Key-word arguments to pass down to the engine’s validate_dataset
-method. For the recommended parquet format, these arguments
-include <cite>add_metadata_file</cite>, <cite>row_group_max_size</cite>, <cite>file_min_size</cite>,
-and <cite>require_metadata_file</cite>. For more information, see
-<cite>ParquetDatasetEngine.validate_dataset</cite>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>valid</strong> – <cite>True</cite> if the input dataset is valid for efficient NVTabular
-processing.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="merlin.io.Dataset.regenerate_dataset">
-<span class="sig-name descname"><span class="pre">regenerate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.regenerate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.regenerate_dataset" title="Link to this definition">#</a></dt>
-<dd><p>EXPERIMENTAL:
-Regenerate an NVTabular Dataset for efficient processing by writing
-out new Parquet files. In contrast to default <code class="docutils literal notranslate"><span class="pre">to_parquet</span></code> behavior,
-this method preserves the original ordering.</p>
-<p>Example Usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="s2">&quot;/path/to/data_pq&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">)</span>
-<span class="n">dataset</span><span class="o">.</span><span class="n">regenerate_dataset</span><span class="p">(</span>
-    <span class="n">out_path</span><span class="p">,</span> <span class="n">part_size</span><span class="o">=</span><span class="s2">&quot;1MiB&quot;</span><span class="p">,</span> <span class="n">file_size</span><span class="o">=</span><span class="s2">&quot;10MiB&quot;</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>output_path</strong> (<em>string</em>) – Root directory path to use for the new (regenerated) dataset.</p></li>
-<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>(</em><em>string</em><em>)</em><em>, </em><em>optional</em>) – Subset of columns to include in the regenerated dataset.</p></li>
-<li><p><strong>output_format</strong> (<em>string</em><em>, </em><em>optional</em>) – Format to use for regenerated dataset.  Only “parquet” (default)
-is currently supported.</p></li>
-<li><p><strong>compute</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to compute the task graph or to return a Delayed object.
-By default, the graph will be executed.</p></li>
-<li><p><strong>**kwargs</strong> – Key-word arguments to pass down to the engine’s regenerate_dataset
-method. See <cite>ParquetDatasetEngine.regenerate_dataset</cite> for more
-information.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>result</strong> – If <cite>compute=True</cite> (default), the return value will be an integer
-corresponding to the number of generated data files.  If <cite>False</cite>,
-the returned value will be a <cite>Delayed</cite> object.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a> or Delayed</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">regenerate_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/merlin/io/dataset.html#Dataset.regenerate_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#merlin.io.Dataset.regenerate_dataset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="merlin.io.Dataset.infer_schema">
