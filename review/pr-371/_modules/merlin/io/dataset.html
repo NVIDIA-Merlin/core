@@ -1498,106 +1498,13 @@ document.write(`
 <div class="viewcode-block" id="Dataset.validate_dataset">
 <a class="viewcode-back" href="../../../api/generated/merlin.io.Dataset.html#merlin.io.Dataset.validate_dataset">[docs]</a>
     <span class="k">def</span> <span class="nf">validate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate for efficient processing.</span>
-
-<span class="sd">        The purpose of this method is to validate that the Dataset object</span>
-<span class="sd">        meets the minimal requirements for efficient NVTabular processing.</span>
-<span class="sd">        For now, this criteria requires the data to be in parquet format.</span>
-
-<span class="sd">        Example Usage::</span>
-
-<span class="sd">            dataset = Dataset(&quot;/path/to/data_pq&quot;, engine=&quot;parquet&quot;)</span>
-<span class="sd">            assert validate_dataset(dataset)</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        -----------</span>
-<span class="sd">        **kwargs :</span>
-<span class="sd">            Key-word arguments to pass down to the engine&#39;s validate_dataset</span>
-<span class="sd">            method. For the recommended parquet format, these arguments</span>
-<span class="sd">            include `add_metadata_file`, `row_group_max_size`, `file_min_size`,</span>
-<span class="sd">            and `require_metadata_file`. For more information, see</span>
-<span class="sd">            `ParquetDatasetEngine.validate_dataset`.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        valid : bool</span>
-<span class="sd">            `True` if the input dataset is valid for efficient NVTabular</span>
-<span class="sd">            processing.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Check that the dataset format is Parquet</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">,</span> <span class="n">ParquetDatasetEngine</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s2">&quot;NVTabular is optimized for the parquet format. Please use &quot;</span>
-                <span class="s2">&quot;the to_parquet method to convert your dataset.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Early return</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">validate_dataset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot; validate_dataset is not supported for merlin &gt;23.08 &quot;&quot;&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Dataset.regenerate_dataset">
 <a class="viewcode-back" href="../../../api/generated/merlin.io.Dataset.html#merlin.io.Dataset.regenerate_dataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">regenerate_dataset</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">output_path</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">output_format</span><span class="o">=</span><span class="s2">&quot;parquet&quot;</span><span class="p">,</span>
-        <span class="n">compute</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;EXPERIMENTAL:</span>
-<span class="sd">        Regenerate an NVTabular Dataset for efficient processing by writing</span>
-<span class="sd">        out new Parquet files. In contrast to default ``to_parquet`` behavior,</span>
-<span class="sd">        this method preserves the original ordering.</span>
-
-<span class="sd">        Example Usage::</span>
-
-<span class="sd">            dataset = Dataset(&quot;/path/to/data_pq&quot;, engine=&quot;parquet&quot;)</span>
-<span class="sd">            dataset.regenerate_dataset(</span>
-<span class="sd">                out_path, part_size=&quot;1MiB&quot;, file_size=&quot;10MiB&quot;</span>
-<span class="sd">            )</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        -----------</span>
-<span class="sd">        output_path : string</span>
-<span class="sd">            Root directory path to use for the new (regenerated) dataset.</span>
-<span class="sd">        columns : list(string), optional</span>
-<span class="sd">            Subset of columns to include in the regenerated dataset.</span>
-<span class="sd">        output_format : string, optional</span>
-<span class="sd">            Format to use for regenerated dataset.  Only &quot;parquet&quot; (default)</span>
-<span class="sd">            is currently supported.</span>
-<span class="sd">        compute : bool, optional</span>
-<span class="sd">            Whether to compute the task graph or to return a Delayed object.</span>
-<span class="sd">            By default, the graph will be executed.</span>
-<span class="sd">        **kwargs :</span>
-<span class="sd">            Key-word arguments to pass down to the engine&#39;s regenerate_dataset</span>
-<span class="sd">            method. See `ParquetDatasetEngine.regenerate_dataset` for more</span>
-<span class="sd">            information.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        result : int or Delayed</span>
-<span class="sd">            If `compute=True` (default), the return value will be an integer</span>
-<span class="sd">            corresponding to the number of generated data files.  If `False`,</span>
-<span class="sd">            the returned value will be a `Delayed` object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Check that the desired output format is Parquet</span>
-        <span class="k">if</span> <span class="n">output_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;parquet&quot;</span><span class="p">]:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;NVTabular is optimized for the parquet format. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_format</span><span class="si">}</span><span class="s2"> is not yet a supported output format for &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;regenerate_dataset.&quot;</span>
-            <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="n">ParquetDatasetEngine</span><span class="o">.</span><span class="n">regenerate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">compute</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">result</span></div>
+    <span class="k">def</span> <span class="nf">regenerate_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot; regenerate_dataset is not supported for merlin &gt;23.08 &quot;&quot;&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Dataset.infer_schema">
