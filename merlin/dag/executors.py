@@ -374,6 +374,7 @@ class DaskExecutor:
         # If so, we should perform column selection at the ddf level.
         # Otherwise, Dask will not push the column selection into the
         # IO function.
+
         if not nodes:
             return ddf[_get_unique(additional_columns)] if additional_columns else ddf
 
@@ -390,6 +391,13 @@ class DaskExecutor:
 
         def empty_like(df, cols):
             # Construct an empty DataFrame with the same dtypes as df
+
+            # TODO: constructing meta like this can loose dtype information for
+            # columns that are arbitrarily set to 'float64'. We should propagate
+            # dtype information along with column names in the columngroup graph.
+            # This currently only happens during intermediate 'fit' transforms,
+            # so as long as statoperators don't require dtype information on the
+            # DDF this doesn't matter all that much
             return df._constructor(
                 {
                     col: df._constructor_sliced(
