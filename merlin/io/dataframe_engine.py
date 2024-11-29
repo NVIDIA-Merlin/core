@@ -38,7 +38,16 @@ class DataFrameDatasetEngine(DatasetEngine):
         cpu = self.cpu if cpu is None else cpu
 
         # Move data from gpu to cpu if necessary
-        _ddf = self._move_ddf("cpu") if (cpu and not self.cpu) else self._ddf
+        if hasattr(self._ddf, "to_backend"):
+            # Requires dask>=2023.1.1
+            if cpu:
+                _ddf = self._ddf.to_backend("pandas")
+            elif cpu is False:
+                _ddf = self._ddf.to_backend("cudf")
+            else:
+                _ddf = self._ddf
+        else:
+            _ddf = self._move_ddf("cpu") if (cpu and not self.cpu) else self._ddf
 
         if isinstance(columns, list):
             return _ddf[columns]
@@ -49,14 +58,22 @@ class DataFrameDatasetEngine(DatasetEngine):
     def to_cpu(self):
         if self.cpu:
             return
-        self._ddf = self._move_ddf("cpu")
+        if hasattr(self._ddf, "to_backend"):
+            # Requires dask>=2023.1.1
+            self._ddf = self._ddf.to_backend("pandas")
+        else:
+            self._ddf = self._move_ddf("cpu")
         self.cpu = True
         self.moved_collection = not self.moved_collection
 
     def to_gpu(self):
         if not self.cpu:
             return
-        self._ddf = self._move_ddf("gpu")
+        if hasattr(self._ddf, "to_backend"):
+            # Requires dask>=2023.1.1
+            self._ddf = self._ddf.to_backend("cudf")
+        else:
+            self._ddf = self._move_ddf("gpu")
         self.cpu = False
         self.moved_collection = not self.moved_collection
 
@@ -66,6 +83,7 @@ class DataFrameDatasetEngine(DatasetEngine):
 
     def _move_ddf(self, destination):
         """Move the collection between cpu and gpu memory."""
+        # TODO: Remove this method when we pin to dask>=2013.1.1
         _ddf = self._ddf
         if (
             self.moved_collection

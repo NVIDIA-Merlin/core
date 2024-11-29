@@ -664,6 +664,9 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
         if isinstance(x, dd.DataFrame):
             # If input is a dask_cudf collection, convert
             # to a pandas-backed Dask collection
+            if hasattr(x, "to_backend"):
+                # Requires dask>=2023.1.1
+                return x.to_backend("pandas")
             if cudf is None or not isinstance(x, dask_cudf.DataFrame):
                 # Already a Pandas-backed collection
                 return x
@@ -676,6 +679,9 @@ def convert_data(x, cpu=True, to_collection=None, npartitions=1):
             return dd.from_pandas(_x, sort=False, npartitions=npartitions) if to_collection else _x
     elif cudf and dask_cudf:
         if isinstance(x, dd.DataFrame):
+            if hasattr(x, "to_backend"):
+                # Requires dask>=2023.1.1
+                return x.to_backend("cudf")
             # If input is a Dask collection, convert to dask_cudf
             if isinstance(x, dask_cudf.DataFrame):
                 # Already a cudf-backed Dask collection
