@@ -20,12 +20,41 @@ from typing import Optional, Tuple, Union
 
 
 class DefaultShapes(Enum):
-    LIST = (None, None)
-    SCALAR = (None,)
+    LIST = (-1, None)
+    SCALAR = (-1,)
+
+
+def Dimension(size=None, index=None):
+    """Create a dimension from a size.
+
+    A size can be one of:
+      - None    : a ragged dimension of unknown size
+      - int     : a fixed dimension of some size (-1 = unknown)
+      - 2-tuple : the bounds of a ragged dimension (fixed if min == max)
+    """
+    if isinstance(size, (UniformDimension, RaggedDimension)):
+        return size
+    elif isinstance(size, tuple) and len(size) == 2:
+        if size[0] == size[1] or index == 0:
+            return UniformDimension(size[0], size[1])
+        return RaggedDimension(size[0], size[1])
+    elif isinstance(size, int):
+        if size == -1:
+            return UniformDimension()
+        return UniformDimension(size, size)
+    elif size is None:
+        if index == 0:
+            return UniformDimension()
+        return RaggedDimension()
+    else:
+        raise ValueError(
+            f"Invalid dimension format: {size}. Each dimension is expected "
+            " to be None, a single integer, or a tuple with length 2."
+        )
 
 
 @dataclass(frozen=True)
-class Dimension:
+class BaseDimension:
     """
     The range of potential sizes for a single dimension of a field or column
     """
@@ -36,6 +65,12 @@ class Dimension:
     def __post_init__(self):
         if self.min is None:
             raise ValueError("The minimum size of a dimension cannot be None. ")
+
+        if not isinstance(self.min, int):
+            raise ValueError("The minimmum size must be an integer. " f"Provided min: {self.min}")
+
+        if self.max and not isinstance(self.max, int):
+            raise ValueError("The maximum size must be an integer. " f"Provided max: {self.max}")
 
         if self.min < 0:
             raise ValueError(
@@ -72,14 +107,17 @@ class Dimension:
 
     @property
     def is_bounded(self):
+        """Is the dimension bounded in size?"""
         return self.max is not None
 
     @property
     def is_fixed(self):
+        """Is the dimension fixed in size?"""
         return self.is_bounded and self.min == self.max
 
     @property
     def is_variable(self):
+        """Can the size of the dimension vary between instances of tensors."""
         return not self.is_fixed
 
     @property
@@ -91,6 +129,37 @@ class Dimension:
 
     def with_max(self, value):
         return replace(self, max=value)
+
+
+class RaggedDimension(BaseDimension):
+    @property
+    def is_uniform(self):
+        return False
+
+    @property
+    def is_ragged(self):
+        return True
+
+    @property
+    def size(self):
+        return None
+
+
+class UniformDimension(BaseDimension):
+    @property
+    def is_uniform(self):
+        return True
+
+    @property
+    def is_ragged(self):
+        return False
+
+    @property
+    def size(self):
+        if self.is_fixed:
+            return self.max
+        else:
+            return -1
 
 
 @dataclass(frozen=True)
@@ -111,19 +180,7 @@ class Shape:
         if self.dims is not None:
             new_dims = []
             for i, dim in enumerate(self.dims):
-                if isinstance(dim, Dimension):
-                    new_dim = dim
-                elif isinstance(dim, tuple) and len(dim) == 2:
-                    new_dim = Dimension(dim[0], dim[1])
-                elif isinstance(dim, int):
-                    new_dim = Dimension(dim, dim)
-                elif dim is None:
-                    new_dim = Dimension()
-                else:
-                    raise ValueError(
-                        f"Invalid shape tuple format: {self.dims}. Each dimension is expected "
-                        " to be None, a single integer, or a tuple with length 2."
-                    )
+                new_dim = Dimension(dim, index=i)
                 new_dims.append(new_dim)
 
             object.__setattr__(self, "dims", tuple(new_dims))
@@ -155,10 +212,16 @@ class Shape:
         return replace(self, dims=tuple(new_dims))
 
     def with_dim_min(self, index, value):
-        return self.with_dim(index, self.dims[index].with_min(value))
+        new_dim = self.dims[index].with_min(value)
+        if new_dim.is_uniform:
+            new_dim = Dimension(value)
+        return self.with_dim(index, new_dim)
 
     def with_dim_max(self, index, value):
-        return self.with_dim(index, self.dims[index].with_max(value))
+        new_dim = self.dims[index].with_max(value)
+        if new_dim.is_uniform:
+            new_dim = Dimension(value)
+        return self.with_dim(index, new_dim)
 
     @property
     def min(self) -> Tuple:
@@ -177,6 +240,10 @@ class Shape:
         return all(dim.is_fixed for dim in self.dims)
 
     @property
+    def is_uniform(self):
+        return all(dim.is_uniform for dim in self.dims)
+
+    @property
     def is_variable(self):
         return not self.is_fixed
 
@@ -186,14 +253,16 @@ class Shape:
 
     @property
     def is_ragged(self):
-        return self.is_list and any(dim.min != dim.max for dim in self.dims[1:])
+        return self.is_list and any(dim.is_ragged for dim in self.dims[1:])
 
     @property
     def as_tuple(self):
         if not self.dims:
             return None
 
-        return tuple(((dim.min, dim.max) if dim.min != dim.max else dim.max for dim in self.dims))
+        return tuple(
+            dim.size if dim.is_fixed or dim.is_uniform else (dim.min, dim.max) for dim in self.dims
+        )
 
     @property
     def is_unknown(self):
